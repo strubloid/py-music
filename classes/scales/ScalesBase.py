@@ -49,27 +49,51 @@ class ScalesBase:
     ## Setting the note for the scale
     def setNote(self, note : str) -> None:
         self.note = note
+        return self
         
 
-    def getNotes(self, note : str) -> list[str]:
+    def getNotes(self, note: str = None) -> list[str]:
 
-        note = self.note if hasattr(self, 'note') else note
-        query="What is the " + note + " major scale? "
+        try:
+            
+            # Use self.note if no note is passed, otherwise use the passed note
+            if note is None:
+                if hasattr(self, 'note'):
+                    note = self.note
+                else:
+                    raise ValueError("No note specified. Either pass a note or use setNote() first.")
+            
+            query = "What is the " + note + " major scale? "
 
-        print(f"Querying for scale notes: {query}")
-        
-        # This will return a BasicAIResponse object directly
-        structured_response = self.chain.invoke({"query": query})
+            print(f"Querying for scale notes: {query}")
+            
+            # This will return a BasicAIResponse object directly
+            structured_response = self.chain.invoke({"query": query})
 
-        ## Extracting the summary which contains the notes
-        summary = structured_response.summary
+            ## Extracting the summary which contains the notes
+            summary = structured_response.summary
 
-        # print(f"Structured response: {structured_response}")
-        print(f"Summary: {summary}")
+            # print(f"Structured response: {structured_response}")
+            print(f"Summary: {summary}")
 
-        self.notes_array = [note.strip() for note in summary.split(",")]
+            # Check if summary contains valid notes
+            if not summary or summary.strip() == "":
+                raise ValueError(f"Empty response received for {note} major scale")
 
-        return self.notes_array
+            self.notes_array = [n.strip() for n in summary.split(",")]
+
+            # Validate that we got actual notes (basic check)
+            if len(self.notes_array) == 0:
+                raise ValueError(f"No notes found in response: {summary}")
+
+            return self.notes_array
+
+        except ValueError as ve:
+            print(f"ValueError: {ve}")
+            return []
+        except Exception as e:
+            print(f"Unexpected error while getting notes for {note}: {e}")
+            return []
 
     def getChords(self) -> list[str]:
 
@@ -80,7 +104,7 @@ class ScalesBase:
         ## constructing chords based on the notes in the interval
         for i in range(len(note_list)):
             chords.append(note_list[i] + scale_intervals[i])
-            
+
         return chords   
 
     # def getBorrowedNotes(self, note : str) -> list[str]:

@@ -25,3 +25,7 @@ print(f"Gmajor notes: {notesOfG.getNotes()}")
 print(f"G major scale notes: {notesOfG.getChords()}")
 
 
+notesOfA = base_scale.setNote("A")
+print(f"A major notes: {notesOfA.getNotes()}")
+
+print(f"A major scale notes: {notesOfA.getChords()}")
