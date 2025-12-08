@@ -30,9 +30,9 @@ def wiki_tool(query: str) -> str:
 def save_tool(content: str, filename: str = "research_output.txt") -> str:
     """Save content to a file."""
     try:
-        # Create a research_outputs directory if it doesn't exist
-        os.makedirs("research_outputs", exist_ok=True)
-        filepath = os.path.join("research_outputs", filename)
+        # Create a output directory if it doesn't exist
+        os.makedirs("output", exist_ok=True)
+        filepath = os.path.join("output", filename)
         
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)

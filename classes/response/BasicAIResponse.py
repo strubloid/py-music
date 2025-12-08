@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class ResearchResponse(BaseModel):
+class BasicAIResponse(BaseModel):
     topic: str
     summary: str
     sources: list[str]
