@@ -21,19 +21,6 @@ llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 parser = PydanticOutputParser(pydantic_object=ResearchResponse)
 
 ## Creating the prompt template
-# prompt = ChatPromptTemplate.from_messages([
-#     (
-#         "system",
-#         """
-#        You are a music theory assistant.
-#        When asked about scales, respond ONLY with the note names separated by commas.
-#        Do not provide explanations, descriptions, or any other text.
-#        Just return the notes like: C, D, E, F, G, A, B
-#         """
-#     ),
-#     ("human", "{query}"),
-# ])
-
 prompt = ChatPromptTemplate.from_messages([
     (
         "system",
@@ -56,9 +43,7 @@ tools = [search_tool, wiki_tool, save_tool]
 # This will return a ResearchResponse object directly
 structured_llm = llm.with_structured_output(ResearchResponse)
 
-# Create a simple chain instead of using deprecated AgentExecutor
-# This is the updated approach for LangChain 1.1+
-# chain = prompt | llm
+# Create a simple chain 
 chain = prompt | structured_llm
 
 query = "What is the G major scale? "
@@ -67,8 +52,10 @@ query = "What is the G major scale? "
 # This will return a ResearchResponse object directly
 structured_response = chain.invoke({"query": query})
 
-structured_response.summary
+## Convert the summary string into an array of notes
 notes_array = [note.strip() for note in structured_response.summary.split(",")]
+
+
 print(f"Notes array: {notes_array}")
 
 # print(f"Type: {type(structured_response)}")
