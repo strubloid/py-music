@@ -12,10 +12,16 @@ llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 base_scale = ScalesBase(llm)
 
 # notes = base_scale.getNotes("G")
-print(f"A major scale notes: {base_scale.getNotes("A")}")
-print(f"B major scale notes: {base_scale.getNotes("B")}")
-print(f"C major scale notes: {base_scale.getNotes("C")}")
-print(f"D major scale notes: {base_scale.getNotes("D")}")
-print(f"E major scale notes: {base_scale.getNotes("E")}")
-print(f"F major scale notes: {base_scale.getNotes("F")}")
-print(f"G major scale notes: {base_scale.getNotes("G")}")
+# print(f"A major scale notes: {base_scale.getNotes("A")}")
+# print(f"B major scale notes: {base_scale.getNotes("B")}")
+# print(f"C major scale notes: {base_scale.getNotes("C")}")
+# print(f"D major scale notes: {base_scale.getNotes("D")}")
+# print(f"E major scale notes: {base_scale.getNotes("E")}")
+# print(f"F major scale notes: {base_scale.getNotes("F")}")
+
+notesOfG = base_scale.setNote("G")
+print(f"Gmajor notes: {notesOfG.getNotes()}")
+
+print(f"G major scale notes: {notesOfG.getChords()}")
+
+

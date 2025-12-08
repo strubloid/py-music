@@ -46,10 +46,14 @@ class ScalesBase:
         # Create the chain properly
         self.chain = self.prompt | self.structured_llm
 
-
+    ## Setting the note for the scale
+    def setNote(self, note : str) -> None:
+        self.note = note
+        
 
     def getNotes(self, note : str) -> list[str]:
 
+        note = self.note if hasattr(self, 'note') else note
         query="What is the " + note + " major scale? "
 
         print(f"Querying for scale notes: {query}")
@@ -63,6 +67,22 @@ class ScalesBase:
         # print(f"Structured response: {structured_response}")
         print(f"Summary: {summary}")
 
-        notes_array = [note.strip() for note in summary.split(",")]
+        self.notes_array = [note.strip() for note in summary.split(",")]
 
-        return notes_array
+        return self.notes_array
+
+    def getChords(self) -> list[str]:
+
+        chords = []
+        note_list = self.notes_array
+        scale_intervals = ["", "m", "m", "", "", "m", "dim"]
+
+        ## constructing chords based on the notes in the interval
+        for i in range(len(note_list)):
+            chords.append(note_list[i] + scale_intervals[i])
+            
+        return chords   
+
+    # def getBorrowedNotes(self, note : str) -> list[str]:
+    #     """Get borrowed notes for a given scale (to be implemented)"""
+    #     pass
