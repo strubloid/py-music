@@ -20,3 +20,6 @@ music.setTune(tune)
 notes = music.getNotesFromTune()
 print(f"Notes in the {tune} major scale: {notes}")
 
+## getting chords from the notes
+chords = music.getChords()
+print(f"Chords in the {tune} major scale: {chords}")

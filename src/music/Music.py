@@ -1,5 +1,6 @@
 from .scales.ScalesTeacher import ScalesTeacher
 from langchain_core.prompts import ChatPromptTemplate
+from .chords.Chords import ChordsTeacher
 
 """ 
     Class that will contain things related to music 
@@ -15,8 +16,14 @@ class Music:
         ## starting the tune variable
         self.tune = None
 
+        # Starting notes array
+        self.notes = []
+
         ## starting scale teacher object
         self.scaleTeacher = ScalesTeacher(llm)
+
+        ## starting chords teacher object
+        self.chordsTeacher = ChordsTeacher(llm)
 
         ## Setting the prompt template from the scale teacher
         self.prompt = ChatPromptTemplate.from_messages(
@@ -38,7 +45,16 @@ class Music:
     
     ## Getting notes from scale
     def getNotesFromTune(self) -> list[str]:
-        return self.scaleTeacher.getNotesFromTune(self.tune)
 
+        ## loading the variable at music class level
+        self.notes = self.scaleTeacher.getNotesFromTune(self.tune)
 
+        return self.notes
 
+    ## Getting notes from scale
+    def getChords(self) -> list[str]:
+
+        ## getting chords based on the notes we have
+        chords = self.chordsTeacher.getChords(self.notes)
+
+        return chords  
