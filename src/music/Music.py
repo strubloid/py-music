@@ -1,6 +1,8 @@
 from .scales.ScalesTeacher import ScalesTeacher
 from langchain_core.prompts import ChatPromptTemplate
 from .chords.Chords import ChordsTeacher
+from .chords.intervals.Major import MajorInterval
+from .chords.intervals.Interval import Interval
 
 """ 
     Class that will contain things related to music 
@@ -19,6 +21,12 @@ class Music:
         # Starting notes array
         self.notes = []
 
+        # Starting chords array
+        self.chords = []
+
+        ## loading a basic major interval by default
+        self.interval = MajorInterval().interval
+
         ## starting scale teacher object
         self.scaleTeacher = ScalesTeacher(llm)
 
@@ -34,6 +42,11 @@ class Music:
 
         ## binding tools to llm
         self.llm.startingChain(self.prompt)
+    
+    ## Sets the interval
+    def setInterval(self, interval: Interval) -> None:
+        self.interval = interval
+        return self
 
     """ 
         This method will set the tune, the base of our research begins here,
@@ -55,6 +68,15 @@ class Music:
     def getChords(self) -> list[str]:
 
         ## getting chords based on the notes we have
-        chords = self.chordsTeacher.getChords(self.notes)
+        self.chords = self.chordsTeacher.getChords(self.notes)
 
-        return chords  
+        return self.chords
+    
+    ## Getting borrowed chords from parallel minor scale
+    def getBorrowedChords(self) -> list[str]:
+        
+        ## getting borrowed chords from parallel minor scale
+        borrowedChords = self.scaleTeacher.getBorrowedChords(self.chords, self.interval)
+
+        return borrowedChords
+    
