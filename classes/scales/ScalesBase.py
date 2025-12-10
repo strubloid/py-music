@@ -1,7 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from ..tools import save_tool
-from ..response.BasicAIResponse import BasicAIResponse
+from src.llm.BasicAIResponse import BasicAIResponse
 
 class ScalesBase:
 

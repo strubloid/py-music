@@ -16,5 +16,7 @@ music = Music(llm)
 tune = "G"
 music.setTune(tune)
 
-
+## this should get the notes from the tune that we are passing before
+notes = music.getNotesFromTune()
+print(f"Notes in the {tune} major scale: {notes}")
 
