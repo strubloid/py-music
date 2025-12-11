@@ -80,3 +80,109 @@ class Music:
 
         return borrowedChords
     
+    def getSeventhNoteToIt(self, chord_index: int = None) -> list[str] | str:
+        """
+        Gets the dominant seventh chord that resolves TO each chord in the current key.
+        This returns secondary dominants (V7/x chords).
+        If chord_index is provided, returns the seventh that goes to that specific chord.
+        """
+        if not self.chords or not self.notes:
+            raise ValueError("Please generate chords first using getChords()")
+        
+        # Chromatic circle for calculating fifths
+        chromatic_notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+        
+        def getSeventhToNote(target_note: str) -> str:
+            """Helper function to get the dominant 7th that resolves to a target note"""
+            # Clean the note (remove chord suffixes like 'm', 'dim')
+            clean_note = target_note
+            if len(target_note) > 1:
+                if target_note[1] in ['#', 'b']:
+                    clean_note = target_note[:2]  # Keep sharp/flat
+                else:
+                    clean_note = target_note[0]   # Remove suffix
+            
+            # Handle flats by converting to sharps for easier calculation
+            note_map = {
+                'Bb': 'A#', 'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#'
+            }
+            if clean_note in note_map:
+                clean_note = note_map[clean_note]
+            
+            # Find the note in chromatic circle
+            if clean_note in chromatic_notes:
+                target_index = chromatic_notes.index(clean_note)
+                # Go back 7 semitones (perfect fifth down) to find the dominant
+                dominant_index = (target_index - 7) % 12
+                dominant_note = chromatic_notes[dominant_index]
+                return f"{dominant_note}7"
+            
+            return f"{clean_note}7"  # Fallback
+        
+        if chord_index is not None:
+            # Return seventh that goes to specific chord
+            if 0 <= chord_index < len(self.chords):
+                target_chord = self.chords[chord_index]
+                return getSeventhToNote(target_chord)
+            else:
+                raise IndexError("Chord index out of range")
+        
+        # Return all sevenths that go to each chord
+        seventh_chords = []
+        for chord in self.chords:
+            seventh_chords.append(getSeventhToNote(chord))
+        
+        return seventh_chords
+    
+    # Add these methods to expand musical functionality
+
+    def getChordProgressions(self) -> dict[str, list[str]]:
+        """
+        Returns common chord progressions in the current key
+        """
+        if not self.chords:
+            raise ValueError("Please generate chords first using getChords()")
+        
+        progressions = {
+            "I-V-vi-IV": [self.chords[0], self.chords[4], self.chords[5], self.chords[3]],
+            "vi-IV-I-V": [self.chords[5], self.chords[3], self.chords[0], self.chords[4]], 
+            "I-vi-ii-V": [self.chords[0], self.chords[5], self.chords[1], self.chords[4]],
+            "I-IV-vi-V": [self.chords[0], self.chords[3], self.chords[5], self.chords[4]],
+            "ii-V-I": [self.chords[1], self.chords[4], self.chords[0]]
+        }
+        
+        return progressions
+
+    def _getRomanNumeral(self, degree: int) -> str:
+        """Helper method to convert scale degree to Roman numeral"""
+        roman_numerals = ["I", "ii", "iii", "IV", "V", "vi", "vii°"]
+        return roman_numerals[degree] if degree < len(roman_numerals) else str(degree + 1)
+
+    def getTensions(self, chord_index: int) -> list[str]:
+        """
+        Returns available tensions for a given chord
+        """
+        if chord_index >= len(self.chords):
+            raise IndexError("Chord index out of range")
+        
+        # Common tensions by scale degree
+        tensions_map = {
+            0: ["9", "11", "13"],      # I maj7
+            1: ["9", "11", "13"],      # ii m7  
+            2: ["11", "13"],           # iii m7
+            3: ["9", "11", "13"],      # IV maj7
+            4: ["9", "13"],            # V7 (avoid 11)
+            5: ["9", "11"],            # vi m7
+            6: ["11", "b13"]           # vii m7b5
+        }
+        
+        return tensions_map.get(chord_index, [])
+
+    def getVoiceLeading(self, progression: list[str]) -> dict:
+        """
+        Analyzes voice leading between chords in a progression
+        """
+        # This would analyze common tones and step-wise motion
+        # Implementation would depend on chord parsing logic
+        return {"analysis": "Voice leading analysis would go here"}
+

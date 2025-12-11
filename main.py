@@ -6,7 +6,6 @@ from src.music.Music import Music
 ## Loading environment variables
 load_dotenv()
 
-
 ## Starting the language model object
 llm = ChatGPT()
 
@@ -32,3 +31,19 @@ print(f"Chords in the {tune} major scale: {chords}")
 ## getting borrowed chords from parallel minor scale
 borrowedChords = music.getBorrowedChords()
 print(f"Borrowed Chords in the {tune} major scale: {borrowedChords}")
+
+## getting seventh chords
+sevenths_to_chords = music.getSeventhNoteToIt()
+print(f"\nSeventh chords that resolve to:")
+for i, (chord, seventh) in enumerate(zip(chords, sevenths_to_chords)):
+    print(f"  {chord} <-- {seventh}")
+
+
+print("\n")
+
+## common progressions
+progressions = music.getChordProgressions()
+print(f"Progressions: {tune}:")
+for name, prog in progressions.items():
+    print(f" : {' - '.join(prog)}")
+

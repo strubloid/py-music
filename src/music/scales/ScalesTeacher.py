@@ -91,13 +91,13 @@ class ScalesTeacher():
                     ## In the major interval we will run to get the minor
                     minor_interval = MinorInterval()
                     intervalPatternToRun = minor_interval.interval
-                    print("Getting borrowed chords from parallel minor scale...")
+                    # print("Getting borrowed chords from parallel minor scale...")
 
                 case MinorInterval():
                     ## In the minor interval we will run to get the major
                     major_interval = MajorInterval()
                     intervalPatternToRun = major_interval.interval
-                    print("Getting borrowed chords from parallel major scale...")
+                    # print("Getting borrowed chords from parallel major scale...")
                 
                 case _:  # Default case
                     raise ValueError(f"Unsupported interval type: {type(interval)}")
