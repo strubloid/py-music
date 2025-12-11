@@ -3,6 +3,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from .chords.Chords import ChordsTeacher
 from .chords.intervals.Major import MajorInterval
 from .chords.intervals.Interval import Interval
+from .visualization.ScaleVisualizer import ScaleVisualizer
 
 """ 
     Class that will contain things related to music 
@@ -135,7 +136,6 @@ class Music:
         return seventh_chords
     
     # Add these methods to expand musical functionality
-
     def getChordProgressions(self) -> dict[str, list[str]]:
         """
         Returns common chord progressions in the current key
@@ -153,15 +153,15 @@ class Music:
         
         return progressions
 
+    # Helper method to convert scale degree to Roman numeral
     def _getRomanNumeral(self, degree: int) -> str:
-        """Helper method to convert scale degree to Roman numeral"""
+
         roman_numerals = ["I", "ii", "iii", "IV", "V", "vi", "vii°"]
         return roman_numerals[degree] if degree < len(roman_numerals) else str(degree + 1)
 
+    # Returns available tensions for a given chord
     def getTensions(self, chord_index: int) -> list[str]:
-        """
-        Returns available tensions for a given chord
-        """
+
         if chord_index >= len(self.chords):
             raise IndexError("Chord index out of range")
         
@@ -178,11 +178,21 @@ class Music:
         
         return tensions_map.get(chord_index, [])
 
-    def getVoiceLeading(self, progression: list[str]) -> dict:
-        """
-        Analyzes voice leading between chords in a progression
-        """
-        # This would analyze common tones and step-wise motion
-        # Implementation would depend on chord parsing logic
-        return {"analysis": "Voice leading analysis would go here"}
+    # Display a comprehensive visual representation of the current scale.
+    # Shows piano keyboard, scale degrees, circle of fifths, and guitar fretboard.
+    def getScale(self, interval) -> None:  
+        
+        if not self.notes or not self.chords:
+            print("Please generate notes and chords first using getNotesFromTune() and getChords()")
+            return
+        
+        # Get secondary dominants
+        sevenths = self.getSeventhNoteToIt()
+        
+        # Create visualizer and display complete analysis
+        visualizer = ScaleVisualizer()
+        scale_name = f"{self.tune} Major Scale"
+        
+        visualizer.display_fretboard(self.notes, self.tune)
+        
 

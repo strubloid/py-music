@@ -47,3 +47,6 @@ print(f"Progressions: {tune}:")
 for name, prog in progressions.items():
     print(f" : {' - '.join(prog)}")
 
+
+
+music.getScale(interval)
