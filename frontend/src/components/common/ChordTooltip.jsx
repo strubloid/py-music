@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useChordDisplay } from '../../contexts/ChordDisplayContext';
+import { useChordPanel } from '../../contexts/ChordPanelContext';
 import './ChordTooltip.css';
 
 const ChordTooltip = ({ 
@@ -9,7 +10,9 @@ const ChordTooltip = ({
   className = '' 
 }) => {
   const { displayMode } = useChordDisplay();
+  const { addChord } = useChordPanel();
   const [isVisible, setIsVisible] = useState(false);
+  const [isPersistent, setIsPersistent] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   
   // Use provided type or fall back to global context (guitar is default)
@@ -24,13 +27,82 @@ const ChordTooltip = ({
     const rect = e.target.getBoundingClientRect();
     setPosition({
       x: rect.left + rect.width / 2,
-      y: rect.top - 10
+      y: rect.bottom + 15 // Increased gap to prevent mouse leave issues
     });
     setIsVisible(true);
   };
 
   const handleMouseLeave = () => {
-    setIsVisible(false);
+    if (!isPersistent) {
+      setIsVisible(false);
+    }
+  };
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    
+    // Add chord to panel
+    addChord(chord);
+    
+    const rect = e.target.getBoundingClientRect();
+    setPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.bottom + 15
+    });
+    setIsPersistent(true);
+    setIsVisible(true);
+  };
+
+  const handleTooltipClick = (e) => {
+    e.stopPropagation();
+  };
+
+  // Close persistent tooltip when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (isPersistent) {
+        setIsPersistent(false);
+        setIsVisible(false);
+      }
+    };
+
+    if (isPersistent) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [isPersistent]);
+
+  // Add delay to mouse leave to prevent disappearing when moving to tooltip
+  const [leaveTimeout, setLeaveTimeout] = useState(null);
+
+  const handleMouseEnterDelayed = (e) => {
+    if (leaveTimeout) {
+      clearTimeout(leaveTimeout);
+      setLeaveTimeout(null);
+    }
+    handleMouseEnter(e);
+  };
+
+  const handleMouseLeaveDelayed = () => {
+    if (!isPersistent) {
+      const timeout = setTimeout(() => {
+        setIsVisible(false);
+      }, 300); // 300ms delay
+      setLeaveTimeout(timeout);
+    }
+  };
+
+  const handleTooltipMouseEnter = () => {
+    if (leaveTimeout) {
+      clearTimeout(leaveTimeout);
+      setLeaveTimeout(null);
+    }
+  };
+
+  const handleTooltipMouseLeave = () => {
+    if (!isPersistent) {
+      setIsVisible(false);
+    }
   };
 
   // Generate chord diagram based on type
@@ -154,21 +226,30 @@ const ChordTooltip = ({
   return (
     <span
       className={`chord-tooltip-trigger ${className}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={handleMouseEnterDelayed}
+      onMouseLeave={handleMouseLeaveDelayed}
+      onClick={handleClick}
     >
       {children}
       
       {isVisible && (
         <div
-          className="chord-tooltip"
+          className={`chord-tooltip ${isPersistent ? 'persistent' : ''}`}
           style={{
             left: position.x,
             top: position.y,
-            transform: 'translate(-50%, -100%)'
+            transform: 'translate(-50%, 0)'
           }}
+          onClick={handleTooltipClick}
+          onMouseEnter={handleTooltipMouseEnter}
+          onMouseLeave={handleTooltipMouseLeave}
         >
           {renderChordDiagram()}
+          {isPersistent && (
+            <div className="close-hint">
+              Click outside to close
+            </div>
+          )}
         </div>
       )}
     </span>

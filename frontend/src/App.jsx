@@ -10,7 +10,9 @@ import GuitarFretboard from './components/GuitarFretboard/GuitarFretboard'
 import SecondaryDominants from './components/SecondaryDominants/SecondaryDominants'
 import Info from './components/common/Info'
 import ChordDisplaySwitch from './components/common/ChordDisplaySwitch'
+import ChordPanel from './components/common/ChordPanel'
 import { ChordDisplayProvider } from './contexts/ChordDisplayContext'
+import { ChordPanelProvider } from './contexts/ChordPanelContext'
 
 function App() {
   const [selectedKey, setSelectedKey] = useState('C')
@@ -81,7 +83,8 @@ function App() {
 
   return (
     <ChordDisplayProvider>
-      <div className="app-container">
+      <ChordPanelProvider>
+        <div className="app-container">
         <div className="main-content">
           {/* Header */}
           <header className="app-header">
@@ -232,6 +235,8 @@ function App() {
         )}
       </div>
     </div>
+    <ChordPanel />
+      </ChordPanelProvider>
     </ChordDisplayProvider>
   )
 }

@@ -20,6 +20,20 @@
   min-width: 200px;
 }
 
+.chord-tooltip.persistent {
+  pointer-events: auto;
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.close-hint {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
 .chord-title {
   font-size: 1.125rem;
   font-weight: 600;
@@ -201,10 +215,10 @@
 @keyframes tooltipFadeIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -100%) scale(0.95);
+    transform: translate(-50%, 0) scale(0.5);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -100%) scale(1);
+    transform: translate(-50%, -140%) scale(1);
   }
 }
