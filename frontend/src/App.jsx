@@ -108,9 +108,10 @@ function App() {
         {/* Floating Scale Degrees Panel */}
         {scaleData && (
           <Info 
-            title="Scale Degrees" 
-            icon="♪"
-            side="left"
+            title="Scale" 
+            icon="🪜"
+            side="right"
+            offset={0}
             initialExpanded={false}
           >
             <div className="degrees-compact-floating">
@@ -130,7 +131,7 @@ function App() {
             title="Scale Notes" 
             icon="🎶"
             side="right"
-            offset={0}
+            offset={1}
             initialExpanded={false}
           >
             <div className="notes-compact-floating">
@@ -152,7 +153,7 @@ function App() {
             title="Secondary Dominants" 
             icon="🎢"
             side="right"
-            offset={1}
+            offset={2}
             initialExpanded={false}
           >
             <div className="dominants-compact-floating">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Eye, EyeOff, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
 import './Info.css';
 
@@ -13,6 +13,53 @@ const Info = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(initialExpanded);
   const [isVisible, setIsVisible] = useState(true);
+  const [dynamicPosition, setDynamicPosition] = useState({});
+  const containerRef = useRef(null);
+  const panelRef = useRef(null);
+
+  // Check if panel goes off-screen and adjust position
+  useEffect(() => {
+    if (isExpanded && containerRef.current && panelRef.current) {
+      const container = containerRef.current;
+      const panel = panelRef.current;
+      const containerRect = container.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+      const viewport = {
+        width: window.innerWidth,
+        height: window.innerHeight
+      };
+
+      let adjustments = {};
+
+      // Check horizontal bounds
+      if (side === 'left') {
+        if (panelRect.right > viewport.width - 20) {
+          // Panel goes off right edge, flip to left side of button
+          adjustments.left = 'auto';
+          adjustments.right = 'calc(100% + 0.75rem)';
+        }
+      } else if (side === 'right') {
+        if (panelRect.left < 20) {
+          // Panel goes off left edge, flip to right side of button
+          adjustments.right = 'auto';
+          adjustments.left = 'calc(100% + 0.75rem)';
+        }
+      }
+
+      // Check vertical bounds
+      if (panelRect.bottom > viewport.height - 20) {
+        // Panel goes off bottom edge, align to bottom of button
+        adjustments.top = 'auto';
+        adjustments.bottom = '0';
+      } else if (panelRect.top < 20) {
+        // Panel goes off top edge, align to top of button
+        adjustments.top = '0';
+        adjustments.bottom = 'auto';
+      }
+
+      setDynamicPosition(adjustments);
+    }
+  }, [isExpanded, side]);
 
   const getExpandIcon = () => {
     if (!isExpanded) {
@@ -36,6 +83,7 @@ const Info = ({
 
   return (
     <div 
+      ref={containerRef}
       className={`info-container info-${side} ${isExpanded ? 'expanded' : 'collapsed'} ${className}`}
       style={{
         [`${side === 'left' || side === 'right' ? 'top' : 'left'}`]: 
@@ -55,7 +103,11 @@ const Info = ({
 
       {/* Expandable Content Panel */}
       {isExpanded && (
-        <div className="info-panel">
+        <div 
+          ref={panelRef}
+          className="info-panel"
+          style={dynamicPosition}
+        >
           <div className="info-header">
             <div className="info-title-with-icon">
               {icon && <span className="info-symbol">{icon}</span>}
