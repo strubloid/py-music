@@ -332,7 +332,6 @@
   min-width: 4rem;
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
   transition: all 0.2s ease;
-  justify-content: space-evenly;
 }
 
 .dominant-item-floating:hover {
@@ -342,25 +341,37 @@
 }
 
 .dominant-source {
+  flex: 1;
   font-size: 0.875rem;
   font-weight: 700;
   color: #ef4444;
-  margin-bottom: 0.25rem;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .dominant-arrow {
+  flex: 1;
   font-size: 0.875rem;
   color: #9ca3af;
-  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .dominant-target {
+  flex: 1;
   font-size: 0.875rem;
   font-weight: 700;
   color: #3b82f6;
-  margin-bottom: 0.25rem;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .dominant-roman {
