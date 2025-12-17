@@ -5,14 +5,21 @@
 }
 
 .scale-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   background: linear-gradient(to right, #fbbf24, #f97316);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.scale-chords-main {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
 }
 
 .scale-content {
@@ -102,6 +109,47 @@
 .degree-function {
   color: #d1d5db; /* gray-300 */
   font-size: 0.875rem;
+}
+
+/* Scale Chords Display */
+.chords-display {
+  margin: 0 auto;
+}
+
+.roman-numerals {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.chord-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 4rem;
+  flex: 1;
+}
+
+.roman-numeral {
+  font-weight: bold;
+  font-size: 1.25rem;
+  color: #fbbf24; /* yellow-400 */
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.chord-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #a3e635; /* lime-400 */
+  background: rgba(163, 230, 53, 0.2);
+  padding: 0.375rem 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+  white-space: nowrap;
+  border: 1px solid rgba(163, 230, 53, 0.3);
 }
 
 /* Responsive Design */

@@ -8,6 +8,7 @@ import ScaleInfo from './components/ScaleInfo/ScaleInfo'
 import ChordProgressions from './components/ChordProgressions/ChordProgressions'
 import GuitarFretboard from './components/GuitarFretboard/GuitarFretboard'
 import SecondaryDominants from './components/SecondaryDominants/SecondaryDominants'
+import Info from './components/common/Info'
 
 function App() {
   const [selectedKey, setSelectedKey] = useState('C')
@@ -92,7 +93,7 @@ function App() {
           </p>
         </header>
 
-        {/* Key and Interval Selector */}
+        {/* Key and Interval Selectors - Now center positioned */}
         <div className="key-interval-section">
           <KeySelector 
             selectedKey={selectedKey} 
@@ -103,6 +104,71 @@ function App() {
             loading={loading}
           />
         </div>
+
+        {/* Floating Scale Degrees Panel */}
+        {scaleData && (
+          <Info 
+            title="Scale Degrees" 
+            icon="♪"
+            side="left"
+            initialExpanded={false}
+          >
+            <div className="degrees-compact-floating">
+              {scaleData.scale_degrees.map((degree, index) => (
+                <div key={index} className="degree-compact-floating">
+                  <div className="degree-roman-floating">{degree.roman}</div>
+                  <div className="degree-chord-floating">{degree.chord}</div>
+                </div>
+              ))}
+            </div>
+          </Info>
+        )}
+
+        {/* Floating Scale Notes Panel */}
+        {scaleData && (
+          <Info 
+            title="Scale Notes" 
+            icon="🎶"
+            side="right"
+            offset={0}
+            initialExpanded={false}
+          >
+            <div className="notes-compact-floating">
+              {scaleData.notes.map((note, index) => (
+                <div
+                  key={index}
+                  className={`note-compact-floating ${index === 0 ? 'root-note' : ''}`}
+                >
+                  {note}
+                </div>
+              ))}
+            </div>
+          </Info>
+        )}
+
+        {/* Floating Secondary Dominants Panel */}
+        {scaleData && scaleData.chord_sevenths && (
+          <Info 
+            title="Secondary Dominants" 
+            icon="🎢"
+            side="right"
+            offset={1}
+            initialExpanded={false}
+          >
+            <div className="dominants-compact-floating">
+              {scaleData.chord_sevenths.map((item, index) => {
+                const romanNumerals = ["I", "ii", "iii", "IV", "V", "vi", "vii°"]
+                return (
+                  <div key={index} className="dominant-item-floating">
+                    <div className="dominant-source">{item.resolves_from}</div>
+                    <div className="dominant-arrow">→</div>
+                    <div className="dominant-target">{item.chord}</div>
+                  </div>
+                )
+              })}
+            </div>
+          </Info>
+        )}
 
         {loading && (
           <div className="loading-container">
@@ -120,8 +186,7 @@ function App() {
                   { id: 'scale', icon: Music2, label: 'Scale Info' },
                   { id: 'guitar', icon: Guitar, label: 'Guitar' },
                   { id: 'piano', icon: Piano, label: 'Piano' },
-                  { id: 'progressions', icon: ArrowRight, label: 'Progressions' },
-                  { id: 'dominants', icon: CircleDot, label: 'Dominants' }
+                  { id: 'progressions', icon: ArrowRight, label: 'Progressions' }
                 ].map(({ id, icon: Icon, label }) => (
                   <button
                     key={id}
@@ -156,12 +221,7 @@ function App() {
                 />
               )}
               
-              {activeTab === 'dominants' && (
-                <SecondaryDominants 
-                  chordSevenths={scaleData.chord_sevenths}
-                  keyName={scaleData.key}
-                />
-              )}
+
             </div>
           </>
         )}
