@@ -1,5 +1,6 @@
 import React from 'react'
 import Card from '../common/Card'
+import PracticeTip from '../common/PracticeTip'
 import './PianoKeyboard.css'
 
 const PianoKeyboard = ({ keyboardData }) => {
@@ -67,12 +68,9 @@ const PianoKeyboard = ({ keyboardData }) => {
         </div>
       </div>
 
-      <div className="practice-tip">
-        <h4 className="practice-tip-title">🎯 Practice Tip</h4>
-        <p className="practice-tip-text">
-          Practice playing the scale from the root note. Notice how the pattern repeats in higher octaves!
-        </p>
-      </div>
+      <PracticeTip>
+        Practice playing the scale from the root note. Notice how the pattern repeats in higher octaves!
+      </PracticeTip>
     </Card>
   )
 }
