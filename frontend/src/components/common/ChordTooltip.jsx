@@ -23,21 +23,6 @@ const ChordTooltip = ({
     return children;
   }
 
-  const handleMouseEnter = (e) => {
-    const rect = e.target.getBoundingClientRect();
-    setPosition({
-      x: rect.left + rect.width / 2,
-      y: rect.bottom + 15 // Increased gap to prevent mouse leave issues
-    });
-    setIsVisible(true);
-  };
-
-  const handleMouseLeave = () => {
-    if (!isPersistent) {
-      setIsVisible(false);
-    }
-  };
-
   const handleClick = (e) => {
     e.stopPropagation();
     
@@ -71,39 +56,6 @@ const ChordTooltip = ({
       return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [isPersistent]);
-
-  // Add delay to mouse leave to prevent disappearing when moving to tooltip
-  const [leaveTimeout, setLeaveTimeout] = useState(null);
-
-  const handleMouseEnterDelayed = (e) => {
-    if (leaveTimeout) {
-      clearTimeout(leaveTimeout);
-      setLeaveTimeout(null);
-    }
-    handleMouseEnter(e);
-  };
-
-  const handleMouseLeaveDelayed = () => {
-    if (!isPersistent) {
-      const timeout = setTimeout(() => {
-        setIsVisible(false);
-      }, 300); // 300ms delay
-      setLeaveTimeout(timeout);
-    }
-  };
-
-  const handleTooltipMouseEnter = () => {
-    if (leaveTimeout) {
-      clearTimeout(leaveTimeout);
-      setLeaveTimeout(null);
-    }
-  };
-
-  const handleTooltipMouseLeave = () => {
-    if (!isPersistent) {
-      setIsVisible(false);
-    }
-  };
 
   // Generate chord diagram based on type
   const renderChordDiagram = () => {
@@ -226,8 +178,6 @@ const ChordTooltip = ({
   return (
     <span
       className={`chord-tooltip-trigger ${className}`}
-      onMouseEnter={handleMouseEnterDelayed}
-      onMouseLeave={handleMouseLeaveDelayed}
       onClick={handleClick}
     >
       {children}
@@ -241,8 +191,6 @@ const ChordTooltip = ({
             transform: 'translate(-50%, 0)'
           }}
           onClick={handleTooltipClick}
-          onMouseEnter={handleTooltipMouseEnter}
-          onMouseLeave={handleTooltipMouseLeave}
         >
           {renderChordDiagram()}
           {isPersistent && (

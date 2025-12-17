@@ -14,6 +14,8 @@ import ChordPanel from './components/common/ChordPanel'
 import { ChordDisplayProvider } from './contexts/ChordDisplayContext'
 import { ChordPanelProvider } from './contexts/ChordPanelContext'
 
+
+
 function App() {
   const [selectedKey, setSelectedKey] = useState('C')
   const [selectedInterval, setSelectedInterval] = useState('major')
@@ -84,6 +86,7 @@ function App() {
   return (
     <ChordDisplayProvider>
       <ChordPanelProvider>
+
         <div className="app-container">
         <div className="main-content">
           {/* Header */}

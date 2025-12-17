@@ -1,9 +1,12 @@
 import React from 'react'
 import Card from '../common/Card'
 import Button from '../common/Button'
+import { useChordPanel } from '../../contexts/ChordPanelContext'
 import './KeySelector.css'
 
 const KeySelector = ({ selectedKey, onKeyChange, selectedInterval, onIntervalChange, availableIntervals, loading }) => {
+  const { clearAll } = useChordPanel();
+  
   const keys = [
     'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'
   ]
@@ -12,6 +15,16 @@ const KeySelector = ({ selectedKey, onKeyChange, selectedInterval, onIntervalCha
     { key: 'major', name: 'Major' },
     { key: 'minor', name: 'Minor' }
   ]
+  
+  const handleKeyChange = (key) => {
+    clearAll(); // Clear selected chords when key changes
+    onKeyChange(key);
+  };
+  
+  const handleIntervalChange = (interval) => {
+    clearAll(); // Clear selected chords when interval changes
+    onIntervalChange(interval);
+  };
 
 
 
@@ -25,7 +38,7 @@ const KeySelector = ({ selectedKey, onKeyChange, selectedInterval, onIntervalCha
               key={key}
               variant={selectedKey === key ? 'primary' : 'secondary'}
               selected={selectedKey === key}
-              onClick={() => onKeyChange(key)}
+              onClick={() => handleKeyChange(key)}
               disabled={loading}
               className={key.includes('#') ? 'sharp-key' : ''}
             >
@@ -43,7 +56,7 @@ const KeySelector = ({ selectedKey, onKeyChange, selectedInterval, onIntervalCha
               key={interval.key}
               variant={selectedInterval === interval.key ? 'primary' : 'secondary'}
               selected={selectedInterval === interval.key}
-              onClick={() => onIntervalChange(interval.key)}
+              onClick={() => handleIntervalChange(interval.key)}
               disabled={loading}
               size="large"
             >
