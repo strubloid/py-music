@@ -6,4 +6,6 @@ langchain-anthropic
 python-dotenv
 pydantic
 rich
+flask
+flask-cors
 langgraph

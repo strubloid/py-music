@@ -26,7 +26,9 @@ class Music:
         self.chords = []
 
         ## loading a basic major interval by default
-        self.interval = MajorInterval().interval
+        default_interval = MajorInterval()
+        self.interval_obj = default_interval
+        self.interval = default_interval.interval
 
         ## starting scale teacher object
         self.scaleTeacher = ScalesTeacher(llm)
@@ -46,7 +48,8 @@ class Music:
     
     ## Sets the interval
     def setInterval(self, interval: Interval) -> None:
-        self.interval = interval
+        self.interval_obj = interval  # Store the interval object
+        self.interval = interval.interval  # Store the interval array for compatibility
         return self
 
     """ 
@@ -59,9 +62,17 @@ class Music:
     
     ## Getting notes from scale
     def getNotesFromTune(self) -> list[str]:
+        
+        ## Determine interval type from the interval object
+        interval_type = 'major'  # default
+        if hasattr(self.interval_obj, '__class__'):
+            if 'Minor' in self.interval_obj.__class__.__name__:
+                interval_type = 'minor'
+            elif 'Major' in self.interval_obj.__class__.__name__:
+                interval_type = 'major'
 
         ## loading the variable at music class level
-        self.notes = self.scaleTeacher.getNotesFromTune(self.tune)
+        self.notes = self.scaleTeacher.getNotesFromTune(self.tune, interval_type)
 
         return self.notes
 
@@ -77,7 +88,7 @@ class Music:
     def getBorrowedChords(self) -> list[str]:
         
         ## getting borrowed chords from parallel minor scale
-        borrowedChords = self.scaleTeacher.getBorrowedChords(self.chords, self.interval)
+        borrowedChords = self.scaleTeacher.getBorrowedChords(self.chords, self.interval_obj)
 
         return borrowedChords
     

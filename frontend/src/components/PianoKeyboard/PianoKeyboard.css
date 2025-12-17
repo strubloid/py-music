@@ -1,0 +1,187 @@
+/* PianoKeyboard Component Styles */
+
+.piano-container {
+  display: flex;
+  justify-content: center;
+}
+
+.piano-keyboard {
+  position: relative;
+}
+
+.black-keys-row {
+  display: flex;
+  margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 10;
+}
+
+.black-key-container {
+  position: relative;
+  width: 40px;
+}
+
+.black-key {
+  width: 30px;
+  height: 80px;
+  background: #1f2937; /* gray-800 */
+  border: 1px solid #374151; /* gray-700 */
+  border-radius: 0 0 4px 4px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: absolute;
+  left: 90%;
+  transform: translateX(-50%);
+}
+
+.black-key:hover {
+  background: #374151;
+}
+
+.black-key.scale-note {
+  background: #2563eb; /* blue-600 */
+  color: white;
+  border-color: #1d4ed8; /* blue-700 */
+}
+
+.black-key.root-note {
+  background: #dc2626; /* red-600 */
+  color: white;
+  border-color: #b91c1c; /* red-700 */
+}
+
+.white-keys-row {
+  display: flex;
+}
+
+.white-key {
+  width: 40px;
+  height: 120px;
+  background: white;
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 0 0 4px 4px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  color: #1f2937; /* gray-800 */
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.white-key:hover {
+  background: #f3f4f6; /* gray-100 */
+}
+
+.white-key.scale-note {
+  background: #3b82f6; /* blue-500 */
+  color: white;
+  border-color: #2563eb; /* blue-600 */
+}
+
+.white-key.root-note {
+  background: #ef4444; /* red-500 */
+  color: white;
+  border-color: #dc2626; /* red-600 */
+}
+
+.piano-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-key {
+  width: 1.5rem;
+  height: 1rem;
+  border-radius: 2px;
+  border: 1px solid #d1d5db;
+}
+
+.legend-key.white {
+  background: white;
+}
+
+.legend-key.root {
+  background: #ef4444; /* red-500 */
+}
+
+.legend-key.scale {
+  background: #3b82f6; /* blue-500 */
+}
+
+.practice-tip {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(194, 65, 12, 0.2); /* orange-900/20 */
+  border-radius: 8px;
+}
+
+.practice-tip-title {
+  font-weight: 600;
+  color: #fdba74; /* orange-300 */
+  margin-bottom: 0.5rem;
+}
+
+.practice-tip-text {
+  font-size: 0.875rem;
+  color: #d1d5db; /* gray-300 */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .black-key-container {
+    width: 30px;
+  }
+  
+  .black-key {
+    width: 24px;
+    height: 60px;
+    font-size: 0.625rem;
+  }
+  
+  .white-key {
+    width: 30px;
+    height: 90px;
+    font-size: 0.75rem;
+  }
+  
+  .piano-legend {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .black-key-container {
+    width: 25px;
+  }
+  
+  .black-key {
+    width: 20px;
+    height: 50px;
+  }
+  
+  .white-key {
+    width: 25px;
+    height: 75px;
+  }
+}

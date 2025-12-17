@@ -1,0 +1,72 @@
+/* Card Component Styles - Common UI Block */
+
+.card {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 1.1rem;
+}
+
+.card.compact {
+  padding: 1rem;
+}
+
+.card.large {
+  padding: 2rem;
+}
+
+.card-header {
+  margin-bottom: 1.5rem;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  color: #fbbf24; /* yellow-400 */
+  margin: 0;
+}
+
+.card-title.large {
+  font-size: 2rem;
+}
+
+.card-title.small {
+  font-size: 1.25rem;
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-footer {
+  margin-top: 1.5rem;
+}
+
+/* Variants */
+.card.primary {
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.card.secondary {
+  border: 1px solid rgba(147, 197, 253, 0.3);
+}
+
+.card.accent {
+  background: rgba(194, 65, 12, 0.2); /* orange accent */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .card {
+    padding: 1rem;
+  }
+  
+  .card.large {
+    padding: 1.5rem;
+  }
+  
+  .card-title {
+    font-size: 1.25rem;
+  }
+}

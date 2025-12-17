@@ -39,15 +39,15 @@ class ScalesTeacher():
         return self.prompt
     
     # Getting notes from a tune
-    def getNotesFromTune(self, tune: str = None) -> list[str]:
+    def getNotesFromTune(self, tune: str = None, interval_type: str = 'major') -> list[str]:
         try:
 
             ## Basic validation
             if tune is None:
                 raise ValueError("Please provide a tune")
             
-            ## TODO: Later add the major, minor, modal scales, etc.
-            query = "What is the " + tune + " major scale? "
+            ## Build query based on interval type  
+            query = f"What is the {tune} {interval_type} scale? "
 
             # This will return a BasicAIResponse object directly
             structured_response = self.llm.chain.invoke({"query": query})

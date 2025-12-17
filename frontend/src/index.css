@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.piano-key {
+  transition: all 0.2s ease;
+}
+
+.piano-key:hover {
+  transform: translateY(-2px);
+}
+
+.fret-dot {
+  transition: all 0.3s ease;
+}
+
+.fret-dot:hover {
+  transform: scale(1.2);
+}

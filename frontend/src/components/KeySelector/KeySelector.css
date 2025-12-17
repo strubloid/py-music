@@ -1,0 +1,64 @@
+/* KeySelector Component Styles */
+
+.key-selector-container {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.key-selector-section {
+  flex: 1;
+}
+
+.interval-selector-section {
+  flex-shrink: 0;
+  min-width: 280px;
+}
+
+.keys-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.75rem;
+}
+
+.intervals-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+/* Sharp key styling for buttons */
+.sharp-key {
+  background: #374151 !important; /* gray-800 */
+  color: #fef3c7 !important; /* yellow-200 */
+}
+
+.sharp-key.selected {
+  background: #fbbf24 !important;
+  color: black !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .key-selector-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .interval-selector-section {
+    min-width: unset;
+  }
+  
+  .keys-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .keys-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .intervals-grid {
+    grid-template-columns: 1fr;
+  }
+}
