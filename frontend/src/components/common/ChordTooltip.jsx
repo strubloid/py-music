@@ -31,6 +31,9 @@ const ChordTooltip = ({
     // Add chord to panel
     addChord(chord);
     
+    //TODO: check the position of the mouse and adjust tooltip position if near edges
+    const y = e.clientY;
+
     const rect = e.target.getBoundingClientRect();
     setPosition({
       x: rect.left + rect.width / 2,
@@ -40,50 +43,53 @@ const ChordTooltip = ({
     setIsVisible(true);
   };
 
-  const handleTooltipClick = (e) => {
-    e.stopPropagation();
-  };
-
   const handleClose = () => {
     setIsPersistent(false);
     setIsVisible(false);
   };
 
   const handleMouseDown = (e) => {
-    if (e.target.classList.contains('tooltip-header')) {
+    if (e.target.classList.contains('tooltip-header') || e.target.classList.contains('tooltip-title')) {
+      e.preventDefault();
+      e.stopPropagation();
       setIsDragging(true);
-      const rect = e.currentTarget.getBoundingClientRect();
+      // Calculate offset from current position, not getBoundingClientRect
       setDragOffset({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
+        x: e.clientX - position.x,
+        y: e.clientY - position.y
       });
     }
   };
 
-  const handleMouseMove = (e) => {
-    if (isDragging) {
-      setPosition({
-        x: e.clientX - dragOffset.x,
-        y: e.clientY - dragOffset.y
-      });
-    }
-  };
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
 
   // Add mouse event listeners for dragging
   useEffect(() => {
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      const handleGlobalMouseMove = (e) => {
+        e.preventDefault();
+        setPosition({
+          x: e.clientX - dragOffset.x,
+          y: e.clientY - dragOffset.y
+        });
+      };
+
+      const handleGlobalMouseUp = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+      };
+
+      document.addEventListener('mousemove', handleGlobalMouseMove, { passive: false });
+      document.addEventListener('mouseup', handleGlobalMouseUp, { passive: false });
+      document.body.style.cursor = 'grabbing';
+      
       return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('mousemove', handleGlobalMouseMove);
+        document.removeEventListener('mouseup', handleGlobalMouseUp);
+        document.body.style.cursor = '';
       };
     }
-  }, [isDragging, dragOffset]);
+  }, [isDragging, dragOffset.x, dragOffset.y]);
 
   // Generate chord diagram based on type
   const renderChordDiagram = () => {
@@ -208,15 +214,15 @@ const ChordTooltip = ({
     >
       {children}
       
-      {isVisible && (
+      {isVisible && isPersistent && (
         <div
-          className={`chord-tooltip ${isPersistent ? 'persistent' : ''} ${isDragging ? 'dragging' : ''}`}
+          className={`chord-tooltip persistent ${isDragging ? 'dragging' : ''}`}
           style={{
             left: position.x,
             top: position.y,
-            transform: 'translate(-50%, 0)'
+            transform: 'translate(-50%, 0)',
+            cursor: isDragging ? 'grabbing' : 'default'
           }}
-          onClick={handleTooltipClick}
           onMouseDown={handleMouseDown}
         >
           {isPersistent && (
