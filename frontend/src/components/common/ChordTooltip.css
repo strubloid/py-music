@@ -38,11 +38,12 @@
 
 .mini-piano {
   position: relative;
-  width: 140px;
-  height: 60px;
+  width: 220px;
+  height: 120px;
   background: #1f2937;
-  border-radius: 4px;
+  border-radius: 6px;
   overflow: hidden;
+  border: 2px solid #374151;
 }
 
 .white-keys {
@@ -67,8 +68,8 @@
 }
 
 .key-label {
-  font-size: 0.625rem;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .black-keys {
@@ -104,8 +105,9 @@
 .guitar-fretboard {
   background: #1f2937;
   border-radius: 6px;
-  padding: 0.5rem;
-  min-width: 120px;
+  padding: 0.75rem;
+  min-width: 180px;
+  border: 2px solid #374151;
 }
 
 .fret-numbers {
@@ -114,33 +116,35 @@
 }
 
 .fret-numbers > div:first-child {
-  width: 20px;
+  width: 28px;
 }
 
 .fret-number {
-  width: 20px;
+  width: 28px;
   text-align: center;
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   color: #9ca3af;
+  font-weight: 500;
 }
 
 .guitar-string-row {
   display: flex;
   align-items: center;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
+  position: relative;
 }
 
 .string-name {
-  width: 20px;
+  width: 28px;
   text-align: center;
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   color: #60a5fa;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .fret-position {
-  width: 20px;
-  height: 12px;
+  width: 28px;
+  height: 16px;
   position: relative;
   display: flex;
   align-items: center;
@@ -150,9 +154,20 @@
 .fret-line {
   position: absolute;
   left: 0;
-  width: 1px;
+  width: 2px;
   height: 100%;
   background: #4b5563;
+}
+
+.guitar-string-row::after {
+  content: '';
+  position: absolute;
+  left: 28px;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: #6b7280;
+  z-index: 1;
 }
 
 .open-string {
@@ -168,11 +183,11 @@
 }
 
 .finger-position {
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
   background: #3b82f6;
   border-radius: 50%;
-  font-size: 0.5rem;
+  font-size: 0.625rem;
   color: white;
   display: flex;
   align-items: center;
@@ -180,6 +195,7 @@
   font-weight: bold;
   position: relative;
   z-index: 10;
+  border: 2px solid #1d4ed8;
 }
 
 @keyframes tooltipFadeIn {

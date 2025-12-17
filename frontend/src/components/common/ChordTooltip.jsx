@@ -14,6 +14,11 @@ const ChordTooltip = ({
   
   // Use provided type or fall back to global context (guitar is default)
   const tooltipType = type || displayMode;
+  
+  // Don't render tooltip if chord is empty or null
+  if (!chord) {
+    return children;
+  }
 
   const handleMouseEnter = (e) => {
     const rect = e.target.getBoundingClientRect();
@@ -47,10 +52,20 @@ const ChordTooltip = ({
       'F': ['F', 'A', 'C'],
       'G': ['G', 'B', 'D'],
       'Am': ['A', 'C', 'E'],
-      'Bdim': ['B', 'D', 'F']
+      'Bdim': ['B', 'D', 'F'],
+      // Single notes
+      'D': ['D'],
+      'E': ['E'],
+      'F#': ['F#'],
+      'G#': ['G#'],
+      'A': ['A'],
+      'A#': ['A#'],
+      'B': ['B'],
+      'C#': ['C#'],
+      'D#': ['D#']
     };
 
-    const notes = chordPatterns[chord] || ['C', 'E', 'G'];
+    const notes = chordPatterns[chord] || [chord]; // Default to the chord name itself
     const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
     const blackKeys = ['C#', 'D#', 'F#', 'G#', 'A#'];
 
@@ -91,7 +106,12 @@ const ChordTooltip = ({
       'Em': { frets: ['0', '2', '2', '0', '0', '0'], fingers: [null, 2, 3, null, null, null] },
       'F': { frets: ['1', '3', '3', '2', '1', '1'], fingers: [1, 4, 3, 2, 1, 1] },
       'G': { frets: ['3', '2', '0', '0', '3', '3'], fingers: [3, 2, null, null, 4, 4] },
-      'Am': { frets: ['x', '0', '2', '2', '1', '0'], fingers: [null, null, 2, 3, 1, null] }
+      'Am': { frets: ['x', '0', '2', '2', '1', '0'], fingers: [null, null, 2, 3, 1, null] },
+      // For single notes, show a simple representation
+      'D': { frets: ['x', 'x', '0', '2', '3', 'x'], fingers: [null, null, null, 1, 2, null] },
+      'E': { frets: ['0', '2', '2', '1', '0', '0'], fingers: [null, 2, 3, 1, null, null] },
+      'A': { frets: ['x', '0', '2', '2', '2', '0'], fingers: [null, null, 1, 2, 3, null] },
+      'B': { frets: ['x', '2', '4', '4', '4', '2'], fingers: [null, 1, 2, 3, 4, 1] }
     };
 
     const chordData = guitarChords[chord] || guitarChords['C'];

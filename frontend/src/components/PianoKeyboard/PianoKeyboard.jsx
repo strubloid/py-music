@@ -31,11 +31,9 @@ const PianoKeyboard = ({ keyboardData }) => {
             {black_keys.map((key, index) => (
               <div key={index} className="black-key-container">
                 {key && (
-                  <ChordTooltip chord={key}>
-                    <div className={getKeyClasses(key, true)}>
-                      {key}
-                    </div>
-                  </ChordTooltip>
+                  <div className={getKeyClasses(key, true)}>
+                    {key}
+                  </div>
                 )}
               </div>
             ))}
@@ -44,13 +42,12 @@ const PianoKeyboard = ({ keyboardData }) => {
           {/* White keys row */}
           <div className="white-keys-row">
             {white_keys.map((key) => (
-              <ChordTooltip key={key} chord={key}>
-                <div
-                  className={getKeyClasses(key, false)}
-                >
-                  {key}
-                </div>
-              </ChordTooltip>
+              <div
+                key={key}
+                className={getKeyClasses(key, false)}
+              >
+                {key}
+              </div>
             ))}
           </div>
         </div>
