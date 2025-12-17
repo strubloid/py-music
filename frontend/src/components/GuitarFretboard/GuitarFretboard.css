@@ -3,10 +3,13 @@
 .fretboard-scroll {
   overflow-x: auto;
   padding-bottom: 1rem;
+  display: flex;
+  justify-content: center;
 }
 
 .fretboard-content {
   min-width: max-content;
+  margin: 0 auto;
 }
 
 .fret-headers {
@@ -91,6 +94,8 @@
   z-index: 10;
   cursor: pointer;
   transition: transform 0.2s ease;
+  text-align: center;
+  line-height: 1;
 }
 
 .note-dot:hover {

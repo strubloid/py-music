@@ -100,9 +100,10 @@ const GuitarFretboard = ({ fretboardData }) => {
 
       <div className="practice-tip">
         <h4 className="practice-tip-title">🎯 Practice Tip</h4>
-        <p className="practice-tip-text">
-          Practice playing the scale pattern across all strings. Notice how the same notes appear in different positions!
-        </p>
+        <p className="practice-tip-text">Have fun auround this, as it will be helpfull to you to get familiar with the fretboard and gain muscle memory.</p>
+        <p className="practice-tip-text">When I started... I was in shame of not being able to do chords, yeah! chords were a hardworking skill, so I prattice another thing, Scales!</p>
+        <p className="practice-tip-text">After a lot of scales! specialy G for some reason, I got the jist of it, but one thing for sure, you will have some favorites in your heart.</p>
+        <p className="practice-tip-text">So... Stop your worries, the craic is having fun, be prepared, get your "mood" in shape, an open your brain to possibilities!</p>
       </div>
     </Card>
   )
