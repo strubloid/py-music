@@ -144,6 +144,18 @@ def get_available_intervals():
         ]
     })
 
+@app.route('/api/music-config', methods=['GET'])
+def get_music_config():
+    """Get music display configuration for consistent UI rendering"""
+    return jsonify({
+        "guitarStringOrder": ["E", "A", "D", "G", "B", "E"],  # Low to High (6th to 1st string)
+        "pianoKeyOrder": ["C", "D", "E", "F", "G", "A", "B"],
+        "blackKeyOrder": ["C#", "D#", "F#", "G#", "A#"],
+        "chordDisplayOrder": "ascending",  # or 'descending'
+        "noteNamingConvention": "sharp",  # or 'flat'
+        "fretboardDirection": "leftToRight"  # or 'rightToLeft'
+    })
+
 @app.route('/api/scale/<key>', methods=['GET'])
 def get_scale_analysis(key):
     """Get complete scale analysis for a given key and interval"""

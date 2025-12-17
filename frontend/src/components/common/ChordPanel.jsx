@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Trash2, Music } from 'lucide-react';
 import { useChordPanel } from '../../contexts/ChordPanelContext';
 import { useChordDisplay } from '../../contexts/ChordDisplayContext';
+import musicConfig from '../../services/MusicDisplayConfig';
 import './ChordPanel.css';
 
 const ChordPanel = () => {
@@ -26,8 +27,8 @@ const ChordPanel = () => {
     };
     
     const notes = chordPatterns[chord] || [chord];
-    const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-    const blackKeys = ['C#', 'D#', 'F#', 'G#', 'A#'];
+    const whiteKeys = musicConfig.getPianoKeyOrder();
+    const blackKeys = musicConfig.getBlackKeyOrder();
     
     return (
       <div className="inline-piano-diagram">
@@ -73,29 +74,28 @@ const ChordPanel = () => {
     };
     
     const chordData = guitarChords[chord] || guitarChords['C'];
-    // Guitar strings from high E (1st) to low E (6th) to match fretboard display
-    const strings = ['E', 'B', 'G', 'D', 'A', 'E'];
-    const fretOrder = [5, 4, 3, 2, 1, 0]; // Map display order to chord data order
+    // Use centralized configuration for consistent string ordering
+    const strings = musicConfig.getGuitarStrings();
+    // No need for fretOrder mapping since we're using consistent ordering
     
     return (
       <div className="inline-guitar-diagram">
         <div className="chord-title-small">{chord}</div>
         <div className="mini-guitar-inline">
           {strings.map((string, stringIndex) => {
-            const chordDataIndex = fretOrder[stringIndex];
             return (
               <div key={stringIndex} className="guitar-string-inline">
                 <span className="string-label-small">{string}</span>
                 <div className="string-frets">
                   {[0, 1, 2, 3].map(fret => (
                     <div key={fret} className="fret-cell-inline">
-                      {fret === 0 && chordData.frets[chordDataIndex] === '0' && (
+                      {fret === 0 && chordData.frets[stringIndex] === '0' && (
                         <div className="open-circle">o</div>
                       )}
-                      {fret === 0 && chordData.frets[chordDataIndex] === 'x' && (
+                      {fret === 0 && chordData.frets[stringIndex] === 'x' && (
                         <div className="muted-x">×</div>
                       )}
-                      {fret > 0 && parseInt(chordData.frets[chordDataIndex]) === fret && (
+                      {fret > 0 && parseInt(chordData.frets[stringIndex]) === fret && (
                         <div className="finger-dot">●</div>
                       )}
                     </div>

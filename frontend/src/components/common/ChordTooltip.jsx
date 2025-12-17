@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useChordDisplay } from '../../contexts/ChordDisplayContext';
 import { useChordPanel } from '../../contexts/ChordPanelContext';
+import { useMagneticBorder } from '../../contexts/MagneticBorderContext';
+import musicConfig from '../../services/MusicDisplayConfig';
 import './ChordTooltip.css';
 
 const ChordTooltip = ({ 
@@ -11,6 +13,39 @@ const ChordTooltip = ({
 }) => {
   const { displayMode } = useChordDisplay();
   const { addChord } = useChordPanel();
+  const { isMagneticEnabled } = useMagneticBorder();
+
+  // Magnetic snap function
+  const applyMagneticSnap = (x, y) => {
+    if (!isMagneticEnabled) return { x, y };
+    
+    const snapDistance = 20; // pixels
+    const tooltipWidth = 220; // approximate width
+    const tooltipHeight = 200; // approximate height
+    
+    let snappedX = x;
+    let snappedY = y;
+    
+    // Snap to left edge
+    if (x - tooltipWidth / 2 < snapDistance) {
+      snappedX = tooltipWidth / 2 + 10;
+    }
+    // Snap to right edge  
+    else if (x + tooltipWidth / 2 > window.innerWidth - snapDistance) {
+      snappedX = window.innerWidth - tooltipWidth / 2 - 10;
+    }
+    
+    // Snap to top edge
+    if (y < snapDistance) {
+      snappedY = 10;
+    }
+    // Snap to bottom edge
+    else if (y + tooltipHeight > window.innerHeight - snapDistance) {
+      snappedY = window.innerHeight - tooltipHeight - 10;
+    }
+    
+    return { x: snappedX, y: snappedY };
+  };
   const [isVisible, setIsVisible] = useState(false);
   const [isPersistent, setIsPersistent] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -68,10 +103,12 @@ const ChordTooltip = ({
     if (isDragging) {
       const handleGlobalMouseMove = (e) => {
         e.preventDefault();
-        setPosition({
+        const newPos = {
           x: e.clientX - dragOffset.x,
           y: e.clientY - dragOffset.y
-        });
+        };
+        const snappedPos = applyMagneticSnap(newPos.x, newPos.y);
+        setPosition(snappedPos);
       };
 
       const handleGlobalMouseUp = (e) => {
@@ -124,8 +161,8 @@ const ChordTooltip = ({
     };
 
     const notes = chordPatterns[chord] || [chord]; // Default to the chord name itself
-    const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-    const blackKeys = ['C#', 'D#', 'F#', 'G#', 'A#'];
+    const whiteKeys = musicConfig.getPianoKeyOrder();
+    const blackKeys = musicConfig.getBlackKeyOrder();
 
     return (
       <div className="piano-chord-diagram">
@@ -172,7 +209,7 @@ const ChordTooltip = ({
     };
 
     const chordData = guitarChords[chord] || guitarChords['C'];
-    const strings = ['E', 'A', 'D', 'G', 'B', 'E'];
+    const strings = musicConfig.getGuitarStrings();
 
     return (
       <div className="guitar-chord-diagram">

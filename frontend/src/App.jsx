@@ -13,6 +13,8 @@ import ChordDisplaySwitch from './components/common/ChordDisplaySwitch'
 import ChordPanel from './components/common/ChordPanel'
 import { ChordDisplayProvider } from './contexts/ChordDisplayContext'
 import { ChordPanelProvider } from './contexts/ChordPanelContext'
+import { MagneticBorderProvider } from './contexts/MagneticBorderContext'
+import MagneticToggle from './components/common/MagneticToggle'
 
 
 
@@ -85,8 +87,8 @@ function App() {
 
   return (
     <ChordDisplayProvider>
-      <ChordPanelProvider>
-
+        <MagneticBorderProvider>
+          <ChordPanelProvider>
         <div className="app-container">
         <div className="main-content">
           {/* Header */}
@@ -96,7 +98,10 @@ function App() {
               <h1 className="header-title">
                 Strubloid Music Theory
               </h1>
-              <ChordDisplaySwitch className="chord-switch" />
+              <div className="header-controls">
+                <ChordDisplaySwitch className="chord-switch" />
+                <MagneticToggle />
+              </div>
             </div>
             <p className="header-subtitle">
               Have fun discovering scales, chords, and progressions!
@@ -239,8 +244,9 @@ function App() {
       </div>
     </div>
     <ChordPanel />
-      </ChordPanelProvider>
-    </ChordDisplayProvider>
+          </ChordPanelProvider>
+        </MagneticBorderProvider>
+      </ChordDisplayProvider>
   )
 }
 
