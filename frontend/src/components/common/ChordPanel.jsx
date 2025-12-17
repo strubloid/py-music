@@ -73,32 +73,37 @@ const ChordPanel = () => {
     };
     
     const chordData = guitarChords[chord] || guitarChords['C'];
-    const strings = ['E', 'A', 'D', 'G', 'B', 'E'];
+    // Guitar strings from high E (1st) to low E (6th) to match fretboard display
+    const strings = ['E', 'B', 'G', 'D', 'A', 'E'];
+    const fretOrder = [5, 4, 3, 2, 1, 0]; // Map display order to chord data order
     
     return (
       <div className="inline-guitar-diagram">
         <div className="chord-title-small">{chord}</div>
         <div className="mini-guitar-inline">
-          {strings.map((string, stringIndex) => (
-            <div key={stringIndex} className="guitar-string-inline">
-              <span className="string-label-small">{string}</span>
-              <div className="string-frets">
-                {[0, 1, 2, 3].map(fret => (
-                  <div key={fret} className="fret-cell-inline">
-                    {fret === 0 && chordData.frets[stringIndex] === '0' && (
-                      <div className="open-circle">o</div>
-                    )}
-                    {fret === 0 && chordData.frets[stringIndex] === 'x' && (
-                      <div className="muted-x">×</div>
-                    )}
-                    {fret > 0 && parseInt(chordData.frets[stringIndex]) === fret && (
-                      <div className="finger-dot">●</div>
-                    )}
-                  </div>
-                ))}
+          {strings.map((string, stringIndex) => {
+            const chordDataIndex = fretOrder[stringIndex];
+            return (
+              <div key={stringIndex} className="guitar-string-inline">
+                <span className="string-label-small">{string}</span>
+                <div className="string-frets">
+                  {[0, 1, 2, 3].map(fret => (
+                    <div key={fret} className="fret-cell-inline">
+                      {fret === 0 && chordData.frets[chordDataIndex] === '0' && (
+                        <div className="open-circle">o</div>
+                      )}
+                      {fret === 0 && chordData.frets[chordDataIndex] === 'x' && (
+                        <div className="muted-x">×</div>
+                      )}
+                      {fret > 0 && parseInt(chordData.frets[chordDataIndex]) === fret && (
+                        <div className="finger-dot">●</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );
