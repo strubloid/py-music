@@ -1,6 +1,7 @@
 import React from 'react'
 import Card from '../common/Card'
 import PracticeTip from '../common/PracticeTip'
+import ChordTooltip from '../common/ChordTooltip'
 import './PianoKeyboard.css'
 
 const PianoKeyboard = ({ keyboardData }) => {
@@ -30,9 +31,11 @@ const PianoKeyboard = ({ keyboardData }) => {
             {black_keys.map((key, index) => (
               <div key={index} className="black-key-container">
                 {key && (
-                  <div className={getKeyClasses(key, true)}>
-                    {key}
-                  </div>
+                  <ChordTooltip chord={key}>
+                    <div className={getKeyClasses(key, true)}>
+                      {key}
+                    </div>
+                  </ChordTooltip>
                 )}
               </div>
             ))}
@@ -41,12 +44,13 @@ const PianoKeyboard = ({ keyboardData }) => {
           {/* White keys row */}
           <div className="white-keys-row">
             {white_keys.map((key) => (
-              <div
-                key={key}
-                className={getKeyClasses(key, false)}
-              >
-                {key}
-              </div>
+              <ChordTooltip key={key} chord={key}>
+                <div
+                  className={getKeyClasses(key, false)}
+                >
+                  {key}
+                </div>
+              </ChordTooltip>
             ))}
           </div>
         </div>

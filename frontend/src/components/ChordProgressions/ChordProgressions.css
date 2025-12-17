@@ -78,23 +78,7 @@
   margin-top: 0.5rem;
 }
 
-.practice-tip {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background: rgba(194, 65, 12, 0.2); /* orange-900/20 */
-  border-radius: 8px;
-}
 
-.practice-tip-title {
-  font-weight: 600;
-  color: #fdba74; /* orange-300 */
-  margin-bottom: 0.5rem;
-}
-
-.practice-tip-text {
-  font-size: 0.875rem;
-  color: #d1d5db; /* gray-300 */
-}
 
 /* Responsive Design */
 @media (max-width: 768px) {

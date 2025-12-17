@@ -1,0 +1,194 @@
+/* ChordTooltip Component Styles */
+
+.chord-tooltip-trigger {
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.chord-tooltip {
+  position: fixed;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: tooltipFadeIn 0.2s ease;
+  pointer-events: none;
+  min-width: 200px;
+}
+
+.chord-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #fbbf24;
+  text-align: center;
+  margin-bottom: 0.75rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Piano Chord Diagram */
+.piano-chord-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mini-piano {
+  position: relative;
+  width: 140px;
+  height: 60px;
+  background: #1f2937;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.white-keys {
+  display: flex;
+  height: 100%;
+}
+
+.white-key {
+  flex: 1;
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.white-key.active {
+  background: #3b82f6;
+  color: white;
+}
+
+.key-label {
+  font-size: 0.625rem;
+  font-weight: 500;
+}
+
+.black-keys {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  pointer-events: none;
+}
+
+.black-key {
+  position: absolute;
+  width: 8%;
+  height: 100%;
+  background: #1f2937;
+  border: 1px solid #374151;
+  transform: translateX(-50%);
+  transition: background-color 0.2s ease;
+}
+
+.black-key.active {
+  background: #1e40af;
+}
+
+/* Guitar Chord Diagram */
+.guitar-chord-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.guitar-fretboard {
+  background: #1f2937;
+  border-radius: 6px;
+  padding: 0.5rem;
+  min-width: 120px;
+}
+
+.fret-numbers {
+  display: flex;
+  margin-bottom: 0.25rem;
+}
+
+.fret-numbers > div:first-child {
+  width: 20px;
+}
+
+.fret-number {
+  width: 20px;
+  text-align: center;
+  font-size: 0.625rem;
+  color: #9ca3af;
+}
+
+.guitar-string-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.string-name {
+  width: 20px;
+  text-align: center;
+  font-size: 0.625rem;
+  color: #60a5fa;
+  font-weight: 500;
+}
+
+.fret-position {
+  width: 20px;
+  height: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fret-line {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 100%;
+  background: #4b5563;
+}
+
+.open-string {
+  font-size: 0.625rem;
+  color: #10b981;
+  font-weight: bold;
+}
+
+.muted-string {
+  font-size: 0.75rem;
+  color: #ef4444;
+  font-weight: bold;
+}
+
+.finger-position {
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border-radius: 50%;
+  font-size: 0.5rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  position: relative;
+  z-index: 10;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -100%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%) scale(1);
+  }
+}

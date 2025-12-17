@@ -9,6 +9,8 @@ import ChordProgressions from './components/ChordProgressions/ChordProgressions'
 import GuitarFretboard from './components/GuitarFretboard/GuitarFretboard'
 import SecondaryDominants from './components/SecondaryDominants/SecondaryDominants'
 import Info from './components/common/Info'
+import ChordDisplaySwitch from './components/common/ChordDisplaySwitch'
+import { ChordDisplayProvider } from './contexts/ChordDisplayContext'
 
 function App() {
   const [selectedKey, setSelectedKey] = useState('C')
@@ -78,20 +80,22 @@ function App() {
   }
 
   return (
-    <div className="app-container">
-      <div className="main-content">
-        {/* Header */}
-        <header className="app-header">
-          <div className="header-title-container">
-            <Music className="header-icon" />
-            <h1 className="header-title">
-              Strubloid Music Theory
-            </h1>
-          </div>
-          <p className="header-subtitle">
-            Have fun discovering scales, chords, and progressions!
-          </p>
-        </header>
+    <ChordDisplayProvider>
+      <div className="app-container">
+        <div className="main-content">
+          {/* Header */}
+          <header className="app-header">
+            <div className="header-title-container">
+              <Music className="header-icon" />
+              <h1 className="header-title">
+                Strubloid Music Theory
+              </h1>
+              <ChordDisplaySwitch className="chord-switch" />
+            </div>
+            <p className="header-subtitle">
+              Have fun discovering scales, chords, and progressions!
+            </p>
+          </header>
 
         {/* Key and Interval Selectors - Now center positioned */}
         <div className="key-interval-section">
@@ -228,6 +232,7 @@ function App() {
         )}
       </div>
     </div>
+    </ChordDisplayProvider>
   )
 }
 

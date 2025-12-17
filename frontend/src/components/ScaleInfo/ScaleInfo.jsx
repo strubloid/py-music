@@ -1,5 +1,6 @@
 import React from 'react'
 import Card from '../common/Card'
+import ChordTooltip from '../common/ChordTooltip'
 import './ScaleInfo.css'
 
 const ScaleInfo = ({ scaleData }) => {
@@ -18,7 +19,9 @@ const ScaleInfo = ({ scaleData }) => {
             {scale_degrees.map((degree, index) => (
               <div key={index} className="chord-column">
                 <div className="roman-numeral">{degree.roman}</div>
-                <div className="chord-name">{degree.chord}</div>
+                <ChordTooltip chord={degree.chord}>
+                  <div className="chord-name">{degree.chord}</div>
+                </ChordTooltip>
               </div>
             ))}
           </div>

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Play } from 'lucide-react'
 import PracticeTip from '../common/PracticeTip'
+import ChordTooltip from '../common/ChordTooltip'
 
 const ChordProgressions = ({ progressions, keyName }) => {
   return (
@@ -24,9 +25,11 @@ const ChordProgressions = ({ progressions, keyName }) => {
               <div className="flex flex-wrap gap-2">
                 {chords.map((chord, index) => (
                   <React.Fragment key={index}>
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                      {chord}
-                    </div>
+                    <ChordTooltip chord={chord}>
+                      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        {chord}
+                      </div>
+                    </ChordTooltip>
                     {index < chords.length - 1 && (
                       <span className="text-gray-400 flex items-center">→</span>
                     )}
