@@ -1,5 +1,6 @@
 import React from 'react'
 import { Play } from 'lucide-react'
+import PracticeTip from '../common/PracticeTip'
 
 const ChordProgressions = ({ progressions, keyName }) => {
   return (
@@ -42,12 +43,9 @@ const ChordProgressions = ({ progressions, keyName }) => {
         ))}
       </div>
       
-      <div className="mt-6 p-4 bg-blue-900/20 rounded-lg">
-        <h4 className="font-semibold text-blue-300 mb-2">💡 Tip</h4>
-        <p className="text-sm text-gray-300">
-          These progressions are the foundation of countless songs. Try playing them on piano or guitar!
-        </p>
-      </div>
+      <PracticeTip title="💡 Tip" initialExpanded={true}>
+        These progressions are the foundation of countless songs. Try playing them on piano or guitar!
+      </PracticeTip>
     </div>
   )
 }
