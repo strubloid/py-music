@@ -400,6 +400,73 @@
   box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
 }
 
+/* Selected Chords Section */
+.selected-chords-section {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.selected-chords-section .section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+}
+
+.selected-chords-visual-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.selected-chord-simple {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.selected-chord-simple:hover {
+  background: rgba(0, 0, 0, 0.02);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.selected-chord-simple.highlighted {
+  background: rgba(33, 150, 243, 0.1);
+  border: 2px solid #2196f3;
+  animation: highlight-pulse 2s ease-out;
+}
+
+@keyframes highlight-pulse {
+  0% { 
+    background: rgba(33, 150, 243, 0.3);
+  }
+  100% { 
+    background: rgba(33, 150, 243, 0.1);
+  }
+}
+
+/* Inline Chord Display */
+.inline-chord-container {
+  width: 100%;
+  min-width: 180px;
+}
+
+.inline-chord-container .inline-display {
+  transform: scale(1.0);
+  transform-origin: center;
+  margin: 0;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .progression-builder-panel {

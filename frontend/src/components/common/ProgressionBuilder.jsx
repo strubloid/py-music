@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { useChordPanel } from '../../contexts/ChordPanelContext'
 import ChordTooltip from './ChordTooltip'
+import InlineChordDisplay from './InlineChordDisplay'
 import './ProgressionBuilder.css'
 
 const ProgressionBuilder = ({ scaleData }) => {
   const { 
     selectedChords, 
+    addChord: addToSelected,
     progressionLines, 
     currentLine, 
     addChordToProgression, 
@@ -13,11 +15,15 @@ const ProgressionBuilder = ({ scaleData }) => {
     addProgressionLine, 
     removeProgressionLine, 
     clearProgression, 
-    setCurrentProgressionLine 
+    setCurrentProgressionLine,
+    showSelectedChords
   } = useChordPanel()
+  
+  const [highlightedChord, setHighlightedChord] = useState(null)
 
   const addChord = (chord) => {
     addChordToProgression(chord)
+    addToSelected(chord) // Also add to selected chords when adding to progression
   }
 
   const removeChord = (lineIndex, chordIndex) => {
@@ -86,6 +92,25 @@ const ProgressionBuilder = ({ scaleData }) => {
           </button>
         </div>
       </div>
+
+      {/* Selected Chords Section - shown/hidden based on toggle */}
+      {showSelectedChords && selectedChords.length > 0 && (
+        <div className="selected-chords-section">
+          <h4 className="section-title">Selected Chords:</h4>
+          <div className="selected-chords-visual-grid">
+            {[...new Set(selectedChords)].map((chord, index) => (
+              <div 
+                key={index} 
+                className={`selected-chord-simple ${highlightedChord === chord ? 'highlighted' : ''}`}
+                onClick={() => addChordToProgression(chord)}
+                title={`Add ${chord} to current progression line`}
+              >
+                <InlineChordDisplay chord={chord} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Scale Chords and Seventh Notes */}
       <div className="chord-selection-grid">
@@ -166,7 +191,18 @@ const ProgressionBuilder = ({ scaleData }) => {
                   line.map((chord, chordIndex) => (
                     <div key={chordIndex} className="progression-chord-item">
                       <ChordTooltip chord={chord}>
-                        <div className="chord-display">{chord}</div>
+                        <div 
+                          className="chord-display"
+                          onClick={() => {
+                            addToSelected(chord)
+                            setHighlightedChord(chord)
+                            // Clear highlight after 2 seconds
+                            setTimeout(() => setHighlightedChord(null), 2000)
+                          }}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          {chord}
+                        </div>
                       </ChordTooltip>
                       <button
                         className="remove-chord-button"

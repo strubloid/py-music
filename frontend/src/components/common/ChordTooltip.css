@@ -252,3 +252,58 @@
   z-index: 10;
   border: 2px solid #1d4ed8;
 }
+
+/* Inline Display Specific Styles */
+.strings {
+  display: flex;
+  flex-direction: column;
+}
+
+.string {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  position: relative;
+}
+
+.string::after {
+  content: '';
+  position: absolute;
+  left: 28px;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: #6b7280;
+  z-index: 1;
+}
+
+.frets {
+  display: flex;
+  align-items: center;
+}
+
+.nut {
+  width: 28px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fret {
+  width: 28px;
+  height: 16px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fret::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  background: #4b5563;
+}

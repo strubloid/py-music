@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useChordDisplay } from '../../contexts/ChordDisplayContext';
 import { useChordPanel } from '../../contexts/ChordPanelContext';
-import musicConfig from '../../services/MusicDisplayConfig.jsx';
+import chordDataService from '../../services/ChordDataService';
 import './ChordTooltip.css';
 
 const ChordTooltip = ({ 
@@ -160,30 +160,10 @@ const ChordTooltip = ({
    * @returns 
    */
   const renderPianoChord = () => {
-    // Basic chord patterns - this is a simplified version
-    const chordPatterns = {
-      'C': ['C', 'E', 'G'],
-      'Dm': ['D', 'F', 'A'],
-      'Em': ['E', 'G', 'B'],
-      'F': ['F', 'A', 'C'],
-      'G': ['G', 'B', 'D'],
-      'Am': ['A', 'C', 'E'],
-      'Bdim': ['B', 'D', 'F'],
-      // Single notes
-      'D': ['D'],
-      'E': ['E'],
-      'F#': ['F#'],
-      'G#': ['G#'],
-      'A': ['A'],
-      'A#': ['A#'],
-      'B': ['B'],
-      'C#': ['C#'],
-      'D#': ['D#']
-    };
-
-    const notes = chordPatterns[chord] || [chord];
-    const whiteKeys = musicConfig.getPianoKeyOrder();
-    const blackKeys = musicConfig.getBlackKeyOrder();
+    // Use centralized chord data service
+    const notes = chordDataService.getPianoChordData(chord);
+    const whiteKeys = chordDataService.pianoKeyOrder.filter(note => !note.includes('#'));
+    const blackKeys = chordDataService.pianoKeyOrder.filter(note => note.includes('#'));
 
     return (
       <div className="piano-chord-diagram">
@@ -215,31 +195,11 @@ const ChordTooltip = ({
 
   const renderGuitarChord = () => {
     // Use same string order as main fretboard: E, B, G, D, A, E (high to low)
-    const strings = ['E', 'B', 'G', 'D', 'A', 'E']; // Match backend generate_fretboard_data order
+    const strings = chordDataService.guitarStringNames; // Use centralized string order
     
-    // Basic guitar chord fingerings - simplified version
-    // Fingerings are in order: E(1st), B(2nd), G(3rd), D(4th), A(5th), E(6th)
-    const guitarChords = {
-      'C': { frets: ['0', '1', '0', '2', '3', 'x'], fingers: [null, 1, null, 2, 3, null] },
-      'Dm': { frets: ['1', '3', '2', '0', 'x', 'x'], fingers: [1, 3, 2, null, null, null] },
-      'Em': { frets: ['0', '0', '0', '2', '2', '0'], fingers: [null, null, null, 2, 3, null] },
-      'F': { frets: ['1', '1', '2', '3', '3', '1'], fingers: [1, 1, 2, 4, 3, 1] },
-      'G': { frets: ['3', '3', '0', '0', '2', '3'], fingers: [4, 4, null, null, 2, 3] },
-      'Am': { frets: ['0', '1', '2', '2', '0', 'x'], fingers: [null, 1, 2, 3, null, null] },
-      'Bdim': { frets: ['x', '2', '3', '1', 'x', 'x'], fingers: [null, 2, 3, 1, null, null] },
-      // For single notes, show a simple representation  
-      'D': { frets: ['x', '3', '2', '0', 'x', 'x'], fingers: [null, 2, 1, null, null, null] },
-      'E': { frets: ['0', '0', '1', '2', '2', '0'], fingers: [null, null, 1, 2, 3, null] },
-      'A': { frets: ['0', '2', '2', '2', '0', 'x'], fingers: [null, 1, 2, 3, null, null] },
-      'B': { frets: ['2', '4', '4', '4', '2', 'x'], fingers: [1, 2, 3, 4, 1, null] },
-      'C#': { frets: ['x', '4', '6', '6', '6', '4'], fingers: [null, 1, 2, 3, 4, 1] },
-      'D#': { frets: ['x', 'x', '1', '3', '4', 'x'], fingers: [null, null, 1, 2, 3, null] },
-      'F#': { frets: ['2', '2', '3', '4', '4', '2'], fingers: [1, 1, 2, 4, 3, 1] },
-      'G#': { frets: ['4', '4', '1', '1', '3', '4'], fingers: [3, 4, 1, 1, 2, 3] },
-      'A#': { frets: ['1', '3', '3', '3', '1', 'x'], fingers: [1, 2, 3, 4, 1, null] }
-    };
-
-    const chordData = guitarChords[chord] || guitarChords['C'];
+    // Use centralized chord data service
+    const chordData = chordDataService.getGuitarChordData(chord);
+    const stringNames = chordDataService.guitarStringNames;
 
     return (
       <div className="guitar-chord-diagram">

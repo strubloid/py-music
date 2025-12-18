@@ -10,6 +10,7 @@ import GuitarFretboard from './components/GuitarFretboard/GuitarFretboard'
 import SecondaryDominants from './components/SecondaryDominants/SecondaryDominants'
 import Info from './components/common/Info'
 import ChordDisplaySwitch from './components/common/ChordDisplaySwitch'
+import SelectedChordsToggle from './components/common/SelectedChordsToggle'
 import BottomPanel from './components/common/BottomPanel'
 import { ChordDisplayProvider } from './contexts/ChordDisplayContext'
 import { ChordPanelProvider } from './contexts/ChordPanelContext'
@@ -101,6 +102,7 @@ function App() {
               </h1>
               <div className="header-controls">
                 <ChordDisplaySwitch className="chord-switch" />
+                <SelectedChordsToggle className="chord-switch" />
               </div>
             </div>
             <p className="header-subtitle">

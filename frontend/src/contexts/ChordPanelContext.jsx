@@ -17,6 +17,9 @@ export const ChordPanelProvider = ({ children }) => {
   // Progression state - persists across tab switches
   const [progressionLines, setProgressionLines] = useState([[]]);
   const [currentLine, setCurrentLine] = useState(0);
+  
+  // Toggle for showing selected chords panel
+  const [showSelectedChords, setShowSelectedChords] = useState(false);
 
   const addChord = (chord) => {
     // Add chord to the array (allows duplicates for building progressions)
@@ -76,6 +79,10 @@ export const ChordPanelProvider = ({ children }) => {
     setCurrentLine(lineIndex);
   };
 
+  const toggleSelectedChords = () => {
+    setShowSelectedChords(prev => !prev);
+  };
+
   return (
     <ChordPanelContext.Provider value={{
       selectedChords,
@@ -91,7 +98,10 @@ export const ChordPanelProvider = ({ children }) => {
       addProgressionLine,
       removeProgressionLine,
       clearProgression,
-      setCurrentProgressionLine
+      setCurrentProgressionLine,
+      // Selected chords panel toggle
+      showSelectedChords,
+      toggleSelectedChords
     }}>
       {children}
     </ChordPanelContext.Provider>
