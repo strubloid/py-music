@@ -31,34 +31,30 @@ const ChordTooltip = ({
     return children;
   }
 
+  /**
+   * This function handles click on the chord element to show the tooltip
+   * @param {event} e Event object 
+   * @returns void
+   */
   const handleClick = (e) => {
     e.stopPropagation();
     
     // Ignore clicks that happen right after finishing a drag
     if (justFinishedDrag) {
-      console.log('🚫 CLICK IGNORED - Just finished dragging, preventing repositioning');
       setJustFinishedDrag(false);
       return;
     }
     
-    console.log('✅ CLICK ACCEPTED - Processing new tooltip positioning');
-    
     // Add chord to panel
     addChord(chord);
+  
+    // Get the chord element's position
+    const rect = e.currentTarget.getBoundingClientRect();
     
-    const rect = e.target.getBoundingClientRect();
-    const currentTargetRect = e.currentTarget.getBoundingClientRect();
-    
-    console.log('🎯 DEBUG - Raw mouse:', { x: e.clientX, y: e.clientY });
-    console.log('🎯 DEBUG - Target rect:', { top: rect.top, left: rect.left, bottom: rect.bottom, right: rect.right, width: rect.width, height: rect.height });
-    
-    // Position tooltip consistently relative to the element, not the click point
-    // Use element's horizontal center and position above the element
-    let initialX = rect.left + (rect.width / 2); // Center of the element horizontally
-    let initialY = rect.top/2 - 140; // Rule for the base showing
-
-    
-
+    // X position follows the chord element (centered on it)
+    // Y position is fixed at the top area
+    let initialX = rect.left - 350;
+    let initialY = rect.height + 150;
     
     // setting initial position
     setPosition({
@@ -69,14 +65,21 @@ const ChordTooltip = ({
     setIsVisible(true);
   };
 
+  /**
+   * This function handles closing the tooltip
+   * @param {event} e Event object 
+   */
   const handleClose = (e) => {
     e.stopPropagation(); // Prevent any other event handling
     e.preventDefault();  // Make sure it doesn't trigger other handlers
-    console.log('🔴 CLOSING TOOLTIP');
     setIsPersistent(false);
     setIsVisible(false);
   };
 
+  /**
+   * Mouse down handler - initiates dragging
+   * @param {event} e Event object
+   */
   const handleMouseDown = (e) => {
     if (e.target.classList.contains('tooltip-header') || e.target.classList.contains('tooltip-title')) {
       e.preventDefault();
@@ -92,35 +95,31 @@ const ChordTooltip = ({
     }
   };
 
-
-
-  // Drag handler - free movement
+  /**
+   * This function handles dragging the tooltip
+   * @param {event} e Event object
+   */
   const handleDrag = (e) => {
     e.preventDefault();
-
-    // Calculate new center position (since position.x represents the center due to CSS transform)
     const newPos = {
       x: e.clientX - dragOffset.x,
       y: e.clientY - dragOffset.y
     };
-    
-    console.log("🎯 DRAG - Set position to:", newPos);
     setPosition(newPos);
   };
 
   // Mouse up handler - maintains final position
   const handleMouseUp = (e) => {
     e.preventDefault();
-    console.log('🛑 DRAG END - Maintaining position at:', position);
     
+    // set statuses
     setIsDragging(false);
     setJustFinishedDrag(true);
     
     // Clear the flag after a short delay to allow normal clicking again
     setTimeout(() => {
       setJustFinishedDrag(false);
-      console.log('✅ CLICK ENABLED - Ready for new clicks');
-    }, 100);
+    }, 150);
   };
 
   // Add mouse event listeners for dragging
@@ -156,6 +155,10 @@ const ChordTooltip = ({
     return null;
   };
 
+  /**
+   * This function renders a simple piano chord diagram
+   * @returns 
+   */
   const renderPianoChord = () => {
     // Basic chord patterns - this is a simplified version
     const chordPatterns = {
