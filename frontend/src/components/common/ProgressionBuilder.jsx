@@ -93,24 +93,7 @@ const ProgressionBuilder = ({ scaleData }) => {
         </div>
       </div>
 
-      {/* Selected Chords Section - shown/hidden based on toggle */}
-      {showSelectedChords && selectedChords.length > 0 && (
-        <div className="selected-chords-section">
-          <h4 className="section-title">Selected Chords:</h4>
-          <div className="selected-chords-visual-grid">
-            {[...new Set(selectedChords)].map((chord, index) => (
-              <div 
-                key={index} 
-                className={`selected-chord-simple ${highlightedChord === chord ? 'highlighted' : ''}`}
-                onClick={() => addChordToProgression(chord)}
-                title={`Add ${chord} to current progression line`}
-              >
-                <InlineChordDisplay chord={chord} />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+
 
       {/* Scale Chords and Seventh Notes */}
       <div className="chord-selection-grid">
@@ -190,27 +173,45 @@ const ProgressionBuilder = ({ scaleData }) => {
                 ) : (
                   line.map((chord, chordIndex) => (
                     <div key={chordIndex} className="progression-chord-item">
-                      <ChordTooltip chord={chord}>
-                        <div 
-                          className="chord-display"
-                          onClick={() => {
-                            addToSelected(chord)
-                            setHighlightedChord(chord)
-                            // Clear highlight after 2 seconds
-                            setTimeout(() => setHighlightedChord(null), 2000)
-                          }}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          {chord}
+                      {showSelectedChords ? (
+                        <div className="chord-with-diagram">
+                          <div className="chord-diagram-inline">
+                            <InlineChordDisplay chord={chord} />
+                          </div>
+                          <div className="chord-text-small">{chord}</div>
+                          <button
+                            className="remove-chord-button inline-mode"
+                            onClick={() => removeChord(lineIndex, chordIndex)}
+                            title="Remove chord"
+                          >
+                            ×
+                          </button>
                         </div>
-                      </ChordTooltip>
-                      <button
-                        className="remove-chord-button"
-                        onClick={() => removeChord(lineIndex, chordIndex)}
-                        title="Remove chord"
-                      >
-                        ×
-                      </button>
+                      ) : (
+                        <>
+                          <ChordTooltip chord={chord}>
+                            <div 
+                              className="chord-display"
+                              onClick={() => {
+                                addToSelected(chord)
+                                setHighlightedChord(chord)
+                                // Clear highlight after 2 seconds
+                                setTimeout(() => setHighlightedChord(null), 2000)
+                              }}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              {chord}
+                            </div>
+                          </ChordTooltip>
+                          <button
+                            className="remove-chord-button"
+                            onClick={() => removeChord(lineIndex, chordIndex)}
+                            title="Remove chord"
+                          >
+                            ×
+                          </button>
+                        </>
+                      )}
                     </div>
                   ))
                 )}

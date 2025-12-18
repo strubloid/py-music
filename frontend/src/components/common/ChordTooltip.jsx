@@ -45,8 +45,8 @@ const ChordTooltip = ({
       return;
     }
     
-    // Add chord to panel
-    addChord(chord);
+    // Just show tooltip, don't add to selected chords
+    // addChord(chord); // REMOVED: No longer auto-add to selected chords
   
     // Get the chord element's position
     const rect = e.currentTarget.getBoundingClientRect();
