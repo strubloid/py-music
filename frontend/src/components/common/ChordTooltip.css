@@ -253,7 +253,7 @@
   border: 2px solid #1d4ed8;
 }
 
-@keyframes tooltipFadeIn {
+/* @keyframes tooltipFadeIn {
   from {
     opacity: 0;
     transform: translate(-50%, 0) scale(0.5);
@@ -262,4 +262,4 @@
     opacity: 1;
     transform: translate(-50%, -140%) scale(1);
   }
-}
+} */

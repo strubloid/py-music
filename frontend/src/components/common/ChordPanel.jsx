@@ -2,7 +2,7 @@ import React from 'react';
 import { X, Trash2, Music } from 'lucide-react';
 import { useChordPanel } from '../../contexts/ChordPanelContext';
 import { useChordDisplay } from '../../contexts/ChordDisplayContext';
-import musicConfig from '../../services/MusicDisplayConfig';
+import musicConfig from '../../services/MusicDisplayConfig.jsx';
 import './ChordPanel.css';
 
 const ChordPanel = () => {
