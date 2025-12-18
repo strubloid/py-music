@@ -307,20 +307,13 @@ def get_secondary_dominants(key):
         if interval_type not in INTERVALS:
             return jsonify({"error": f"Invalid interval type. Available: {list(INTERVALS.keys())}"}), 400
         
-        if llm:
-            music = Music(llm)
-            music.setTune(key.upper())
-            interval = INTERVALS[interval_type]()
-            music.setInterval(interval)
-            music.getNotesFromTune()
-            chords = music.getChords()
-            sevenths = music.getSeventhNoteToIt()
-        else:
-            music = SimplifiedMusic()
-            music.setTune(key.upper())
-            music.getNotesFromTune()
-            chords = music.getChords()
-            sevenths = music.getSeventhNoteToIt()
+        # Use SimplifiedMusic for consistent results regardless of LLM availability
+        music = SimplifiedMusic()
+        music.setTune(key.upper())
+        music.setInterval(interval_type)
+        music.getNotesFromTune()
+        chords = music.getChords()
+        sevenths = music.getSeventhNoteToIt()
         
         return jsonify({
             "key": key.upper(),

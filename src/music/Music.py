@@ -71,16 +71,81 @@ class Music:
             elif 'Major' in self.interval_obj.__class__.__name__:
                 interval_type = 'major'
 
-        ## loading the variable at music class level
-        self.notes = self.scaleTeacher.getNotesFromTune(self.tune, interval_type)
+        ## Use comprehensive scale definitions with proper enharmonic equivalents
+        self.notes = self._getScaleNotes(self.tune, interval_type)
 
         return self.notes
+    
+    def _getScaleNotes(self, tune: str, interval_type: str) -> list[str]:
+        """Get scale notes with comprehensive definitions and proper enharmonic equivalents"""
+        
+        # Define proper scales with sharps and flats for each key
+        major_scales = {
+            "C": ["C", "D", "E", "F", "G", "A", "B"],
+            "G": ["G", "A", "B", "C", "D", "E", "F#"],
+            "D": ["D", "E", "F#", "G", "A", "B", "C#"],
+            "A": ["A", "B", "C#", "D", "E", "F#", "G#"],
+            "E": ["E", "F#", "G#", "A", "B", "C#", "D#"],
+            "B": ["B", "C#", "D#", "E", "F#", "G#", "A#"],
+            "F#": ["F#", "G#", "A#", "B", "C#", "D#", "F"],
+            "C#": ["C#", "D#", "F", "F#", "G#", "A#", "C"],  # E#→F, B#→C
+            "F": ["F", "G", "A", "Bb", "C", "D", "E"],
+            "Bb": ["Bb", "C", "D", "Eb", "F", "G", "A"],
+            "Eb": ["Eb", "F", "G", "Ab", "Bb", "C", "D"],
+            "Ab": ["Ab", "Bb", "C", "Db", "Eb", "F", "G"],
+            "Db": ["Db", "Eb", "F", "Gb", "Ab", "Bb", "C"],
+            "Gb": ["Gb", "Ab", "Bb", "B", "Db", "Eb", "F"],  # Cb→B
+            # Sharp key variants using actual chromatic notes
+            "G#": ["G#", "A#", "C", "C#", "D#", "F", "F#"],  # B#→C, E#→F
+            "D#": ["D#", "F", "F#", "G#", "A#", "C", "C#"],  # E#→F, B#→C
+            "A#": ["A#", "C", "C#", "D#", "F", "F#", "G#"],  # B#→C, E#→F
+        }
+        
+        minor_scales = {
+            "C": ["C", "D", "D#", "F", "G", "G#", "A#"],  # Eb→D#, Ab→G#, Bb→A#
+            "G": ["G", "A", "A#", "C", "D", "D#", "F"],   # Bb→A#, Eb→D#
+            "D": ["D", "E", "F", "G", "A", "A#", "C"],    # Bb→A#
+            "A": ["A", "B", "C", "D", "E", "F", "G"],
+            "E": ["E", "F#", "G", "A", "B", "C", "D"],
+            "B": ["B", "C#", "D", "E", "F#", "G", "A"],
+            "F#": ["F#", "G#", "A", "B", "C#", "D", "E"],
+            "C#": ["C#", "D#", "E", "F#", "G#", "A", "B"],
+            "G#": ["G#", "A#", "B", "C#", "D#", "E", "F#"],
+            "D#": ["D#", "F", "F#", "G#", "A#", "B", "C#"],  # E#→F
+            "A#": ["A#", "C", "C#", "D#", "F", "F#", "G#"],  # B#→C, E#→F
+            "F": ["F", "G", "G#", "A#", "C", "C#", "D#"],    # Ab→G#, Bb→A#, Db→C#, Eb→D#
+            # Flat keys converted to sharp equivalents
+            "A#": ["A#", "C", "C#", "D#", "F", "F#", "G#"],  # Bb minor → A# minor
+            "D#": ["D#", "F", "F#", "G#", "A#", "B", "C#"],  # Eb minor → D# minor  
+            "G#": ["G#", "A#", "B", "C#", "D#", "E", "F#"],  # Ab minor → G# minor
+            "C#": ["C#", "D#", "E", "F#", "G#", "A", "B"],   # Db minor → C# minor
+            "F#": ["F#", "G#", "A", "B", "C#", "D", "E"]     # Gb minor → F# minor
+        }
+        
+        if interval_type == 'major':
+            return major_scales.get(tune, major_scales["C"])
+        else:  # minor
+            return minor_scales.get(tune, minor_scales["C"])
 
     ## Getting notes from scale
     def getChords(self) -> list[str]:
 
-        ## getting chords based on the notes we have
-        self.chords = self.chordsTeacher.getChords(self.notes)
+        ## Use improved chord generation based on scale degrees and interval type
+        if self.notes:
+            interval_type = 'major'  # default
+            if hasattr(self.interval_obj, '__class__'):
+                if 'Minor' in self.interval_obj.__class__.__name__:
+                    interval_type = 'minor'
+            
+            if interval_type == 'major':
+                chord_types = ['', 'm', 'm', '', '', 'm', 'dim']  # Major scale triads: I ii iii IV V vi vii°
+            else:  # minor (natural minor)
+                chord_types = ['m', 'dim', '', 'm', 'm', '', '']  # Natural minor triads: i ii° III iv v VI VII
+            
+            self.chords = [self.notes[i] + chord_types[i] for i in range(len(self.notes))]
+        else:
+            # Fallback to chordsTeacher if no notes available
+            self.chords = self.chordsTeacher.getChords(self.notes)
 
         return self.chords
     
@@ -139,19 +204,26 @@ class Music:
             else:
                 raise IndexError("Chord index out of range")
         
-        # Return all sevenths that go to each chord in the format expected by frontend
-        seventh_chords = []
-        for chord in self.chords:
-            dominant_seventh = self._getSeventhToNote(chord)
+        # Calculate secondary dominants using 3-steps-back rule in the actual scale
+        sevenths_and_targets = []
+        
+        # Generate secondary dominants for ALL scale degrees (I through vii)
+        for i, chord in enumerate(self.chords):
+            # Special case: vii° (diminished 7th degree) resolves to V chord
+            if i == 6:  # 7th degree (0-indexed)
+                dominant_index = 4  # V chord (5th degree, 0-indexed as 4)
+            else:
+                # Regular pattern: count 3 steps back in this scale
+                dominant_index = (i - 3 + 7) % 7  # Add 7 to handle negative indices
             
-            seventh_chords.append({
-                "seventh": dominant_seventh,
+            dominant_note = self.notes[dominant_index]
+            
+            sevenths_and_targets.append({
+                "seventh": f"{dominant_note}7",
                 "resolves_to": chord  # Use full chord name (Am, Bm, Em, F#dim)
             })
         
-        print (f"seventh_chords: {seventh_chords}")
-
-        return seventh_chords
+        return sevenths_and_targets
     
     # Add these methods to expand musical functionality
     def getChordProgressions(self) -> dict[str, list[str]]:
