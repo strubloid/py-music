@@ -6,8 +6,6 @@ import './ProgressionBuilder.css'
 
 const ProgressionBuilder = ({ scaleData }) => {
   const { 
-    selectedChords, 
-    addChord: addToSelected,
     progressionLines, 
     currentLine, 
     addChordToProgression, 
@@ -16,14 +14,13 @@ const ProgressionBuilder = ({ scaleData }) => {
     removeProgressionLine, 
     clearProgression, 
     setCurrentProgressionLine,
-    showSelectedChords
+    showChords
   } = useChordPanel()
   
-  const [highlightedChord, setHighlightedChord] = useState(null)
+
 
   const addChord = (chord) => {
     addChordToProgression(chord)
-    addToSelected(chord) // Also add to selected chords when adding to progression
   }
 
   const removeChord = (lineIndex, chordIndex) => {
@@ -92,8 +89,6 @@ const ProgressionBuilder = ({ scaleData }) => {
           </button>
         </div>
       </div>
-
-
 
       {/* Scale Chords and Seventh Notes */}
       <div className="chord-selection-grid">
@@ -173,7 +168,7 @@ const ProgressionBuilder = ({ scaleData }) => {
                 ) : (
                   line.map((chord, chordIndex) => (
                     <div key={chordIndex} className="progression-chord-item">
-                      {showSelectedChords ? (
+                      {showChords ? (
                         <div className="chord-with-diagram">
                           <div className="chord-diagram-inline">
                             <InlineChordDisplay chord={chord} />
@@ -190,16 +185,7 @@ const ProgressionBuilder = ({ scaleData }) => {
                       ) : (
                         <>
                           <ChordTooltip chord={chord}>
-                            <div 
-                              className="chord-display"
-                              onClick={() => {
-                                addToSelected(chord)
-                                setHighlightedChord(chord)
-                                // Clear highlight after 2 seconds
-                                setTimeout(() => setHighlightedChord(null), 2000)
-                              }}
-                              style={{ cursor: 'pointer' }}
-                            >
+                            <div className="chord-display">
                               {chord}
                             </div>
                           </ChordTooltip>

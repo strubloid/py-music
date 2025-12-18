@@ -11,33 +11,12 @@ export const useChordPanel = () => {
 };
 
 export const ChordPanelProvider = ({ children }) => {
-  const [selectedChords, setSelectedChords] = useState([]);
-  const [highlightedChord, setHighlightedChord] = useState(null);
-  
   // Progression state - persists across tab switches
   const [progressionLines, setProgressionLines] = useState([[]]);
   const [currentLine, setCurrentLine] = useState(0);
   
-  // Toggle for showing selected chords panel
-  const [showSelectedChords, setShowSelectedChords] = useState(false);
-
-  const addChord = (chord) => {
-    // Add chord to the array (allows duplicates for building progressions)
-    setSelectedChords(prev => [...prev, chord]);
-  };
-
-  const removeChord = (index) => {
-    setSelectedChords(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const clearChords = () => {
-    setSelectedChords([]);
-    setHighlightedChord(null);
-  };
-
-  const isHighlighted = (chordName) => {
-    return highlightedChord === chordName;
-  };
+  // Toggle for showing chord diagrams
+  const [showChords, setShowChords] = useState(false);
 
   // Progression methods
   const addChordToProgression = (chord) => {
@@ -79,17 +58,12 @@ export const ChordPanelProvider = ({ children }) => {
     setCurrentLine(lineIndex);
   };
 
-  const toggleSelectedChords = () => {
-    setShowSelectedChords(prev => !prev);
+  const toggleChords = () => {
+    setShowChords(prev => !prev);
   };
 
   return (
     <ChordPanelContext.Provider value={{
-      selectedChords,
-      addChord,
-      removeChord,
-      clearChords,
-      isHighlighted,
       // Progression state
       progressionLines,
       currentLine,
@@ -99,9 +73,9 @@ export const ChordPanelProvider = ({ children }) => {
       removeProgressionLine,
       clearProgression,
       setCurrentProgressionLine,
-      // Selected chords panel toggle
-      showSelectedChords,
-      toggleSelectedChords
+      // Chord display toggle
+      showChords,
+      toggleChords
     }}>
       {children}
     </ChordPanelContext.Provider>

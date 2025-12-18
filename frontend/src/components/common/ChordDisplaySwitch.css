@@ -81,3 +81,13 @@
 .switch-button:hover .switch-thumb {
   transform: scale(1.1);
 }
+
+.switch-thumb.chords-on {
+  left: 26px;
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.switch-thumb.chords-off {
+  left: 2px;
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+}

@@ -5,7 +5,7 @@ import { useChordPanel } from '../../contexts/ChordPanelContext'
 import './KeySelector.css'
 
 const KeySelector = ({ selectedKey, onKeyChange, selectedInterval, onIntervalChange, availableIntervals, loading }) => {
-  const { clearChords } = useChordPanel();
+;
   
   const keys = [
     'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'
@@ -17,12 +17,10 @@ const KeySelector = ({ selectedKey, onKeyChange, selectedInterval, onIntervalCha
   ]
   
   const handleKeyChange = (key) => {
-    clearChords(); // Clear selected chords when key changes
     onKeyChange(key);
   };
   
   const handleIntervalChange = (interval) => {
-    clearChords(); // Clear selected chords when interval changes
     onIntervalChange(interval);
   };
 
