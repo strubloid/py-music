@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useChordDisplay } from '../../contexts/ChordDisplayContext';
 import { useChordPanel } from '../../contexts/ChordPanelContext';
-import { useMagneticBorder } from '../../contexts/MagneticBorderContext';
 import musicConfig from '../../services/MusicDisplayConfig.jsx';
 import './ChordTooltip.css';
 
@@ -13,71 +12,8 @@ const ChordTooltip = ({
 }) => {
   const { displayMode } = useChordDisplay();
   const { addChord } = useChordPanel();
-  const { isMagneticEnabled } = useMagneticBorder();
 
-  // Magnetic snap function with detailed logging
-  const applyMagneticSnap = (x, y) => {
-    console.log('🧲 MAGNETIC SNAP - Input position:', x, y);
-    console.log('🧲 MAGNETIC SNAP - Magnetic enabled:', isMagneticEnabled);
-    
-    // When magnetic is disabled, return exact position without any constraints
-    if (!isMagneticEnabled) {
-      console.log('🧲 MAGNETIC SNAP - Magnetic disabled, returning original position');
-      return { x, y };
-    }
-    
-    const snapDistance = 20; // pixels
-    const tooltipWidth = 220; // approximate width
-    const tooltipHeight = 200; // approximate height
-    
-    let snappedX = x;
-    let snappedY = y;
-    let snapApplied = false;
-    
-    console.log('🧲 MAGNETIC SNAP - Snap distance:', snapDistance);
-    console.log('🧲 MAGNETIC SNAP - Tooltip dimensions:', tooltipWidth, 'x', tooltipHeight);
-    console.log('🧲 MAGNETIC SNAP - Window size:', window.innerWidth, 'x', window.innerHeight);
-    
-    // Snap to left edge
-    const leftEdgeDistance = x - tooltipWidth / 2;
-    if (leftEdgeDistance < snapDistance) {
-      snappedX = tooltipWidth / 2 + 10;
-      snapApplied = true;
-      console.log('🧲 MAGNETIC SNAP - LEFT EDGE SNAP:', leftEdgeDistance, '< snap distance, new X:', snappedX);
-    }
-    // Snap to right edge  
-    else {
-      const rightEdgeDistance = window.innerWidth - (x + tooltipWidth / 2);
-      if (rightEdgeDistance < snapDistance) {
-        snappedX = window.innerWidth - tooltipWidth / 2 - 10;
-        snapApplied = true;
-        console.log('🧲 MAGNETIC SNAP - RIGHT EDGE SNAP:', rightEdgeDistance, '< snap distance, new X:', snappedX);
-      }
-    }
-    
-    // Snap to top edge
-    if (y < snapDistance) {
-      snappedY = 10;
-      snapApplied = true;
-      console.log('🧲 MAGNETIC SNAP - TOP EDGE SNAP:', y, '< snap distance, new Y:', snappedY);
-    }
-    // Snap to bottom edge
-    else {
-      const bottomEdgeDistance = window.innerHeight - (y + tooltipHeight);
-      if (bottomEdgeDistance < snapDistance) {
-        snappedY = window.innerHeight - tooltipHeight - 10;
-        snapApplied = true;
-        console.log('🧲 MAGNETIC SNAP - BOTTOM EDGE SNAP:', bottomEdgeDistance, '< snap distance, new Y:', snappedY);
-      }
-    }
-    
-    if (!snapApplied) {
-      console.log('🧲 MAGNETIC SNAP - No snapping applied, position unchanged');
-    }
-    
-    console.log('🧲 MAGNETIC SNAP - Output position:', snappedX, snappedY);
-    return { x: snappedX, y: snappedY };
-  };
+
   const [isVisible, setIsVisible] = useState(false);
   const [isPersistent, setIsPersistent] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -119,19 +55,11 @@ const ChordTooltip = ({
     // Position tooltip consistently relative to the element, not the click point
     // Use element's horizontal center and position above the element
     let initialX = rect.left + (rect.width / 2); // Center of the element horizontally
-    let initialY = rect.top/2 - 140; // Position above the element with 20px gap
-    
-    console.log('🎯 DEBUG - Using element-relative positioning:', { x: initialX, y: initialY });
-    
-    // When magnetic is enabled, apply magnetic snapping to the initial position
-    if (isMagneticEnabled) {
-      const snappedPos = applyMagneticSnap(initialX, initialY);
-      initialX = snappedPos.x;
-      initialY = snappedPos.y;
-    }
-    
-    console.log('🎯 CLICK - Mouse position:', {x: initialX,y: initialY});
+    let initialY = rect.top/2 - 140; // Rule for the base showing
 
+    
+
+    
     // setting initial position
     setPosition({
       x: initialX,
@@ -154,14 +82,11 @@ const ChordTooltip = ({
       e.preventDefault();
       e.stopPropagation();
       
-      // Since position.x/y represent the CENTER point (due to transform: translate(-50%, 0))
-      // Calculate offset from current center position to mouse
       const offset = {
         x: e.clientX - position.x,
         y: e.clientY - position.y
       };
       
-      console.log("drag offset:", offset);
       setDragOffset(offset);
       setIsDragging(true);
     }
@@ -169,24 +94,8 @@ const ChordTooltip = ({
 
 
 
-// Magnetic drag handler - with snapping to edges
-  const handleMagneticDrag = (e) => {
-    e.preventDefault();
-    
-    // Calculate new center position (since position.x represents the center due to CSS transform)
-    const newPos = {
-      x: e.clientX - dragOffset.x,
-      y: e.clientY - dragOffset.y
-    };
-    
-    // magnetic rule 
-    const snappedPos = applyMagneticSnap(newPos.x, newPos.y);
-    console.log("set position to:", snappedPos);
-    setPosition(snappedPos);
-  };
-
-  // Free drag handler - no constraints, exact mouse following
-  const handleFreeDrag = (e) => {
+  // Drag handler - free movement
+  const handleDrag = (e) => {
     e.preventDefault();
 
     // Calculate new center position (since position.x represents the center due to CSS transform)
@@ -195,7 +104,7 @@ const ChordTooltip = ({
       y: e.clientY - dragOffset.y
     };
     
-    console.log("[Freedrag] set position to:", newPos);
+    console.log("🎯 DRAG - Set position to:", newPos);
     setPosition(newPos);
   };
 
@@ -218,8 +127,8 @@ const ChordTooltip = ({
   useEffect(() => {
     if (isDragging) {
 
-      // Choose the appropriate drag handler based on magnetic mode
-      const handleGlobalMouseMove = isMagneticEnabled ? handleMagneticDrag : handleFreeDrag;
+      // Use single drag handler
+      const handleGlobalMouseMove = handleDrag;
 
       // adding the mouse move listener
       document.addEventListener('mousemove', handleGlobalMouseMove, { passive: false });
@@ -235,7 +144,7 @@ const ChordTooltip = ({
         document.body.style.cursor = '';
       };
     }
-  }, [isDragging, dragOffset.x, dragOffset.y, isMagneticEnabled, position]);
+  }, [isDragging, dragOffset.x, dragOffset.y, position]);
 
   // Generate chord diagram based on type
   const renderChordDiagram = () => {
@@ -382,6 +291,8 @@ const ChordTooltip = ({
           {renderChordDiagram()}
         </div>
       )}
+      
+
     </span>
   );
 };

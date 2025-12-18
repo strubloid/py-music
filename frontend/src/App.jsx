@@ -13,8 +13,6 @@ import ChordDisplaySwitch from './components/common/ChordDisplaySwitch'
 import ChordPanel from './components/common/ChordPanel'
 import { ChordDisplayProvider } from './contexts/ChordDisplayContext'
 import { ChordPanelProvider } from './contexts/ChordPanelContext'
-import { MagneticBorderProvider } from './contexts/MagneticBorderContext'
-import MagneticToggle from './components/common/MagneticToggle'
 
 
 
@@ -87,7 +85,6 @@ function App() {
 
   return (
     <ChordDisplayProvider>
-        <MagneticBorderProvider>
           <ChordPanelProvider>
         <div className="app-container">
         <div className="main-content">
@@ -100,7 +97,6 @@ function App() {
               </h1>
               <div className="header-controls">
                 <ChordDisplaySwitch className="chord-switch" />
-                <MagneticToggle />
               </div>
             </div>
             <p className="header-subtitle">
@@ -245,7 +241,6 @@ function App() {
     </div>
     <ChordPanel />
           </ChordPanelProvider>
-        </MagneticBorderProvider>
       </ChordDisplayProvider>
   )
 }
