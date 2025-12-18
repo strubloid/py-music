@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 
 import ProgressionBuilder from './ProgressionBuilder'
+import MusicProduction from './MusicProduction'
 import './BottomPanel.css'
 
 const BottomPanel = ({ scaleData }) => {
@@ -26,7 +27,8 @@ const BottomPanel = ({ scaleData }) => {
     if (!isDragging) return
     
     const deltaY = dragStartY.current - e.clientY
-    const newHeight = Math.min(Math.max(startHeight.current + deltaY, 200), window.innerHeight * 0.8)
+    const maxHeight = window.innerHeight * 0.85 // Leave space for main content
+    const newHeight = Math.min(Math.max(startHeight.current + deltaY, 200), maxHeight)
     setPanelHeight(newHeight)
   }
 
@@ -85,12 +87,22 @@ const BottomPanel = ({ scaleData }) => {
           <span className="button-icon">🎼</span>
           <span className="button-text">Building Progressions</span>
         </button>
+        
+        <button
+          className={`bottom-button ${activePanel === 'production' ? 'active' : ''}`}
+          onClick={() => togglePanel('production')}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <span className="button-icon">🎧</span>
+          <span className="button-text">Music Production</span>
+        </button>
       </div>
 
       {/* Panel Content */}
       {activePanel && (
         <div className="bottom-panel-content">
           {activePanel === 'progression' && <ProgressionBuilder scaleData={scaleData} />}
+          {activePanel === 'production' && <MusicProduction />}
         </div>
       )}
     </div>
