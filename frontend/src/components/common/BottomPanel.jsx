@@ -1,0 +1,52 @@
+import React, { useState } from 'react'
+import { useChordPanel } from '../../contexts/ChordPanelContext'
+import SelectedChords from './SelectedChords'
+import ProgressionBuilder from './ProgressionBuilder'
+import './BottomPanel.css'
+
+const BottomPanel = ({ scaleData }) => {
+  const [activePanel, setActivePanel] = useState(null)
+  const { selectedChords } = useChordPanel()
+
+  const togglePanel = (panelType) => {
+    setActivePanel(activePanel === panelType ? null : panelType)
+  }
+
+  return (
+    <div className="bottom-panel">
+      {/* Bottom Controls */}
+      <div className="bottom-controls">
+        <button
+          className={`bottom-button ${activePanel === 'selected' ? 'active' : ''}`}
+          onClick={() => togglePanel('selected')}
+        >
+          <span className="button-icon">🎵</span>
+          <span className="button-text">
+            Selected Chords
+            {selectedChords.length > 0 && (
+              <span className="chord-count">({selectedChords.length})</span>
+            )}
+          </span>
+        </button>
+
+        <button
+          className={`bottom-button ${activePanel === 'progression' ? 'active' : ''}`}
+          onClick={() => togglePanel('progression')}
+        >
+          <span className="button-icon">🎼</span>
+          <span className="button-text">Building Progressions</span>
+        </button>
+      </div>
+
+      {/* Panel Content */}
+      {activePanel && (
+        <div className="bottom-panel-content">
+          {activePanel === 'selected' && <SelectedChords />}
+          {activePanel === 'progression' && <ProgressionBuilder scaleData={scaleData} />}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default BottomPanel

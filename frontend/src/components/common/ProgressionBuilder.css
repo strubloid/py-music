@@ -1,0 +1,374 @@
+/* Progression Builder Panel Styles */
+.progression-builder-panel {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.panel-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.export-button {
+  padding: 0.5rem 1rem;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.export-button:hover {
+  background: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.clear-button {
+  padding: 0.5rem 1rem;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.clear-button:hover {
+  background: #ff5252;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+/* Section Styles */
+.quick-chords-section,
+.progression-section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #555;
+  margin: 0 0 1rem 0;
+}
+
+/* Quick Chords */
+.quick-chords-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.75rem;
+}
+
+.quick-chord-button {
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.quick-chord-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.quick-chord-button.selected {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.quick-chord-button.selected:hover {
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.selected-chords-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.seventh-notes-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 193, 7, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+.seventh-chord-button {
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.seventh-chord-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Progression Header */
+.progression-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.add-line-button {
+  padding: 0.5rem 1rem;
+  background: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.add-line-button:hover {
+  background: #1976d2;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+/* Progression Lines */
+.progression-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.progression-line {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1rem;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.progression-line.active {
+  background: #e3f2fd;
+  border-color: #2196f3;
+  box-shadow: 0 2px 12px rgba(33, 150, 243, 0.2);
+}
+
+.line-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.line-number {
+  font-weight: 600;
+  color: #555;
+  min-width: 60px;
+}
+
+.line-select-button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #2196f3;
+  background: white;
+  color: #2196f3;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.line-select-button:hover {
+  background: #2196f3;
+  color: white;
+}
+
+.progression-line.active .line-select-button {
+  background: #2196f3;
+  color: white;
+}
+
+.remove-line-button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: #ff6b6b;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+  transition: all 0.2s ease;
+  margin-left: auto;
+}
+
+.remove-line-button:hover {
+  background: #ff5252;
+  transform: scale(1.1);
+}
+
+/* Line Chords */
+.line-chords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  min-height: 3rem;
+  align-items: center;
+}
+
+.empty-line {
+  color: #999;
+  font-style: italic;
+  flex: 1;
+  text-align: center;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  border: 2px dashed #ddd;
+}
+
+.progression-chord-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.progression-chord-item .chord-display {
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  min-width: 60px;
+  text-align: center;
+}
+
+.progression-chord-item .chord-display:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.progression-chord-item .remove-chord-button {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  line-height: 1;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.progression-chord-item .remove-chord-button:hover {
+  background: #ff5252;
+  transform: scale(1.1);
+}
+
+/* Progression Info */
+.progression-info {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  margin-top: 1rem;
+}
+
+.progression-stats {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .progression-builder-panel {
+    padding: 1rem;
+  }
+
+  .panel-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .progression-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .quick-chords-grid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .line-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .line-chords {
+    gap: 0.5rem;
+  }
+
+  .progression-chord-item .chord-display {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}

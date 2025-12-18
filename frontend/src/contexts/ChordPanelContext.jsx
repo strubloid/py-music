@@ -15,28 +15,15 @@ export const ChordPanelProvider = ({ children }) => {
   const [highlightedChord, setHighlightedChord] = useState(null);
 
   const addChord = (chord) => {
-    const existingIndex = selectedChords.findIndex(c => c.name === chord);
-    
-    if (existingIndex !== -1) {
-      // Chord already exists, highlight it
-      setHighlightedChord(chord);
-      setTimeout(() => setHighlightedChord(null), 1500); // Remove highlight after 1.5s
-    } else {
-      // Add new chord
-      const newChord = {
-        id: Date.now() + Math.random(),
-        name: chord,
-        addedAt: new Date()
-      };
-      setSelectedChords(prev => [...prev, newChord]);
-    }
+    // Add chord to the array (allows duplicates for building progressions)
+    setSelectedChords(prev => [...prev, chord]);
   };
 
-  const removeChord = (chordId) => {
-    setSelectedChords(prev => prev.filter(c => c.id !== chordId));
+  const removeChord = (index) => {
+    setSelectedChords(prev => prev.filter((_, i) => i !== index));
   };
 
-  const clearAll = () => {
+  const clearChords = () => {
     setSelectedChords([]);
     setHighlightedChord(null);
   };
@@ -50,7 +37,7 @@ export const ChordPanelProvider = ({ children }) => {
       selectedChords,
       addChord,
       removeChord,
-      clearAll,
+      clearChords,
       isHighlighted
     }}>
       {children}

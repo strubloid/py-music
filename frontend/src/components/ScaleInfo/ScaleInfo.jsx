@@ -1,10 +1,16 @@
 import React from 'react'
 import Card from '../common/Card'
 import ChordTooltip from '../common/ChordTooltip'
+import { useChordPanel } from '../../contexts/ChordPanelContext'
 import './ScaleInfo.css'
 
 const ScaleInfo = ({ scaleData }) => {
-  const { scale_name, notes, scale_degrees, chords } = scaleData
+  const { scale_name, notes, scale_degrees, chords, chord_sevenths } = scaleData
+  const { selectedChords, addChord } = useChordPanel()
+
+  const handleSeventhChordClick = (chord) => {
+    addChord(chord)
+  }
 
   return (
     <div className="scale-info-container">
@@ -25,6 +31,23 @@ const ScaleInfo = ({ scaleData }) => {
               </div>
             ))}
           </div>
+        </div>
+      </Card>
+
+      {/* Seventh Chords Section */}
+      <Card title="Seventh Notes" className="seventh-chords-section">
+        <div className="seventh-chords-display">
+          {chord_sevenths && chord_sevenths.map((seventhData, index) => (
+            <div 
+              key={index} 
+              className={`seventh-chord-button ${selectedChords.includes(seventhData.seventh) ? 'selected' : ''}`}
+              onClick={() => handleSeventhChordClick(seventhData.seventh)}
+            >
+              <ChordTooltip chord={seventhData.seventh}>
+                <span>{seventhData.seventh}</span>
+              </ChordTooltip>
+            </div>
+          ))}
         </div>
       </Card>
     </div>

@@ -6,7 +6,7 @@ import musicConfig from '../../services/MusicDisplayConfig.jsx';
 import './ChordPanel.css';
 
 const ChordPanel = () => {
-  const { selectedChords, removeChord, clearAll, isHighlighted } = useChordPanel();
+  const { selectedChords, removeChord, clearChords, isHighlighted } = useChordPanel();
   const { displayMode } = useChordDisplay();
 
   // Render inline chord diagram
@@ -130,7 +130,7 @@ const ChordPanel = () => {
           <Music size={20} />
           <h3>Selected Chords ({selectedChords.length})</h3>
         </div>
-        <button className="clear-all-btn" onClick={clearAll} title="Clear all chords">
+        <button className="clear-all-btn" onClick={clearChords} title="Clear all chords">
           <Trash2 size={16} />
           Clear All
         </button>

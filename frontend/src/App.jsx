@@ -10,7 +10,7 @@ import GuitarFretboard from './components/GuitarFretboard/GuitarFretboard'
 import SecondaryDominants from './components/SecondaryDominants/SecondaryDominants'
 import Info from './components/common/Info'
 import ChordDisplaySwitch from './components/common/ChordDisplaySwitch'
-import ChordPanel from './components/common/ChordPanel'
+import BottomPanel from './components/common/BottomPanel'
 import { ChordDisplayProvider } from './contexts/ChordDisplayContext'
 import { ChordPanelProvider } from './contexts/ChordPanelContext'
 
@@ -89,11 +89,11 @@ function App() {
 
   return (
     <ChordDisplayProvider>
-          <ChordPanelProvider>
+      <ChordPanelProvider>
         <div className="app-container">
-        <div className="main-content">
-          {/* Header */}
-          <header className="app-header">
+          <div className="main-content">
+            {/* Header */}
+            <header className="app-header">
             <div className="header-title-container">
               <Music className="header-icon" />
               <h1 className="header-title">
@@ -241,11 +241,11 @@ function App() {
             </div>
           </>
         )}
-      </div>
-    </div>
-    <ChordPanel />
-          </ChordPanelProvider>
-      </ChordDisplayProvider>
+          </div>
+        </div>
+        <BottomPanel scaleData={scaleData} />
+      </ChordPanelProvider>
+    </ChordDisplayProvider>
   )
 }
 

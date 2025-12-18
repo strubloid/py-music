@@ -152,6 +152,54 @@
   border: 1px solid rgba(163, 230, 53, 0.3);
 }
 
+/* Seventh Chords Section */
+.seventh-chords-section {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.seventh-chords-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.seventh-chord-button {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #1f2937;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.seventh-chord-button:hover {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-color: rgba(251, 191, 36, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+.seventh-chord-button.selected {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+
+.seventh-chord-button.selected:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .scale-content {
@@ -170,5 +218,14 @@
   .note-badge {
     padding: 0.375rem 0.75rem;
     font-size: 1rem;
+  }
+  
+  .seventh-chords-display {
+    gap: 0.5rem;
+  }
+  
+  .seventh-chord-button {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.9rem;
   }
 }
