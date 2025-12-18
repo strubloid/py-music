@@ -150,8 +150,13 @@ class SimplifiedMusic:
             
             # Generate secondary dominants for ALL scale degrees (I through vii)
             for i, chord in enumerate(self.chords):
-                # Count 3 steps back in this scale: current → -1 → -2 → -3
-                dominant_index = (i - 3) % 7
+                # Special case: vii° (diminished 7th degree) resolves to V chord
+                if i == 6:  # 7th degree (0-indexed)
+                    dominant_index = 4  # V chord (5th degree, 0-indexed as 4)
+                else:
+                    # Regular pattern: count 3 steps back in this scale
+                    dominant_index = (i - 3 + 7) % 7  # Add 7 to handle negative indices
+                
                 dominant_note = self.notes[dominant_index]
                 
                 sevenths_and_targets.append({
