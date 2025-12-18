@@ -14,13 +14,18 @@ const MusicProduction = () => {
   const [musicLines, setMusicLines] = useState([])
   const [dragState, setDragState] = useState(null)
 
-  // Cleanup event listeners on unmount
+  // Refs to avoid stale closures
+  const dragStateRef = React.useRef(null)
+  const musicLinesRef = React.useRef(musicLines)
+  
+  // Keep refs updated
   useEffect(() => {
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [])
+    dragStateRef.current = dragState
+  }, [dragState])
+  
+  useEffect(() => {
+    musicLinesRef.current = musicLines
+  }, [musicLines])
 
   // Cache functions
   const saveLyricsToCache = (lines) => {
@@ -122,72 +127,131 @@ const MusicProduction = () => {
   }
 
   const updateChordPosition = (lineId, chordIndex, x) => {
+    console.log('💾 updateChordPosition called:', { lineId, chordIndex, x })
     // Update the chord position in state and cache
     const updatedLines = musicLines.map(line => {
       if (line.id === lineId) {
         const chordPositions = { ...line.chordPositions }
         chordPositions[chordIndex] = x // Store exact position
+        console.log('💾 Updated chord positions for line:', line.id, chordPositions)
         return { ...line, chordPositions }
       }
       return line
     })
     setMusicLines(updatedLines)
     saveLyricsToCache(updatedLines)
+    console.log('✅ Position saved and cached')
   }
 
-  const handleMouseMove = React.useCallback((e) => {
-    if (!dragState || !dragState.isDragging) return
+  const handleMouseMove = (e) => {
+    const currentDragState = dragStateRef.current
+    console.log('🖱️ Mouse move:', { mouseX: e.clientX, hasDragState: !!currentDragState })
     
-    const container = document.querySelector(`[data-line-id="${dragState.lineId}"] .chord-text-container`)
-    if (!container) return
+    if (!currentDragState || !currentDragState.isDragging) {
+      console.log('❌ No drag state or not dragging')
+      return
+    }
+    
+    e.preventDefault()
+    e.stopPropagation()
+    
+    // Use stored container reference
+    const container = currentDragState.container
+    if (!container) {
+      console.log('❌ No container in drag state')
+      return
+    }
     
     const rect = container.getBoundingClientRect()
     const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width - 60))
+    console.log('🎯 Calculated position:', { x, containerWidth: rect.width, mouseRelative: e.clientX - rect.left })
     
-    // Update position immediately for fluid dragging
-    const chord = document.querySelector(`[data-line-id="${dragState.lineId}"] .draggable-chord:nth-child(${dragState.chordIndex + 1})`)
-    if (chord) {
-      chord.style.left = `${x}px`
-      chord.style.transform = 'translateY(-1px) scale(1.05)' // Visual feedback
+    // Update position immediately using the stored element reference
+    if (currentDragState.element) {
+      currentDragState.element.style.left = `${x}px`
+      currentDragState.element.style.transform = 'translateY(-1px) scale(1.05)'
+      currentDragState.element.style.zIndex = '1000'
+      console.log('✅ Element position updated to:', x)
+    } else {
+      console.log('❌ No element reference in drag state')
     }
-  }, [dragState])
+  }
 
-  const handleMouseUp = React.useCallback((e) => {
-    if (!dragState || !dragState.isDragging) return
+  const handleMouseUp = (e) => {
+    const currentDragState = dragStateRef.current
+    console.log('🔚 Drag ended:', { mouseX: e.clientX, hasDragState: !!currentDragState })
     
-    const container = document.querySelector(`[data-line-id="${dragState.lineId}"] .chord-text-container`)
+    if (!currentDragState || !currentDragState.isDragging) {
+      console.log('❌ No drag state on mouse up')
+      return
+    }
+    
+    e.preventDefault()
+    e.stopPropagation()
+    
+    // Use stored container reference
+    const container = currentDragState.container
     if (container) {
       const rect = container.getBoundingClientRect()
       const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width - 60))
-      updateChordPosition(dragState.lineId, dragState.chordIndex, x)
+      console.log('💾 Saving final position:', x)
+      updateChordPosition(currentDragState.lineId, currentDragState.chordIndex, x)
+    } else {
+      console.log('❌ No container in drag state on mouse up')
     }
     
-    // Reset visual feedback
-    const chord = document.querySelector(`[data-line-id="${dragState.lineId}"] .draggable-chord:nth-child(${dragState.chordIndex + 1})`)
-    if (chord) {
-      chord.style.transform = ''
+    // Reset visual feedback using the stored element reference
+    if (currentDragState.element) {
+      currentDragState.element.style.cursor = 'grab'
+      currentDragState.element.style.transform = ''
+      currentDragState.element.style.zIndex = ''
+      console.log('✅ Visual feedback reset')
     }
     
     setDragState(null)
+    dragStateRef.current = null
     document.removeEventListener('mousemove', handleMouseMove)
     document.removeEventListener('mouseup', handleMouseUp)
-  }, [dragState, updateChordPosition])
+    console.log('🧹 Drag cleanup completed')
+  }
 
   const handleChordMouseDown = (e, lineId, chordIndex) => {
+    console.log('🎵 Drag started:', { lineId, chordIndex, target: e.target })
     e.preventDefault()
-    const rect = e.target.closest('.chord-text-container').getBoundingClientRect()
+    e.stopPropagation()
+    
+    const container = e.target.closest('.chord-text-container')
+    if (!container) {
+      console.log('❌ Container not found')
+      return
+    }
+    
+    console.log('✅ Container found:', container)
+    const rect = container.getBoundingClientRect()
     const startX = e.clientX - rect.left
     
-    setDragState({
+    const newDragState = {
       lineId,
       chordIndex,
       startX,
-      isDragging: true
-    })
+      isDragging: true,
+      element: e.target, // Store reference to the dragged element
+      container: container // Store container reference
+    }
+    
+    console.log('🎵 New drag state:', newDragState)
+    setDragState(newDragState)
+    dragStateRef.current = newDragState // Update ref immediately
+    
+    // Add visual feedback immediately
+    e.target.style.cursor = 'grabbing'
+    e.target.style.transform = 'translateY(-1px) scale(1.05)'
+    e.target.style.zIndex = '1000'
     
     // Add event listeners for mouse move and up
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    document.addEventListener('mousemove', handleMouseMove, { passive: false })
+    document.addEventListener('mouseup', handleMouseUp, { passive: false })
+    console.log('🎵 Event listeners added')
   }
 
   const updateChord = (lineId, chordIndex, chord) => {
@@ -363,18 +427,7 @@ const MusicProduction = () => {
         <div className="editor-container">
           {musicLines && musicLines.length > 0 ? musicLines.map((line, lineIndex) => (
             <div key={line.id} className="music-line-card">
-              <div className="card-glow"></div>
-              {/* <div className="line-header">
-                {musicLines.length > 1 && (
-                  <button
-                    className="remove-line-btn"
-                    onClick={() => removeMusicLine(line.id)}
-                  >
-                    ×
-                  </button>
-                )}
-              </div> */}
-            
+              <div className="card-glow"></div>            
             <div className="chord-text-container" data-line-id={line.id}>
               {/* Draggable Chords Layer */}
               <div className="chords-layer">
@@ -392,12 +445,6 @@ const MusicProduction = () => {
                     {chord}
                   </div>
                 ))}
-                {/* <button
-                  className="add-chord-btn"
-                  onClick={() => addChord(line.id)}
-                >
-                  +
-                </button> */}
               </div>
               
               {/* Lyrics Input Line */}
