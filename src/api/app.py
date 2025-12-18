@@ -86,13 +86,18 @@ class SimplifiedMusic:
             "A": ["A", "B", "C#", "D", "E", "F#", "G#"],
             "E": ["E", "F#", "G#", "A", "B", "C#", "D#"],
             "B": ["B", "C#", "D#", "E", "F#", "G#", "A#"],
-            "F#": ["F#", "G#", "A#", "B", "C#", "D#", "E#"],
+            "F#": ["F#", "G#", "A#", "B", "C#", "D#", "F"],
+            "C#": ["C#", "D#", "F", "F#", "G#", "A#", "C"],  # E#→F, B#→C
             "F": ["F", "G", "A", "Bb", "C", "D", "E"],
             "Bb": ["Bb", "C", "D", "Eb", "F", "G", "A"],
             "Eb": ["Eb", "F", "G", "Ab", "Bb", "C", "D"],
             "Ab": ["Ab", "Bb", "C", "Db", "Eb", "F", "G"],
             "Db": ["Db", "Eb", "F", "Gb", "Ab", "Bb", "C"],
-            "Gb": ["Gb", "Ab", "Bb", "Cb", "Db", "Eb", "F"]
+            "Gb": ["Gb", "Ab", "Bb", "B", "Db", "Eb", "F"],  # Cb→B
+            # Sharp key variants using actual chromatic notes
+            "G#": ["G#", "A#", "C", "C#", "D#", "F", "F#"],  # B#→C, E#→F
+            "D#": ["D#", "F", "F#", "G#", "A#", "C", "C#"],  # E#→F, B#→C
+            "A#": ["A#", "C", "C#", "D#", "F", "F#", "G#"],  # B#→C, E#→F
         }
         
         minor_scales = {
@@ -103,12 +108,16 @@ class SimplifiedMusic:
             "E": ["E", "F#", "G", "A", "B", "C", "D"],
             "B": ["B", "C#", "D", "E", "F#", "G", "A"],
             "F#": ["F#", "G#", "A", "B", "C#", "D", "E"],
+            "C#": ["C#", "D#", "E", "F#", "G#", "A", "B"],
+            "G#": ["G#", "A#", "B", "C#", "D#", "E", "F#"],
+            "D#": ["D#", "F", "F#", "G#", "A#", "B", "C#"],  # E#→F
+            "A#": ["A#", "C", "C#", "D#", "F", "F#", "G#"],  # B#→C, E#→F
             "F": ["F", "G", "Ab", "Bb", "C", "Db", "Eb"],
             "Bb": ["Bb", "C", "Db", "Eb", "F", "Gb", "Ab"],
-            "Eb": ["Eb", "F", "Gb", "Ab", "Bb", "Cb", "Db"],
-            "Ab": ["Ab", "Bb", "Cb", "Db", "Eb", "Fb", "Gb"],
-            "Db": ["Db", "Eb", "Fb", "Gb", "Ab", "Bbb", "Cb"],
-            "Gb": ["Gb", "Ab", "Bbb", "Cb", "Db", "Ebb", "Fb"]
+            "Eb": ["Eb", "F", "Gb", "Ab", "Bb", "B", "Db"],  # Cb→B
+            "Ab": ["Ab", "Bb", "B", "Db", "Eb", "E", "Gb"],  # Cb→B, Fb→E
+            "Db": ["Db", "Eb", "E", "Gb", "Ab", "A", "B"],   # Fb→E, Bbb→A, Cb→B
+            "Gb": ["Gb", "Ab", "A", "B", "Db", "D", "E"]     # Bbb→A, Cb→B, Ebb→D, Fb→E
         }
         
         if self.interval_type == 'major':

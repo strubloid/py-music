@@ -56,8 +56,9 @@ function App() {
       setLoading(true)
       setError(null)
 
-      // Fetch scale data from backend API
-      const response = await axios.get(`/api/scale/${key}?interval=${interval}`)
+      // Fetch scale data from backend API - encode the key to handle sharp symbols
+      const encodedKey = encodeURIComponent(key)
+      const response = await axios.get(`/api/scale/${encodedKey}?interval=${interval}`)
       setScaleData(response.data)
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch scale data')
