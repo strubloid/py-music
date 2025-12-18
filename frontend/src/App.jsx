@@ -50,10 +50,13 @@ function App() {
     }
   }
 
+  // This function fetches scale data based on selected key and interval
   const fetchScaleData = async (key, interval) => {
     try {
       setLoading(true)
       setError(null)
+
+      // Fetch scale data from backend API
       const response = await axios.get(`/api/scale/${key}?interval=${interval}`)
       setScaleData(response.data)
     } catch (err) {
@@ -172,9 +175,9 @@ function App() {
                 const romanNumerals = ["I", "ii", "iii", "IV", "V", "vi", "vii°"]
                 return (
                   <div key={index} className="dominant-item-floating">
-                    <div className="dominant-source">{item.resolves_from}</div>
+                    <div className="dominant-source">{item.seventh}</div>
                     <div className="dominant-arrow">→</div>
-                    <div className="dominant-target">{item.chord}</div>
+                    <div className="dominant-target">{item.resolves_to}</div>
                   </div>
                 )
               })}

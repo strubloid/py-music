@@ -20,13 +20,19 @@ CORS(app)  # Enable CORS for all routes
 
 # Initialize the music system like in main.py
 llm = None
+music_system = None
 try:
     print("🔄 Initializing LLM...")
     llm = ChatGPT()
     print("✅ LLM initialized successfully")
+    # Initialize the main music system with LLM
+    music_system = Music(llm)
+    print("✅ Music system initialized with LLM")
 except Exception as e:
     print(f"⚠️  LLM initialization failed: {e}. Using simplified mode.")
     llm = None
+    music_system = None
+
 
 # Available interval types
 INTERVALS = {
@@ -34,6 +40,7 @@ INTERVALS = {
     'minor': MinorInterval
 }
 
+## this function helps get roman numerals and functions
 def get_roman_numeral(degree, interval_type):
     """Get Roman numeral based on degree and interval type"""
     if interval_type == 'major':
@@ -71,15 +78,43 @@ class SimplifiedMusic:
         return self
     
     def getNotesFromTune(self):
-        # Generate scale based on interval type
-        chromatic = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-        if self.tune in chromatic:
-            start_index = chromatic.index(self.tune)
-            if self.interval_type == 'major':
-                scale_intervals = [0, 2, 4, 5, 7, 9, 11]  # Major scale intervals (W-W-H-W-W-W-H)
-            else:  # minor (natural minor)
-                scale_intervals = [0, 2, 3, 5, 7, 8, 10]  # Natural minor scale intervals (W-H-W-W-H-W-W)
-            self.notes = [chromatic[(start_index + interval) % 12] for interval in scale_intervals]
+        # Define proper scales with sharps and flats for each key
+        major_scales = {
+            "C": ["C", "D", "E", "F", "G", "A", "B"],
+            "G": ["G", "A", "B", "C", "D", "E", "F#"],
+            "D": ["D", "E", "F#", "G", "A", "B", "C#"],
+            "A": ["A", "B", "C#", "D", "E", "F#", "G#"],
+            "E": ["E", "F#", "G#", "A", "B", "C#", "D#"],
+            "B": ["B", "C#", "D#", "E", "F#", "G#", "A#"],
+            "F#": ["F#", "G#", "A#", "B", "C#", "D#", "E#"],
+            "F": ["F", "G", "A", "Bb", "C", "D", "E"],
+            "Bb": ["Bb", "C", "D", "Eb", "F", "G", "A"],
+            "Eb": ["Eb", "F", "G", "Ab", "Bb", "C", "D"],
+            "Ab": ["Ab", "Bb", "C", "Db", "Eb", "F", "G"],
+            "Db": ["Db", "Eb", "F", "Gb", "Ab", "Bb", "C"],
+            "Gb": ["Gb", "Ab", "Bb", "Cb", "Db", "Eb", "F"]
+        }
+        
+        minor_scales = {
+            "C": ["C", "D", "Eb", "F", "G", "Ab", "Bb"],
+            "G": ["G", "A", "Bb", "C", "D", "Eb", "F"],
+            "D": ["D", "E", "F", "G", "A", "Bb", "C"],
+            "A": ["A", "B", "C", "D", "E", "F", "G"],
+            "E": ["E", "F#", "G", "A", "B", "C", "D"],
+            "B": ["B", "C#", "D", "E", "F#", "G", "A"],
+            "F#": ["F#", "G#", "A", "B", "C#", "D", "E"],
+            "F": ["F", "G", "Ab", "Bb", "C", "Db", "Eb"],
+            "Bb": ["Bb", "C", "Db", "Eb", "F", "Gb", "Ab"],
+            "Eb": ["Eb", "F", "Gb", "Ab", "Bb", "Cb", "Db"],
+            "Ab": ["Ab", "Bb", "Cb", "Db", "Eb", "Fb", "Gb"],
+            "Db": ["Db", "Eb", "Fb", "Gb", "Ab", "Bbb", "Cb"],
+            "Gb": ["Gb", "Ab", "Bbb", "Cb", "Db", "Ebb", "Fb"]
+        }
+        
+        if self.interval_type == 'major':
+            self.notes = major_scales.get(self.tune, major_scales["C"])
+        else:  # minor
+            self.notes = minor_scales.get(self.tune, minor_scales["C"])
         return self.notes
     
     def getChords(self):
@@ -92,26 +127,30 @@ class SimplifiedMusic:
             self.chords = [self.notes[i] + chord_types[i] for i in range(len(self.notes))]
         return self.chords
     
+    
     def getBorrowedChords(self):
         # Simple borrowed chords
         if self.notes:
-            return [note + 'm' if i in [0, 3, 4] else note + '' for i, note in enumerate(self.notes)]
+            return [note + "m" if i in [0, 3, 4] else note + "" for i, note in enumerate(self.notes)]
         return []
     
     def getSeventhNoteToIt(self):
-        # Simple secondary dominants
-        if self.chords:
-            chromatic = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-            sevenths = []
-            for chord in self.chords:
-                root = chord.replace('m', '').replace('dim', '') if chord else 'C'
-                if root in chromatic:
-                    root_index = chromatic.index(root)
-                    fifth_down = chromatic[(root_index - 7) % 12]
-                    sevenths.append(fifth_down + '7')
-                else:
-                    sevenths.append('C7')
-            return sevenths
+        """Calculate secondary dominants using 3-steps-back rule in the actual scale"""
+        if self.chords and self.notes:
+            sevenths_and_targets = []
+            
+            # Generate secondary dominants for ALL scale degrees (I through vii)
+            for i, chord in enumerate(self.chords):
+                # Count 3 steps back in this scale: current → -1 → -2 → -3
+                dominant_index = (i - 3) % 7
+                dominant_note = self.notes[dominant_index]
+                
+                sevenths_and_targets.append({
+                    "seventh": f"{dominant_note}7",
+                    "resolves_to": chord  # Use full chord name (Am, Bm, Em, F#dim)
+                })
+            
+            return sevenths_and_targets
         return []
     
     def getChordProgressions(self):
@@ -166,36 +205,18 @@ def get_scale_analysis(key):
         if interval_type not in INTERVALS:
             return jsonify({"error": f"Invalid interval type. Available: {list(INTERVALS.keys())}"}), 400
         
-        # Use real Music class if LLM available, otherwise fallback
-        if llm:
-            # Initialize Music system exactly like main.py
-            music = Music(llm)
-            
-            # Set the tune
-            music.setTune(key.upper())
-            
-            # Set the interval
-            interval = INTERVALS[interval_type]()
-            music.setInterval(interval)
-            
-            # Get all the musical data exactly like main.py
-            notes = music.getNotesFromTune()
-            chords = music.getChords()
-            borrowed_chords = music.getBorrowedChords()
-            sevenths = music.getSeventhNoteToIt()
-            progressions = music.getChordProgressions()
-        else:
-            # Fallback to simplified music
-            music = SimplifiedMusic()
-            music.setTune(key.upper())
-            music.setInterval(interval_type)  # Use setInterval method
-            notes = music.getNotesFromTune()
-            chords = music.getChords()
-            borrowed_chords = music.getBorrowedChords()
-            sevenths = music.getSeventhNoteToIt()
-            progressions = music.getChordProgressions()
+        # Use SimplifiedMusic for consistent secondary dominants
+        music = SimplifiedMusic()
+        music.setTune(key.upper())
+        music.setInterval(interval_type)
+        notes = music.getNotesFromTune()
+        chords = music.getChords()
+        borrowed_chords = music.getBorrowedChords()
+        sevenths_data = music.getSeventhNoteToIt()  # This returns the correct diatonic pattern
+        progressions = music.getChordProgressions()
         
         # Format the response
+        chromatic_notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
         response = {
             "key": key.upper(),
             "interval_type": interval_type,
@@ -203,11 +224,8 @@ def get_scale_analysis(key):
             "notes": notes,
             "chords": chords,
             "borrowed_chords": borrowed_chords,
-            "secondary_dominants": sevenths,
-            "chord_sevenths": [
-                {"chord": chord, "resolves_from": seventh}
-                for chord, seventh in zip(chords, sevenths)
-            ],
+            "secondary_dominants": sevenths_data,
+            "chord_sevenths": sevenths_data,  # Use the correct diatonic 3-steps-back data
             "progressions": progressions,
             "scale_degrees": [
                 {
@@ -295,7 +313,7 @@ def get_secondary_dominants(key):
             "interval_type": interval_type,
             "secondary_dominants": [
                 {"target_chord": chord, "dominant_seventh": seventh}
-                for chord, seventh in zip(chords, sevenths)
+                for chord in chords
             ]
         })
         

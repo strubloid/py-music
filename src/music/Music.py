@@ -139,11 +139,18 @@ class Music:
             else:
                 raise IndexError("Chord index out of range")
         
-        # Return all sevenths that go to each chord
+        # Return all sevenths that go to each chord in the format expected by frontend
         seventh_chords = []
         for chord in self.chords:
-            seventh_chords.append(getSeventhToNote(chord))
+            dominant_seventh = self._getSeventhToNote(chord)
+            
+            seventh_chords.append({
+                "seventh": dominant_seventh,
+                "resolves_to": chord  # Use full chord name (Am, Bm, Em, F#dim)
+            })
         
+        print (f"seventh_chords: {seventh_chords}")
+
         return seventh_chords
     
     # Add these methods to expand musical functionality
