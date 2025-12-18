@@ -76,42 +76,25 @@
 }
 
 .music-line-card {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 6px;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 0.6rem;
+  margin-bottom: 0.8rem;
   transition: background 0.2s ease;
 }
 
 .music-line-card:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .line-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .line-number {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
   font-weight: 500;
-}
-
-.remove-line-btn {
-  width: 20px;
-  height: 20px;
-  border: none;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-  font-size: 1.2rem;
-}
-
-.remove-line-btn:hover {
-  color: #ff6b6b;
 }
 
 .chords-section {
@@ -223,66 +206,88 @@
 .chord-text-container {
   position: relative;
   width: 100%;
-  min-height: 120px;
+  min-height: 80px;
 }
 
 .chords-layer {
   position: relative;
   height: 50px;
   border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
 }
 
 .draggable-chord {
   position: absolute;
-  top: 5px;
+  top: 8px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  cursor: move;
+  justify-content: center;
   user-select: none;
+  cursor: move;
   z-index: 5;
+  transition: all 0.2s ease;
+  border-radius: 20px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 40px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .draggable-chord:hover {
   z-index: 10;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.95);
 }
 
-.draggable-chord .chord-input {
-  width: 50px;
-  padding: 0.2rem 0.4rem;
-  border: none;
-  border-radius: 3px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 0.85rem;
+.draggable-chord:active {
+  cursor: grabbing;
+  transform: translateY(0px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.lyrics-line {
+  margin-top: 8px;
+}
+
+.lyrics-input {
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  background: rgba(255, 255, 255, 0.1);
   color: white;
-  background: rgba(0, 0, 0, 0.6);
-  margin-bottom: 2px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
-.draggable-chord .chord-input:focus {
+.lyrics-input:focus {
   outline: none;
-  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
 }
 
-.remove-chord-btn {
-  width: 16px;
-  height: 16px;
-  border: none;
-  background: rgba(255, 107, 107, 0.8);
-  color: white;
-  border-radius: 50%;
-  font-size: 0.7rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.lyrics-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
 }
 
-.remove-chord-btn:hover {
-  background: rgba(255, 107, 107, 1);
+.lyrics-input:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
 }
+
+
 
 .add-chord-btn {
   position: absolute;

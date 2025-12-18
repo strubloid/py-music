@@ -12,6 +12,15 @@ const MusicProduction = () => {
   
   // Music lines structure: each line has chords and corresponding text sections
   const [musicLines, setMusicLines] = useState([])
+  const [dragState, setDragState] = useState(null)
+
+  // Cleanup event listeners on unmount
+  useEffect(() => {
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [])
 
   // Cache functions
   const saveLyricsToCache = (lines) => {
@@ -112,39 +121,73 @@ const MusicProduction = () => {
     ))
   }
 
-  const handleChordDragStart = (e, lineId, chordIndex) => {
-    e.dataTransfer.setData('text/plain', `${lineId}-${chordIndex}`)
-  }
-
-  const handleChordDrag = (e, lineId, chordIndex) => {
-    // Update chord position during drag
-  }
-
-  const handleChordDragEnd = (e, lineId, chordIndex) => {
-    // Finalize chord position
-    const rect = e.target.closest('.chord-text-container').getBoundingClientRect()
-    const x = e.clientX - rect.left
-    updateChordPosition(lineId, chordIndex, x)
-  }
-
   const updateChordPosition = (lineId, chordIndex, x) => {
     // Update the chord position in state and cache
     const updatedLines = musicLines.map(line => {
       if (line.id === lineId) {
         const chordPositions = { ...line.chordPositions }
-        chordPositions[chordIndex] = Math.max(0, x - 25)
+        chordPositions[chordIndex] = x // Store exact position
         return { ...line, chordPositions }
       }
       return line
     })
     setMusicLines(updatedLines)
     saveLyricsToCache(updatedLines)
+  }
+
+  const handleMouseMove = React.useCallback((e) => {
+    if (!dragState || !dragState.isDragging) return
     
-    // Update DOM position
-    const chord = document.querySelector(`[data-line-id="${lineId}"] .draggable-chord:nth-child(${chordIndex + 1})`)
+    const container = document.querySelector(`[data-line-id="${dragState.lineId}"] .chord-text-container`)
+    if (!container) return
+    
+    const rect = container.getBoundingClientRect()
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width - 60))
+    
+    // Update position immediately for fluid dragging
+    const chord = document.querySelector(`[data-line-id="${dragState.lineId}"] .draggable-chord:nth-child(${dragState.chordIndex + 1})`)
     if (chord) {
-      chord.style.left = `${Math.max(0, x - 25)}px`
+      chord.style.left = `${x}px`
+      chord.style.transform = 'translateY(-1px) scale(1.05)' // Visual feedback
     }
+  }, [dragState])
+
+  const handleMouseUp = React.useCallback((e) => {
+    if (!dragState || !dragState.isDragging) return
+    
+    const container = document.querySelector(`[data-line-id="${dragState.lineId}"] .chord-text-container`)
+    if (container) {
+      const rect = container.getBoundingClientRect()
+      const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width - 60))
+      updateChordPosition(dragState.lineId, dragState.chordIndex, x)
+    }
+    
+    // Reset visual feedback
+    const chord = document.querySelector(`[data-line-id="${dragState.lineId}"] .draggable-chord:nth-child(${dragState.chordIndex + 1})`)
+    if (chord) {
+      chord.style.transform = ''
+    }
+    
+    setDragState(null)
+    document.removeEventListener('mousemove', handleMouseMove)
+    document.removeEventListener('mouseup', handleMouseUp)
+  }, [dragState, updateChordPosition])
+
+  const handleChordMouseDown = (e, lineId, chordIndex) => {
+    e.preventDefault()
+    const rect = e.target.closest('.chord-text-container').getBoundingClientRect()
+    const startX = e.clientX - rect.left
+    
+    setDragState({
+      lineId,
+      chordIndex,
+      startX,
+      isDragging: true
+    })
+    
+    // Add event listeners for mouse move and up
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
   }
 
   const updateChord = (lineId, chordIndex, chord) => {
@@ -266,30 +309,36 @@ const MusicProduction = () => {
   // Calculate accurate chord positions based on text and pixel positions
   const calculateChordPositions = (text, chords, pixelPositions) => {
     const positions = []
-    const avgCharWidth = 5.5 // More accurate character width in PDF units
+    const avgCharWidth = 5.8 // PDF character width
+    const textAreaWidth = 400 // Approximate text area width in the interface
     
     chords.forEach((chord, index) => {
       let xPos = 0
       
-      if (pixelPositions[index] !== undefined) {
-        // Get pixel position from drag
+      if (pixelPositions[index] !== undefined && text.length > 0) {
+        // Convert pixel position to character position
         const pixelPos = pixelPositions[index]
         
-        // More accurate conversion: assume text area is about 500px wide for full text
-        const textAreaWidth = 500
-        const textLength = text.length
-        const charPositionRatio = pixelPos / textAreaWidth
-        const estimatedCharPos = Math.floor(charPositionRatio * textLength)
+        // Calculate percentage of text area width
+        const positionRatio = pixelPos / textAreaWidth
         
-        // Convert to PDF units
-        xPos = Math.max(0, Math.min(estimatedCharPos * avgCharWidth, textLength * avgCharWidth))
+        // Map to character position in text
+        const charPosition = Math.floor(positionRatio * text.length)
+        
+        // Convert to PDF units, ensuring we don't go beyond text
+        xPos = Math.max(0, Math.min(charPosition * avgCharWidth, (text.length - 1) * avgCharWidth))
       } else {
-        // Default evenly spaced positioning
-        const spacing = Math.max(40, (text.length * avgCharWidth) / (chords.length + 1))
-        xPos = spacing * (index + 1)
+        // Default positioning - spread evenly across the text
+        if (text.length > 0) {
+          const textWidth = text.length * avgCharWidth
+          const spacing = textWidth / (chords.length + 1)
+          xPos = spacing * (index + 1) - (chord.length * avgCharWidth / 2)
+        } else {
+          xPos = index * 40 // Fallback spacing
+        }
       }
       
-      positions.push({ chord, xPos })
+      positions.push({ chord, xPos: Math.max(0, xPos) })
     })
     
     return positions
@@ -301,9 +350,6 @@ const MusicProduction = () => {
         <div className="header-content">
           <h2 className="panel-title">Create your Shit</h2>
           <div className="panel-actions">
-            <button onClick={addMusicLine} className="action-button">
-              + Add Line
-            </button>
             <button onClick={exportSong} className="action-button">
               Export PDF
             </button>
@@ -318,8 +364,7 @@ const MusicProduction = () => {
           {musicLines && musicLines.length > 0 ? musicLines.map((line, lineIndex) => (
             <div key={line.id} className="music-line-card">
               <div className="card-glow"></div>
-              <div className="line-header">
-                <span className="line-number">{lineIndex + 1}</span>
+              {/* <div className="line-header">
                 {musicLines.length > 1 && (
                   <button
                     className="remove-line-btn"
@@ -328,7 +373,7 @@ const MusicProduction = () => {
                     ×
                   </button>
                 )}
-              </div>
+              </div> */}
             
             <div className="chord-text-container" data-line-id={line.id}>
               {/* Draggable Chords Layer */}
@@ -342,43 +387,27 @@ const MusicProduction = () => {
                         ? line.chordPositions[chordIndex] 
                         : (chordIndex * 80) + 10}px` 
                     }}
-                    draggable
-                    onDragStart={(e) => handleChordDragStart(e, line.id, chordIndex)}
-                    onDrag={(e) => handleChordDrag(e, line.id, chordIndex)}
-                    onDragEnd={(e) => handleChordDragEnd(e, line.id, chordIndex)}
+                    onMouseDown={(e) => handleChordMouseDown(e, line.id, chordIndex)}
                   >
-                    <input
-                      type="text"
-                      value={chord}
-                      onChange={(e) => updateChord(line.id, chordIndex, e.target.value)}
-                      className="chord-input"
-                      placeholder="C"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <button 
-                      className="remove-chord-btn"
-                      onClick={() => removeChord(line.id, chordIndex)}
-                    >
-                      ×
-                    </button>
+                    {chord}
                   </div>
                 ))}
-                <button
+                {/* <button
                   className="add-chord-btn"
                   onClick={() => addChord(line.id)}
                 >
                   +
-                </button>
+                </button> */}
               </div>
               
-              {/* Text Input Line */}
-              <div className="text-line">
-                <textarea
+              {/* Lyrics Input Line */}
+              <div className="lyrics-line">
+                <input
+                  type="text"
                   value={line.text || ''}
                   onChange={(e) => updateLineText(line.id, e.target.value)}
-                  className="line-text-input"
+                  className="lyrics-input"
                   placeholder="Write your lyrics here..."
-                  rows="2"
                 />
               </div>
             </div>
