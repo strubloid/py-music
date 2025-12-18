@@ -113,11 +113,15 @@ const ChordTooltip = ({
     const rect = e.target.getBoundingClientRect();
     const currentTargetRect = e.currentTarget.getBoundingClientRect();
     
+    console.log('🎯 DEBUG - Raw mouse:', { x: e.clientX, y: e.clientY });
+    console.log('🎯 DEBUG - Target rect:', { top: rect.top, left: rect.left, bottom: rect.bottom, right: rect.right, width: rect.width, height: rect.height });
     
+    // Position tooltip consistently relative to the element, not the click point
+    // Use element's horizontal center and position above the element
+    let initialX = rect.left + (rect.width / 2); // Center of the element horizontally
+    let initialY = rect.top/2 - 140; // Position above the element with 20px gap
     
-    // Use the mouse position directly instead of trying to calculate from element position
-    let initialX = e.clientX;
-    let initialY = e.clientY;
+    console.log('🎯 DEBUG - Using element-relative positioning:', { x: initialX, y: initialY });
     
     // When magnetic is enabled, apply magnetic snapping to the initial position
     if (isMagneticEnabled) {
@@ -137,7 +141,10 @@ const ChordTooltip = ({
     setIsVisible(true);
   };
 
-  const handleClose = () => {
+  const handleClose = (e) => {
+    e.stopPropagation(); // Prevent any other event handling
+    e.preventDefault();  // Make sure it doesn't trigger other handlers
+    console.log('🔴 CLOSING TOOLTIP');
     setIsPersistent(false);
     setIsVisible(false);
   };
