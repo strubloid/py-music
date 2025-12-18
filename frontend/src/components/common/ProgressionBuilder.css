@@ -3,6 +3,9 @@
   padding: 1rem;
   max-width: 1200px;
   margin: 0 auto;
+  min-height: fit-content;
+  pointer-events: auto;
+  position: relative;
 }
 
 .panel-header {
