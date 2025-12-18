@@ -53,8 +53,8 @@ const ChordTooltip = ({
     
     // X position follows the chord element (centered on it)
     // Y position is fixed at the top area
-    let initialX = rect.left - 350;
-    let initialY = rect.height + 150;
+    let initialX = rect.left - 300;
+    let initialY = rect.height + 400;
     
     // setting initial position
     setPosition({

@@ -80,11 +80,6 @@ const ProgressionBuilder = ({ scaleData }) => {
     printWindow.print()
   }
 
-  // Get seventh notes from scale data
-  const seventhNotes = scaleData?.chord_sevenths ? 
-    scaleData.chord_sevenths.map(item => item.seventh) : 
-    ['C7', 'D7', 'E7', 'F7', 'G7', 'A7', 'B7'] // fallback
-
   return (
     <div className="progression-builder-panel">
       <div className="panel-header">
@@ -105,37 +100,19 @@ const ProgressionBuilder = ({ scaleData }) => {
           <h4 className="section-title">From Selected Chords:</h4>
           <div className="quick-chords-grid">
             {[...new Set(selectedChords)].map((chord, index) => (
-              <ChordTooltip key={index} chord={chord}>
-                <button
-                  className="quick-chord-button selected"
-                  onClick={() => addChord(chord)}
-                >
-                  {chord}
-                </button>
-              </ChordTooltip>
+              <button
+                key={index}
+                className="quick-chord-button selected"
+                onClick={() => addChord(chord)}
+              >
+                {chord}
+              </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* Seventh Notes Selection */}
-      <div className="seventh-notes-section">
-        <h4 className="section-title">Seventh Notes:</h4>
-        <div className="quick-chords-grid">
-          {seventhNotes.map((chord, index) => (
-            <ChordTooltip key={index} chord={chord}>
-              <button
-                className="seventh-chord-button"
-                onClick={() => addChord(chord)}
-              >
-                {chord}
-              </button>
-            </ChordTooltip>
-          ))}
-        </div>
-      </div>
 
-      {/* Progression Lines */}
       <div className="progression-section">
         <div className="progression-header">
           <h4 className="section-title">Progression:</h4>
@@ -199,8 +176,10 @@ const ProgressionBuilder = ({ scaleData }) => {
 
       <div className="progression-info">
         <span className="progression-stats">
-          {progressionLines.length} line{progressionLines.length !== 1 ? 's' : ''}, {' '}
-          {progressionLines.reduce((total, line) => total + line.length, 0)} chord{progressionLines.reduce((total, line) => total + line.length, 0) !== 1 ? 's' : ''} total
+          {(() => {
+            const totalChords = progressionLines.reduce((total, line) => total + line.length, 0);
+            return `${progressionLines.length} line${progressionLines.length !== 1 ? 's' : ''}, ${totalChords} chord${totalChords !== 1 ? 's' : ''} total`;
+          })()}
         </span>
       </div>
     </div>
