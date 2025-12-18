@@ -336,14 +336,14 @@
 }
 
 .chord-diagram-inline {
-  background: white;
-  border-radius: 4px;
-  padding: 0.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
 }
 
 .chord-diagram-inline .inline-chord-container .inline-display {
-  transform: scale(0.6);
+  transform: scale(0.97);
   transform-origin: center;
 }
 
