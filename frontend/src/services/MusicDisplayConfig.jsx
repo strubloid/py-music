@@ -5,7 +5,7 @@ class MusicDisplayConfig {
   constructor() {
     this.config = {
       // Default configuration - will be overridden by backend
-      guitarStringOrder: ['E', 'A', 'D', 'G', 'B', 'E'], // Low to High (6th to 1st string)
+      guitarStringOrder: ['E', 'B', 'G', 'D', 'A' , 'E'], // Low to High (6th to 1st string)
       pianoKeyOrder: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
       blackKeyOrder: ['C#', 'D#', 'F#', 'G#', 'A#'],
       chordDisplayOrder: 'ascending', // or 'descending'

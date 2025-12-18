@@ -5,6 +5,55 @@ from .chords.intervals.Major import MajorInterval
 from .chords.intervals.Interval import Interval
 from .visualization.ScaleVisualizer import ScaleVisualizer
 
+def get_roman_numeral(degree, interval_type):
+    """Get Roman numeral based on degree and interval type"""
+    if interval_type == 'major':
+        roman_numerals = ["I", "ii", "iii", "IV", "V", "vi", "vii°"]
+    else:  # minor
+        roman_numerals = ["i", "ii°", "III", "iv", "v", "VI", "VII"]
+    
+    return roman_numerals[degree] if degree < len(roman_numerals) else str(degree + 1)
+
+def get_function_name(degree):
+    """Get function name for scale degree"""
+    functions = ["Tonic", "Supertonic", "Mediant", "Subdominant", 
+                "Dominant", "Submediant", "Leading Tone"]
+    return functions[degree] if degree < len(functions) else "Extended"
+
+def generate_fretboard_data(notes, root_note):
+    """Generate fretboard data for React component"""
+    # Guitar strings from 1st (high E) to 6th (low E) - CORRECT visual order for display
+    strings = ['E', 'B', 'G', 'D', 'A', 'E']  # 1st, 2nd, 3rd, 4th, 5th, 6th string
+    chromatic_notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    frets = 12
+    
+    fretboard = []
+    
+    for string_note in strings:
+        string_data = {
+            "string": string_note,
+            "frets": []
+        }
+        
+        string_index = chromatic_notes.index(string_note)
+        
+        for fret in range(frets + 1):
+            note_index = (string_index + fret) % 12
+            current_note = chromatic_notes[note_index]
+            
+            fret_data = {
+                "fret": fret,
+                "note": current_note,
+                "is_scale_note": current_note in notes,
+                "is_root": current_note == root_note
+            }
+            
+            string_data["frets"].append(fret_data)
+        
+        fretboard.append(string_data)
+    
+    return fretboard
+
 """ 
     Class that will contain things related to music 
     such as scales, chords, progressions, etc. 
@@ -152,10 +201,10 @@ class Music:
     ## Getting borrowed chords from parallel minor scale
     def getBorrowedChords(self) -> list[str]:
         
-        ## getting borrowed chords from parallel minor scale
-        borrowedChords = self.scaleTeacher.getBorrowedChords(self.chords, self.interval_obj)
-
-        return borrowedChords
+        # Simple borrowed chords implementation
+        if self.notes:
+            return [note + "m" if i in [0, 3, 4] else note + "" for i, note in enumerate(self.notes)]
+        return []
     
     def getSeventhNoteToIt(self, chord_index: int = None) -> list[str] | str:
         """
@@ -244,10 +293,8 @@ class Music:
         return progressions
 
     # Helper method to convert scale degree to Roman numeral
-    def _getRomanNumeral(self, degree: int) -> str:
-
-        roman_numerals = ["I", "ii", "iii", "IV", "V", "vi", "vii°"]
-        return roman_numerals[degree] if degree < len(roman_numerals) else str(degree + 1)
+    def _getRomanNumeral(self, degree: int, interval_type: str = 'major') -> str:
+        return get_roman_numeral(degree, interval_type)
 
     # Returns available tensions for a given chord
     def getTensions(self, chord_index: int) -> list[str]:
@@ -284,5 +331,55 @@ class Music:
         scale_name = f"{self.tune} Major Scale"
         
         visualizer.display_fretboard(self.notes, self.tune)
+    
+    def getCompleteScaleAnalysis(self, key: str, interval_type: str) -> dict:
+        """Get complete scale analysis for API responses"""
+        self.setTune(key.upper())
+        
+        # Set interval based on string type
+        if interval_type == 'minor':
+            from .chords.intervals.Minor import MinorInterval
+            self.setInterval(MinorInterval())
+        else:
+            self.setInterval(MajorInterval())
+        
+        # Generate all data
+        notes = self.getNotesFromTune()
+        chords = self.getChords()
+        borrowed_chords = self.getBorrowedChords()
+        sevenths_data = self.getSeventhNoteToIt()
+        progressions = self.getChordProgressions()
+        
+        # Format the response
+        response = {
+            "key": key.upper(),
+            "interval_type": interval_type,
+            "scale_name": f"{key.upper()} {interval_type.title()} Scale",
+            "notes": notes,
+            "chords": chords,
+            "borrowed_chords": borrowed_chords,
+            "secondary_dominants": sevenths_data,
+            "chord_sevenths": sevenths_data,
+            "progressions": progressions,
+            "scale_degrees": [
+                {
+                    "degree": i + 1,
+                    "roman": get_roman_numeral(i, interval_type),
+                    "note": notes[i] if i < len(notes) else "",
+                    "chord": chords[i] if i < len(chords) else "",
+                    "function": get_function_name(i)
+                }
+                for i in range(len(notes))
+            ],
+            "keyboard_data": {
+                "white_keys": ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+                "black_keys": ['C#', 'D#', None, 'F#', 'G#', 'A#', None],
+                "scale_notes": notes,
+                "root_note": key.upper()
+            },
+            "fretboard_data": generate_fretboard_data(notes, key.upper())
+        }
+        
+        return response
         
 

@@ -96,7 +96,7 @@ class ScaleVisualizer:
             root_note = notes[0]
             
         # Guitar tuning (standard)
-        strings = ['E', 'A', 'D', 'G', 'B', 'E']
+        strings = ['E', 'Bx', 'G', 'D', 'A', 'E']
         frets = 12  # Show first 12 frets
         
         fretboard = Table(show_header=True, header_style="bold green")
