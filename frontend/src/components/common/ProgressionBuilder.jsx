@@ -94,23 +94,40 @@ const ProgressionBuilder = ({ scaleData }) => {
         </div>
       </div>
 
-      {/* Selected Chords from Main Panel */}
-      {selectedChords.length > 0 && (
-        <div className="selected-chords-section">
-          <h4 className="section-title">From Selected Chords:</h4>
-          <div className="quick-chords-grid">
-            {[...new Set(selectedChords)].map((chord, index) => (
+      {/* Scale Chords and Seventh Notes */}
+      <div className="chord-selection-grid">
+        <div className="scale-chords-section">
+          <h4 className="section-title">Scale Chords:</h4>
+          <div className="compact-chords-grid">
+            {scaleData?.scale_degrees?.map((degree, index) => (
               <button
                 key={index}
-                className="quick-chord-button selected"
-                onClick={() => addChord(chord)}
+                className="compact-chord-button"
+                onClick={() => addChord(degree.chord)}
+                title={`${degree.roman} - ${degree.chord}`}
               >
-                {chord}
+                {degree.chord}
               </button>
             ))}
           </div>
         </div>
-      )}
+        
+        <div className="seventh-notes-section">
+          <h4 className="section-title">Seventh Notes:</h4>
+          <div className="compact-chords-grid">
+            {scaleData?.chord_sevenths?.map((seventhData, index) => (
+              <button
+                key={index}
+                className="compact-seventh-button"
+                onClick={() => addChord(seventhData.seventh)}
+                title={`Resolves to ${seventhData.resolves_to}`}
+              >
+                {seventhData.seventh}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
 
       <div className="progression-section">
