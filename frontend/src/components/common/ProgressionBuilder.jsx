@@ -4,43 +4,36 @@ import ChordTooltip from './ChordTooltip'
 import './ProgressionBuilder.css'
 
 const ProgressionBuilder = ({ scaleData }) => {
-  const { selectedChords } = useChordPanel()
-  const [progressionLines, setProgressionLines] = useState([[]])
-  const [currentLine, setCurrentLine] = useState(0)
+  const { 
+    selectedChords, 
+    progressionLines, 
+    currentLine, 
+    addChordToProgression, 
+    removeChordFromProgression, 
+    addProgressionLine, 
+    removeProgressionLine, 
+    clearProgression, 
+    setCurrentProgressionLine 
+  } = useChordPanel()
 
   const addChord = (chord) => {
-    setProgressionLines(prev => {
-      const newLines = [...prev]
-      newLines[currentLine] = [...newLines[currentLine], chord]
-      return newLines
-    })
+    addChordToProgression(chord)
   }
 
   const removeChord = (lineIndex, chordIndex) => {
-    setProgressionLines(prev => {
-      const newLines = [...prev]
-      newLines[lineIndex] = newLines[lineIndex].filter((_, index) => index !== chordIndex)
-      return newLines
-    })
+    removeChordFromProgression(lineIndex, chordIndex)
   }
 
   const addNewLine = () => {
-    setProgressionLines(prev => [...prev, []])
-    setCurrentLine(progressionLines.length)
+    addProgressionLine()
   }
 
   const removeLine = (lineIndex) => {
-    if (progressionLines.length > 1) {
-      setProgressionLines(prev => prev.filter((_, index) => index !== lineIndex))
-      if (currentLine >= progressionLines.length - 1) {
-        setCurrentLine(Math.max(0, progressionLines.length - 2))
-      }
-    }
+    removeProgressionLine(lineIndex)
   }
 
   const clearAll = () => {
-    setProgressionLines([[]])
-    setCurrentLine(0)
+    clearProgression()
   }
 
   const exportToPDF = () => {
@@ -148,7 +141,7 @@ const ProgressionBuilder = ({ scaleData }) => {
                 <span className="line-number">Line {lineIndex + 1}</span>
                 <button
                   className="line-select-button"
-                  onClick={() => setCurrentLine(lineIndex)}
+                  onClick={() => setCurrentProgressionLine(lineIndex)}
                   title="Select this line for adding chords"
                 >
                   {currentLine === lineIndex ? '✓' : '○'}
