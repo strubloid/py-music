@@ -72,10 +72,15 @@ const BottomPanel = ({ scaleData }) => {
       )}
       
       {/* Bottom Controls */}
-      <div className="bottom-controls">
+      <div 
+        className="bottom-controls"
+        onMouseDown={activePanel ? handleMouseDown : undefined}
+        style={{ cursor: activePanel ? 'ns-resize' : 'default' }}
+      >
         <button
           className={`bottom-button ${activePanel === 'progression' ? 'active' : ''}`}
           onClick={() => togglePanel('progression')}
+          onMouseDown={(e) => e.stopPropagation()}
         >
           <span className="button-icon">🎼</span>
           <span className="button-text">Building Progressions</span>
