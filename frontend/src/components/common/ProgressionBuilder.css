@@ -327,12 +327,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
   position: relative;
-  padding: 0.5rem;
+  padding: 0.1rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 8px;
-  min-width: 120px;
+  border-radius: 6px;
+  min-width: 90px;
+  max-width: 220px;
 }
 
 .chord-diagram-inline {
@@ -343,12 +343,11 @@
 }
 
 .chord-diagram-inline .inline-chord-container .inline-display {
-  transform: scale(0.97);
   transform-origin: center;
 }
 
 .chord-text-small {
-  font-size: 0.75rem;
+  font-size: 1.30rem;
   font-weight: 600;
   color: white;
   text-align: center;
@@ -356,15 +355,15 @@
 
 .remove-chord-button.inline-mode {
   position: absolute;
-  top: -8px;
-  right: -8px;
+  top: -6px;
+  right: -6px;
   background: #ef4444;
   color: white;
   border: none;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  font-size: 0.875rem;
+  width: 16px;
+  height: 16px;
+  font-size: 0.7rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -460,8 +459,12 @@
 
 /* Inline Chord Display */
 .inline-chord-container {
-  width: 100%;
-  min-width: 180px;
+    width: 100%;
+    max-width: 210px;
+    height: 225px;
+    top: 0px;
+    transform: scale(0.80);
+    position: relative;
 }
 
 .inline-chord-container .inline-display {
