@@ -4,6 +4,11 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  AWS_LAMBDA_JS_RUNTIME = "nodejs18.x"
+
+# Add plugin for Python functions support
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
 
 # Redirect API calls to Netlify Functions with path parameters
 [[redirects]]
@@ -35,6 +40,11 @@
 
 [functions]
   directory = "backend/functions"
+  # Enable Python runtime for serverless functions
+  node_bundler = "esbuild"
+
+[functions."**/*.py"]
+  included_files = ["backend/project/**"]
 
 [dev]
   command = "cd frontend && npm run dev"
