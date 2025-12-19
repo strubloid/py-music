@@ -133,7 +133,6 @@ Every push to your main branch will automatically:
 - **Build minutes**: 300 minutes/month free
 
 This should be more than enough for a music theory app!
-
 ---
 
 ## 🎵 Features Available in Production

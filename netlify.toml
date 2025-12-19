@@ -1,11 +1,9 @@
 [build]
-  base = "frontend"
   publish = "frontend/dist"
-  command = "npm run build"
+  command = "cd frontend && npm install && npm run build"
 
 [build.environment]
   NODE_VERSION = "18"
-  PYTHON_VERSION = "3.9"
 
 # Redirect API calls to Netlify Functions
 [[redirects]]
@@ -21,13 +19,9 @@
 
 [functions]
   directory = "netlify/functions"
-  python_runtime = "3.9"
 
 [dev]
-  command = "npm run dev"
+  command = "cd frontend && npm run dev"
   port = 3000
   targetPort = 3000
   framework = "#custom"
-  
-[dev.env]
-  PYTHON_VERSION = "3.9"
