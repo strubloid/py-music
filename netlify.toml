@@ -34,7 +34,7 @@
   status = 200
 
 [functions]
-  directory = "netlify/functions"
+  directory = "backend/functions"
 
 [dev]
   command = "cd frontend && npm run dev"
