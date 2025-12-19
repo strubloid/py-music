@@ -5,7 +5,23 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# Redirect API calls to Netlify Functions
+# Redirect API calls to Netlify Functions with path parameters
+[[redirects]]
+  from = "/api/scale/:key"
+  to = "/.netlify/functions/scale/:key"
+  status = 200
+
+[[redirects]]
+  from = "/api/chord-progressions/:key"
+  to = "/.netlify/functions/chord-progressions/:key"
+  status = 200
+
+[[redirects]]
+  from = "/api/secondary-dominants/:key"
+  to = "/.netlify/functions/secondary-dominants/:key"
+  status = 200
+
+# General API redirect
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
