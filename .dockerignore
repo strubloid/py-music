@@ -3,3 +3,14 @@ fly.toml
 __pycache__/
 .envrc
 .venv/
+*.pyc
+.env
+node_modules
+npm-debug.log
+.gitignore
+README.md
+.vscode
+.idea
+*.log
+venv
+.DS_Store

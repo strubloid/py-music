@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory, send_file
 from flask_cors import CORS
 from dotenv import load_dotenv
 import sys
@@ -17,7 +17,9 @@ from backend.project.music.Music import Music, get_roman_numeral, get_function_n
 # Load environment variables
 load_dotenv()
 
-app = Flask(__name__)
+# Configure Flask to serve static frontend
+FRONTEND_DIR = project_root / 'frontend' / 'dist'
+app = Flask(__name__, static_folder=str(FRONTEND_DIR), static_url_path='')
 CORS(app)  # Enable CORS for all routes
 
 # Initialize the music system like in main.py
@@ -209,14 +211,32 @@ def get_available_keys():
     keys = ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B']
     return jsonify({"keys": keys})
 
+# Serve static files from frontend/dist
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    """Serve frontend static files and handle SPA routing"""
+    # If path is an API route, let it pass through to API handlers
+    if path.startswith('api/'):
+        return jsonify({"error": "API endpoint not found"}), 404
+    
+    # If file exists, serve it
+    if path and (FRONTEND_DIR / path).exists():
+        return send_from_directory(str(FRONTEND_DIR), path)
+    
+    # Otherwise, serve index.html for SPA routing
+    return send_file(str(FRONTEND_DIR / 'index.html'))
+
 if __name__ == '__main__':
     print("🎵 Starting Music Theory API...")
     print(f"🤖 LLM Available: {llm is not None}")
     print(f"🎼 Available Intervals: {list(INTERVALS.keys())}")
     print("🌐 Server running on http://localhost:5000")
+    print(f"📁 Serving frontend from: {FRONTEND_DIR}")
     print("")
     print("📖 Example requests:")
     print("  http://localhost:5000/api/scale/G?interval=major")
     print("  http://localhost:5000/api/scale/G?interval=minor")
+    print("  http://localhost:5000/ (frontend)")
     print("")
     app.run(debug=False, host='0.0.0.0', port=5000)

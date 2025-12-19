@@ -1,7 +1,4 @@
-# fly.toml app configuration file generated for py-music on 2025-12-19T18:21:32Z
-#
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
 
 app = 'py-music'
 primary_region = 'lhr'
@@ -9,7 +6,7 @@ primary_region = 'lhr'
 [build]
 
 [http_service]
-  internal_port = 8080
+  internal_port = 5000
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
