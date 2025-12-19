@@ -1,13 +1,5 @@
-# No external dependencies needed for basic functions
-# Add dependencies here if needed in the future
-langchain
-wikipedia
-langchain-community
-langchain-openai
-langchain-anthropic
-python-dotenv
-pydantic
-rich
+# Minimal dependencies for Netlify serverless functions
+# Remove heavy dependencies to reduce cold start times
 flask
 flask-cors
 langgraph
