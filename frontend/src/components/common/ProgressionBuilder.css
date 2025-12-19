@@ -1,11 +1,14 @@
 /* Progression Builder Panel Styles */
 .progression-builder-panel {
   padding: 1rem;
-  max-width: 1200px;
+  /* max-width: 1200px; */
   margin: 0 auto;
   min-height: fit-content;
   pointer-events: auto;
   position: relative;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .panel-header {
@@ -20,8 +23,9 @@
 .panel-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #333;
+  color: white;
   margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .panel-actions {
@@ -72,8 +76,9 @@
 .section-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #555;
+  color: white;
   margin: 0 0 1rem 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Quick Chords */
@@ -112,7 +117,6 @@
 }
 
 .selected-chords-section {
-  margin-bottom: 1.5rem;
   padding: 1rem;
   background: rgba(76, 175, 80, 0.1);
   border-radius: 12px;
@@ -120,7 +124,6 @@
 }
 
 .seventh-notes-section {
-  margin-bottom: 1.5rem;
   padding: 1rem;
   background: rgba(255, 193, 7, 0.1);
   border-radius: 12px;
@@ -402,35 +405,38 @@
 }
 
 .scale-chords-section, .seventh-notes-section {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 0.75rem;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .scale-chords-section .section-title, 
 .seventh-notes-section .section-title {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  color: #333;
+  color: white;
   margin: 0 0 0.5rem 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .compact-chords-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  /* grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); */
+  grid-template-columns: repeat(auto-fit, minmax(20px, 85px));
   gap: 0.5rem;
 }
 
 .compact-chord-button, .compact-seventh-button {
-  padding: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 1px;
+  border: none; 
   border-radius: 6px;
-  background: white;
   cursor: pointer;
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   transition: all 0.2s ease;
-  min-height: 100px;
+  min-height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -456,25 +462,22 @@
 }
 
 .compact-chord-button {
-  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
   color: #1565c0;
 }
 
 .compact-chord-button:hover {
-  background: linear-gradient(135deg, #bbdefb, #90caf9);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+  background: rgba(187, 222, 251, 0.98);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
 }
 
 .compact-seventh-button {
-  background: linear-gradient(135deg, #fff3e0, #ffcc02);
   color: #e65100;
 }
 
 .compact-seventh-button:hover {
-  background: linear-gradient(135deg, #ffcc02, #ffa000);
+  background: rgba(255, 204, 2, 0.98);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
 }
 
 
