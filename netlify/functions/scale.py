@@ -3,26 +3,6 @@ import sys
 import os
 from pathlib import Path
 
-# Add src to path
-src_path = str(Path(__file__).parent.parent.parent / 'src')
-if src_path not in sys.path:
-    sys.path.insert(0, src_path)
-
-try:
-    from src.music.chords.intervals.Major import MajorInterval
-    from src.music.chords.intervals.Minor import MinorInterval
-    from src.music.Music import Music
-except ImportError as e:
-    print(f"Import error: {e}")
-    MajorInterval = None
-    MinorInterval = None
-    Music = None
-
-INTERVALS = {
-    'major': MajorInterval,
-    'minor': MinorInterval
-}
-
 def handler(event, context):
     """
     Netlify Function handler for scale analysis
@@ -66,46 +46,40 @@ def handler(event, context):
         key = key.upper()
         interval_type = query_params.get('interval', 'major').lower()
         
-        print(f"Processing scale request: key={key}, interval={interval_type}")
+        print(f"Processing scale request: key={key}, interval={interval_type}, path={path}")
         
-        if not MajorInterval or not MinorInterval or not Music:
-            return {
-                'statusCode': 500,
-                'headers': headers,
-                'body': json.dumps({
-                    'error': 'Music system not initialized',
-                    'key': key,
-                    'interval': interval_type
-                })
-            }
-        
-        if interval_type not in INTERVALS:
-            return {
-                'statusCode': 400,
-                'headers': headers,
-                'body': json.dumps({
-                    'error': f'Invalid interval type. Available: {list(INTERVALS.keys())}'
-                })
-            }
-        
-        # Create mock LLM (since we can't use API keys easily in functions)
-        class MockLLM:
-            def getParser(self):
-                class MockParser:
-                    def get_format_instructions(self):
-                        return ''
-                return MockParser()
-            def startingChain(self, prompt):
-                pass
-        
-        # Get scale analysis
-        music = Music(MockLLM())
-        response = music.getCompleteScaleAnalysis(key, interval_type)
+        # For now, return a mock response to verify the function is working
+        # TODO: Add actual music theory logic once we confirm connectivity
+        mock_response = {
+            "scale_name": f"{key} {interval_type.capitalize()}",
+            "key": key,
+            "interval_type": interval_type,
+            "notes": ["C", "D", "E", "F", "G", "A", "B"] if key == "C" else [key, "D", "E", "F", "G", "A", "B"],
+            "scale_degrees": [
+                {"roman": "I", "note": key, "chord": f"{key}", "function": "Tonic"},
+                {"roman": "ii", "note": "D", "chord": "Dm", "function": "Supertonic"},
+                {"roman": "iii", "note": "E", "chord": "Em", "function": "Mediant"},
+                {"roman": "IV", "note": "F", "chord": "F", "function": "Subdominant"},
+                {"roman": "V", "note": "G", "chord": "G", "function": "Dominant"},
+                {"roman": "vi", "note": "A", "chord": "Am", "function": "Submediant"},
+                {"roman": "vii°", "note": "B", "chord": "Bdim", "function": "Leading Tone"}
+            ],
+            "chord_sevenths": [
+                {"seventh": "Cmaj7", "resolves_to": "C", "resolves_from": "G7", "chord": "C"},
+                {"seventh": "Dm7", "resolves_to": "Dm", "resolves_from": "A7", "chord": "Dm"}
+            ],
+            "common_progressions": {
+                "I-IV-V-I": ["C", "F", "G", "C"],
+                "I-vi-IV-V": ["C", "Am", "F", "G"],
+                "ii-V-I": ["Dm", "G", "C"]
+            },
+            "status": "mock_data"
+        }
         
         return {
             'statusCode': 200,
             'headers': headers,
-            'body': json.dumps(response)
+            'body': json.dumps(mock_response)
         }
         
     except Exception as e:
@@ -120,7 +94,8 @@ def handler(event, context):
             },
             'body': json.dumps({
                 'error': str(e),
-                'type': type(e).__name__
+                'type': type(e).__name__,
+                'message': 'Function error - check logs'
             })
         }
 
