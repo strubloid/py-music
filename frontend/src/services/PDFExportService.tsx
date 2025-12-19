@@ -5,7 +5,7 @@ import html2canvas from 'html2canvas'
 interface MusicLine {
   chords?: string[]
   text?: string
-  chordPositions?: number[]
+  chordPositions?: { [key: number]: number } // Changed from number[] to object
 }
 
 interface ExportOptions {
@@ -66,26 +66,82 @@ const PDFExportService: PDFExportServiceType = {
 
         // Chords with accurate positioning
         if (line.chords?.length && line.chords.length > 0 && showChords) {
+          // Measure actual frontend text width
+          const tempDiv = document.createElement('div')
+          tempDiv.style.cssText = `
+            position: absolute;
+            visibility: hidden;
+            white-space: nowrap;
+            font-family: 'Georgia', serif;
+            font-size: 14px;
+          `
+          tempDiv.textContent = line.text || ''
+          document.body.appendChild(tempDiv)
+          const frontendTextWidth = tempDiv.offsetWidth
+          
+          // NOW measure PDF text width with the SAME font
+          tempDiv.style.cssText = `
+            position: absolute;
+            visibility: hidden;
+            white-space: nowrap;
+            font-family: 'Georgia', serif;
+            font-size: ${fontSize}px;
+          `
+          tempDiv.textContent = line.text || ''
+          const pdfTextWidth = tempDiv.offsetWidth
+          document.body.removeChild(tempDiv)
+          
+          // Get the container width for reference
+          let frontendContainerWidth = 1200
+          const sampleContainer = document.querySelector('.chord-text-container')
+          if (sampleContainer) {
+            frontendContainerWidth = sampleContainer.offsetWidth
+          }
+          
+          console.log(`📏 Text measurement for line ${lineIndex + 1}:`, {
+            text: (line.text?.substring(0, 50) || '') + '...',
+            frontendTextWidth: frontendTextWidth + 'px',
+            pdfTextWidth: pdfTextWidth + 'px',
+            containerWidth: frontendContainerWidth + 'px',
+            ratio: (frontendTextWidth / pdfTextWidth).toFixed(2)
+          })
+          
           html += `<div style="position: relative; height: 10px; margin: 0;">`
           
           line.chords.forEach((chord, chordIndex) => {
-            const position = line.chordPositions?.[chordIndex] || (chordIndex * 80 + 10)
+            // Get position from object (not array!)
+            const savedPosition = line.chordPositions?.[chordIndex]
+            const position = savedPosition !== undefined ? savedPosition : (chordIndex * 80 + 10)
             
-            // Dynamic positioning calculation for full-width layout
-            const pdfContentWidth = 714 // PDF usable width (794px - 80px padding)
+            console.log(`📄 PDF Export - Chord "${chord}" at index ${chordIndex}:`, {
+              savedPosition,
+              finalPosition: position,
+              allPositions: line.chordPositions
+            })
             
-            // Try to get actual frontend container width
-            let frontendWidth = 1200 // fallback default
-            const sampleContainer = document.querySelector('.chord-text-container')
-            if (sampleContainer) {
-              frontendWidth = sampleContainer.offsetWidth
-            }
+            // CORRECT CALCULATION:
+            // 1. Frontend lyrics have padding where text starts ≈ 13px from left
+            const frontendTextStartOffset = 100
             
-            // Calculate proportional position: (frontend_position / frontend_width) * pdf_width
-            const positionRatio = position / frontendWidth
-            // Adjust positioning for chord length to prevent overflow
-            const chordWidth = chord.length * 6 // estimate chord width
-            const printPosition = Math.max(0, Math.min(positionRatio * pdfContentWidth, pdfContentWidth - chordWidth - 10))
+            // 2. Adjust chord position by removing the padding offset
+            const adjustedPosition = Math.max(0, position - frontendTextStartOffset)
+            
+            // 3. Calculate ratio based on ACTUAL TEXT WIDTH, not container width!
+            const textRatio = adjustedPosition / frontendTextWidth
+            
+            // 4. Apply same ratio to PDF text width
+            const printPosition = textRatio * pdfTextWidth
+            
+            console.log(`   → PDF position calculation:`, {
+              chordName: chord,
+              frontendPosition: position + 'px',
+              frontendTextStartOffset: frontendTextStartOffset + 'px',
+              adjustedPosition: adjustedPosition.toFixed(1) + 'px',
+              frontendTextWidth: frontendTextWidth + 'px',
+              textRatio: (textRatio * 100).toFixed(1) + '%',
+              pdfTextWidth: pdfTextWidth + 'px',
+              printPosition: printPosition.toFixed(1) + 'px'
+            })
             
             html += `
               <div style="
