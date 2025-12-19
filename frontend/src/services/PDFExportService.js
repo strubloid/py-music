@@ -48,7 +48,10 @@ const PDFExportService = {
           
           line.chords.forEach((chord, chordIndex) => {
             const position = line.chordPositions?.[chordIndex] || (chordIndex * 100 + 10)
-            const printPosition = Math.max(0, Math.min(position * 0.6, 650)) // Scale and bound
+            // Adjust scaling factor and add offset correction for better alignment
+            const scaleFactor = 0.75 // Increase from 0.6 to 0.75 for better spacing
+            const offsetCorrection = -20 // Subtract 20px to shift chords left
+            const printPosition = Math.max(0, Math.min(position * scaleFactor + offsetCorrection, 650))
             
             html += `
               <span style="
@@ -234,7 +237,10 @@ const PDFExportService = {
           printHTML += `<div class="chords-container">`
           line.chords.forEach((chord, index) => {
             const position = line.chordPositions?.[index] || (index * 100 + 10)
-            const scaledPosition = Math.max(0, position * 0.5)
+            // Apply same correction as HTML-to-PDF method
+            const scaleFactor = 0.6 // Slightly better than 0.5 for print
+            const offsetCorrection = -15 // Adjust offset for print layout
+            const scaledPosition = Math.max(0, position * scaleFactor + offsetCorrection)
             printHTML += `<span class="chord" style="left: ${scaledPosition}px;">${chord}</span>`
           })
           printHTML += `</div>`
@@ -276,9 +282,14 @@ const PDFExportService = {
           let chordLine = ''
           let maxPos = 0
           
-          // Build chord line with spacing
+          // Build chord line with spacing - improved positioning
           line.chords.forEach((chord, chordIndex) => {
-            const position = Math.floor((line.chordPositions?.[chordIndex] || (chordIndex * 100 + 10)) / 10)
+            const rawPosition = line.chordPositions?.[chordIndex] || (chordIndex * 100 + 10)
+            // Apply similar correction as other methods but for character positions
+            const scaleFactor = 0.12 // Characters per pixel approximation
+            const offsetCorrection = -2 // Character offset correction
+            const position = Math.max(0, Math.floor(rawPosition * scaleFactor + offsetCorrection))
+            
             while (chordLine.length < position) {
               chordLine += ' '
             }
