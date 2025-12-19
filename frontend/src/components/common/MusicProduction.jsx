@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useChordPanel } from '../../contexts/ChordPanelContext'
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
-import PDFExportService from '../../services/PDFExportService'
+import PDFExportService from '../../services/PDFExportService.tsx'
 import './MusicProduction.css'
 
 // Cache key for storing lyrics data

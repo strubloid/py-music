@@ -1,14 +1,36 @@
-import React, { useState, useRef } from 'react'
+import React from 'react'
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
 
-const PDFExportService = {
+interface MusicLine {
+  chords?: string[]
+  text?: string
+  chordPositions?: number[]
+}
+
+interface ExportOptions {
+  title?: string
+  fontSize?: number
+  chordFontSize?: number
+  lineSpacing?: number
+  pageMargin?: number
+  showChords?: boolean
+  showLyrics?: boolean
+}
+
+interface PDFExportServiceType {
+  exportAsHighQualityPDF: (musicLines: MusicLine[], options?: ExportOptions) => Promise<void>
+  exportViaPrint: (musicLines: MusicLine[], options?: Partial<ExportOptions>) => void
+  exportAsText: (musicLines: MusicLine[], title?: string) => void
+}
+
+const PDFExportService: PDFExportServiceType = {
   // Method 1: High-Quality HTML-to-PDF (Recommended)
-  exportAsHighQualityPDF: async (musicLines, options = {}) => {
+  exportAsHighQualityPDF: async (musicLines: MusicLine[], options: ExportOptions = {}) => {
     const {
       title = 'My Song',
       fontSize = 14,
-      chordFontSize = 14,
+      chordFontSize = 10, // Reduced from 14 to 10 (30% smaller)
       lineSpacing = 25,
       pageMargin = 40,
       showChords = true,
@@ -39,11 +61,11 @@ const PDFExportService = {
     `
 
     musicLines.forEach((line, lineIndex) => {
-      if ((line.chords?.length > 0 && showChords) || (line.text && showLyrics)) {
+      if ((line.chords?.length && line.chords.length > 0 && showChords) || (line.text && showLyrics)) {
         html += `<div style="margin-bottom: ${lineSpacing}px; page-break-inside: avoid;">`
 
         // Chords with accurate positioning
-        if (line.chords?.length > 0 && showChords) {
+        if (line.chords?.length && line.chords.length > 0 && showChords) {
           html += `<div style="position: relative; height: 35px; margin-bottom: 5px;">`
           
           line.chords.forEach((chord, chordIndex) => {
@@ -152,9 +174,13 @@ const PDFExportService = {
   },
 
   // Method 2: Native Browser Print (Alternative)
-  exportViaPrint: (musicLines, options = {}) => {
+  exportViaPrint: (musicLines: MusicLine[], options: Partial<ExportOptions> = {}) => {
     const printWindow = window.open('', '_blank')
     const { title = 'My Song' } = options
+
+    if (!printWindow) {
+      throw new Error('Unable to open print window')
+    }
 
     const printCSS = `
       <style>
@@ -228,10 +254,10 @@ const PDFExportService = {
     `
 
     musicLines.forEach((line) => {
-      if (line.chords?.length > 0 || line.text) {
+      if (line.chords?.length && line.chords.length > 0 || line.text) {
         printHTML += `<div class="music-line">`
 
-        if (line.chords?.length > 0) {
+        if (line.chords?.length && line.chords.length > 0) {
           printHTML += `<div class="chords-container">`
           line.chords.forEach((chord, index) => {
             const position = line.chordPositions?.[index] || (index * 80 + 10)
@@ -266,15 +292,15 @@ const PDFExportService = {
   },
 
   // Method 3: Text-Only Export (Fast, simple)
-  exportAsText: (musicLines, title = 'My Song') => {
+  exportAsText: (musicLines: MusicLine[], title: string = 'My Song') => {
     let textContent = `${title}\n`
     textContent += `Generated: ${new Date().toLocaleDateString()}\n`
     textContent += `${'='.repeat(50)}\n\n`
 
     musicLines.forEach((line, index) => {
-      if (line.chords?.length > 0 || line.text) {
+      if (line.chords?.length && line.chords.length > 0 || line.text) {
         // Chords line
-        if (line.chords?.length > 0) {
+        if (line.chords?.length && line.chords.length > 0) {
           let chordLine = ''
           let maxPos = 0
           

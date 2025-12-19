@@ -1,6 +1,6 @@
 import React from 'react';
 import { useChordDisplay } from '../../contexts/ChordDisplayContext';
-import chordDataService from '../../services/ChordDataService';
+import chordDataService from '../../services/ChordDataService.tsx'
 import './ChordTooltip.css';
 
 const InlineChordDisplay = ({ chord, className = '' }) => {
