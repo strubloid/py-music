@@ -233,17 +233,21 @@
 
 .lyrics-input {
   width: 100%;
-  min-height: 50px;
-  padding: 0.4rem 0.6rem;
+
+  min-height: 60px;
+  padding: 0.6rem 0.8rem;
   border: none;
   border-radius: 3px;
-  font-family: inherit;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  font-family: inherit; /* Keep UI font consistency */
+  font-size: 27px; /* Much larger font to fill 100% width at character limit */
+  line-height: 1.6; /* Tighter line height for bigger text */
   resize: vertical;
   background: rgba(0, 0, 0, 0.4);
   color: white;
   transition: background 0.2s ease;
+  /* Ensure text wraps properly */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .lyrics-input:focus {
@@ -260,9 +264,10 @@
 
 .chords-layer {
   position: relative;
+  width: 100%;
   height: 50px;
   border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 4px;
 }
@@ -304,22 +309,10 @@
 }
 
 .lyrics-line {
-  margin-top: 8px;
+  margin-top: 0px;
 }
 
-.lyrics-input {
-  width: 100%;
-  padding: 10px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 24px;
-  font-family: inherit;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-}
+/* Duplicate lyrics-input style removed to prevent conflicts */
 
 .lyrics-input:focus {
   outline: none;

@@ -461,9 +461,22 @@ const MusicProduction = () => {
                 <input
                   type="text"
                   value={line.text || ''}
-                  onChange={(e) => updateLineText(line.id, e.target.value)}
+                  onChange={(e) => {
+                    // Strict character limit enforcement
+                    const newText = e.target.value.slice(0, 120)
+                    if (newText.length <= 120) {
+                      updateLineText(line.id, newText)
+                    }
+                  }}
+                  onKeyPress={(e) => {
+                    // Prevent typing if at character limit
+                    if (line.text && line.text.length >= 120 && e.key !== 'Backspace' && e.key !== 'Delete') {
+                      e.preventDefault()
+                    }
+                  }}
                   className="lyrics-input"
                   placeholder="Write your lyrics here..."
+                  maxLength={120}
                 />
               </div>
             </div>

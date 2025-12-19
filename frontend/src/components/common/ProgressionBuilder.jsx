@@ -141,7 +141,6 @@ const ProgressionBuilder = ({ scaleData }) => {
               className={`progression-line ${currentLine === lineIndex ? 'active' : ''}`}
             >
               <div className="line-header">
-                <span className="line-number">Line {lineIndex + 1}</span>
                 <button
                   className="line-select-button"
                   onClick={() => setCurrentProgressionLine(lineIndex)}

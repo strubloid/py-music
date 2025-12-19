@@ -70,8 +70,20 @@ const PDFExportService: PDFExportServiceType = {
           
           line.chords.forEach((chord, chordIndex) => {
             const position = line.chordPositions?.[chordIndex] || (chordIndex * 80 + 10)
-            // Fine-tuned scaling factor for precise positioning
-            const printPosition = Math.max(0, Math.min(position * 0.8, 650)) // Increased from 0.75 to 0.8
+            
+            // Dynamic positioning calculation for full-width layout
+            const pdfContentWidth = 714 // PDF usable width (794px - 80px padding)
+            
+            // Try to get actual frontend container width
+            let frontendWidth = 1200 // fallback default
+            const sampleContainer = document.querySelector('.chord-text-container')
+            if (sampleContainer) {
+              frontendWidth = sampleContainer.offsetWidth
+            }
+            
+            // Calculate proportional position: (frontend_position / frontend_width) * pdf_width
+            const positionRatio = position / frontendWidth
+            const printPosition = Math.max(0, Math.min(positionRatio * pdfContentWidth, pdfContentWidth - 60))
             
             html += `
               <span style="
@@ -165,7 +177,7 @@ const PDFExportService: PDFExportServiceType = {
       }
 
       document.body.removeChild(printContainer)
-      return pdf.save(`song-${title.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.pdf`)
+      pdf.save(`song-${title.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.pdf`)
 
     } catch (error) {
       document.body.removeChild(printContainer)
