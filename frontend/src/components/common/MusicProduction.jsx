@@ -137,8 +137,9 @@ const MusicProduction = () => {
   const updateChordPosition = (lineId, chordIndex, x) => {
     console.log('💾 updateChordPosition called:', { lineId, chordIndex, x })
     
-    // Get container for bounds checking
-    const container = document.querySelector(`[data-line-id="${lineId}"] .chord-text-container`)
+    // Get container for bounds checking - use the music line card instead
+    const lineCard = document.querySelector(`[data-line-id="${lineId}"]`)
+    const container = lineCard?.querySelector('.chord-text-container')
     
     if (container) {
       // Ensure position is within container bounds
@@ -154,20 +155,22 @@ const MusicProduction = () => {
       })
       
       // Update the chord position in state and cache
-      const updatedLines = musicLines.map(line => {
-        if (line.id === lineId) {
-          const chordPositions = { ...line.chordPositions }
-          chordPositions[chordIndex] = boundedX // Store bounded position
-          console.log('💾 Updated chord positions for line:', line.id, chordPositions)
-          return { ...line, chordPositions }
-        }
-        return line
+      setMusicLines(prev => {
+        const updatedLines = prev.map(line => {
+          if (line.id === lineId) {
+            const chordPositions = { ...line.chordPositions }
+            chordPositions[chordIndex] = boundedX // Store bounded position
+            console.log('💾 Updated chord positions for line:', line.id, chordPositions)
+            return { ...line, chordPositions }
+          }
+          return line
+        })
+        saveLyricsToCache(updatedLines)
+        console.log('✅ Position saved and cached:', updatedLines.find(l => l.id === lineId)?.chordPositions)
+        return updatedLines
       })
-      setMusicLines(updatedLines)
-      saveLyricsToCache(updatedLines)
-      console.log('✅ Position saved and cached')
     } else {
-      console.warn('❌ Container not found for position update')
+      console.warn('❌ Container not found for position update', { lineId, lineCard, container })
     }
   }
 
