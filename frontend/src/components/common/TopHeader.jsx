@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react'
-import ChordDisplaySwitch from './ChordDisplaySwitch'
-import ChordsToggle from './ChordsToggle'
 import './TopHeader.css'
 
 const TopHeader = ({ type = 'floating' }) => {
@@ -90,15 +88,6 @@ const TopHeader = ({ type = 'floating' }) => {
           <span className="button-icon">⭐</span>
           <span className="button-text">Favorites</span>
         </button>
-
-        <button
-          className={`top-button ${activePanel === 'controls' ? 'active' : ''}`}
-          onClick={() => togglePanel('controls')}
-          onMouseDown={(e) => type === 'floating' && e.stopPropagation()}
-        >
-          <span className="button-icon">🎛️</span>
-          <span className="button-text">Controls</span>
-        </button>
       </div>
 
       {/* Drag Handle - Only for floating mode */}
@@ -132,22 +121,6 @@ const TopHeader = ({ type = 'floating' }) => {
               <div className="favorites-grid">
                 <div className="favorite-item">No favorites yet</div>
                 <div className="favorite-item">Add some scales or progressions to your favorites!</div>
-              </div>
-            </div>
-          )}
-
-          {activePanel === 'controls' && (
-            <div className="controls-content">
-              <h3>Display Controls</h3>
-              <div className="controls-grid">
-                <div className="control-group">
-                  <label>Chord Display:</label>
-                  <ChordDisplaySwitch />
-                </div>
-                <div className="control-group">
-                  <label>Show Chords:</label>
-                  <ChordsToggle />
-                </div>
               </div>
             </div>
           )}

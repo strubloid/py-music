@@ -27,6 +27,19 @@
   flex-wrap: wrap;
 }
 
+.header-controls {
+  position: relative;
+  right: auto;
+  top: auto;
+  transform: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  justify-content: center;
+  width: 100%;
+}
+
 .header-icon {
   width: 2rem;
   height: 2rem;

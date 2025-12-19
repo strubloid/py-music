@@ -105,6 +105,10 @@ function App() {
               <Music className="header-icon" />
               <h1 className="header-title">Strubloid</h1>
               <h1 className="header-title">#No mi mi mi ...</h1>
+              <div className="header-controls">
+                <ChordDisplaySwitch className="chord-switch" />
+                <ChordsToggle className="chord-switch" />
+              </div>
             </div>
             <p className="header-subtitle">
               Have fun discovering scales, chords, and progressions!
