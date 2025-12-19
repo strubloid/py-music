@@ -48,8 +48,8 @@ const PDFExportService = {
           
           line.chords.forEach((chord, chordIndex) => {
             const position = line.chordPositions?.[chordIndex] || (chordIndex * 80 + 10)
-            // Match exact UI positioning - no scaling needed
-            const printPosition = Math.max(0, Math.min(position * 0.75, 650)) // Simple scaling to fit page width
+            // Fine-tuned scaling factor for precise positioning
+            const printPosition = Math.max(0, Math.min(position * 0.8, 650)) // Increased from 0.75 to 0.8
             
             html += `
               <span style="
@@ -235,8 +235,8 @@ const PDFExportService = {
           printHTML += `<div class="chords-container">`
           line.chords.forEach((chord, index) => {
             const position = line.chordPositions?.[index] || (index * 80 + 10)
-            // Match UI positioning exactly
-            const scaledPosition = Math.max(0, position * 0.6)
+            // Fine-tuned scaling for print method
+            const scaledPosition = Math.max(0, position * 0.65)
             printHTML += `<span class="chord" style="left: ${scaledPosition}px;">${chord}</span>`
           })
           printHTML += `</div>`
