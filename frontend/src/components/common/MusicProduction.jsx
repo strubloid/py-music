@@ -260,7 +260,15 @@ const MusicProduction = () => {
       return
     }
     
+    // Find the draggable element (parent of the clicked element)
+    const draggableElement = e.target.closest('.draggable-chord-diagram, .draggable-chord-text')
+    if (!draggableElement) {
+      console.log('❌ Draggable element not found')
+      return
+    }
+    
     console.log('✅ Container found:', container)
+    console.log('✅ Draggable element found:', draggableElement)
     const rect = container.getBoundingClientRect()
     const startX = e.clientX - rect.left
     
@@ -269,7 +277,7 @@ const MusicProduction = () => {
       chordIndex,
       startX,
       isDragging: true,
-      element: e.target, // Store reference to the dragged element
+      element: draggableElement, // Use the draggable container, not the inner element
       container: container // Store container reference
     }
     
@@ -278,9 +286,9 @@ const MusicProduction = () => {
     dragStateRef.current = newDragState // Update ref immediately
     
     // Add visual feedback immediately
-    e.target.style.cursor = 'grabbing'
-    e.target.style.transform = 'translateY(-1px) scale(1.05)'
-    e.target.style.zIndex = '1000'
+    draggableElement.style.cursor = 'grabbing'
+    draggableElement.style.transform = 'translateY(-1px) scale(1.05)'
+    draggableElement.style.zIndex = '1000'
     
     // Add event listeners for mouse move and up
     document.addEventListener('mousemove', handleMouseMove, { passive: false })
