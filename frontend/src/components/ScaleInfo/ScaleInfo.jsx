@@ -1,10 +1,13 @@
 import React from 'react'
+import { useChordPanel } from '../../contexts/ChordPanelContext'
 import Card from '../common/Card'
 import ChordTooltip from '../common/ChordTooltip'
+import ChordDiagram from '../common/ChordDiagram'
 import './ScaleInfo.css'
 
 const ScaleInfo = ({ scaleData }) => {
   const { scale_name, notes, scale_degrees, chords } = scaleData
+  const { showChords } = useChordPanel()
 
   return (
     <div className="scale-info-container">
@@ -19,9 +22,13 @@ const ScaleInfo = ({ scaleData }) => {
             {scale_degrees.map((degree, index) => (
               <div key={index} className="chord-column">
                 <div className="roman-numeral">{degree.roman}</div>
-                <ChordTooltip chord={degree.chord}>
-                  <div className="chord-name">{degree.chord}</div>
-                </ChordTooltip>
+                {showChords ? (
+                  <ChordDiagram chord={degree.chord} size="medium" />
+                ) : (
+                  <ChordTooltip chord={degree.chord}>
+                    <div className="chord-name">{degree.chord}</div>
+                  </ChordTooltip>
+                )}
               </div>
             ))}
           </div>
