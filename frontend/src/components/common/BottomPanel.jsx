@@ -85,7 +85,7 @@ const BottomPanel = ({ scaleData }) => {
           onMouseDown={(e) => e.stopPropagation()}
         >
           <span className="button-icon">🎼</span>
-          <span className="button-text">Building Progressions</span>
+          <span className="button-text">Progressions</span>
         </button>
         
         <button
@@ -94,7 +94,7 @@ const BottomPanel = ({ scaleData }) => {
           onMouseDown={(e) => e.stopPropagation()}
         >
           <span className="button-icon">🎧</span>
-          <span className="button-text">Music Production</span>
+          <span className="button-text">Music</span>
         </button>
       </div>
 

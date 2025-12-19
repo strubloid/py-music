@@ -130,43 +130,73 @@
 
 
 
-/* Responsive Design */
+/* Enhanced Mobile Responsiveness */
 @media (max-width: 768px) {
+  .piano-container {
+    padding: 0 0.5rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .piano-keyboard {
+    min-width: max-content;
+    margin: 0 auto;
+  }
+  
   .black-key-container {
-    width: 30px;
+    width: 28px;
   }
   
   .black-key {
-    width: 24px;
+    width: 22px;
     height: 60px;
     font-size: 0.625rem;
+    padding-bottom: 0.375rem;
   }
   
   .white-key {
-    width: 30px;
+    width: 28px;
     height: 90px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+    padding-bottom: 0.375rem;
   }
   
   .piano-legend {
     flex-direction: column;
     gap: 0.5rem;
     align-items: center;
+    margin-top: 1rem;
+  }
+  
+  .legend-item {
+    font-size: 0.875rem;
   }
 }
 
 @media (max-width: 480px) {
+  .piano-container {
+    padding: 0 0.25rem;
+  }
+  
   .black-key-container {
-    width: 25px;
+    width: 24px;
   }
   
   .black-key {
-    width: 20px;
+    width: 18px;
     height: 50px;
+    font-size: 0.55rem;
+    padding-bottom: 0.25rem;
   }
   
   .white-key {
-    width: 25px;
+    width: 24px;
     height: 75px;
+    font-size: 0.625rem;
+    padding-bottom: 0.25rem;
+  }
+  
+  .legend-item {
+    font-size: 0.8rem;
   }
 }

@@ -14,12 +14,25 @@ const Info = ({
   const [isExpanded, setIsExpanded] = useState(initialExpanded);
   const [isVisible, setIsVisible] = useState(true);
   const [dynamicPosition, setDynamicPosition] = useState({});
+  const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef(null);
   const panelRef = useRef(null);
 
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Check if panel goes off-screen and adjust position
   useEffect(() => {
-    if (isExpanded && containerRef.current && panelRef.current) {
+    if (isExpanded && containerRef.current && panelRef.current && !isMobile) {
       const container = containerRef.current;
       const panel = panelRef.current;
       const containerRect = container.getBoundingClientRect();
@@ -59,10 +72,11 @@ const Info = ({
 
       setDynamicPosition(adjustments);
     }
-  }, [isExpanded, side]);
+  }, [isExpanded, side, isMobile]);
 
   const getExpandIcon = () => {
     if (!isExpanded) {
+      if (isMobile) return <ChevronDown size={16} />;
       switch (side) {
         case 'left': return <ChevronRight size={16} />;
         case 'right': return <ChevronLeft size={16} />;
@@ -71,6 +85,7 @@ const Info = ({
         default: return <ChevronRight size={16} />;
       }
     } else {
+      if (isMobile) return <ChevronUp size={16} />;
       switch (side) {
         case 'left': return <ChevronLeft size={16} />;
         case 'right': return <ChevronRight size={16} />;
@@ -81,19 +96,35 @@ const Info = ({
     }
   };
 
+  const handleToggleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <div 
       ref={containerRef}
-      className={`info-container info-${side} ${isExpanded ? 'expanded' : 'collapsed'} ${className}`}
-      style={{
+      className={`info-container info-${side} ${isExpanded ? 'expanded' : 'collapsed'} ${isMobile ? 'mobile-layout' : ''} ${className}`}
+      style={!isMobile ? {
         [`${side === 'left' || side === 'right' ? 'top' : 'left'}`]: 
           side === 'left' || side === 'right' 
             ? `calc(50% + ${offset * 5}rem - 2.5rem)`
             : `calc(50% + ${offset * 8}rem - 4rem)`
-      }}
+      } : {}}
     >
       {/* Floating Toggle Button */}
-      <div className="info-toggle-button" onClick={() => setIsExpanded(!isExpanded)}>
+      <div 
+        className="info-toggle-button" 
+        onClick={handleToggleClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            handleToggleClick(e);
+          }
+        }}
+      >
         <div className="toggle-content">
           {icon && <span className="info-icon">{icon}</span>}
           <span className="info-title-compact">{title}</span>

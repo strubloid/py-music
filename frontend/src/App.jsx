@@ -99,7 +99,6 @@ function App() {
             <div className="header-title-container">
               <Music className="header-icon" />
               <h1 className="header-title">Strubloid</h1>
-              <p>&nbsp;</p>
               <h1 className="header-title">#No mi mi mi ...</h1>
               <div className="header-controls">
                 <ChordDisplaySwitch className="chord-switch" />
@@ -123,71 +122,74 @@ function App() {
           />
         </div>
 
-        {/* Floating Scale Degrees Panel */}
-        {scaleData && (
-          <Info 
-            title="Scale" 
-            icon="🪜"
-            side="right"
-            offset={0}
-            initialExpanded={false}
-          >
-            <div className="degrees-compact-floating">
-              {scaleData.scale_degrees.map((degree, index) => (
-                <div key={index} className="degree-compact-floating">
-                  <div className="degree-roman-floating">{degree.roman}</div>
-                  <div className="degree-chord-floating">{degree.chord}</div>
-                </div>
-              ))}
-            </div>
-          </Info>
-        )}
-
-        {/* Floating Scale Notes Panel */}
-        {scaleData && (
-          <Info 
-            title="Scale Notes" 
-            icon="🎶"
-            side="right"
-            offset={1}
-            initialExpanded={false}
-          >
-            <div className="notes-compact-floating">
-              {scaleData.notes.map((note, index) => (
-                <div
-                  key={index}
-                  className={`note-compact-floating ${index === 0 ? 'root-note' : ''}`}
-                >
-                  {note}
-                </div>
-              ))}
-            </div>
-          </Info>
-        )}
-
-        {/* Floating Secondary Dominants Panel */}
-        {scaleData && scaleData.chord_sevenths && (
-          <Info 
-            title="Secondary Dominants" 
-            icon="🎢"
-            side="right"
-            offset={2}
-            initialExpanded={false}
-          >
-            <div className="dominants-compact-floating">
-              {scaleData.chord_sevenths.map((item, index) => {
-                const romanNumerals = ["I", "ii", "iii", "IV", "V", "vi", "vii°"]
-                return (
-                  <div key={index} className="dominant-item-floating">
-                    <div className="dominant-source">{item.seventh}</div>
-                    <div className="dominant-arrow">→</div>
-                    <div className="dominant-target">{item.resolves_to}</div>
+        {/* Info Panels Container */}
+        <div className="info-panels-container">
+          {/* Floating Scale Degrees Panel */}
+          {scaleData && (
+            <Info 
+              title="Scale" 
+              icon="🪜"
+              side="right"
+              offset={0}
+              initialExpanded={false}
+            >
+              <div className="degrees-compact-floating">
+                {scaleData.scale_degrees.map((degree, index) => (
+                  <div key={index} className="degree-compact-floating">
+                    <div className="degree-roman-floating">{degree.roman}</div>
+                    <div className="degree-chord-floating">{degree.chord}</div>
                   </div>
-                )
-              })}
-            </div>
-          </Info>
-        )}
+                ))}
+              </div>
+            </Info>
+          )}
+
+          {/* Floating Scale Notes Panel */}
+          {scaleData && (
+            <Info 
+              title="Scale Notes" 
+              icon="🎶"
+              side="right"
+              offset={1}
+              initialExpanded={false}
+            >
+              <div className="notes-compact-floating">
+                {scaleData.notes.map((note, index) => (
+                  <div
+                    key={index}
+                    className={`note-compact-floating ${index === 0 ? 'root-note' : ''}`}
+                  >
+                    {note}
+                  </div>
+                ))}
+              </div>
+            </Info>
+          )}
+
+          {/* Floating Secondary Dominants Panel */}
+          {scaleData && scaleData.chord_sevenths && (
+            <Info 
+              title="Secondary Dominants" 
+              icon="🎢"
+              side="right"
+              offset={2}
+              initialExpanded={false}
+            >
+              <div className="dominants-compact-floating">
+                {scaleData.chord_sevenths.map((item, index) => {
+                  const romanNumerals = ["I", "ii", "iii", "IV", "V", "vi", "vii°"]
+                  return (
+                    <div key={index} className="dominant-item-floating">
+                      <div className="dominant-source">{item.seventh}</div>
+                      <div className="dominant-arrow">→</div>
+                      <div className="dominant-target">{item.resolves_to}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            </Info>
+          )}
+        </div>
 
         {loading && (
           <div className="loading-container">

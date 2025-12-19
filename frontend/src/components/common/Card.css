@@ -60,6 +60,7 @@
 @media (max-width: 768px) {
   .card {
     padding: 1rem;
+    width: 100%;
   }
   
   .card.large {

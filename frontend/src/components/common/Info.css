@@ -1,57 +1,111 @@
 /* Info Component Styles */
-
 .info-container {
-  position: relative;
+  position: fixed;
   z-index: 1000;
+  pointer-events: auto;
+  transition: all 0.3s ease;
 }
 
-.info-container.info-left {
-  position: fixed;
+/* Desktop positioning */
+.info-container:not(.mobile-layout).info-left {
   left: 1rem;
   top: 50%;
   transform: translateY(-50%);
 }
 
-.info-container.info-right {
-  position: fixed;
+.info-container:not(.mobile-layout).info-right {
   right: 1rem;
   top: 50%;
   transform: translateY(-50%);
 }
 
-.info-container.info-top {
-  position: fixed;
+.info-container:not(.mobile-layout).info-top {
   top: 1rem;
   left: 50%;
   transform: translateX(-50%);
 }
 
-.info-container.info-bottom {
-  position: fixed;
+.info-container:not(.mobile-layout).info-bottom {
   bottom: 1rem;
   left: 50%;
   transform: translateX(-50%);
 }
 
-/* Toggle Button Styles */
+/* Mobile layout - position at bottom of screen and expand upward */
+.info-container.mobile-layout {
+  position: fixed !important;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  top: auto !important;
+  transform: none !important;
+  width: auto !important;
+}
+
+/* Toggle Button */
 .info-toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.75rem 1rem;
   border-radius: 8px;
-  padding: 0.5rem 0.375rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  min-width: 2rem;
+  transition: all 0.2s ease;
+  min-height: 48px; /* Touch target size */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Desktop toggle button styling */
+.info-container:not(.mobile-layout) .info-toggle-button {
+  min-width: 2.5rem;
   width: 2.5rem;
+  padding: 0.5rem 0.375rem;
+  min-height: auto;
+}
+
+.info-container:not(.mobile-layout) .toggle-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Mobile toggle button styling */
+.info-container.mobile-layout .info-toggle-button {
+  width: 100%;
+  justify-content: space-between;
+  min-height: 48px;
+}
+
+.info-container.mobile-layout .toggle-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  justify-content: space-between;
 }
 
 .info-toggle-button:hover {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
+  transform: scale(1.02);
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+}
+
+.info-toggle-button:active {
+  transform: scale(1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .toggle-content {
@@ -70,6 +124,12 @@
   display: none;
 }
 
+.info-container.mobile-layout .info-title-compact {
+  display: inline;
+  color: #f3f4f6;
+  font-weight: 600;
+}
+
 .expand-icon {
   color: #9ca3af;
   transition: transform 0.2s ease;
@@ -80,44 +140,92 @@
   transform: rotate(180deg);
 }
 
-/* Panel Styles */
+.info-toggle-button:focus {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+/* Info Panel */
 .info-panel {
-  position: absolute;
   background: rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 16px;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
-  min-width: 300px;
-  max-width: 400px;
-  animation: slideIn 0.3s ease;
   overflow: hidden;
+  transition: all 0.3s ease;
+  animation: slideIn 0.3s ease;
 }
 
-/* Panel positioning based on side */
-.info-left .info-panel {
+/* Desktop panel positioning */
+.info-container:not(.mobile-layout) .info-panel {
+  position: absolute;
+  min-width: 300px;
+  max-width: 400px;
+}
+
+.info-container:not(.mobile-layout).info-left .info-panel {
   left: calc(100% + 0.75rem);
   top: 0;
 }
 
-.info-right .info-panel {
+.info-container:not(.mobile-layout).info-right .info-panel {
   right: calc(100% + 0.75rem);
   top: 0;
 }
 
-.info-top .info-panel {
+.info-container:not(.mobile-layout).info-top .info-panel {
   top: calc(100% + 0.75rem);
   left: 50%;
   transform: translateX(-50%);
 }
 
-.info-bottom .info-panel {
+.info-container:not(.mobile-layout).info-bottom .info-panel {
   bottom: calc(100% + 0.75rem);
   left: 50%;
   transform: translateX(-50%);
 }
 
-/* Header Styles */
+/* Mobile panel positioning */
+.info-container.mobile-layout .info-panel {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Panel animations */
+.info-container.collapsed .info-panel {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.95);
+  pointer-events: none;
+}
+
+.info-container.mobile-layout.collapsed .info-panel {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+
+.info-container.expanded .info-panel {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.info-container.mobile-layout.expanded .info-panel {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Panel Header */
 .info-header {
   display: flex;
   justify-content: space-between;
@@ -160,6 +268,8 @@
   cursor: pointer;
   color: #9ca3af;
   transition: all 0.2s ease;
+  min-width: 32px;
+  min-height: 32px;
 }
 
 .visibility-button:hover,
@@ -168,7 +278,7 @@
   color: #d1d5db;
 }
 
-/* Content Styles */
+/* Panel Content */
 .info-content {
   padding: 1.25rem;
   animation: fadeIn 0.3s ease;
@@ -195,32 +305,85 @@
   }
 }
 
-/* Responsive adjustments */
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
-  .info-container.info-left,
-  .info-container.info-right {
-    position: relative;
-    left: auto;
-    right: auto;
-    top: auto;
-    transform: none;
-  }
-  
-  .info-panel {
-    min-width: 280px;
-    max-width: 90vw;
-  }
-  
-  .info-left .info-panel,
-  .info-right .info-panel {
-    left: 0;
-    right: 0;
-    top: calc(100% + 0.5rem);
+  /* Force mobile layout on all info containers */
+  .info-container {
+    position: fixed !important;
+    bottom: 1rem !important;
+    left: 1rem !important;
+    right: 1rem !important;
+    top: auto !important;
+    transform: none !important;
+    width: auto !important;
   }
   
   .info-toggle-button {
-    width: 100%;
-    justify-content: center;
+    width: 100% !important;
+    min-height: 48px !important;
+    padding: 0.75rem 1rem !important;
+    justify-content: space-between !important;
+  }
+  
+  .toggle-content {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+  
+  .info-title-compact {
+    display: inline !important;
+    color: #f3f4f6 !important;
+    font-weight: 600 !important;
+  }
+  
+  .info-panel {
+    position: absolute !important;
+    bottom: calc(100% + 0.5rem) !important;
+    left: 0 !important;
+    right: 0 !important;
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+    min-width: auto !important;
+    max-width: none !important;
+  }
+  
+  .info-container.collapsed .info-panel {
+    transform: translateY(20px) !important;
+  }
+  
+  .info-container.expanded .info-panel {
+    transform: translateY(0) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .info-container {
+    bottom: 0.5rem !important;
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+  }
+  
+  .info-toggle-button {
+    font-size: 0.8rem !important;
+    padding: 0.625rem 0.75rem !important;
+    min-height: 44px !important;
+  }
+  
+  .info-header {
+    padding: 0.75rem 1rem !important;
+  }
+  
+  .info-content {
+    padding: 1rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  .info-panel {
+    max-height: 50vh !important;
   }
 }
 

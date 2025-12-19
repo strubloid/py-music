@@ -52,6 +52,7 @@
 
 .frets-row {
   display: flex;
+  flex-shrink: 0; /* Prevent shrinking for mobile scroll */
 }
 
 .fret-cell {
@@ -192,55 +193,125 @@
 
 
 
-/* Responsive Design */
+/* Enhanced Mobile Responsiveness */
 @media (max-width: 768px) {
   .fretboard-container {
-    padding: 1rem;
+    padding: 0.75rem 0.5rem;
   }
   
   .fretboard-title {
     font-size: 1.25rem;
     margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  .fretboard-scroll {
+    padding-bottom: 0.75rem;
+    margin: 0 -0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    /* Ensure horizontal scrolling shows all frets */
+    width: 100%;
+    min-width: 100%;
+  }
+  
+  .fretboard-content {
+    /* Force minimum width to show all 13 frets */
+    min-width: calc(13 * 2.5rem + 3rem);
+    margin: 0;
   }
   
   .string-label-header,
   .string-name {
     width: 3rem;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    flex-shrink: 0;
   }
   
   .fret-number {
     width: 2.5rem;
     font-size: 0.75rem;
+    flex-shrink: 0;
   }
   
   .fret-cell {
     width: 2.5rem;
     height: 1.5rem;
+    flex-shrink: 0;
+  }
+  
+  .frets-row {
+    display: flex;
+    flex-shrink: 0;
   }
   
   .note-dot {
-    width: 1.25rem;
-    height: 1.25rem;
-    font-size: 0.625rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    font-size: 0.6rem;
+    font-weight: 600;
   }
   
   .fretboard-legend {
     flex-direction: column;
     gap: 0.5rem;
     align-items: center;
+    margin-top: 1rem;
+  }
+  
+  .legend-item {
+    font-size: 0.875rem;
   }
 }
 
 @media (max-width: 480px) {
-  .fret-number,
+  .fretboard-container {
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .fretboard-title {
+    font-size: 1.125rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .fretboard-scroll {
+    margin: 0 -0.25rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+  
+  .fretboard-content {
+    /* Force minimum width to show all 13 frets on small screens */
+    min-width: calc(13 * 2rem + 2.5rem);
+  }
+  
+  .string-label-header,
+  .string-name {
+    width: 2.5rem;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+  
+  .fret-number {
+    width: 2rem;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+  }
+  
   .fret-cell {
     width: 2rem;
+    height: 1.25rem;
+    flex-shrink: 0;
   }
   
   .note-dot {
     width: 1rem;
     height: 1rem;
-    font-size: 0.5rem;
+    font-size: 0.55rem;
+    font-weight: 600;
+  }
+  
+  .legend-item {
+    font-size: 0.8rem;
   }
 }
