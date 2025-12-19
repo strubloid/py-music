@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useChordPanel } from '../../contexts/ChordPanelContext'
+import { jsPDF } from 'jspdf'
+import html2canvas from 'html2canvas'
+import PDFExportService from '../../services/PDFExportService'
 import './MusicProduction.css'
 
 // Cache key for storing lyrics data
 const LYRICS_CACHE_KEY = 'music-production-lyrics'
-
-// Note: jsPDF is dynamically imported in the export function to reduce bundle size
 
 const MusicProduction = () => {
   const { progressionLines } = useChordPanel()
@@ -13,6 +14,9 @@ const MusicProduction = () => {
   // Music lines structure: each line has chords and corresponding text sections
   const [musicLines, setMusicLines] = useState([])
   const [dragState, setDragState] = useState(null)
+  const [isExporting, setIsExporting] = useState(false)
+  const [showExportMenu, setShowExportMenu] = useState(false)
+  const printContainerRef = useRef(null)
 
   // Refs to avoid stale closures
   const dragStateRef = React.useRef(null)
@@ -26,6 +30,23 @@ const MusicProduction = () => {
   useEffect(() => {
     musicLinesRef.current = musicLines
   }, [musicLines])
+
+  // Close export menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showExportMenu && !event.target.closest('.export-dropdown')) {
+        setShowExportMenu(false)
+      }
+    }
+    
+    if (showExportMenu) {
+      document.addEventListener('click', handleClickOutside)
+    }
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [showExportMenu])
 
   // Cache functions
   const saveLyricsToCache = (lines) => {
@@ -128,6 +149,26 @@ const MusicProduction = () => {
 
   const updateChordPosition = (lineId, chordIndex, x) => {
     console.log('💾 updateChordPosition called:', { lineId, chordIndex, x })
+    
+    // Get both container and input info for debugging
+    const container = document.querySelector(`[data-line-id="${lineId}"] .chord-text-container`)
+    const input = document.querySelector(`[data-line-id="${lineId}"] .lyrics-input`)
+    
+    if (container && input) {
+      const inputStyle = window.getComputedStyle(input)
+      const usableWidth = input.offsetWidth - 
+        parseFloat(inputStyle.paddingLeft) - 
+        parseFloat(inputStyle.paddingRight)
+        
+      console.log('🔍 Debug info:', {
+        containerWidth: container.offsetWidth,
+        inputWidth: input.offsetWidth,
+        usableWidth: usableWidth,
+        positionAsPercentageOfUsable: ((x / usableWidth) * 100).toFixed(1) + '%',
+        positionAsPercentageOfContainer: ((x / container.offsetWidth) * 100).toFixed(1) + '%'
+      })
+    }
+    
     // Update the chord position in state and cache
     const updatedLines = musicLines.map(line => {
       if (line.id === lineId) {
@@ -289,120 +330,94 @@ const MusicProduction = () => {
     }
   }
 
-  const exportSong = async () => {
+  const handleExport = async (type) => {
+    setIsExporting(true)
+    setShowExportMenu(false)
+    
     try {
-      // Dynamically import jsPDF
-      const { jsPDF } = await import('jspdf')
-      const doc = new jsPDF()
-      
-      // PDF settings
-      const pageWidth = doc.internal.pageSize.getWidth()
-      const margin = 20
-      let yPosition = margin + 10
-      
-      // Title
-      doc.setFontSize(20)
-      doc.setFont('helvetica', 'bold')
-      doc.text('My Song', margin, yPosition)
-      
-      yPosition += 10
-      doc.setFontSize(10)
-      doc.setFont('helvetica', 'normal')
-      doc.text(`Generated: ${new Date().toLocaleDateString()}`, margin, yPosition)
-      
-      yPosition += 20
-      
-      // Process each line with accurate chord positioning
-      musicLines.forEach((line, index) => {
-        if (line.chords.length > 0 || line.text) {
-          if (yPosition > 250) { // New page if needed
-            doc.addPage()
-            yPosition = margin + 10
-          }
+      switch (type) {
+        case 'pdf-hq':
+          await PDFExportService.exportAsHighQualityPDF(musicLines, {
+            title: 'My Song',
+            fontSize: 14,
+            chordFontSize: 14,
+            lineSpacing: 25,
+            showChords: true,
+            showLyrics: true
+          })
+          break
           
-          // Line number
-          doc.setFontSize(12)
-          doc.setFont('helvetica', 'bold')
-          doc.text(`Line ${index + 1}:`, margin, yPosition)
-          yPosition += 15
+        case 'print':
+          PDFExportService.exportViaPrint(musicLines, { title: 'My Song' })
+          break
           
-          const text = line.text || ''
-          const chords = line.chords || []
+        case 'text':
+          PDFExportService.exportAsText(musicLines, 'My Song')
+          break
           
-          if (chords.length > 0) {
-            // Calculate accurate chord positions based on text content
-            const chordPositions = calculateChordPositions(text, chords, line.chordPositions || {})
-            
-            // Draw chords
-            doc.setFontSize(11)
-            doc.setFont('helvetica', 'bold')
-            chordPositions.forEach(({ chord, xPos }) => {
-              doc.text(chord, margin + xPos, yPosition)
-            })
-            
-            yPosition += 15
-          }
-          
-          // Draw lyrics
-          if (text) {
-            doc.setFontSize(11)
-            doc.setFont('helvetica', 'normal')
-            
-            // Split long lines if needed
-            const textLines = doc.splitTextToSize(text, pageWidth - (margin * 2))
-            textLines.forEach(textLine => {
-              doc.text(textLine, margin, yPosition)
-              yPosition += 12
-            })
-          }
-          
-          yPosition += 10 // Space between lines
-        }
-      })
+        default:
+          // Fallback to high-quality PDF
+          await PDFExportService.exportAsHighQualityPDF(musicLines)
+      }
       
-      // Save PDF
-      doc.save(`song-${Date.now()}.pdf`)
-      console.log('Song exported to PDF successfully!')
+      console.log(`✅ Export completed: ${type}`)
       
     } catch (error) {
-      console.error('PDF export failed:', error)
-      alert('PDF export failed. Make sure you have internet connection for the first time loading the PDF library.')
+      console.error('❌ Export failed:', error)
+      alert(`Export failed: ${error.message}`)
+    } finally {
+      setIsExporting(false)
     }
   }
   
-  // Calculate accurate chord positions based on text and pixel positions
-  const calculateChordPositions = (text, chords, pixelPositions) => {
+  // Calculate accurate chord positions based on interface pixel positions
+  const calculateChordPositions = (text, chords, pixelPositions, lineIndex) => {
     const positions = []
-    const avgCharWidth = 5.8 // PDF character width
-    const textAreaWidth = 400 // Approximate text area width in the interface
     
     chords.forEach((chord, index) => {
       let xPos = 0
       
-      if (pixelPositions[index] !== undefined && text.length > 0) {
-        // Convert pixel position to character position
+      if (pixelPositions[index] !== undefined) {
+        // Use exact pixel position from interface
         const pixelPos = pixelPositions[index]
         
-        // Calculate percentage of text area width
-        const positionRatio = pixelPos / textAreaWidth
+        const PDF_TEXT_WIDTH = 140 // Available width for text in PDF (mm)
         
-        // Map to character position in text
-        const charPosition = Math.floor(positionRatio * text.length)
+        // PROPORTIONAL POSITIONING: Direct mathematical relationship
+        // Get the actual interface container width dynamically
+        let interfaceWidth = 1497 // Default from your logs
         
-        // Convert to PDF units, ensuring we don't go beyond text
-        xPos = Math.max(0, Math.min(charPosition * avgCharWidth, (text.length - 1) * avgCharWidth))
-      } else {
-        // Default positioning - spread evenly across the text
-        if (text.length > 0) {
-          const textWidth = text.length * avgCharWidth
-          const spacing = textWidth / (chords.length + 1)
-          xPos = spacing * (index + 1) - (chord.length * avgCharWidth / 2)
-        } else {
-          xPos = index * 40 // Fallback spacing
+        // Try to get real interface width if available
+        const currentContainer = document.querySelector('.chord-text-container')
+        if (currentContainer) {
+          interfaceWidth = currentContainer.offsetWidth
         }
+        
+        // Calculate position as percentage of interface width
+        const positionPercentage = pixelPos / interfaceWidth
+        
+        // Apply same percentage to PDF text width
+        xPos = positionPercentage * PDF_TEXT_WIDTH
+        
+        // Ensure bounds
+        xPos = Math.max(0, Math.min(xPos, PDF_TEXT_WIDTH - 5))
+        
+        // Debugging information
+        console.log(`📄 PROPORTIONAL MAPPING: Chord "${chord}"`)
+        console.log(`   - Interface pixel: ${pixelPos}px`)
+        console.log(`   - Interface width: ${interfaceWidth}px`)
+        console.log(`   - Position percentage: ${(positionPercentage * 100).toFixed(1)}%`)
+        console.log(`   - PDF position: ${xPos.toFixed(2)}mm`)
+        console.log(`   - PDF width: ${PDF_TEXT_WIDTH}mm`)
+        console.log(`   - Text: "${text.trim()}"`)
+      } else {
+        // Default positioning for chords without saved positions
+        const spacing = 140 / (chords.length + 1)
+        xPos = spacing * (index + 1) - 5
+        xPos = Math.max(0, xPos)
       }
       
-      positions.push({ chord, xPos: Math.max(0, xPos) })
+      positions.push({ chord, xPos })
     })
     
     return positions
@@ -414,9 +429,31 @@ const MusicProduction = () => {
         <div className="header-content">
           <h2 className="panel-title">Create your Shit</h2>
           <div className="panel-actions">
-            <button onClick={exportSong} className="action-button">
-              Export PDF
-            </button>
+            <div className="export-dropdown">
+              <button 
+                onClick={() => setShowExportMenu(!showExportMenu)} 
+                className="action-button"
+                disabled={isExporting}
+              >
+                {isExporting ? 'Exporting...' : 'Export ▼'}
+              </button>
+              {showExportMenu && !isExporting && (
+                <div className="export-menu">
+                  <button onClick={() => handleExport('pdf-hq')} className="export-option">
+                    <span className="export-icon">📄</span>
+                    High-Quality PDF
+                  </button>
+                  <button onClick={() => handleExport('print')} className="export-option">
+                    <span className="export-icon">🖨️</span>
+                    Print/Browser PDF
+                  </button>
+                  <button onClick={() => handleExport('text')} className="export-option">
+                    <span className="export-icon">📝</span>
+                    Text File
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <div className="header-divider"></div>
