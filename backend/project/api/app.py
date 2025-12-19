@@ -7,10 +7,10 @@ import os
 # Add the parent directory to sys.path so we can import from src
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from src.music.chords.intervals.Major import MajorInterval
-from src.music.chords.intervals.Minor import MinorInterval
-from src.llm.ChatGPT import ChatGPT
-from src.music.Music import Music, get_roman_numeral, get_function_name, generate_fretboard_data
+from backend.project.music.chords.intervals.Major import MajorInterval
+from backend.project.music.chords.intervals.Minor import MinorInterval
+from backend.project.llm.ChatGPT import ChatGPT
+from backend.project.music.Music import Music, get_roman_numeral, get_function_name, generate_fretboard_data
 
 # Load environment variables
 load_dotenv()

@@ -3,12 +3,12 @@ import sys
 import os
 from pathlib import Path
 
-# Add src to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'src'))
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from src.music.chords.intervals.Major import MajorInterval
-from src.music.chords.intervals.Minor import MinorInterval
-from src.music.Music import Music
+from backend.project.music.chords.intervals.Major import MajorInterval
+from backend.project.music.chords.intervals.Minor import MinorInterval
+from backend.project.music.Music import Music
 
 INTERVALS = {
     'major': MajorInterval,

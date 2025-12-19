@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
-from src.music.chords.intervals.Major import MajorInterval
-from src.llm.ChatGPT import ChatGPT
-from src.music.Music import Music
+from backend.project.music.chords.intervals.Major import MajorInterval
+from backend.project.llm.ChatGPT import ChatGPT
+from backend.project.music.Music import Music
 
 ## Loading environment variables
 load_dotenv()
