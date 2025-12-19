@@ -5,8 +5,8 @@ import sys
 import os
 from pathlib import Path
 
-# Add the project root to sys.path
-project_root = Path(__file__).parent.parent.parent
+# Add the project root to sys.path (need to go up 3 levels: api -> project -> backend -> root)
+project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from backend.project.music.chords.intervals.Major import MajorInterval
