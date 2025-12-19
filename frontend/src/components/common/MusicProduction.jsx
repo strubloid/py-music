@@ -480,7 +480,7 @@ const MusicProduction = () => {
               <div className="card-glow"></div>            
             <div className="chord-text-container" data-line-id={line.id}>
               {/* Draggable Chord Diagrams Layer */}
-              <div className="chords-layer">
+              <div className={`chords-layer ${showChords ? 'has-diagrams' : 'has-text'}`}>
                 {line.chords.map((chord, chordIndex) => {
                   // Calculate positioning based on display mode
                   const containerWidth = showChords ? 600 : 400; 

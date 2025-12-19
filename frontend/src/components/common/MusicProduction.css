@@ -95,13 +95,27 @@
   font-size: 12px;
 }
 
-.chords-layer {
-  position: relative;
-  height: 120px; /* Increased height for chord diagrams */
-  margin-bottom: 10px;
+/* Add conditional height classes for chords layer */
+.chords-layer.has-diagrams {
+  min-height: 120px; /* Larger height for chord diagrams */
 }
 
+.chords-layer.has-text {
+  min-height: 50px; /* Smaller height for text chords */
+}
 
+.chords-layer {
+  position: relative;
+  width: 100%;
+  min-height: 50px; /* Base minimum height */
+  height: auto; /* Allow dynamic height */
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  padding-bottom: 8px; /* Add padding to accommodate chord diagrams */
+  transition: min-height 0.3s ease; /* Smooth height transition */
+}
 
 .action-button {
   padding: 0.5rem 1rem;
@@ -318,15 +332,6 @@
   min-height: 80px;
 }
 
-.chords-layer {
-  position: relative;
-  width: 100%;
-  height: 50px;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
-  margin-bottom: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 4px;
-}
 
 .draggable-chord {
   position: absolute;
