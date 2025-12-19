@@ -66,7 +66,7 @@ const PDFExportService: PDFExportServiceType = {
 
         // Chords with accurate positioning
         if (line.chords?.length && line.chords.length > 0 && showChords) {
-          html += `<div style="position: relative; height: 35px; margin-bottom: 5px;">`
+          html += `<div style="position: relative; height: 10px; margin: 0;">`
           
           line.chords.forEach((chord, chordIndex) => {
             const position = line.chordPositions?.[chordIndex] || (chordIndex * 80 + 10)
@@ -83,22 +83,37 @@ const PDFExportService: PDFExportServiceType = {
             
             // Calculate proportional position: (frontend_position / frontend_width) * pdf_width
             const positionRatio = position / frontendWidth
-            const printPosition = Math.max(0, Math.min(positionRatio * pdfContentWidth, pdfContentWidth - 60))
+            // Adjust positioning for chord length to prevent overflow
+            const chordWidth = chord.length * 6 // estimate chord width
+            const printPosition = Math.max(0, Math.min(positionRatio * pdfContentWidth, pdfContentWidth - chordWidth - 10))
             
             html += `
-              <span style="
+              <div style="
                 position: absolute;
                 left: ${printPosition}px;
-                font-weight: bold;
-                font-size: ${chordFontSize}px;
-                color: #2c3e50;
+                top: 0px;
                 background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-                padding: 6px 12px;
-                border-radius: 15px;
+                border-radius: 4px;
                 border: 1px solid #dee2e6;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                font-family: 'Arial', sans-serif;
-              ">${chord}</span>
+                box-shadow: none;
+                display: inline-block;
+                padding: 0;
+                margin: 0;
+              ">
+                <div style="
+                  display: block;
+                  position: relative;
+                  top: -8px;
+                  margin: 0;
+                  font-weight: bold;
+                  font-size: ${chordFontSize}px;
+                  color: #2c3e50;
+                  padding: 1px 4px;
+                  font-family: 'Arial', sans-serif;
+                  line-height: ${chordFontSize}px;
+                  text-align: center;
+                ">${chord}</div>
+              </div>
             `
           })
           
@@ -109,10 +124,12 @@ const PDFExportService: PDFExportServiceType = {
         if (line.text && showLyrics) {
           html += `
             <div style="
+              position: relative;
+              top: -2px;
               font-size: ${fontSize}px;
               line-height: 1.8;
               color: #2c3e50;
-              padding: 12px 0;
+              padding: 8px 0;
               border-bottom: 1px dotted #bdc3c7;
               font-family: 'Georgia', serif;
             ">${line.text}</div>
