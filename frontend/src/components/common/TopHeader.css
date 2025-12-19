@@ -1,0 +1,253 @@
+/* Top Header Styles */
+.top-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  z-index: 3000;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  min-height: 60px;
+  transition: height 0.1s ease-out;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Block mode - takes up normal document flow instead of fixed positioning */
+.top-header.block {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+}
+
+/* Floating mode - specific styles for fixed positioning */
+.top-header.floating {
+  position: fixed;
+}
+
+.panel-drag-handle.bottom {
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  right: 0;
+  height: 10px;
+  cursor: ns-resize;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  z-index: 3002;
+}
+
+.drag-indicator {
+  width: 40px;
+  height: 4px;
+  background: rgba(102, 126, 234, 0.6);
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.panel-drag-handle:hover .drag-indicator,
+.drag-indicator.dragging {
+  background: rgba(102, 126, 234, 0.9);
+  width: 60px;
+  height: 6px;
+}
+
+.top-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  z-index: 3001;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Block mode controls styling */
+.top-header.block .top-controls {
+  border-radius: 12px 12px 0 0;
+}
+
+.top-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.top-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.top-button.active {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.button-icon {
+  font-size: 1.2rem;
+}
+
+.button-text {
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Panel Content */
+.top-panel-content {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  overflow-y: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.top-panel-content.floating {
+  height: calc(100% - 60px);
+  max-height: calc(50vh - 60px);
+}
+
+.top-panel-content.block {
+  height: auto;
+  max-height: none;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* Content sections */
+.shortcuts-content h3,
+.favorites-content h3,
+.controls-content h3 {
+  margin: 0 0 1rem 0;
+  color: #4a5568;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.shortcuts-grid,
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.shortcut-item {
+  padding: 0.75rem 1rem;
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 8px;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.shortcut-item:hover {
+  background: rgba(102, 126, 234, 0.2);
+  transform: translateY(-1px);
+}
+
+.favorite-item {
+  padding: 0.75rem 1rem;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  border-radius: 8px;
+  color: #4a5568;
+}
+
+.controls-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 8px;
+}
+
+.control-group label {
+  color: #4a5568;
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .top-controls {
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  
+  .top-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .button-text {
+    display: none;
+  }
+  
+  .shortcuts-grid,
+  .favorites-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .control-group {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+}
+
+/* Ensure proper spacing when in block mode */
+.top-header.block + * {
+  margin-top: 0;
+}
+
+/* Animation for smooth expand/collapse */
+.top-header {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Ensure content doesn't overlap with floating header */
+.app-container:has(.top-header.floating) .main-content {
+  padding-top: 5rem; /* Ensure top padding when floating header is present */
+}
+
+/* Adjust when panel is expanded in floating mode */
+.app-container:has(.top-header.floating .top-panel-content) .main-content {
+  padding-top: 1rem; /* Reduce padding when panel is expanded as it will provide the necessary space */
+}
