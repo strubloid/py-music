@@ -3,9 +3,11 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import sys
 import os
+from pathlib import Path
 
-# Add the parent directory to sys.path so we can import from src
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+# Add the project root to sys.path
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 from backend.project.music.chords.intervals.Major import MajorInterval
 from backend.project.music.chords.intervals.Minor import MinorInterval

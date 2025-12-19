@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent))
+
 from dotenv import load_dotenv
 from backend.project.music.chords.intervals.Major import MajorInterval
 from backend.project.llm.ChatGPT import ChatGPT
