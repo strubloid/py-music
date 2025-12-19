@@ -9,7 +9,7 @@
 .main-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 5rem 0.75rem 8rem 0.75rem; /* Increased top and bottom padding to account for top and bottom panels */
+  padding: 7rem 0.75rem 8rem 0.75rem
 }
 
 .app-header {
@@ -211,7 +211,7 @@
 /* Enhanced Mobile Responsiveness */
 @media (max-width: 768px) {
   .main-content {
-    padding: 0.5rem 0.5rem 5rem 0.5rem;
+    padding: 7rem 0.75rem 8rem 0.75rem;
   }
   
   .app-header {
@@ -266,7 +266,7 @@
 
 @media (max-width: 480px) {
   .main-content {
-    padding: 0.25rem 0.25rem 6rem 0.25rem; /* Increased bottom padding for bottom panel */
+    padding: 7rem 0.75rem 8rem 0.75rem;
   }
   
   .header-title {

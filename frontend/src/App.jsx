@@ -27,7 +27,6 @@ function App() {
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('scale')
   const [availableIntervals, setAvailableIntervals] = useState([])
-  const [headerType, setHeaderType] = useState('floating') // New state for header type
 
   useEffect(() => {
     fetchAvailableIntervals()
@@ -96,7 +95,7 @@ function App() {
       <ChordPanelProvider>
         <div className="app-container">
           {/* Top Header with shortcuts and controls */}
-          <TopHeader type={headerType} />
+          <TopHeader />
           
           <div className="main-content">
             {/* Header */}
@@ -113,37 +112,6 @@ function App() {
             <p className="header-subtitle">
               Have fun discovering scales, chords, and progressions!
             </p>
-            <div style={{ 
-              margin: '1rem 0', 
-              padding: '1rem', 
-              background: 'rgba(255, 255, 255, 0.1)', 
-              borderRadius: '8px',
-              textAlign: 'center'
-            }}>
-              <label style={{ marginRight: '1rem', fontSize: '0.9rem' }}>
-                Header Mode: 
-              </label>
-              <label style={{ marginRight: '1rem', cursor: 'pointer' }}>
-                <input 
-                  type="radio" 
-                  value="floating" 
-                  checked={headerType === 'floating'} 
-                  onChange={(e) => setHeaderType(e.target.value)}
-                  style={{ marginRight: '0.5rem' }}
-                />
-                Floating
-              </label>
-              <label style={{ cursor: 'pointer' }}>
-                <input 
-                  type="radio" 
-                  value="block" 
-                  checked={headerType === 'block'} 
-                  onChange={(e) => setHeaderType(e.target.value)}
-                  style={{ marginRight: '0.5rem' }}
-                />
-                Block
-              </label>
-            </div>
           </header>
 
         {/* Key and Interval Selectors - Now center positioned */}

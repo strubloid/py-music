@@ -244,10 +244,10 @@
 
 /* Ensure content doesn't overlap with floating header */
 .app-container:has(.top-header.floating) .main-content {
-  padding-top: 5rem; /* Ensure top padding when floating header is present */
+  padding-top: 7rem; /* Ensure top padding when floating header is present */
 }
 
 /* Adjust when panel is expanded in floating mode */
 .app-container:has(.top-header.floating .top-panel-content) .main-content {
-  padding-top: 1rem; /* Reduce padding when panel is expanded as it will provide the necessary space */
+  padding-top: 7rem; /* Reduce padding when panel is expanded as it will provide the necessary space */
 }

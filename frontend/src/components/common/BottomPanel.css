@@ -172,6 +172,9 @@
     width: 1rem;
     height: 1rem;
     flex-shrink: 0;
+    position: relative;
+    top: -6px;
+    left: -7px;
   }
 
   .bottom-panel-content {
