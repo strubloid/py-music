@@ -316,7 +316,6 @@ const MusicProduction = () => {
 
   const handleExport = async (type) => {
     setIsExporting(true)
-    setShowExportMenu(false)
     
     try {
       switch (type) {
