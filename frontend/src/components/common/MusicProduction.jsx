@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useChordPanel } from '../../contexts/ChordPanelContext'
-import { useChordDisplay } from '../../contexts/ChordDisplayContext'
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
 import PDFExportService from '../../services/PDFExportService.tsx'
@@ -11,8 +10,7 @@ import './MusicProduction.css'
 const LYRICS_CACHE_KEY = 'music-production-lyrics'
 
 const MusicProduction = () => {
-  const { progressionLines } = useChordPanel()
-  const { showChordDiagrams, toggleChordDiagrams } = useChordDisplay()
+  const { progressionLines, showChords } = useChordPanel()
   
   // Music lines structure: each line has chords and corresponding text sections
   const [musicLines, setMusicLines] = useState([])
@@ -158,7 +156,7 @@ const MusicProduction = () => {
     if (container) {
       // Ensure position is within container bounds
       const containerWidth = container.offsetWidth;
-      const chordWidth = showChordDiagrams ? 90 : 50; // Adjust based on display mode
+      const chordWidth = showChords ? 90 : 50; // Adjust based on display mode
       const boundedX = Math.max(0, Math.min(x, containerWidth - chordWidth));
       
       console.log('🔍 Position info:', {
@@ -208,7 +206,7 @@ const MusicProduction = () => {
     }
     
     const rect = container.getBoundingClientRect()
-    const chordWidth = showChordDiagrams ? 90 : 50; // Match the display mode
+    const chordWidth = showChords ? 90 : 50; // Match the display mode
     const maxX = rect.width - chordWidth;
     const x = Math.max(0, Math.min(e.clientX - rect.left, maxX))
     console.log('🎯 Calculated position:', { x, containerWidth: rect.width, maxX, mouseRelative: e.clientX - rect.left })
@@ -241,7 +239,7 @@ const MusicProduction = () => {
     const container = currentDragState.container
     if (container) {
       const rect = container.getBoundingClientRect()
-      const chordWidth = showChordDiagrams ? 90 : 50;
+      const chordWidth = showChords ? 90 : 50;
       const maxX = rect.width - chordWidth;
       const x = Math.max(0, Math.min(e.clientX - rect.left, maxX))
       console.log('💾 Saving final position:', x)
@@ -454,13 +452,7 @@ const MusicProduction = () => {
         <div className="header-content">
           <h2 className="panel-title">Create your Shit</h2>
           <div className="panel-actions">
-            <button 
-              onClick={toggleChordDiagrams}
-              className="action-button toggle-chord-display"
-              title={showChordDiagrams ? 'Show chord names' : 'Show chord diagrams'}
-            >
-              {showChordDiagrams ? '🎸 → ABC' : 'ABC → 🎸'}
-            </button>
+            
             <button 
               onClick={() => handleExport('pdf-hq')} 
               className="action-button"
@@ -491,8 +483,8 @@ const MusicProduction = () => {
               <div className="chords-layer">
                 {line.chords.map((chord, chordIndex) => {
                   // Calculate positioning based on display mode
-                  const containerWidth = showChordDiagrams ? 600 : 400; 
-                  const chordWidth = showChordDiagrams ? 90 : 50; 
+                  const containerWidth = showChords ? 600 : 400; 
+                  const chordWidth = showChords ? 90 : 50; 
                   const totalChords = line.chords.length;
                   
                   let defaultPosition = 0;
@@ -511,7 +503,7 @@ const MusicProduction = () => {
                   return (
                     <div 
                       key={`chord-${line.id}-${chordIndex}`}
-                      className={showChordDiagrams ? "draggable-chord-diagram" : "draggable-chord-text"}
+                      className={showChords ? "draggable-chord-diagram" : "draggable-chord-text"}
                       style={{ 
                         left: `${finalPosition}px`,
                         position: 'absolute',
@@ -520,7 +512,7 @@ const MusicProduction = () => {
                       }}
                       onMouseDown={(e) => handleChordMouseDown(e, line.id, chordIndex)}
                     >
-                      {showChordDiagrams ? (
+                      {showChords ? (
                         <ChordDiagram chord={chord} size="medium" />
                       ) : (
                         <div className="chord-text-display">

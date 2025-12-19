@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { useChordPanel } from '../../contexts/ChordPanelContext'
-import { useChordDisplay } from '../../contexts/ChordDisplayContext'
 import ChordTooltip from './ChordTooltip'
 import ChordDiagram from './ChordDiagram'
 import InlineChordDisplay from './InlineChordDisplay'
@@ -18,7 +17,6 @@ const ProgressionBuilder = ({ scaleData }) => {
     setCurrentProgressionLine,
     showChords
   } = useChordPanel()
-  const { showChordDiagrams } = useChordDisplay()
   
 
 
@@ -105,7 +103,7 @@ const ProgressionBuilder = ({ scaleData }) => {
                 onClick={() => addChord(degree.chord)}
                 title={`${degree.roman} - ${degree.chord}`}
               >
-                {showChordDiagrams ? (
+                {showChords ? (
                   <ChordDiagram chord={degree.chord} size="small" />
                 ) : (
                   <span className="chord-text-display">{degree.chord}</span>
@@ -125,7 +123,7 @@ const ProgressionBuilder = ({ scaleData }) => {
                 onClick={() => addChord(seventhData.seventh)}
                 title={`Resolves to ${seventhData.resolves_to}`}
               >
-                {showChordDiagrams ? (
+                {showChords ? (
                   <ChordDiagram chord={seventhData.seventh} size="small" />
                 ) : (
                   <span className="chord-text-display">{seventhData.seventh}</span>
@@ -179,7 +177,7 @@ const ProgressionBuilder = ({ scaleData }) => {
                   line.map((chord, chordIndex) => (
                     <div key={chordIndex} className="progression-chord-item">
                       <div className="chord-with-diagram">
-                        {showChordDiagrams ? (
+                        {showChords ? (
                           <ChordDiagram chord={chord} size="medium" />
                         ) : (
                           <div className="chord-text-large">{chord}</div>

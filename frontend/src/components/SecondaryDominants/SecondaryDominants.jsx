@@ -1,10 +1,10 @@
 import React from 'react'
 import { ArrowRight } from 'lucide-react'
-import { useChordDisplay } from '../../contexts/ChordDisplayContext'
+import { useChordPanel } from '../../contexts/ChordPanelContext'
 import ChordDiagram from '../common/ChordDiagram'
 
 const SecondaryDominants = ({ chordSevenths, keyName }) => {
-  const { showChordDiagrams } = useChordDisplay()
+  const { showChords } = useChordPanel()
   
   return (
     <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6">
@@ -41,7 +41,7 @@ const SecondaryDominants = ({ chordSevenths, keyName }) => {
               
               <div className="flex items-center justify-center gap-3 py-2">
                 <div className="secondary-dominant-chord">
-                  {showChordDiagrams ? (
+                  {showChords ? (
                     <ChordDiagram chord={item.resolves_from} size="small" />
                   ) : (
                     <div className="bg-gradient-to-r from-red-600 to-pink-600 text-white px-4 py-2 rounded-full font-medium">
@@ -51,7 +51,7 @@ const SecondaryDominants = ({ chordSevenths, keyName }) => {
                 </div>
                 <ArrowRight className="w-5 h-5 text-gray-400" />
                 <div className="target-chord">
-                  {showChordDiagrams ? (
+                  {showChords ? (
                     <ChordDiagram chord={item.chord} size="small" />
                   ) : (
                     <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full font-medium">

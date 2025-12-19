@@ -1,12 +1,12 @@
 import React from 'react'
 import { Play } from 'lucide-react'
-import { useChordDisplay } from '../../contexts/ChordDisplayContext'
+import { useChordPanel } from '../../contexts/ChordPanelContext'
 import PracticeTip from '../common/PracticeTip'
 import ChordTooltip from '../common/ChordTooltip'
 import ChordDiagram from '../common/ChordDiagram'
 
 const ChordProgressions = ({ progressions, keyName }) => {
-  const { showChordDiagrams } = useChordDisplay()
+  const { showChords } = useChordPanel()
   
   return (
     <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6">
@@ -30,7 +30,7 @@ const ChordProgressions = ({ progressions, keyName }) => {
                 {chords.map((chord, index) => (
                   <React.Fragment key={index}>
                     <div className="chord-progression-item">
-                      {showChordDiagrams ? (
+                      {showChords ? (
                         <ChordDiagram chord={chord} size="small" />
                       ) : (
                         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
