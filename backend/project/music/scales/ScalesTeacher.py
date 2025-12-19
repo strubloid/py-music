@@ -83,24 +83,22 @@ class ScalesTeacher():
             ## loading notes object
             notesObject = Notes()
             borrowedChords = []
-            intervalPatternToRun = None  # Initialize outside match
+            intervalPatternToRun = None
             
             ## Loading the interval pattern to run based on current interval
-            match interval:
-                case MajorInterval():
-                    ## In the major interval we will run to get the minor
-                    minor_interval = MinorInterval()
-                    intervalPatternToRun = minor_interval.interval
-                    # print("Getting borrowed chords from parallel minor scale...")
-
-                case MinorInterval():
-                    ## In the minor interval we will run to get the major
-                    major_interval = MajorInterval()
-                    intervalPatternToRun = major_interval.interval
-                    # print("Getting borrowed chords from parallel major scale...")
-                
-                case _:  # Default case
-                    raise ValueError(f"Unsupported interval type: {type(interval)}")
+            if isinstance(interval, MajorInterval):
+                ## In the major interval we will run to get the minor
+                minor_interval = MinorInterval()
+                intervalPatternToRun = minor_interval.interval
+                # print("Getting borrowed chords from parallel minor scale...")
+            elif isinstance(interval, MinorInterval):
+                ## In the minor interval we will run to get the major
+                major_interval = MajorInterval()
+                intervalPatternToRun = major_interval.interval
+                # print("Getting borrowed chords from parallel major scale...")
+            else:
+                # Default case
+                raise ValueError(f"Unsupported interval type: {type(interval)}")
             
             # Validate intervalPatternToRun
             if intervalPatternToRun is None:
@@ -124,23 +122,21 @@ class ScalesTeacher():
                     continue
             
                 ## Checking if is a major or minor scale
-                match interval:
-                    case MajorInterval():
-                        # Major to Minor: flatten certain degrees 
-                        if i == 2: # Third degree (B → Bb) 
-                            rootNote = notesObject.flattenNote(rootNote) 
-                        elif i == 5: # Sixth degree (E → Eb) 
-                            rootNote = notesObject.flattenNote(rootNote) 
-                        elif i == 6: # Seventh degree (F# → F) 
-                            rootNote = notesObject.removeSharp(rootNote)
-
-                    case MinorInterval():
-                        if i == 2: # Third degree (Bb → B) 
-                            rootNote = notesObject.sharpenNote(rootNote) 
-                        elif i == 5: # Sixth degree (Eb → E) 
-                            rootNote = notesObject.sharpenNote(rootNote) 
-                        elif i == 6: # Seventh degree (F → F#) 
-                            rootNote = notesObject.sharpenNote(rootNote)
+                if isinstance(interval, MajorInterval):
+                    # Major to Minor: flatten certain degrees 
+                    if i == 2: # Third degree (B → Bb) 
+                        rootNote = notesObject.flattenNote(rootNote) 
+                    elif i == 5: # Sixth degree (E → Eb) 
+                        rootNote = notesObject.flattenNote(rootNote) 
+                    elif i == 6: # Seventh degree (F# → F) 
+                        rootNote = notesObject.removeSharp(rootNote)
+                elif isinstance(interval, MinorInterval):
+                    if i == 2: # Third degree (Bb → B) 
+                        rootNote = notesObject.sharpenNote(rootNote) 
+                    elif i == 5: # Sixth degree (Eb → E) 
+                        rootNote = notesObject.sharpenNote(rootNote) 
+                    elif i == 6: # Seventh degree (F → F#) 
+                        rootNote = notesObject.sharpenNote(rootNote)
 
                 # Validate before appending
                 chord_suffix = intervalPatternToRun[i]

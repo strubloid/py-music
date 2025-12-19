@@ -8,7 +8,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # Production stage with Python backend
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
@@ -24,7 +24,7 @@ COPY main.py ./
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 
 # Set environment variables
-ENV FLASK_APP=backend.project.api.app
+ENV FLASK_APP=backend.project.api.app:app
 ENV PYTHONUNBUFFERED=1
 ENV PORT=5000
 
@@ -32,4 +32,4 @@ ENV PORT=5000
 EXPOSE 5000
 
 # Run the Flask app with frontend serving
-CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000"]
+CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000", "--no-reload"]
