@@ -1,7 +1,10 @@
 import React from 'react'
+import { useChordDisplay } from '../contexts/ChordDisplayContext'
+import ChordDiagram from './common/ChordDiagram'
 
 const ScaleInfo = ({ scaleData }) => {
   const { scale_name, notes, scale_degrees } = scaleData
+  const { showChordDiagrams } = useChordDisplay()
 
   return (
     <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6 mb-8">
@@ -45,7 +48,11 @@ const ScaleInfo = ({ scaleData }) => {
                   <span className="font-medium w-8">{degree.note}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-green-400">{degree.chord}</span>
+                  {showChordDiagrams ? (
+                    <ChordDiagram chord={degree.chord} size="small" />
+                  ) : (
+                    <span className="text-green-400 chord-text-display">{degree.chord}</span>
+                  )}
                   <span className="text-gray-400 text-sm">{degree.function}</span>
                 </div>
               </div>

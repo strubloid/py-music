@@ -1,0 +1,35 @@
+.chord-diagram-container {
+  display: inline-block;
+  margin: 2px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.chord-diagram-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.chord-diagram-container:active {
+  cursor: grabbing;
+  transform: translateY(-1px) scale(1.05);
+}
+
+.chord-diagram {
+  display: block;
+}
+
+.chord-diagram text {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Dragging state */
+.chord-diagram-container.dragging {
+  transform: translateY(-3px) scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}

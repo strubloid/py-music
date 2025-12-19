@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useChordPanel } from '../../contexts/ChordPanelContext'
+import { useChordDisplay } from '../../contexts/ChordDisplayContext'
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
 import PDFExportService from '../../services/PDFExportService.tsx'
+import ChordDiagram from './ChordDiagram'
 import './MusicProduction.css'
 
 // Cache key for storing lyrics data
@@ -10,6 +12,7 @@ const LYRICS_CACHE_KEY = 'music-production-lyrics'
 
 const MusicProduction = () => {
   const { progressionLines } = useChordPanel()
+  const { showChordDiagrams, toggleChordDiagrams } = useChordDisplay()
   
   // Music lines structure: each line has chords and corresponding text sections
   const [musicLines, setMusicLines] = useState([])
@@ -134,38 +137,38 @@ const MusicProduction = () => {
   const updateChordPosition = (lineId, chordIndex, x) => {
     console.log('💾 updateChordPosition called:', { lineId, chordIndex, x })
     
-    // Get both container and input info for debugging
+    // Get container for bounds checking
     const container = document.querySelector(`[data-line-id="${lineId}"] .chord-text-container`)
-    const input = document.querySelector(`[data-line-id="${lineId}"] .lyrics-input`)
     
-    if (container && input) {
-      const inputStyle = window.getComputedStyle(input)
-      const usableWidth = input.offsetWidth - 
-        parseFloat(inputStyle.paddingLeft) - 
-        parseFloat(inputStyle.paddingRight)
-        
-      console.log('🔍 Debug info:', {
-        containerWidth: container.offsetWidth,
-        inputWidth: input.offsetWidth,
-        usableWidth: usableWidth,
-        positionAsPercentageOfUsable: ((x / usableWidth) * 100).toFixed(1) + '%',
-        positionAsPercentageOfContainer: ((x / container.offsetWidth) * 100).toFixed(1) + '%'
+    if (container) {
+      // Ensure position is within container bounds
+      const containerWidth = container.offsetWidth;
+      const chordWidth = showChordDiagrams ? 90 : 50; // Adjust based on display mode
+      const boundedX = Math.max(0, Math.min(x, containerWidth - chordWidth));
+      
+      console.log('🔍 Position info:', {
+        originalX: x,
+        boundedX: boundedX,
+        containerWidth: containerWidth,
+        chordWidth: chordWidth
       })
+      
+      // Update the chord position in state and cache
+      const updatedLines = musicLines.map(line => {
+        if (line.id === lineId) {
+          const chordPositions = { ...line.chordPositions }
+          chordPositions[chordIndex] = boundedX // Store bounded position
+          console.log('💾 Updated chord positions for line:', line.id, chordPositions)
+          return { ...line, chordPositions }
+        }
+        return line
+      })
+      setMusicLines(updatedLines)
+      saveLyricsToCache(updatedLines)
+      console.log('✅ Position saved and cached')
+    } else {
+      console.warn('❌ Container not found for position update')
     }
-    
-    // Update the chord position in state and cache
-    const updatedLines = musicLines.map(line => {
-      if (line.id === lineId) {
-        const chordPositions = { ...line.chordPositions }
-        chordPositions[chordIndex] = x // Store exact position
-        console.log('💾 Updated chord positions for line:', line.id, chordPositions)
-        return { ...line, chordPositions }
-      }
-      return line
-    })
-    setMusicLines(updatedLines)
-    saveLyricsToCache(updatedLines)
-    console.log('✅ Position saved and cached')
   }
 
   const handleMouseMove = (e) => {
@@ -188,14 +191,17 @@ const MusicProduction = () => {
     }
     
     const rect = container.getBoundingClientRect()
-    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width - 60))
-    console.log('🎯 Calculated position:', { x, containerWidth: rect.width, mouseRelative: e.clientX - rect.left })
+    const chordWidth = showChordDiagrams ? 90 : 50; // Match the display mode
+    const maxX = rect.width - chordWidth;
+    const x = Math.max(0, Math.min(e.clientX - rect.left, maxX))
+    console.log('🎯 Calculated position:', { x, containerWidth: rect.width, maxX, mouseRelative: e.clientX - rect.left })
     
     // Update position immediately using the stored element reference
     if (currentDragState.element) {
       currentDragState.element.style.left = `${x}px`
-      currentDragState.element.style.transform = 'translateY(-1px) scale(1.05)'
+      currentDragState.element.style.transform = 'translateY(-2px) scale(1.1)'
       currentDragState.element.style.zIndex = '1000'
+      currentDragState.element.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)'
       console.log('✅ Element position updated to:', x)
     } else {
       console.log('❌ No element reference in drag state')
@@ -218,7 +224,9 @@ const MusicProduction = () => {
     const container = currentDragState.container
     if (container) {
       const rect = container.getBoundingClientRect()
-      const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width - 60))
+      const chordWidth = showChordDiagrams ? 90 : 50;
+      const maxX = rect.width - chordWidth;
+      const x = Math.max(0, Math.min(e.clientX - rect.left, maxX))
       console.log('💾 Saving final position:', x)
       updateChordPosition(currentDragState.lineId, currentDragState.chordIndex, x)
     } else {
@@ -230,6 +238,7 @@ const MusicProduction = () => {
       currentDragState.element.style.cursor = 'grab'
       currentDragState.element.style.transform = ''
       currentDragState.element.style.zIndex = ''
+      currentDragState.element.style.boxShadow = ''
       console.log('✅ Visual feedback reset')
     }
     
@@ -413,6 +422,13 @@ const MusicProduction = () => {
           <h2 className="panel-title">Create your Shit</h2>
           <div className="panel-actions">
             <button 
+              onClick={toggleChordDiagrams}
+              className="action-button toggle-chord-display"
+              title={showChordDiagrams ? 'Show chord names' : 'Show chord diagrams'}
+            >
+              {showChordDiagrams ? '🎸 → ABC' : 'ABC → 🎸'}
+            </button>
+            <button 
               onClick={() => handleExport('pdf-hq')} 
               className="action-button"
               disabled={isExporting}
@@ -438,22 +454,49 @@ const MusicProduction = () => {
             <div key={line.id} className="music-line-card">
               <div className="card-glow"></div>            
             <div className="chord-text-container" data-line-id={line.id}>
-              {/* Draggable Chords Layer */}
+              {/* Draggable Chord Diagrams Layer */}
               <div className="chords-layer">
-                {line.chords.map((chord, chordIndex) => (
-                  <div 
-                    key={chordIndex} 
-                    className="draggable-chord"
-                    style={{ 
-                      left: `${line.chordPositions && line.chordPositions[chordIndex] !== undefined 
-                        ? line.chordPositions[chordIndex] 
-                        : (chordIndex * 80) + 10}px` 
-                    }}
-                    onMouseDown={(e) => handleChordMouseDown(e, line.id, chordIndex)}
-                  >
-                    {chord}
-                  </div>
-                ))}
+                {line.chords.map((chord, chordIndex) => {
+                  // Calculate positioning based on display mode
+                  const containerWidth = showChordDiagrams ? 600 : 400; 
+                  const chordWidth = showChordDiagrams ? 90 : 50; 
+                  const totalChords = line.chords.length;
+                  
+                  let defaultPosition = 0;
+                  if (totalChords > 1) {
+                    // Distribute chords evenly across the available space
+                    const availableSpace = containerWidth - chordWidth;
+                    defaultPosition = (chordIndex / (totalChords - 1)) * availableSpace;
+                  } else {
+                    defaultPosition = 10; // Single chord, place near start
+                  }
+                  
+                  const finalPosition = line.chordPositions && line.chordPositions[chordIndex] !== undefined 
+                    ? line.chordPositions[chordIndex] 
+                    : Math.max(0, Math.min(defaultPosition, containerWidth - chordWidth));
+                  
+                  return (
+                    <div 
+                      key={`chord-${line.id}-${chordIndex}`}
+                      className={showChordDiagrams ? "draggable-chord-diagram" : "draggable-chord-text"}
+                      style={{ 
+                        left: `${finalPosition}px`,
+                        position: 'absolute',
+                        top: '0px',
+                        zIndex: 10
+                      }}
+                      onMouseDown={(e) => handleChordMouseDown(e, line.id, chordIndex)}
+                    >
+                      {showChordDiagrams ? (
+                        <ChordDiagram chord={chord} size="medium" />
+                      ) : (
+                        <div className="chord-text-display">
+                          {chord}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
               
               {/* Lyrics Input Line */}

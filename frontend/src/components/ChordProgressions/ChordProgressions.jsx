@@ -1,9 +1,13 @@
 import React from 'react'
 import { Play } from 'lucide-react'
+import { useChordDisplay } from '../../contexts/ChordDisplayContext'
 import PracticeTip from '../common/PracticeTip'
 import ChordTooltip from '../common/ChordTooltip'
+import ChordDiagram from '../common/ChordDiagram'
 
 const ChordProgressions = ({ progressions, keyName }) => {
+  const { showChordDiagrams } = useChordDisplay()
+  
   return (
     <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6">
       <h3 className="text-2xl font-semibold mb-6 text-center text-yellow-400">
@@ -25,11 +29,15 @@ const ChordProgressions = ({ progressions, keyName }) => {
               <div className="flex flex-wrap gap-2">
                 {chords.map((chord, index) => (
                   <React.Fragment key={index}>
-                    <ChordTooltip chord={chord}>
-                      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                        {chord}
-                      </div>
-                    </ChordTooltip>
+                    <div className="chord-progression-item">
+                      {showChordDiagrams ? (
+                        <ChordDiagram chord={chord} size="small" />
+                      ) : (
+                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                          {chord}
+                        </div>
+                      )}
+                    </div>
                     {index < chords.length - 1 && (
                       <span className="text-gray-400 flex items-center">→</span>
                     )}

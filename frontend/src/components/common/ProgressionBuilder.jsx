@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useChordPanel } from '../../contexts/ChordPanelContext'
+import { useChordDisplay } from '../../contexts/ChordDisplayContext'
 import ChordTooltip from './ChordTooltip'
+import ChordDiagram from './ChordDiagram'
 import InlineChordDisplay from './InlineChordDisplay'
 import './ProgressionBuilder.css'
 
@@ -16,6 +18,7 @@ const ProgressionBuilder = ({ scaleData }) => {
     setCurrentProgressionLine,
     showChords
   } = useChordPanel()
+  const { showChordDiagrams } = useChordDisplay()
   
 
 
@@ -102,7 +105,11 @@ const ProgressionBuilder = ({ scaleData }) => {
                 onClick={() => addChord(degree.chord)}
                 title={`${degree.roman} - ${degree.chord}`}
               >
-                {degree.chord}
+                {showChordDiagrams ? (
+                  <ChordDiagram chord={degree.chord} size="small" />
+                ) : (
+                  <span className="chord-text-display">{degree.chord}</span>
+                )}
               </button>
             ))}
           </div>
@@ -118,7 +125,11 @@ const ProgressionBuilder = ({ scaleData }) => {
                 onClick={() => addChord(seventhData.seventh)}
                 title={`Resolves to ${seventhData.resolves_to}`}
               >
-                {seventhData.seventh}
+                {showChordDiagrams ? (
+                  <ChordDiagram chord={seventhData.seventh} size="small" />
+                ) : (
+                  <span className="chord-text-display">{seventhData.seventh}</span>
+                )}
               </button>
             ))}
           </div>
@@ -167,36 +178,20 @@ const ProgressionBuilder = ({ scaleData }) => {
                 ) : (
                   line.map((chord, chordIndex) => (
                     <div key={chordIndex} className="progression-chord-item">
-                      {showChords ? (
-                        <div className="chord-with-diagram">
-                          <div className="chord-diagram-inline">
-                            <InlineChordDisplay chord={chord} />
-                          </div>
-                          <div className="chord-text-small">{chord}</div>
-                          <button
-                            className="remove-chord-button inline-mode"
-                            onClick={() => removeChord(lineIndex, chordIndex)}
-                            title="Remove chord"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <ChordTooltip chord={chord}>
-                            <div className="chord-display">
-                              {chord}
-                            </div>
-                          </ChordTooltip>
-                          <button
-                            className="remove-chord-button"
-                            onClick={() => removeChord(lineIndex, chordIndex)}
-                            title="Remove chord"
-                          >
-                            ×
-                          </button>
-                        </>
-                      )}
+                      <div className="chord-with-diagram">
+                        {showChordDiagrams ? (
+                          <ChordDiagram chord={chord} size="medium" />
+                        ) : (
+                          <div className="chord-text-large">{chord}</div>
+                        )}
+                        <button
+                          className="remove-chord-button"
+                          onClick={() => removeChord(lineIndex, chordIndex)}
+                          title="Remove chord"
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}

@@ -19,6 +19,17 @@
   transform: translateY(-2px);
 }
 
+.chord-progression-item {
+  display: inline-block;
+  margin: 4px;
+}
+
+.secondary-dominant-chord,
+.target-chord {
+  display: inline-block;
+  margin: 4px;
+}
+
 .progression-header {
   display: flex;
   align-items: center;

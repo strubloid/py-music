@@ -19,6 +19,15 @@ export const ChordDisplayProvider = ({ children }) => {
     return 'guitar';
   });
 
+  // Show chord diagrams vs text - default to true (show diagrams)
+  const [showChordDiagrams, setShowChordDiagrams] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('showChordDiagrams');
+      return saved !== null ? JSON.parse(saved) : true;
+    }
+    return true;
+  });
+
   // Save to localStorage when mode changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -26,15 +35,28 @@ export const ChordDisplayProvider = ({ children }) => {
     }
   }, [displayMode]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('showChordDiagrams', JSON.stringify(showChordDiagrams));
+    }
+  }, [showChordDiagrams]);
+
   const toggleDisplayMode = () => {
     setDisplayMode(prev => prev === 'guitar' ? 'piano' : 'guitar');
+  };
+
+  const toggleChordDiagrams = () => {
+    setShowChordDiagrams(prev => !prev);
   };
 
   return (
     <ChordDisplayContext.Provider value={{ 
       displayMode, 
       setDisplayMode, 
-      toggleDisplayMode 
+      toggleDisplayMode,
+      showChordDiagrams,
+      setShowChordDiagrams,
+      toggleChordDiagrams
     }}>
       {children}
     </ChordDisplayContext.Provider>
