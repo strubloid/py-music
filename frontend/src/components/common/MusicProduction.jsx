@@ -75,11 +75,25 @@ const MusicProduction = () => {
       // Try to find existing lyrics for this line
       const existingLyrics = cachedLyrics.find(cached => cached.id === index + 1)
       
+      // Clean up chord positions - only keep positions for chords that exist
+      const cleanedPositions = {}
+      if (existingLyrics?.chordPositions) {
+        // Only keep positions for indices that are within the current chords array
+        Object.keys(existingLyrics.chordPositions).forEach(key => {
+          const idx = parseInt(key)
+          if (idx < chords.length) {
+            cleanedPositions[idx] = existingLyrics.chordPositions[key]
+          }
+        })
+      }
+      
+      console.log(`🧹 Line ${index + 1}: ${chords.length} chords, cleaned positions:`, cleanedPositions)
+      
       return {
         id: index + 1,
         chords: chords,
         text: existingLyrics ? existingLyrics.text : '', // Preserve cached lyrics
-        chordPositions: existingLyrics ? existingLyrics.chordPositions : {}
+        chordPositions: cleanedPositions // Use cleaned positions
       }
     })
     setMusicLines(syncedLines)
@@ -336,6 +350,14 @@ const MusicProduction = () => {
 
   const handleExport = async (type) => {
     setIsExporting(true)
+    
+    // Debug: Log what we're sending to export
+    console.log('🚀 EXPORTING WITH DATA:', JSON.stringify(musicLines.map(line => ({
+      id: line.id,
+      chords: line.chords,
+      text: line.text,
+      chordPositions: line.chordPositions
+    })), null, 2))
     
     try {
       switch (type) {
