@@ -15,7 +15,6 @@ const MusicProduction = () => {
   const [musicLines, setMusicLines] = useState([])
   const [dragState, setDragState] = useState(null)
   const [isExporting, setIsExporting] = useState(false)
-  const [showExportMenu, setShowExportMenu] = useState(false)
   const printContainerRef = useRef(null)
 
   // Refs to avoid stale closures
@@ -31,22 +30,7 @@ const MusicProduction = () => {
     musicLinesRef.current = musicLines
   }, [musicLines])
 
-  // Close export menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showExportMenu && !event.target.closest('.export-dropdown')) {
-        setShowExportMenu(false)
-      }
-    }
-    
-    if (showExportMenu) {
-      document.addEventListener('click', handleClickOutside)
-    }
-    
-    return () => {
-      document.removeEventListener('click', handleClickOutside)
-    }
-  }, [showExportMenu])
+
 
   // Cache functions
   const saveLyricsToCache = (lines) => {
@@ -429,31 +413,20 @@ const MusicProduction = () => {
         <div className="header-content">
           <h2 className="panel-title">Create your Shit</h2>
           <div className="panel-actions">
-            <div className="export-dropdown">
-              <button 
-                onClick={() => setShowExportMenu(!showExportMenu)} 
-                className="action-button"
-                disabled={isExporting}
-              >
-                {isExporting ? 'Exporting...' : 'Export ▼'}
-              </button>
-              {showExportMenu && !isExporting && (
-                <div className="export-menu">
-                  <button onClick={() => handleExport('pdf-hq')} className="export-option">
-                    <span className="export-icon">📄</span>
-                    High-Quality PDF
-                  </button>
-                  <button onClick={() => handleExport('print')} className="export-option">
-                    <span className="export-icon">🖨️</span>
-                    Print/Browser PDF
-                  </button>
-                  <button onClick={() => handleExport('text')} className="export-option">
-                    <span className="export-icon">📝</span>
-                    Text File
-                  </button>
-                </div>
-              )}
-            </div>
+            <button 
+              onClick={() => handleExport('pdf-hq')} 
+              className="action-button"
+              disabled={isExporting}
+            >
+              {isExporting ? 'Exporting...' : '📄 Export'}
+            </button>
+            <button 
+              onClick={() => handleExport('print')} 
+              className="action-button"
+              disabled={isExporting}
+            >
+              🖨️ Print
+            </button>
           </div>
         </div>
         <div className="header-divider"></div>

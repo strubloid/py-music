@@ -47,11 +47,9 @@ const PDFExportService = {
           html += `<div style="position: relative; height: 35px; margin-bottom: 5px;">`
           
           line.chords.forEach((chord, chordIndex) => {
-            const position = line.chordPositions?.[chordIndex] || (chordIndex * 100 + 10)
-            // Adjust scaling factor and add offset correction for better alignment
-            const scaleFactor = 0.75 // Increase from 0.6 to 0.75 for better spacing
-            const offsetCorrection = -20 // Subtract 20px to shift chords left
-            const printPosition = Math.max(0, Math.min(position * scaleFactor + offsetCorrection, 650))
+            const position = line.chordPositions?.[chordIndex] || (chordIndex * 80 + 10)
+            // Match exact UI positioning - no scaling needed
+            const printPosition = Math.max(0, Math.min(position * 0.75, 650)) // Simple scaling to fit page width
             
             html += `
               <span style="
@@ -236,11 +234,9 @@ const PDFExportService = {
         if (line.chords?.length > 0) {
           printHTML += `<div class="chords-container">`
           line.chords.forEach((chord, index) => {
-            const position = line.chordPositions?.[index] || (index * 100 + 10)
-            // Apply same correction as HTML-to-PDF method
-            const scaleFactor = 0.6 // Slightly better than 0.5 for print
-            const offsetCorrection = -15 // Adjust offset for print layout
-            const scaledPosition = Math.max(0, position * scaleFactor + offsetCorrection)
+            const position = line.chordPositions?.[index] || (index * 80 + 10)
+            // Match UI positioning exactly
+            const scaledPosition = Math.max(0, position * 0.6)
             printHTML += `<span class="chord" style="left: ${scaledPosition}px;">${chord}</span>`
           })
           printHTML += `</div>`
