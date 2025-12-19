@@ -95,7 +95,7 @@ const PDFExportService: PDFExportServiceType = {
           let frontendContainerWidth = 1200
           const sampleContainer = document.querySelector('.chord-text-container')
           if (sampleContainer) {
-            frontendContainerWidth = sampleContainer.offsetWidth
+            frontendContainerWidth = (sampleContainer as HTMLElement).offsetWidth
           }
           
           console.log(`📏 Text measurement for line ${lineIndex + 1}:`, {
