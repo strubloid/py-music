@@ -9,6 +9,7 @@ export default defineConfig({
     // Include .jsx files
     include: '**/*.{jsx,js}',
   })],
+  base: '/', // Ensure correct base path for deployment
   server: {
     port: 3000,
     host: true, // Allow external connections
@@ -36,6 +37,7 @@ export default defineConfig({
   // Enhanced build options
   build: {
     sourcemap: true, // Enable source maps for better debugging
+    outDir: 'dist', // Ensure correct output directory
     rollupOptions: {
       output: {
         manualChunks: {
