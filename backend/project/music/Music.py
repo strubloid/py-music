@@ -25,7 +25,7 @@ def generate_fretboard_data(notes, root_note):
     # Guitar strings from 1st (high E) to 6th (low E) - CORRECT visual order for display
     strings = ['E', 'B', 'G', 'D', 'A', 'E']  # 1st, 2nd, 3rd, 4th, 5th, 6th string
     chromatic_notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-    frets = 12
+    frets = 24
     
     fretboard = []
     

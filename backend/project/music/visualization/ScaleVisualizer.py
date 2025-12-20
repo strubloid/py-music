@@ -97,7 +97,7 @@ class ScaleVisualizer:
             
         # Guitar tuning (standard)
         strings = ['E', 'Bx', 'G', 'D', 'A', 'E']
-        frets = 12  # Show first 12 frets
+        frets = 24  # Show all 24 frets
         
         fretboard = Table(show_header=True, header_style="bold green")
         fretboard.add_column("String", style="black", width=5)
