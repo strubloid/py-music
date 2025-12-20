@@ -117,8 +117,8 @@
 }
 
 .roman-numerals {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   width: 100%;
   justify-content: center;
@@ -137,6 +137,9 @@
   min-height: 180px;
   cursor: pointer;
   position: relative;
+  flex: 1 1 150px;
+  min-width: 150px;
+  max-width: 220px;
 }
 
 .chord-column:hover {
