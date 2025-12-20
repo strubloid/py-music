@@ -103,21 +103,6 @@ const GuitarFretboard = ({ fretboardData }) => {
               </div>
             ))}
           </div>
-
-          {/* Fret position markers */}
-          <div className="fret-position-markers">
-            <div className="fret-position-spacer"></div>
-            {Array.from({ length: 13 }, (_, i) => (
-              <div key={i} className="fret-position-cell">
-                {[3, 5, 7, 9].includes(i) && (
-                  <div className="position-marker">•</div>
-                )}
-                {i === 12 && (
-                  <div className="position-marker double">•</div>
-                )}
-              </div>
-            ))}
-          </div>
         </div>
       </div>
       
