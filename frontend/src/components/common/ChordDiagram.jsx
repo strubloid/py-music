@@ -354,7 +354,7 @@ const ChordDiagram = ({ chord, size = 'medium', refreshTrigger }) => {
           {/* Chord name */}
           <text
             x={width / 2}
-            y={height - 10}
+            y={height - 2}
             textAnchor="middle"
             fontSize="12"
             fontWeight="bold"

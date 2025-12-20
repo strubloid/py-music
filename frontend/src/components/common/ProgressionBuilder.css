@@ -547,18 +547,37 @@
   }
 
   .scale-chords-section, .seventh-notes-section {
-    padding: 0.5rem;
+    padding: 0.25rem;
   }
 
   .compact-chords-grid {
-    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.25rem;
   }
 
   .compact-chord-button, .compact-seventh-button {
-    padding: 0.25rem 0.375rem;
+    padding: 0;
     font-size: 0.8rem;
-    min-height: 28px;
+    min-height: 45px;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  /* Make chord diagrams smaller and more compact on mobile */
+  .inline-chord-container {
+    max-width: 70px;
+    height: auto;
+    transform: scale(0.45);
+    margin: -15px 0 -12px 0;
+  }
+  
+  .compact-chord-button .chord-diagram-container,
+  .compact-seventh-button .chord-diagram-container {
+    margin: 0;
+    padding: 0;
+    border-radius: 3px;
+    box-shadow: none;
+    max-height: 140px;
   }
 
   .progression-header {
