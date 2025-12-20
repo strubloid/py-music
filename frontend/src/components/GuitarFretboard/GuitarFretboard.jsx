@@ -5,7 +5,8 @@ import './GuitarFretboard.css'
 
 const GuitarFretboard = ({ fretboardData }) => {
   const scrollRef = useRef(null)
-  const [scrollState, setScrollState] = useState({ left: false, right: true, showStringNames: true })
+  const scrollTimeoutRef = useRef(null)
+  const [scrollState, setScrollState] = useState({ left: false, right: true, showStringNames: true, isScrolling: false })
 
   // Handle scroll detection for fade indicators and string name visibility
   useEffect(() => {
@@ -21,11 +22,26 @@ const GuitarFretboard = ({ fretboardData }) => {
       // Show string names when at start (0-50px) or scrolled far right (>150px)
       const showStringNames = scrollPos < 50 || scrollPos > 150
 
+      // Set scrolling state
       setScrollState({ 
         left: isScrolledLeft, 
         right: isScrolledRight,
-        showStringNames 
+        showStringNames,
+        isScrolling: true
       })
+
+      // Clear existing timeout
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
+
+      // Set timeout to detect scroll end
+      scrollTimeoutRef.current = setTimeout(() => {
+        setScrollState(prev => ({ 
+          ...prev,
+          isScrolling: false
+        }))
+      }, 150)
     }
 
     const element = scrollRef.current
@@ -34,7 +50,12 @@ const GuitarFretboard = ({ fretboardData }) => {
       // Initial check
       setTimeout(handleScroll, 100)
       
-      return () => element.removeEventListener('scroll', handleScroll)
+      return () => {
+        element.removeEventListener('scroll', handleScroll)
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current)
+        }
+      }
     }
   }, [])
 
@@ -107,7 +128,7 @@ const GuitarFretboard = ({ fretboardData }) => {
       </div>
       
       {/* Right fade overlay - positioned outside scroll container */}
-      <div className={`fretboard-fade-overlay ${!scrollState.right ? 'hidden' : ''}`}></div>
+      <div className={`fretboard-fade-overlay ${(!scrollState.right || scrollState.isScrolling) ? 'hidden' : ''}`}></div>
     </div>
 
       {/* Legend */}
