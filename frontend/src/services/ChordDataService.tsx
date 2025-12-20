@@ -4,6 +4,11 @@
 export interface GuitarChordData {
   frets: string[];
   fingers: (number | null)[];
+  position?: string; // Description like "Open", "Barre 3rd fret", etc.
+}
+
+export interface GuitarChordVariation {
+  variations: GuitarChordData[];
 }
 
 export interface PianoChordData {
@@ -25,7 +30,112 @@ export interface ChordRenderData {
 
 class ChordDataService {
   // Guitar chord fingerings - fingerings are in order: E(1st), B(2nd), G(3rd), D(4th), A(5th), E(6th)
-  // Comprehensive database with all common chord types
+  // Now with multiple variations per chord
+  private guitarChordVariations: Record<string, GuitarChordData[]> = {
+    // C Major - Multiple positions across the neck
+    'C': [
+      { frets: ['0', '1', '0', '2', '3', 'x'], fingers: [null, 1, null, 2, 3, null], position: 'Open position' },
+      { frets: ['x', '3', '5', '5', '5', '3'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 3rd fret' },
+      { frets: ['x', '3', '2', '0', '1', '0'], fingers: [null, 3, 2, null, 1, null], position: 'Alt open' },
+      { frets: ['8', '8', '9', '10', '10', '8'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 8th fret' },
+      { frets: ['x', 'x', '10', '12', '13', '12'], fingers: [null, null, 1, 3, 4, 2], position: '10th position' }
+    ],
+    
+    // C# Major
+    'C#': [
+      { frets: ['x', '4', '6', '6', '6', '4'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 4th fret' },
+      { frets: ['x', 'x', '6', '6', '6', '9'], fingers: [null, null, 1, 1, 1, 4], position: '6th position' },
+      { frets: ['9', '9', '10', '11', '11', '9'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 9th fret' },
+      { frets: ['x', 'x', '11', '13', '14', '13'], fingers: [null, null, 1, 3, 4, 2], position: '11th position' }
+    ],
+    
+    // D Major
+    'D': [
+      { frets: ['2', '3', '2', '0', 'x', 'x'], fingers: [1, 3, 2, null, null, null], position: 'Open position' },
+      { frets: ['x', 'x', '0', '2', '3', '2'], fingers: [null, null, null, 1, 3, 2], position: 'Alt open' },
+      { frets: ['x', '5', '7', '7', '7', '5'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 5th fret' },
+      { frets: ['10', '10', '11', '12', '12', '10'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 10th fret' },
+      { frets: ['x', 'x', '12', '14', '15', '14'], fingers: [null, null, 1, 3, 4, 2], position: '12th position' }
+    ],
+    
+    // D# Major
+    'D#': [
+      { frets: ['x', 'x', '1', '3', '4', '3'], fingers: [null, null, 1, 2, 4, 3], position: '1st position' },
+      { frets: ['x', '6', '8', '8', '8', '6'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 6th fret' },
+      { frets: ['11', '11', '12', '13', '13', '11'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 11th fret' }
+    ],
+    
+    // E Major
+    'E': [
+      { frets: ['0', '0', '1', '2', '2', '0'], fingers: [null, null, 1, 3, 2, null], position: 'Open position' },
+      { frets: ['0', '0', '1', '2', '2', '0'], fingers: [null, null, 1, 2, 3, null], position: 'Alt fingering' },
+      { frets: ['x', '7', '9', '9', '9', '7'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 7th fret' },
+      { frets: ['12', '12', '13', '14', '14', '12'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 12th fret' },
+      { frets: ['x', 'x', '14', '16', '17', '16'], fingers: [null, null, 1, 3, 4, 2], position: '14th position' }
+    ],
+    
+    // F Major
+    'F': [
+      { frets: ['1', '1', '2', '3', '3', '1'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 1st fret' },
+      { frets: ['x', 'x', '3', '5', '6', '5'], fingers: [null, null, 1, 3, 4, 2], position: '3rd position' },
+      { frets: ['1', '3', '3', '2', '1', '1'], fingers: [1, 4, 3, 2, 1, 1], position: 'Alt 1st position' },
+      { frets: ['x', '8', '10', '10', '10', '8'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 8th fret' },
+      { frets: ['13', '13', '14', '15', '15', '13'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 13th fret' }
+    ],
+    
+    // F# Major
+    'F#': [
+      { frets: ['2', '2', '3', '4', '4', '2'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 2nd fret' },
+      { frets: ['x', 'x', '4', '6', '7', '6'], fingers: [null, null, 1, 3, 4, 2], position: '4th position' },
+      { frets: ['x', '9', '11', '11', '11', '9'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 9th fret' },
+      { frets: ['14', '14', '15', '16', '16', '14'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 14th fret' }
+    ],
+    
+    // G Major
+    'G': [
+      { frets: ['3', '0', '0', '0', '2', '3'], fingers: [3, null, null, null, 2, 4], position: 'Open position' },
+      { frets: ['3', '2', '0', '0', '0', '3'], fingers: [3, 2, null, null, null, 4], position: 'Alt open' },
+      { frets: ['x', 'x', '5', '7', '8', '7'], fingers: [null, null, 1, 3, 4, 2], position: '5th position' },
+      { frets: ['3', '5', '5', '4', '3', '3'], fingers: [1, 4, 3, 2, 1, 1], position: 'Barre 3rd fret' },
+      { frets: ['x', '10', '12', '12', '12', '10'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 10th fret' }
+    ],
+    
+    // G# Major
+    'G#': [
+      { frets: ['4', '4', '5', '6', '6', '4'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 4th fret' },
+      { frets: ['x', 'x', '6', '8', '9', '8'], fingers: [null, null, 1, 3, 4, 2], position: '6th position' },
+      { frets: ['4', '6', '6', '5', '4', '4'], fingers: [1, 4, 3, 2, 1, 1], position: 'Alt 4th position' },
+      { frets: ['x', '11', '13', '13', '13', '11'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 11th fret' }
+    ],
+    
+    // A Major
+    'A': [
+      { frets: ['0', '2', '2', '2', '0', 'x'], fingers: [null, 2, 3, 4, null, null], position: 'Open position' },
+      { frets: ['0', '2', '2', '2', '0', 'x'], fingers: [null, 1, 2, 3, null, null], position: 'Alt fingering' },
+      { frets: ['x', 'x', '7', '9', '10', '9'], fingers: [null, null, 1, 3, 4, 2], position: '7th position' },
+      { frets: ['5', '7', '7', '6', '5', '5'], fingers: [1, 4, 3, 2, 1, 1], position: 'Barre 5th fret' },
+      { frets: ['x', '12', '14', '14', '14', '12'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 12th fret' }
+    ],
+    
+    // A# Major
+    'A#': [
+      { frets: ['1', '3', '3', '3', '1', 'x'], fingers: [1, 3, 4, 2, 1, null], position: '1st position' },
+      { frets: ['x', 'x', '8', '10', '11', '10'], fingers: [null, null, 1, 3, 4, 2], position: '8th position' },
+      { frets: ['6', '8', '8', '7', '6', '6'], fingers: [1, 4, 3, 2, 1, 1], position: 'Barre 6th fret' },
+      { frets: ['x', '13', '15', '15', '15', '13'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 13th fret' }
+    ],
+    
+    // B Major
+    'B': [
+      { frets: ['2', '4', '4', '4', '2', 'x'], fingers: [1, 3, 4, 2, 1, null], position: '2nd position' },
+      { frets: ['x', '2', '4', '4', '4', '2'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 2nd fret' },
+      { frets: ['x', 'x', '9', '11', '12', '11'], fingers: [null, null, 1, 3, 4, 2], position: '9th position' },
+      { frets: ['7', '9', '9', '8', '7', '7'], fingers: [1, 4, 3, 2, 1, 1], position: 'Barre 7th fret' },
+      { frets: ['x', '14', '16', '16', '16', '14'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 14th fret' }
+    ]
+  };
+  
+  // Keep legacy single-variation format for backwards compatibility
   private guitarChords: Record<string, GuitarChordData> = {
     // Major Chords
     'C': { frets: ['0', '1', '0', '2', '3', 'x'], fingers: [null, 1, null, 2, 3, null] },
@@ -463,6 +573,40 @@ class ChordDataService {
   // Get chord data for guitar
   getGuitarChordData(chordName: string): GuitarChordData {
     return this.guitarChords[chordName] || this.guitarChords['C'];
+  }
+
+  // Get all variations for a guitar chord
+  getGuitarChordVariations(chordName: string): GuitarChordData[] {
+    // If we have multiple variations, return them
+    if (this.guitarChordVariations[chordName]) {
+      return this.guitarChordVariations[chordName];
+    }
+    
+    // Otherwise return single variation as array for consistency
+    const singleChord = this.guitarChords[chordName];
+    if (singleChord) {
+      return [singleChord];
+    }
+    
+    // Fallback to C major
+    return this.guitarChordVariations['C'] || [this.guitarChords['C']];
+  }
+
+  // Get specific variation by index
+  getGuitarChordVariation(chordName: string, variationIndex: number = 0): GuitarChordData {
+    const variations = this.getGuitarChordVariations(chordName);
+    const index = Math.max(0, Math.min(variationIndex, variations.length - 1));
+    return variations[index];
+  }
+
+  // Check if a chord has multiple variations
+  hasMultipleVariations(chordName: string): boolean {
+    return this.guitarChordVariations[chordName]?.length > 1 || false;
+  }
+
+  // Get count of variations for a chord
+  getVariationCount(chordName: string): number {
+    return this.getGuitarChordVariations(chordName).length;
   }
 
   // Get chord data for piano

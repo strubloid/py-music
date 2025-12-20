@@ -1,6 +1,8 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useChordDisplay } from '../../contexts/ChordDisplayContext'
 import chordDataService from '../../services/ChordDataService.tsx'
+import chordPreferenceManager from '../../services/ChordPreferenceManager.tsx'
+import ChordVariationPicker from './ChordVariationPicker.jsx'
 import './ChordDiagram.css'
 
 // Guitar chord fingering data
@@ -99,16 +101,39 @@ const PianoChordDiagram = ({ chord, size = 'medium' }) => {
 
 const ChordDiagram = ({ chord, size = 'medium' }) => {
   const { displayMode } = useChordDisplay()
+  const [showVariations, setShowVariations] = useState(false)
+  const [currentVariationIndex, setCurrentVariationIndex] = useState(0)
+  
+  // Load preferred variation on mount or when chord changes
+  useEffect(() => {
+    const preferredIndex = chordPreferenceManager.getPreferredVariation(chord)
+    setCurrentVariationIndex(preferredIndex)
+  }, [chord])
   
   // If piano mode, render piano keys instead
   if (displayMode === 'piano') {
     return <PianoChordDiagram chord={chord} size={size} />
   }
   
-  // Otherwise render guitar diagram
-  console.log('ChordDiagram rendering:', chord, size)
-  const chordData = CHORD_FINGERINGS[chord] || CHORD_FINGERINGS['C']
-  console.log('Using chord data:', chordData)
+  // Get the current variation to display
+  const chordData = chordDataService.getGuitarChordVariation(chord, currentVariationIndex)
+  const hasMultipleVariations = chordDataService.hasMultipleVariations(chord)
+  const variationCount = chordDataService.getVariationCount(chord)
+  const allVariations = chordDataService.getGuitarChordVariations(chord)
+  
+  const handleChordClick = (e) => {
+    if (hasMultipleVariations) {
+      e.preventDefault()
+      e.stopPropagation()
+      setShowVariations(!showVariations)
+    }
+  }
+  
+  const handleSelectVariation = (index) => {
+    setCurrentVariationIndex(index)
+    chordPreferenceManager.setPreferredVariation(chord, index)
+    setShowVariations(false)
+  }
   
   const sizes = {
     small: { width: 60, height: 80, fretSpacing: 12 },
@@ -118,7 +143,6 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
   
   const { width, height, fretSpacing } = sizes[size]
   const stringSpacing = (width - 20) / 5
-  const strings = ['E', 'A', 'D', 'G', 'B', 'E']
   
   const getFretPosition = (fret) => {
     if (fret === 0) return null // Open string
@@ -136,108 +160,204 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
     return colors[finger] || '#333'
   }
   
+  // Convert string format to number for rendering
+  const parseStringFret = (fret) => {
+    if (fret === 'x' || fret === 'X') return -1
+    const num = parseInt(fret)
+    return isNaN(num) ? -1 : num
+  }
+  
   return (
-    <div className="chord-diagram-container" title={chordData.name}>
-      <svg width={width} height={height} className="chord-diagram">
-        {/* Nut (top line) */}
-        <line x1="10" y1="20" x2={width - 10} y2="20" stroke="#8B4513" strokeWidth="3" />
-        
-        {/* Frets */}
-        {[1, 2, 3, 4].map(fret => (
-          <line
-            key={fret}
-            x1="10"
-            y1={20 + fret * fretSpacing}
-            x2={width - 10}
-            y2={20 + fret * fretSpacing}
-            stroke="#ddd"
-            strokeWidth="1"
-          />
-        ))}
-        
-        {/* Strings */}
-        {strings.map((string, index) => (
-          <line
-            key={string + index}
-            x1={10 + index * stringSpacing}
-            y1="20"
-            x2={10 + index * stringSpacing}
-            y2={20 + 4 * fretSpacing}
-            stroke="#666"
-            strokeWidth="1"
-          />
-        ))}
-        
-        {/* Finger positions */}
-        {chordData.frets.map((fret, stringIndex) => {
-          const x = 10 + stringIndex * stringSpacing
-          const finger = chordData.fingers[stringIndex]
+    <div className="chord-diagram-wrapper">
+      <div 
+        className={`chord-diagram-container ${hasMultipleVariations ? 'clickable' : ''}`}
+        onClick={handleChordClick}
+        title={hasMultipleVariations ? `Click to see ${variationCount} variations` : chord}
+      >
+        <svg width={width} height={height} className="chord-diagram">
+          {/* Nut (top line) */}
+          <line x1="10" y1="20" x2={width - 10} y2="20" stroke="#8B4513" strokeWidth="3" />
           
-          if (fret === -1) {
-            // Muted string - X above nut
-            return (
-              <g key={stringIndex}>
-                <line
-                  x1={x - 3}
-                  y1="8"
-                  x2={x + 3}
-                  y2="16"
-                  stroke="#ff4444"
+          {/* Frets */}
+          {[1, 2, 3, 4].map(fret => (
+            <line
+              key={fret}
+              x1="10"
+              y1={20 + fret * fretSpacing}
+              x2={width - 10}
+              y2={20 + fret * fretSpacing}
+              stroke="#ddd"
+              strokeWidth="1"
+            />
+          ))}
+          
+          {/* Strings */}
+          {chordDataService.guitarStringNames.map((string, index) => (
+            <line
+              key={string + index}
+              x1={10 + index * stringSpacing}
+              y1="20"
+              x2={10 + index * stringSpacing}
+              y2={20 + 4 * fretSpacing}
+              stroke="#666"
+              strokeWidth="1"
+            />
+          ))}
+          
+          {/* Finger positions */}
+          {chordData.frets.map((fretStr, stringIndex) => {
+            const fret = parseStringFret(fretStr)
+            const x = 10 + stringIndex * stringSpacing
+            const finger = chordData.fingers[stringIndex]
+            
+            if (fret === -1) {
+              // Muted string - X above nut
+              return (
+                <g key={stringIndex}>
+                  <line
+                    x1={x - 3}
+                    y1="8"
+                    x2={x + 3}
+                    y2="16"
+                    stroke="#ff4444"
+                    strokeWidth="2"
+                  />
+                  <line
+                    x1={x - 3}
+                    y1="16"
+                    x2={x + 3}
+                    y2="8"
+                    stroke="#ff4444"
+                    strokeWidth="2"
+                  />
+                </g>
+              )
+            } else if (fret === 0) {
+              // Open string - circle above nut
+              return (
+                <circle
+                  key={stringIndex}
+                  cx={x}
+                  cy="12"
+                  r="4"
+                  fill="none"
+                  stroke="#4CAF50"
                   strokeWidth="2"
                 />
-                <line
-                  x1={x - 3}
-                  y1="16"
-                  x2={x + 3}
-                  y2="8"
-                  stroke="#ff4444"
-                  strokeWidth="2"
+              )
+            } else if (fret > 0) {
+              // Fretted note
+              const y = getFretPosition(fret)
+              return (
+                <circle
+                  key={stringIndex}
+                  cx={x}
+                  cy={y}
+                  r="6"
+                  fill={getFingerColor(finger)}
+                  stroke="#333"
+                  strokeWidth="1"
                 />
-              </g>
-            )
-          } else if (fret === 0) {
-            // Open string - circle above nut
-            return (
-              <circle
-                key={stringIndex}
-                cx={x}
-                cy="12"
-                r="4"
-                fill="none"
-                stroke="#4CAF50"
-                strokeWidth="2"
-              />
-            )
-          } else if (fret > 0) {
-            // Fretted note
-            const y = getFretPosition(fret)
-            return (
-              <circle
-                key={stringIndex}
-                cx={x}
-                cy={y}
-                r="6"
-                fill={getFingerColor(finger)}
-                stroke="#333"
-                strokeWidth="1"
-              />
-            )
-          }
-          return null
-        })}
+              )
+            }
+            return null
+          })}
+          
+          {/* Chord name */}
+          <text
+            x={width / 2}
+            y={height - 5}
+            textAnchor="middle"
+            fontSize="12"
+            fontWeight="bold"
+            fill="#333"
+          >
+            {chord}
+          </text>
+        </svg>
         
-        {/* Chord name */}
-        <text
-          x={width / 2}
-          y={height - 5}
-          textAnchor="middle"
-          fontSize="12"
-          fontWeight="bold"
-          fill="#333"
-        >
-          {chord}
-        </text>
-      </svg>
+        {/* Variation indicator */}
+        {hasMultipleVariations && (
+          <div className="variation-indicator">
+            {variationCount} shapes
+          </div>
+        )}
+      </div>
+      
+      {/* Inline Variations Dropdown */}
+      {showVariations && hasMultipleVariations && (
+        <div className="inline-variations-container">
+          <div className="inline-variations-header">
+            Choose shape for {chord}
+          </div>
+          <div className="inline-variations-grid">
+            {allVariations.map((variation, index) => {
+              if (index === currentVariationIndex) return null; // Skip current variation
+              
+              return (
+                <div
+                  key={index}
+                  className="inline-variation-item"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleSelectVariation(index)
+                  }}
+                >
+                  <div className="inline-variation-label">
+                    {variation.position || `Variation ${index + 1}`}
+                  </div>
+                  <svg viewBox="0 0 80 100" className="inline-mini-svg">
+                    {/* Simplified mini diagram */}
+                    {[0, 1, 2, 3, 4].map(fret => (
+                      <line
+                        key={`fret-${fret}`}
+                        x1="10"
+                        y1={15 + fret * 16}
+                        x2="70"
+                        y2={15 + fret * 16}
+                        stroke={fret === 0 ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.25)"}
+                        strokeWidth={fret === 0 ? "2" : "1"}
+                      />
+                    ))}
+                    {[0, 1, 2, 3, 4, 5].map(string => (
+                      <line
+                        key={`string-${string}`}
+                        x1={10 + string * 12}
+                        y1="15"
+                        x2={10 + string * 12}
+                        y2="79"
+                        stroke="rgba(255,255,255,0.25)"
+                        strokeWidth="1"
+                      />
+                    ))}
+                    {variation.frets.map((fret, stringIndex) => {
+                      const x = 10 + stringIndex * 12
+                      if (fret === 'x' || fret === 'X') {
+                        return (
+                          <g key={`fret-${stringIndex}`}>
+                            <line x1={x-3} y1="8" x2={x+3} y2="14" stroke="#ff4757" strokeWidth="2" />
+                            <line x1={x-3} y1="14" x2={x+3} y2="8" stroke="#ff4757" strokeWidth="2" />
+                          </g>
+                        )
+                      } else if (fret === '0') {
+                        return (
+                          <circle key={`fret-${stringIndex}`} cx={x} cy="11" r="3" fill="none" stroke="#26de81" strokeWidth="2" />
+                        )
+                      } else {
+                        const fretNum = parseInt(fret)
+                        const y = 15 + (fretNum - 0.5) * 16
+                        return (
+                          <circle key={`fret-${stringIndex}`} cx={x} cy={y} r="4" fill="#45aaf2" />
+                        )
+                      }
+                    })}
+                  </svg>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

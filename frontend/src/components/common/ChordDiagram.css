@@ -1,3 +1,10 @@
+/* Chord Diagram Wrapper for inline variations */
+.chord-diagram-wrapper {
+  display: inline-block;
+  position: relative;
+  vertical-align: top;
+}
+
 .chord-diagram-container {
   display: inline-block;
   margin: 2px;
@@ -7,6 +14,17 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: grab;
   transition: all 0.2s ease;
+  position: relative;
+}
+
+.chord-diagram-container.clickable {
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.chord-diagram-container.clickable:hover {
+  border-color: #3498db;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
 .chord-diagram-container:hover {
@@ -16,6 +34,121 @@
 .chord-diagram-container:active {
   cursor: grabbing;
   transform: translateY(-1px) scale(1.05);
+}
+
+.chord-diagram-container.clickable:active {
+  transform: translateY(-1px) scale(0.98);
+  cursor: pointer;
+}
+
+/* Inline Variations Container */
+.inline-variations-container {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  padding: 12px;
+  z-index: 1000;
+  min-width: 300px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.inline-variations-header {
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.inline-variations-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.inline-variation-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.inline-variation-item:hover {
+  background: rgba(52, 152, 219, 0.3);
+  border-color: rgba(52, 152, 219, 0.5);
+  transform: translateX(4px);
+}
+
+.inline-variation-label {
+  flex: 1;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.inline-mini-svg {
+  width: 60px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+/* Scrollbar for variations */
+.inline-variations-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.inline-variations-grid::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.inline-variations-grid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.inline-variations-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Variation Indicator Badge */
+.variation-indicator {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  z-index: 10;
+  white-space: nowrap;
 }
 
 .chord-diagram {
