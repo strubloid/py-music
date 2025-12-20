@@ -11,6 +11,7 @@
   -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
   scrollbar-width: thin;
   scrollbar-color: rgba(102, 126, 234, 0.5) rgba(0, 0, 0, 0.1);
+  isolation: isolate;
 }
 
 /* Custom scrollbar styling */
@@ -33,23 +34,28 @@
   background: rgba(102, 126, 234, 0.7);
 }
 
-/* Scroll fade indicators - right side only */
-.fretboard-scroll::after {
-  content: '';
-  position: absolute;
-  width: 30px;
-  right: -10px;
-  top: 0;
-  bottom: 1rem;
-  background: linear-gradient(to left, rgba(102, 126, 234, 0.6) 0%, rgba(102, 126, 234, 0.3) 50%, transparent 100%);
-  pointer-events: none;
-  z-index: 10;
-  opacity: 1;
-  transition: opacity 0.1s ease;
+/* Wrapper for positioning overlay */
+.fretboard-wrapper {
+  position: relative;
+  overflow: hidden;
 }
 
-/* Hide right fade when fully scrolled */
-.fretboard-scroll.scrolled-right::after {
+/* Fade overlay - stays at viewport right edge */
+.fretboard-fade-overlay {
+  position: absolute;
+  height: 240px;
+  width: 30px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(to left, rgba(102, 126, 234, 0.625) 0%, rgba(102, 126, 234, 0.329) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 30;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.fretboard-fade-overlay.hidden {
   opacity: 0;
 }
 

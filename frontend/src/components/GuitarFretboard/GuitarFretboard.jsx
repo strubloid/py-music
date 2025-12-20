@@ -41,10 +41,11 @@ const GuitarFretboard = ({ fretboardData }) => {
   return (
     <Card title="🎸 Guitar Fretboard" size="large" className="fretboard-container">
       
-      <div 
-        ref={scrollRef}
-        className={`fretboard-scroll ${scrollState.left ? 'scrolled-left' : ''} ${!scrollState.right ? 'scrolled-right' : ''} ${scrollState.showStringNames ? 'show-string-names' : 'hide-string-names'}`}
-      >
+      <div className="fretboard-wrapper">
+        <div 
+          ref={scrollRef}
+          className={`fretboard-scroll ${scrollState.left ? 'scrolled-left' : ''} ${!scrollState.right ? 'scrolled-right' : ''} ${scrollState.showStringNames ? 'show-string-names' : 'hide-string-names'}`}
+        >
         <div className="fretboard-content">
           {/* Fret number headers */}
           <div className="fret-headers">
@@ -119,6 +120,10 @@ const GuitarFretboard = ({ fretboardData }) => {
           </div>
         </div>
       </div>
+      
+      {/* Right fade overlay - positioned outside scroll container */}
+      <div className={`fretboard-fade-overlay ${!scrollState.right ? 'hidden' : ''}`}></div>
+    </div>
 
       {/* Legend */}
       <div className="fretboard-legend">
