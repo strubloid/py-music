@@ -238,8 +238,8 @@ const ChordDiagram = ({ chord, size = 'medium', refreshTrigger }) => {
             y1="30" 
             x2={width + leftMargin - 20}
             y2="30" 
-            stroke={startFret === 1 ? "#8B4513" : "#ddd"} 
-            strokeWidth={startFret === 1 ? "5" : "3.5"} 
+            stroke={startFret === 0 || startFret === 1 ? "#8B4513" : "#ddd"} 
+            strokeWidth={startFret === 0 || startFret === 1 ? "5" : "3.5"} 
           />
           
           {/* Frets */}
