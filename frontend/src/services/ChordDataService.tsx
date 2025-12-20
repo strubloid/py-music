@@ -1,5 +1,6 @@
 // Centralized chord data and rendering logic
 // This ensures consistent chord display across all components
+import { GUITAR_STRING_NAMES, PIANO_KEY_ORDER } from '../config/musicConfig';
 
 export interface GuitarChordData {
   frets: string[];
@@ -29,284 +30,284 @@ export interface ChordRenderData {
 }
 
 class ChordDataService {
-  // Guitar chord fingerings - fingerings are in order: E(1st), B(2nd), G(3rd), D(4th), A(5th), E(6th)
+  // Guitar chord fingerings - fingerings are in order: E(6th low), A(5th), D(4th), G(3rd), B(2nd), E(1st high)
   // Now with multiple variations per chord
   private guitarChordVariations: Record<string, GuitarChordData[]> = {
     // C Major - Multiple positions across the neck
     'C': [
-      { frets: ['0', '1', '0', '2', '3', 'x'], fingers: [null, 1, null, 2, 3, null], position: 'Open position' },
-      { frets: ['x', '3', '5', '5', '5', '3'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 3rd fret' },
-      { frets: ['x', '3', '2', '0', '1', '0'], fingers: [null, 3, 2, null, 1, null], position: 'Alt open' },
-      { frets: ['8', '8', '9', '10', '10', '8'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 8th fret' },
-      { frets: ['x', 'x', '10', '12', '13', '12'], fingers: [null, null, 1, 3, 4, 2], position: '10th position' }
+      { frets: ['x', '3', '2', '0', '1', '0'], fingers: [null, 3, 2, null, 1, null], position: 'Open position' },
+      { frets: ['3', '5', '5', '5', '3', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 3rd fret' },
+      { frets: ['0', '1', '0', '2', '3', 'x'], fingers: [null, 1, null, 2, 3, null], position: 'Alt open' },
+      { frets: ['8', '10', '10', '9', '8', '8'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 8th fret' },
+      { frets: ['12', '13', '12', '10', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '10th position' }
     ],
     
     // C# Major
     'C#': [
-      { frets: ['x', '4', '6', '6', '6', '4'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 4th fret' },
-      { frets: ['x', 'x', '6', '6', '6', '9'], fingers: [null, null, 1, 1, 1, 4], position: '6th position' },
-      { frets: ['9', '9', '10', '11', '11', '9'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 9th fret' },
-      { frets: ['x', 'x', '11', '13', '14', '13'], fingers: [null, null, 1, 3, 4, 2], position: '11th position' }
+      { frets: ['4', '6', '6', '6', '4', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 4th fret' },
+      { frets: ['9', '6', '6', '6', 'x', 'x'], fingers: [4, 1, 1, 1, null, null], position: '6th position' },
+      { frets: ['9', '11', '11', '10', '9', '9'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 9th fret' },
+      { frets: ['13', '14', '13', '11', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '11th position' }
     ],
     
     // D Major
     'D': [
-      { frets: ['2', '3', '2', '0', 'x', 'x'], fingers: [1, 3, 2, null, null, null], position: 'Open position' },
-      { frets: ['x', 'x', '0', '2', '3', '2'], fingers: [null, null, null, 1, 3, 2], position: 'Alt open' },
-      { frets: ['x', '5', '7', '7', '7', '5'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 5th fret' },
-      { frets: ['10', '10', '11', '12', '12', '10'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 10th fret' },
-      { frets: ['x', 'x', '12', '14', '15', '14'], fingers: [null, null, 1, 3, 4, 2], position: '12th position' }
+      { frets: ['x', 'x', '0', '2', '3', '2'], fingers: [null, null, null, 2, 3, 1], position: 'Open position' },
+      { frets: ['2', '3', '2', '0', 'x', 'x'], fingers: [2, 3, 1, null, null, null], position: 'Alt open' },
+      { frets: ['5', '7', '7', '7', '5', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 5th fret' },
+      { frets: ['10', '12', '12', '11', '10', '10'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 10th fret' },
+      { frets: ['14', '15', '14', '12', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '12th position' }
     ],
     
     // D# Major
     'D#': [
-      { frets: ['x', 'x', '1', '3', '4', '3'], fingers: [null, null, 1, 2, 4, 3], position: '1st position' },
-      { frets: ['x', '6', '8', '8', '8', '6'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 6th fret' },
-      { frets: ['11', '11', '12', '13', '13', '11'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 11th fret' }
+      { frets: ['3', '4', '3', '1', 'x', 'x'], fingers: [3, 4, 2, 1, null, null], position: '1st position' },
+      { frets: ['6', '8', '8', '8', '6', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 6th fret' },
+      { frets: ['11', '13', '13', '12', '11', '11'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 11th fret' }
     ],
     
     // E Major
     'E': [
-      { frets: ['0', '0', '1', '2', '2', '0'], fingers: [null, null, 1, 3, 2, null], position: 'Open position' },
-      { frets: ['0', '0', '1', '2', '2', '0'], fingers: [null, null, 1, 2, 3, null], position: 'Alt fingering' },
-      { frets: ['x', '7', '9', '9', '9', '7'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 7th fret' },
-      { frets: ['12', '12', '13', '14', '14', '12'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 12th fret' },
-      { frets: ['x', 'x', '14', '16', '17', '16'], fingers: [null, null, 1, 3, 4, 2], position: '14th position' }
+      { frets: ['0', '2', '2', '1', '0', '0'], fingers: [null, 2, 3, 1, null, null], position: 'Open position' },
+      { frets: ['0', '2', '2', '1', '0', '0'], fingers: [null, 3, 2, 1, null, null], position: 'Alt fingering' },
+      { frets: ['7', '9', '9', '9', '7', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 7th fret' },
+      { frets: ['12', '14', '14', '13', '12', '12'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 12th fret' },
+      { frets: ['16', '17', '16', '14', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '14th position' }
     ],
     
     // F Major
     'F': [
-      { frets: ['1', '1', '2', '3', '3', '1'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 1st fret' },
-      { frets: ['x', 'x', '3', '5', '6', '5'], fingers: [null, null, 1, 3, 4, 2], position: '3rd position' },
-      { frets: ['1', '3', '3', '2', '1', '1'], fingers: [1, 4, 3, 2, 1, 1], position: 'Alt 1st position' },
-      { frets: ['x', '8', '10', '10', '10', '8'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 8th fret' },
-      { frets: ['13', '13', '14', '15', '15', '13'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 13th fret' }
+      { frets: ['1', '3', '3', '2', '1', '1'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 1st fret' },
+      { frets: ['5', '6', '5', '3', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '3rd position' },
+      { frets: ['1', '1', '2', '3', '3', '1'], fingers: [1, 1, 2, 3, 4, 1], position: 'Alt 1st position' },
+      { frets: ['8', '10', '10', '10', '8', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 8th fret' },
+      { frets: ['13', '15', '15', '14', '13', '13'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 13th fret' }
     ],
     
     // F# Major
     'F#': [
-      { frets: ['2', '2', '3', '4', '4', '2'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 2nd fret' },
-      { frets: ['x', 'x', '4', '6', '7', '6'], fingers: [null, null, 1, 3, 4, 2], position: '4th position' },
-      { frets: ['x', '9', '11', '11', '11', '9'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 9th fret' },
-      { frets: ['14', '14', '15', '16', '16', '14'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 14th fret' }
+      { frets: ['2', '4', '4', '3', '2', '2'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 2nd fret' },
+      { frets: ['6', '7', '6', '4', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '4th position' },
+      { frets: ['9', '11', '11', '11', '9', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 9th fret' },
+      { frets: ['14', '16', '16', '15', '14', '14'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 14th fret' }
     ],
     
     // G Major
     'G': [
-      { frets: ['3', '0', '0', '0', '2', '3'], fingers: [3, null, null, null, 2, 4], position: 'Open position' },
-      { frets: ['3', '2', '0', '0', '0', '3'], fingers: [3, 2, null, null, null, 4], position: 'Alt open' },
-      { frets: ['x', 'x', '5', '7', '8', '7'], fingers: [null, null, 1, 3, 4, 2], position: '5th position' },
-      { frets: ['3', '5', '5', '4', '3', '3'], fingers: [1, 4, 3, 2, 1, 1], position: 'Barre 3rd fret' },
-      { frets: ['x', '10', '12', '12', '12', '10'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 10th fret' }
+      { frets: ['3', '2', '0', '0', '0', '3'], fingers: [4, 2, null, null, null, 3], position: 'Open position' },
+      { frets: ['3', '0', '0', '0', '2', '3'], fingers: [4, null, null, null, 2, 3], position: 'Alt open' },
+      { frets: ['7', '8', '7', '5', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '5th position' },
+      { frets: ['3', '3', '4', '5', '5', '3'], fingers: [1, 1, 2, 3, 4, 1], position: 'Barre 3rd fret' },
+      { frets: ['10', '12', '12', '12', '10', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 10th fret' }
     ],
     
     // G# Major
     'G#': [
-      { frets: ['4', '4', '5', '6', '6', '4'], fingers: [1, 1, 2, 4, 3, 1], position: 'Barre 4th fret' },
-      { frets: ['x', 'x', '6', '8', '9', '8'], fingers: [null, null, 1, 3, 4, 2], position: '6th position' },
-      { frets: ['4', '6', '6', '5', '4', '4'], fingers: [1, 4, 3, 2, 1, 1], position: 'Alt 4th position' },
-      { frets: ['x', '11', '13', '13', '13', '11'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 11th fret' }
+      { frets: ['4', '6', '6', '5', '4', '4'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 4th fret' },
+      { frets: ['8', '9', '8', '6', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '6th position' },
+      { frets: ['4', '4', '5', '6', '6', '4'], fingers: [1, 1, 2, 3, 4, 1], position: 'Alt 4th position' },
+      { frets: ['11', '13', '13', '13', '11', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 11th fret' }
     ],
     
     // A Major
     'A': [
-      { frets: ['0', '2', '2', '2', '0', 'x'], fingers: [null, 2, 3, 4, null, null], position: 'Open position' },
-      { frets: ['0', '2', '2', '2', '0', 'x'], fingers: [null, 1, 2, 3, null, null], position: 'Alt fingering' },
-      { frets: ['x', 'x', '7', '9', '10', '9'], fingers: [null, null, 1, 3, 4, 2], position: '7th position' },
-      { frets: ['5', '7', '7', '6', '5', '5'], fingers: [1, 4, 3, 2, 1, 1], position: 'Barre 5th fret' },
-      { frets: ['x', '12', '14', '14', '14', '12'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 12th fret' }
+      { frets: ['x', '0', '2', '2', '2', '0'], fingers: [null, null, 4, 3, 2, null], position: 'Open position' },
+      { frets: ['x', '0', '2', '2', '2', '0'], fingers: [null, null, 3, 2, 1, null], position: 'Alt fingering' },
+      { frets: ['9', '10', '9', '7', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '7th position' },
+      { frets: ['5', '5', '6', '7', '7', '5'], fingers: [1, 1, 2, 3, 4, 1], position: 'Barre 5th fret' },
+      { frets: ['12', '14', '14', '14', '12', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 12th fret' }
     ],
     
     // A# Major
     'A#': [
-      { frets: ['1', '3', '3', '3', '1', 'x'], fingers: [1, 3, 4, 2, 1, null], position: '1st position' },
-      { frets: ['x', 'x', '8', '10', '11', '10'], fingers: [null, null, 1, 3, 4, 2], position: '8th position' },
-      { frets: ['6', '8', '8', '7', '6', '6'], fingers: [1, 4, 3, 2, 1, 1], position: 'Barre 6th fret' },
-      { frets: ['x', '13', '15', '15', '15', '13'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 13th fret' }
+      { frets: ['x', '1', '3', '3', '3', '1'], fingers: [null, 1, 2, 4, 3, 1], position: '1st position' },
+      { frets: ['10', '11', '10', '8', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '8th position' },
+      { frets: ['6', '6', '7', '8', '8', '6'], fingers: [1, 1, 2, 3, 4, 1], position: 'Barre 6th fret' },
+      { frets: ['13', '15', '15', '15', '13', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 13th fret' }
     ],
     
     // B Major
     'B': [
-      { frets: ['2', '4', '4', '4', '2', 'x'], fingers: [1, 3, 4, 2, 1, null], position: '2nd position' },
-      { frets: ['x', '2', '4', '4', '4', '2'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 2nd fret' },
-      { frets: ['x', 'x', '9', '11', '12', '11'], fingers: [null, null, 1, 3, 4, 2], position: '9th position' },
-      { frets: ['7', '9', '9', '8', '7', '7'], fingers: [1, 4, 3, 2, 1, 1], position: 'Barre 7th fret' },
-      { frets: ['x', '14', '16', '16', '16', '14'], fingers: [null, 1, 3, 4, 2, 1], position: 'Barre 14th fret' }
+      { frets: ['x', '2', '4', '4', '4', '2'], fingers: [null, 1, 2, 4, 3, 1], position: '2nd position' },
+      { frets: ['2', '4', '4', '4', '2', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 2nd fret' },
+      { frets: ['11', '12', '11', '9', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '9th position' },
+      { frets: ['7', '7', '8', '9', '9', '7'], fingers: [1, 1, 2, 3, 4, 1], position: 'Barre 7th fret' },
+      { frets: ['14', '16', '16', '16', '14', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 14th fret' }
     ]
   };
   
   // Keep legacy single-variation format for backwards compatibility
   private guitarChords: Record<string, GuitarChordData> = {
     // Major Chords
-    'C': { frets: ['0', '1', '0', '2', '3', 'x'], fingers: [null, 1, null, 2, 3, null] },
-    'C#': { frets: ['x', '4', '6', '6', '6', '4'], fingers: [null, 1, 3, 4, 2, 1] },
-    'D': { frets: ['2', '3', '2', '0', 'x', 'x'], fingers: [1, 3, 2, null, null, null] },
-    'D#': { frets: ['x', 'x', '1', '3', '4', '3'], fingers: [null, null, 1, 2, 4, 3] },
-    'E': { frets: ['0', '0', '1', '2', '2', '0'], fingers: [null, null, 1, 3, 2, null] },
-    'F': { frets: ['1', '1', '2', '3', '3', '1'], fingers: [1, 1, 2, 4, 3, 1] },
-    'F#': { frets: ['2', '2', '3', '4', '4', '2'], fingers: [1, 1, 2, 4, 3, 1] },
-    'G': { frets: ['3', '0', '0', '0', '2', '3'], fingers: [3, null, null, null, 2, 4] },
-    'G#': { frets: ['4', '4', '5', '6', '6', '4'], fingers: [1, 1, 2, 4, 3, 1] },
-    'A': { frets: ['0', '2', '2', '2', '0', 'x'], fingers: [null, 2, 3, 4, null, null] },
-    'A#': { frets: ['1', '3', '3', '3', '1', 'x'], fingers: [1, 3, 4, 2, 1, null] },
-    'B': { frets: ['2', '4', '4', '4', '2', 'x'], fingers: [1, 3, 4, 2, 1, null] },
+    'C': { frets: ['x', '3', '2', '0', '1', '0'], fingers: [null, 3, 2, null, 1, null] },
+    'C#': { frets: ['4', '6', '6', '6', '4', 'x'], fingers: [1, 2, 4, 3, 1, null] },
+    'D': { frets: ['x', 'x', '0', '2', '3', '2'], fingers: [null, null, null, 2, 3, 1] },
+    'D#': { frets: ['3', '4', '3', '1', 'x', 'x'], fingers: [3, 4, 2, 1, null, null] },
+    'E': { frets: ['0', '2', '2', '1', '0', '0'], fingers: [null, 2, 3, 1, null, null] },
+    'F': { frets: ['1', '3', '3', '2', '1', '1'], fingers: [1, 3, 4, 2, 1, 1] },
+    'F#': { frets: ['2', '4', '4', '3', '2', '2'], fingers: [1, 3, 4, 2, 1, 1] },
+    'G': { frets: ['3', '2', '0', '0', '0', '3'], fingers: [4, 2, null, null, null, 3] },
+    'G#': { frets: ['4', '6', '6', '5', '4', '4'], fingers: [1, 3, 4, 2, 1, 1] },
+    'A': { frets: ['x', '0', '2', '2', '2', '0'], fingers: [null, null, 4, 3, 2, null] },
+    'A#': { frets: ['x', '1', '3', '3', '3', '1'], fingers: [null, 1, 2, 4, 3, 1] },
+    'B': { frets: ['x', '2', '4', '4', '4', '2'], fingers: [null, 1, 2, 4, 3, 1] },
     
     // Minor Chords
-    'Cm': { frets: ['x', '3', '5', '5', '4', '3'], fingers: [null, 1, 3, 4, 2, 1] },
-    'C#m': { frets: ['x', '4', '6', '6', '5', '4'], fingers: [null, 1, 3, 4, 2, 1] },
-    'Dm': { frets: ['1', '3', '2', '0', 'x', 'x'], fingers: [1, 3, 2, null, null, null] },
-    'D#m': { frets: ['x', 'x', '1', '3', '4', '2'], fingers: [null, null, 1, 3, 4, 2] },
-    'Em': { frets: ['0', '0', '0', '2', '2', '0'], fingers: [null, null, null, 2, 3, null] },
-    'Fm': { frets: ['1', '1', '1', '3', '4', '1'], fingers: [1, 1, 1, 3, 4, 1] },
-    'F#m': { frets: ['2', '2', '2', '4', '5', '2'], fingers: [1, 1, 1, 3, 4, 1] },
-    'Gm': { frets: ['3', '3', '3', '5', '6', '3'], fingers: [1, 1, 1, 3, 4, 1] },
-    'G#m': { frets: ['4', '4', '4', '6', '7', '4'], fingers: [1, 1, 1, 3, 4, 1] },
-    'Am': { frets: ['0', '1', '2', '2', '0', 'x'], fingers: [null, 1, 3, 2, null, null] },
-    'A#m': { frets: ['1', '2', '3', '3', '1', 'x'], fingers: [1, 2, 4, 3, 1, null] },
-    'Bm': { frets: ['2', '3', '4', '4', '2', 'x'], fingers: [1, 2, 4, 3, 1, null] },
+    'Cm': { frets: ['3', '4', '5', '5', '3', 'x'], fingers: [1, 2, 4, 3, 1, null] },
+    'C#m': { frets: ['4', '5', '6', '6', '4', 'x'], fingers: [1, 2, 4, 3, 1, null] },
+    'Dm': { frets: ['x', 'x', '0', '2', '3', '1'], fingers: [null, null, null, 2, 3, 1] },
+    'D#m': { frets: ['2', '4', '3', '1', 'x', 'x'], fingers: [2, 4, 3, 1, null, null] },
+    'Em': { frets: ['0', '2', '2', '0', '0', '0'], fingers: [null, 3, 2, null, null, null] },
+    'Fm': { frets: ['1', '4', '3', '1', '1', '1'], fingers: [1, 4, 3, 1, 1, 1] },
+    'F#m': { frets: ['2', '5', '4', '2', '2', '2'], fingers: [1, 4, 3, 1, 1, 1] },
+    'Gm': { frets: ['3', '6', '5', '3', '3', '3'], fingers: [1, 4, 3, 1, 1, 1] },
+    'G#m': { frets: ['4', '7', '6', '4', '4', '4'], fingers: [1, 4, 3, 1, 1, 1] },
+    'Am': { frets: ['x', '0', '2', '2', '1', '0'], fingers: [null, null, 2, 3, 1, null] },
+    'A#m': { frets: ['x', '1', '3', '3', '2', '1'], fingers: [null, 1, 3, 4, 2, 1] },
+    'Bm': { frets: ['x', '2', '4', '4', '3', '2'], fingers: [null, 1, 3, 4, 2, 1] },
     
     // Dominant 7th Chords
-    'C7': { frets: ['0', '1', '3', '2', '3', 'x'], fingers: [null, 1, 4, 2, 3, null] },
-    'C#7': { frets: ['x', '4', '3', '4', '2', 'x'], fingers: [null, 3, 2, 4, 1, null] },
-    'D7': { frets: ['2', '1', '2', '0', 'x', 'x'], fingers: [2, 1, 3, null, null, null] },
-    'D#7': { frets: ['x', 'x', '1', '0', '2', '3'], fingers: [null, null, 1, null, 2, 4] },
-    'E7': { frets: ['0', '0', '1', '0', '2', '0'], fingers: [null, null, 1, null, 2, null] },
-    'F7': { frets: ['1', '1', '2', '1', '3', '1'], fingers: [1, 1, 2, 1, 3, 1] },
-    'F#7': { frets: ['2', '2', '3', '2', '4', '2'], fingers: [1, 1, 2, 1, 3, 1] },
-    'G7': { frets: ['1', '0', '0', '0', '2', '3'], fingers: [1, null, null, null, 2, 3] },
-    'G#7': { frets: ['4', '4', '5', '4', '6', '4'], fingers: [1, 1, 2, 1, 3, 1] },
-    'A7': { frets: ['0', '2', '0', '2', '0', 'x'], fingers: [null, 2, null, 3, null, null] },
-    'A#7': { frets: ['1', '3', '1', '3', '1', 'x'], fingers: [1, 3, 1, 4, 1, null] },
-    'B7': { frets: ['2', '0', '2', '1', '2', 'x'], fingers: [2, null, 3, 1, 4, null] },
+    'C7': { frets: ['x', '3', '2', '3', '1', '0'], fingers: [null, 3, 2, 4, 1, null] },
+    'C#7': { frets: ['x', '2', '4', '3', '4', 'x'], fingers: [null, 1, 4, 2, 3, null] },
+    'D7': { frets: ['x', 'x', '0', '2', '1', '2'], fingers: [null, null, null, 3, 1, 2] },
+    'D#7': { frets: ['3', '2', '0', '1', 'x', 'x'], fingers: [4, 2, null, 1, null, null] },
+    'E7': { frets: ['0', '2', '0', '1', '0', '0'], fingers: [null, 2, null, 1, null, null] },
+    'F7': { frets: ['1', '3', '1', '2', '1', '1'], fingers: [1, 3, 1, 2, 1, 1] },
+    'F#7': { frets: ['2', '4', '2', '3', '2', '2'], fingers: [1, 3, 1, 2, 1, 1] },
+    'G7': { frets: ['3', '2', '0', '0', '0', '1'], fingers: [3, 2, null, null, null, 1] },
+    'G#7': { frets: ['4', '6', '4', '5', '4', '4'], fingers: [1, 3, 1, 2, 1, 1] },
+    'A7': { frets: ['x', '0', '2', '0', '2', '0'], fingers: [null, null, 3, null, 2, null] },
+    'A#7': { frets: ['x', '1', '3', '1', '3', '1'], fingers: [null, 1, 4, 1, 3, 1] },
+    'B7': { frets: ['x', '2', '1', '2', '0', '2'], fingers: [null, 4, 1, 3, null, 2] },
     
     // Major 7th Chords
-    'Cmaj7': { frets: ['0', '0', '0', '2', '3', 'x'], fingers: [null, null, null, 2, 3, null] },
-    'C#maj7': { frets: ['x', '4', '3', '5', '6', 'x'], fingers: [null, 2, 1, 3, 4, null] },
-    'Dmaj7': { frets: ['2', '2', '2', '0', 'x', 'x'], fingers: [2, 3, 1, null, null, null] },
-    'D#maj7': { frets: ['x', 'x', '1', '0', '3', '3'], fingers: [null, null, 1, null, 3, 4] },
-    'Emaj7': { frets: ['0', '0', '1', '1', '2', '0'], fingers: [null, null, 1, 2, 3, null] },
-    'Fmaj7': { frets: ['0', '1', '2', '3', 'x', 'x'], fingers: [null, 1, 2, 3, null, null] },
-    'F#maj7': { frets: ['2', '1', '3', '3', 'x', 'x'], fingers: [2, 1, 3, 4, null, null] },
-    'Gmaj7': { frets: ['2', '0', '0', '0', '2', '3'], fingers: [2, null, null, null, 3, 4] },
-    'G#maj7': { frets: ['4', '3', '5', '5', 'x', 'x'], fingers: [2, 1, 3, 4, null, null] },
-    'Amaj7': { frets: ['0', '2', '1', '2', '0', 'x'], fingers: [null, 3, 1, 2, null, null] },
-    'A#maj7': { frets: ['1', '3', '2', '3', '1', 'x'], fingers: [1, 4, 2, 3, 1, null] },
-    'Bmaj7': { frets: ['2', '4', '3', '4', '2', 'x'], fingers: [1, 4, 2, 3, 1, null] },
+    'Cmaj7': { frets: ['x', '3', '2', '0', '0', '0'], fingers: [null, 3, 2, null, null, null] },
+    'C#maj7': { frets: ['x', '6', '5', '3', '4', 'x'], fingers: [null, 4, 3, 1, 2, null] },
+    'Dmaj7': { frets: ['x', 'x', '0', '2', '2', '2'], fingers: [null, null, null, 1, 3, 2] },
+    'D#maj7': { frets: ['3', '3', '0', '1', 'x', 'x'], fingers: [4, 3, null, 1, null, null] },
+    'Emaj7': { frets: ['0', '2', '1', '1', '0', '0'], fingers: [null, 3, 2, 1, null, null] },
+    'Fmaj7': { frets: ['x', 'x', '3', '2', '1', '0'], fingers: [null, null, 3, 2, 1, null] },
+    'F#maj7': { frets: ['x', 'x', '3', '3', '1', '2'], fingers: [null, null, 4, 3, 1, 2] },
+    'Gmaj7': { frets: ['3', '2', '0', '0', '0', '2'], fingers: [4, 3, null, null, null, 2] },
+    'G#maj7': { frets: ['x', 'x', '5', '5', '3', '4'], fingers: [null, null, 4, 3, 1, 2] },
+    'Amaj7': { frets: ['x', '0', '2', '1', '2', '0'], fingers: [null, null, 2, 1, 3, null] },
+    'A#maj7': { frets: ['x', '1', '3', '2', '3', '1'], fingers: [null, 1, 3, 2, 4, 1] },
+    'Bmaj7': { frets: ['x', '2', '4', '3', '4', '2'], fingers: [null, 1, 3, 2, 4, 1] },
     
     // Minor 7th Chords
-    'Cm7': { frets: ['x', '3', '1', '3', '4', '3'], fingers: [null, 2, 1, 3, 4, 2] },
-    'C#m7': { frets: ['x', '4', '2', '4', '5', '4'], fingers: [null, 2, 1, 3, 4, 2] },
-    'Dm7': { frets: ['x', '5', '3', '5', '6', '5'], fingers: [null, 2, 1, 3, 4, 2] },
-    'D#m7': { frets: ['x', 'x', '1', '3', '2', '2'], fingers: [null, null, 1, 4, 2, 3] },
-    'Em7': { frets: ['0', '0', '0', '0', '2', '0'], fingers: [null, null, null, null, 2, null] },
-    'Fm7': { frets: ['1', '1', '1', '1', '3', '1'], fingers: [1, 1, 1, 1, 3, 1] },
-    'F#m7': { frets: ['2', '2', '2', '2', '4', '2'], fingers: [1, 1, 1, 1, 3, 1] },
-    'Gm7': { frets: ['3', '3', '3', '3', '5', '3'], fingers: [1, 1, 1, 1, 3, 1] },
-    'G#m7': { frets: ['4', '4', '4', '4', '6', '4'], fingers: [1, 1, 1, 1, 3, 1] },
-    'Am7': { frets: ['0', '1', '0', '2', '0', 'x'], fingers: [null, 1, null, 2, null, null] },
-    'A#m7': { frets: ['1', '2', '1', '3', '1', 'x'], fingers: [1, 2, 1, 3, 1, null] },
-    'Bm7': { frets: ['2', '3', '2', '4', '2', 'x'], fingers: [1, 2, 1, 3, 1, null] },
+    'Cm7': { frets: ['3', '4', '3', '1', '3', 'x'], fingers: [2, 4, 3, 1, 2, null] },
+    'C#m7': { frets: ['4', '5', '4', '2', '4', 'x'], fingers: [2, 4, 3, 1, 2, null] },
+    'Dm7': { frets: ['5', '6', '5', '3', '5', 'x'], fingers: [2, 4, 3, 1, 2, null] },
+    'D#m7': { frets: ['2', '2', '3', '1', 'x', 'x'], fingers: [3, 2, 4, 1, null, null] },
+    'Em7': { frets: ['0', '2', '0', '0', '0', '0'], fingers: [null, 2, null, null, null, null] },
+    'Fm7': { frets: ['1', '3', '1', '1', '1', '1'], fingers: [1, 3, 1, 1, 1, 1] },
+    'F#m7': { frets: ['2', '4', '2', '2', '2', '2'], fingers: [1, 3, 1, 1, 1, 1] },
+    'Gm7': { frets: ['3', '5', '3', '3', '3', '3'], fingers: [1, 3, 1, 1, 1, 1] },
+    'G#m7': { frets: ['4', '6', '4', '4', '4', '4'], fingers: [1, 3, 1, 1, 1, 1] },
+    'Am7': { frets: ['x', '0', '2', '0', '1', '0'], fingers: [null, null, 2, null, 1, null] },
+    'A#m7': { frets: ['x', '1', '3', '1', '2', '1'], fingers: [null, 1, 3, 1, 2, 1] },
+    'Bm7': { frets: ['x', '2', '4', '2', '3', '2'], fingers: [null, 1, 3, 1, 2, 1] },
     
     // Diminished Chords
-    'Cdim': { frets: ['x', '3', '4', '2', 'x', 'x'], fingers: [null, 2, 3, 1, null, null] },
-    'C#dim': { frets: ['x', '4', '5', '3', 'x', 'x'], fingers: [null, 2, 3, 1, null, null] },
-    'Ddim': { frets: ['x', 'x', '0', '1', '0', '1'], fingers: [null, null, null, 1, null, 2] },
-    'D#dim': { frets: ['x', 'x', '1', '2', '1', '2'], fingers: [null, null, 1, 3, 2, 4] },
-    'Edim': { frets: ['x', 'x', '2', '3', '2', '3'], fingers: [null, null, 1, 3, 2, 4] },
-    'Fdim': { frets: ['x', 'x', '3', '4', '3', '4'], fingers: [null, null, 1, 3, 2, 4] },
-    'F#dim': { frets: ['x', 'x', '4', '5', '4', '5'], fingers: [null, null, 1, 3, 2, 4] },
-    'Gdim': { frets: ['x', 'x', '5', '6', '5', '6'], fingers: [null, null, 1, 3, 2, 4] },
-    'G#dim': { frets: ['x', 'x', '6', '7', '6', '7'], fingers: [null, null, 1, 3, 2, 4] },
-    'Adim': { frets: ['x', '0', '1', '2', '1', 'x'], fingers: [null, null, 1, 3, 2, null] },
-    'A#dim': { frets: ['x', '1', '2', '3', '2', 'x'], fingers: [null, 1, 2, 4, 3, null] },
-    'Bdim': { frets: ['x', '2', '3', '4', '3', 'x'], fingers: [null, 1, 2, 4, 3, null] },
+    'Cdim': { frets: ['x', 'x', '2', '4', '3', 'x'], fingers: [null, null, 1, 3, 2, null] },
+    'C#dim': { frets: ['x', 'x', '3', '5', '4', 'x'], fingers: [null, null, 1, 3, 2, null] },
+    'Ddim': { frets: ['1', '0', '1', '0', 'x', 'x'], fingers: [2, null, 1, null, null, null] },
+    'D#dim': { frets: ['2', '1', '2', '1', 'x', 'x'], fingers: [4, 2, 3, 1, null, null] },
+    'Edim': { frets: ['3', '2', '3', '2', 'x', 'x'], fingers: [4, 2, 3, 1, null, null] },
+    'Fdim': { frets: ['4', '3', '4', '3', 'x', 'x'], fingers: [4, 2, 3, 1, null, null] },
+    'F#dim': { frets: ['5', '4', '5', '4', 'x', 'x'], fingers: [4, 2, 3, 1, null, null] },
+    'Gdim': { frets: ['6', '5', '6', '5', 'x', 'x'], fingers: [4, 2, 3, 1, null, null] },
+    'G#dim': { frets: ['7', '6', '7', '6', 'x', 'x'], fingers: [4, 2, 3, 1, null, null] },
+    'Adim': { frets: ['x', '1', '2', '1', '0', 'x'], fingers: [null, 2, 3, 1, null, null] },
+    'A#dim': { frets: ['x', '2', '3', '2', '1', 'x'], fingers: [null, 3, 4, 2, 1, null] },
+    'Bdim': { frets: ['x', '3', '4', '3', '2', 'x'], fingers: [null, 3, 4, 2, 1, null] },
     
     // Augmented Chords
-    'Caug': { frets: ['x', '3', '2', '1', '1', '0'], fingers: [null, 4, 3, 2, 1, null] },
-    'C#aug': { frets: ['x', '4', '3', '2', '2', '1'], fingers: [null, 4, 3, 2, 2, 1] },
-    'Daug': { frets: ['x', 'x', '0', '3', '3', '2'], fingers: [null, null, null, 3, 4, 2] },
-    'D#aug': { frets: ['x', 'x', '1', '4', '4', '3'], fingers: [null, null, 1, 3, 4, 2] },
-    'Eaug': { frets: ['0', '3', '2', '1', '1', '0'], fingers: [null, 4, 3, 2, 1, null] },
-    'Faug': { frets: ['x', 'x', '3', '2', '2', '1'], fingers: [null, null, 4, 2, 3, 1] },
-    'F#aug': { frets: ['x', 'x', '4', '3', '3', '2'], fingers: [null, null, 4, 2, 3, 1] },
-    'Gaug': { frets: ['3', '2', '1', '0', '0', '3'], fingers: [4, 3, 2, null, null, 4] },
-    'G#aug': { frets: ['4', '3', '2', '1', '1', '4'], fingers: [4, 3, 2, 1, 1, 4] },
-    'Aaug': { frets: ['x', '0', '3', '2', '2', '1'], fingers: [null, null, 4, 2, 3, 1] },
-    'A#aug': { frets: ['x', '1', '4', '3', '3', '2'], fingers: [null, 1, 4, 2, 3, 2] },
-    'Baug': { frets: ['x', '2', '5', '4', '4', '3'], fingers: [null, 1, 4, 2, 3, 2] },
+    'Caug': { frets: ['0', '1', '1', '2', '3', 'x'], fingers: [null, 1, 2, 3, 4, null] },
+    'C#aug': { frets: ['1', '2', '2', '3', '4', 'x'], fingers: [1, 2, 2, 3, 4, null] },
+    'Daug': { frets: ['2', '3', '3', '0', 'x', 'x'], fingers: [2, 4, 3, null, null, null] },
+    'D#aug': { frets: ['3', '4', '4', '1', 'x', 'x'], fingers: [2, 4, 3, 1, null, null] },
+    'Eaug': { frets: ['0', '1', '1', '2', '3', '0'], fingers: [null, 1, 2, 3, 4, null] },
+    'Faug': { frets: ['1', '2', '2', '3', 'x', 'x'], fingers: [1, 3, 2, 4, null, null] },
+    'F#aug': { frets: ['2', '3', '3', '4', 'x', 'x'], fingers: [1, 3, 2, 4, null, null] },
+    'Gaug': { frets: ['3', '0', '0', '1', '2', '3'], fingers: [4, null, null, 2, 3, 4] },
+    'G#aug': { frets: ['4', '1', '1', '2', '3', '4'], fingers: [4, 1, 1, 2, 3, 4] },
+    'Aaug': { frets: ['1', '2', '2', '3', '0', 'x'], fingers: [1, 3, 2, 4, null, null] },
+    'A#aug': { frets: ['2', '3', '3', '4', '1', 'x'], fingers: [2, 3, 2, 4, 1, null] },
+    'Baug': { frets: ['3', '4', '4', '5', '2', 'x'], fingers: [2, 3, 2, 4, 1, null] },
     
     // Suspended 2nd Chords
-    'Csus2': { frets: ['x', '3', '0', '0', '1', '3'], fingers: [null, 3, null, null, 1, 4] },
-    'C#sus2': { frets: ['x', '4', '1', '1', '2', '4'], fingers: [null, 3, 1, 1, 2, 4] },
-    'Dsus2': { frets: ['x', '5', '2', '2', '3', '5'], fingers: [null, 3, 1, 1, 2, 4] },
-    'D#sus2': { frets: ['x', 'x', '1', '3', '4', '1'], fingers: [null, null, 1, 3, 4, 1] },
-    'Esus2': { frets: ['0', '2', '4', '4', '0', '0'], fingers: [null, 1, 3, 4, null, null] },
-    'Fsus2': { frets: ['x', 'x', '3', '0', '1', '1'], fingers: [null, null, 3, null, 1, 2] },
-    'F#sus2': { frets: ['x', 'x', '4', '1', '2', '2'], fingers: [null, null, 4, 1, 2, 3] },
-    'Gsus2': { frets: ['3', '0', '0', '2', '3', '3'], fingers: [2, null, null, 1, 3, 4] },
-    'G#sus2': { frets: ['x', 'x', '6', '3', '4', '4'], fingers: [null, null, 4, 1, 2, 3] },
-    'Asus2': { frets: ['0', '0', '2', '2', '0', '0'], fingers: [null, null, 2, 3, null, null] },
-    'A#sus2': { frets: ['x', '1', '3', '3', '1', '1'], fingers: [null, 1, 3, 4, 1, 1] },
-    'Bsus2': { frets: ['x', '2', '4', '4', '2', '2'], fingers: [null, 1, 3, 4, 1, 1] },
+    'Csus2': { frets: ['3', '1', '0', '0', '3', 'x'], fingers: [4, 1, null, null, 3, null] },
+    'C#sus2': { frets: ['4', '2', '1', '1', '4', 'x'], fingers: [4, 2, 1, 1, 3, null] },
+    'Dsus2': { frets: ['5', '3', '2', '2', '5', 'x'], fingers: [4, 2, 1, 1, 3, null] },
+    'D#sus2': { frets: ['1', '4', '3', '1', 'x', 'x'], fingers: [1, 4, 3, 1, null, null] },
+    'Esus2': { frets: ['0', '0', '4', '4', '2', '0'], fingers: [null, null, 4, 3, 1, null] },
+    'Fsus2': { frets: ['1', '1', '0', '3', 'x', 'x'], fingers: [2, 1, null, 3, null, null] },
+    'F#sus2': { frets: ['2', '2', '1', '4', 'x', 'x'], fingers: [3, 2, 1, 4, null, null] },
+    'Gsus2': { frets: ['3', '3', '2', '0', '0', '3'], fingers: [4, 3, 1, null, null, 2] },
+    'G#sus2': { frets: ['4', '4', '3', '6', 'x', 'x'], fingers: [3, 2, 1, 4, null, null] },
+    'Asus2': { frets: ['0', '0', '2', '2', '0', '0'], fingers: [null, null, 3, 2, null, null] },
+    'A#sus2': { frets: ['1', '1', '3', '3', '1', 'x'], fingers: [1, 1, 4, 3, 1, null] },
+    'Bsus2': { frets: ['2', '2', '4', '4', '2', 'x'], fingers: [1, 1, 4, 3, 1, null] },
     
     // Suspended 4th Chords
-    'Csus4': { frets: ['x', '3', '3', '0', '1', '1'], fingers: [null, 3, 4, null, 1, 2] },
-    'C#sus4': { frets: ['x', '4', '4', '1', '2', '2'], fingers: [null, 3, 4, 1, 1, 2] },
-    'Dsus4': { frets: ['x', '5', '5', '2', '3', '3'], fingers: [null, 3, 4, 1, 1, 2] },
-    'D#sus4': { frets: ['x', 'x', '1', '3', '4', '4'], fingers: [null, null, 1, 2, 3, 4] },
-    'Esus4': { frets: ['0', '0', '2', '2', '0', '0'], fingers: [null, null, 2, 3, null, null] },
-    'Fsus4': { frets: ['x', 'x', '3', '3', '1', '1'], fingers: [null, null, 3, 4, 1, 2] },
-    'F#sus4': { frets: ['x', 'x', '4', '4', '2', '2'], fingers: [null, null, 3, 4, 1, 2] },
-    'Gsus4': { frets: ['3', '3', '0', '0', '1', '3'], fingers: [3, 4, null, null, 1, 3] },
-    'G#sus4': { frets: ['4', '4', '6', '6', '4', '4'], fingers: [1, 1, 3, 4, 1, 1] },
-    'Asus4': { frets: ['0', '0', '2', '2', '3', '0'], fingers: [null, null, 2, 3, 4, null] },
-    'A#sus4': { frets: ['x', '1', '3', '3', '4', '1'], fingers: [null, 1, 3, 3, 4, 1] },
-    'Bsus4': { frets: ['x', '2', '4', '4', '5', '2'], fingers: [null, 1, 3, 3, 4, 1] },
+    'Csus4': { frets: ['1', '1', '0', '3', '3', 'x'], fingers: [2, 1, null, 4, 3, null] },
+    'C#sus4': { frets: ['2', '2', '1', '4', '4', 'x'], fingers: [2, 1, 1, 4, 3, null] },
+    'Dsus4': { frets: ['3', '3', '2', '5', '5', 'x'], fingers: [2, 1, 1, 4, 3, null] },
+    'D#sus4': { frets: ['4', '4', '3', '1', 'x', 'x'], fingers: [4, 3, 2, 1, null, null] },
+    'Esus4': { frets: ['0', '0', '2', '2', '0', '0'], fingers: [null, null, 3, 2, null, null] },
+    'Fsus4': { frets: ['1', '1', '3', '3', 'x', 'x'], fingers: [2, 1, 4, 3, null, null] },
+    'F#sus4': { frets: ['2', '2', '4', '4', 'x', 'x'], fingers: [2, 1, 4, 3, null, null] },
+    'Gsus4': { frets: ['3', '1', '0', '0', '3', '3'], fingers: [3, 1, null, null, 4, 3] },
+    'G#sus4': { frets: ['4', '4', '6', '6', '4', '4'], fingers: [1, 1, 4, 3, 1, 1] },
+    'Asus4': { frets: ['0', '3', '2', '2', '0', '0'], fingers: [null, 4, 3, 2, null, null] },
+    'A#sus4': { frets: ['1', '4', '3', '3', '1', 'x'], fingers: [1, 4, 3, 3, 1, null] },
+    'Bsus4': { frets: ['2', '5', '4', '4', '2', 'x'], fingers: [1, 4, 3, 3, 1, null] },
     
     // Add9 Chords
-    'Cadd9': { frets: ['x', '3', '2', '0', '3', '0'], fingers: [null, 3, 2, null, 4, null] },
-    'Dadd9': { frets: ['x', '5', '4', '2', '3', '0'], fingers: [null, 4, 3, 1, 2, null] },
-    'Eadd9': { frets: ['0', '2', '4', '1', '0', '0'], fingers: [null, 2, 4, 1, null, null] },
-    'Fadd9': { frets: ['x', 'x', '3', '2', '1', '3'], fingers: [null, null, 4, 3, 1, 4] },
-    'Gadd9': { frets: ['3', '0', '0', '2', '0', '3'], fingers: [3, null, null, 2, null, 4] },
-    'Aadd9': { frets: ['x', '0', '2', '4', '2', '0'], fingers: [null, null, 1, 4, 2, null] },
-    'Badd9': { frets: ['x', '2', '1', '4', '2', '2'], fingers: [null, 2, 1, 4, 2, 3] },
+    'Cadd9': { frets: ['0', '3', '0', '2', '3', 'x'], fingers: [null, 4, null, 2, 3, null] },
+    'Dadd9': { frets: ['0', '3', '2', '4', '5', 'x'], fingers: [null, 2, 1, 3, 4, null] },
+    'Eadd9': { frets: ['0', '0', '1', '4', '2', '0'], fingers: [null, null, 1, 4, 2, null] },
+    'Fadd9': { frets: ['3', '1', '2', '3', 'x', 'x'], fingers: [4, 1, 3, 4, null, null] },
+    'Gadd9': { frets: ['3', '0', '2', '0', '0', '3'], fingers: [4, null, 2, null, null, 3] },
+    'Aadd9': { frets: ['0', '2', '4', '2', '0', 'x'], fingers: [null, 2, 4, 1, null, null] },
+    'Badd9': { frets: ['2', '2', '4', '1', '2', 'x'], fingers: [3, 2, 4, 1, 2, null] },
     
     // Power Chords (5)
-    'C5': { frets: ['x', '3', 'x', '0', '1', 'x'], fingers: [null, 3, null, null, 1, null] },
-    'D5': { frets: ['x', '5', 'x', '2', '3', 'x'], fingers: [null, 3, null, 1, 2, null] },
-    'E5': { frets: ['0', '2', 'x', 'x', '0', '0'], fingers: [null, 2, null, null, null, null] },
-    'F5': { frets: ['1', '3', 'x', 'x', '1', '1'], fingers: [1, 3, null, null, 1, 1] },
-    'G5': { frets: ['3', '5', 'x', 'x', '3', '3'], fingers: [1, 3, null, null, 1, 1] },
-    'A5': { frets: ['0', '2', 'x', 'x', '0', 'x'], fingers: [null, 2, null, null, null, null] },
-    'B5': { frets: ['x', '2', 'x', 'x', '4', 'x'], fingers: [null, 1, null, null, 3, null] },
+    'C5': { frets: ['x', '1', '0', 'x', '3', 'x'], fingers: [null, 1, null, null, 3, null] },
+    'D5': { frets: ['x', '3', '2', 'x', '5', 'x'], fingers: [null, 2, 1, null, 3, null] },
+    'E5': { frets: ['0', '0', 'x', 'x', '2', '0'], fingers: [null, null, null, null, 2, null] },
+    'F5': { frets: ['1', '1', 'x', 'x', '3', '1'], fingers: [1, 1, null, null, 3, 1] },
+    'G5': { frets: ['3', '3', 'x', 'x', '5', '3'], fingers: [1, 1, null, null, 3, 1] },
+    'A5': { frets: ['x', '0', 'x', 'x', '2', '0'], fingers: [null, null, null, null, 2, null] },
+    'B5': { frets: ['x', '4', 'x', 'x', '2', 'x'], fingers: [null, 3, null, null, 1, null] },
     
     // Minor Major 7th Chords (mM7)
-    'CmM7': { frets: ['x', '3', '1', '0', '4', 'x'], fingers: [null, 3, 1, null, 4, null] },
-    'DmM7': { frets: ['x', '5', '3', '2', '6', 'x'], fingers: [null, 3, 2, 1, 4, null] },
-    'EmM7': { frets: ['0', '2', '1', '0', '0', '0'], fingers: [null, 3, 1, null, null, null] },
-    'FmM7': { frets: ['1', '3', '2', '1', '1', '1'], fingers: [1, 4, 2, 1, 1, 1] },
-    'GmM7': { frets: ['3', '5', '4', '3', '3', '3'], fingers: [1, 4, 2, 1, 1, 1] },
-    'AmM7': { frets: ['x', '0', '2', '1', '1', '0'], fingers: [null, null, 4, 2, 3, null] },
-    'BmM7': { frets: ['x', '2', '4', '3', '3', '2'], fingers: [null, 1, 4, 2, 3, 1] },
+    'CmM7': { frets: ['x', '4', '0', '1', '3', 'x'], fingers: [null, 4, null, 1, 3, null] },
+    'DmM7': { frets: ['x', '6', '2', '3', '5', 'x'], fingers: [null, 4, 1, 2, 3, null] },
+    'EmM7': { frets: ['0', '0', '0', '1', '2', '0'], fingers: [null, null, null, 1, 3, null] },
+    'FmM7': { frets: ['1', '1', '1', '2', '3', '1'], fingers: [1, 1, 1, 2, 4, 1] },
+    'GmM7': { frets: ['3', '3', '3', '4', '5', '3'], fingers: [1, 1, 1, 2, 4, 1] },
+    'AmM7': { frets: ['0', '1', '1', '2', '0', 'x'], fingers: [null, 3, 2, 4, null, null] },
+    'BmM7': { frets: ['2', '3', '3', '4', '2', 'x'], fingers: [1, 3, 2, 4, 1, null] },
     
     // 6th Chords
-    'C6': { frets: ['x', '3', '2', '2', '1', '0'], fingers: [null, 4, 3, 2, 1, null] },
-    'D6': { frets: ['x', '5', '4', '4', '3', '0'], fingers: [null, 4, 3, 3, 2, null] },
-    'E6': { frets: ['0', '2', '2', '1', '2', '0'], fingers: [null, 2, 3, 1, 4, null] },
-    'F6': { frets: ['x', 'x', '3', '5', '3', '5'], fingers: [null, null, 1, 3, 2, 4] },
-    'G6': { frets: ['3', '2', '0', '0', '0', '0'], fingers: [3, 2, null, null, null, null] },
-    'A6': { frets: ['x', '0', '2', '2', '2', '2'], fingers: [null, null, 1, 2, 3, 4] },
-    'B6': { frets: ['x', '2', '1', '1', '1', '2'], fingers: [null, 3, 1, 1, 1, 4] },
+    'C6': { frets: ['0', '1', '2', '2', '3', 'x'], fingers: [null, 1, 2, 3, 4, null] },
+    'D6': { frets: ['0', '3', '4', '4', '5', 'x'], fingers: [null, 2, 3, 3, 4, null] },
+    'E6': { frets: ['0', '2', '1', '2', '2', '0'], fingers: [null, 4, 1, 3, 2, null] },
+    'F6': { frets: ['5', '3', '5', '3', 'x', 'x'], fingers: [4, 2, 3, 1, null, null] },
+    'G6': { frets: ['0', '0', '0', '0', '2', '3'], fingers: [null, null, null, null, 2, 3] },
+    'A6': { frets: ['2', '2', '2', '2', '0', 'x'], fingers: [4, 3, 2, 1, null, null] },
+    'B6': { frets: ['2', '1', '1', '1', '2', 'x'], fingers: [4, 1, 1, 1, 3, null] },
     
     // 9th Chords
-    'C9': { frets: ['x', '3', '2', '3', '3', '3'], fingers: [null, 2, 1, 3, 3, 4] },
-    'D9': { frets: ['x', '5', '4', '5', '5', '5'], fingers: [null, 2, 1, 3, 3, 4] },
-    'E9': { frets: ['0', '2', '0', '1', '0', '2'], fingers: [null, 2, null, 1, null, 3] },
-    'F9': { frets: ['1', '3', '1', '2', '1', '3'], fingers: [1, 3, 1, 2, 1, 4] },
-    'G9': { frets: ['3', '2', '0', '2', '0', '1'], fingers: [4, 2, null, 3, null, 1] },
-    'A9': { frets: ['x', '0', '2', '4', '2', '3'], fingers: [null, null, 1, 3, 2, 4] },
-    'B9': { frets: ['x', '2', '1', '2', '2', '2'], fingers: [null, 2, 1, 3, 3, 4] }
+    'C9': { frets: ['3', '3', '3', '2', '3', 'x'], fingers: [4, 3, 3, 1, 2, null] },
+    'D9': { frets: ['5', '5', '5', '4', '5', 'x'], fingers: [4, 3, 3, 1, 2, null] },
+    'E9': { frets: ['2', '0', '1', '0', '2', '0'], fingers: [3, null, 1, null, 2, null] },
+    'F9': { frets: ['3', '1', '2', '1', '3', '1'], fingers: [4, 1, 2, 1, 3, 1] },
+    'G9': { frets: ['1', '0', '2', '0', '2', '3'], fingers: [1, null, 3, null, 2, 4] },
+    'A9': { frets: ['3', '2', '4', '2', '0', 'x'], fingers: [4, 2, 3, 1, null, null] },
+    'B9': { frets: ['2', '2', '2', '1', '2', 'x'], fingers: [4, 3, 3, 1, 2, null] }
   };
 
   // Piano chord definitions - comprehensive database with all common chord types
@@ -564,11 +565,11 @@ class ChordDataService {
     'B5': ['B', 'F#']
   };
 
-  // String names for guitar (standard tuning)
-  public readonly guitarStringNames: string[] = ['E', 'B', 'G', 'D', 'A', 'E'];
+  // String names for guitar (standard tuning) - imported from central config
+  public readonly guitarStringNames: string[] = [...GUITAR_STRING_NAMES];
   
-  // Piano key order (one octave)
-  public readonly pianoKeyOrder: string[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  // Piano key order (one octave) - imported from central config
+  public readonly pianoKeyOrder: string[] = [...PIANO_KEY_ORDER];
 
   // Get chord data for guitar
   getGuitarChordData(chordName: string): GuitarChordData {

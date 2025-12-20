@@ -140,17 +140,40 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
   }
   
   const sizes = {
-    small: { width: 60, height: 80, fretSpacing: 12 },
-    medium: { width: 80, height: 100, fretSpacing: 15 },
-    large: { width: 100, height: 120, fretSpacing: 18 }
+    small: { width: 90, height: 120, fretSpacing: 18 },
+    medium: { width: 120, height: 150, fretSpacing: 22 },
+    large: { width: 150, height: 180, fretSpacing: 27 }
   }
   
   const { width, height, fretSpacing } = sizes[size]
   const stringSpacing = (width - 20) / 5
   
-  const getFretPosition = (fret) => {
-    if (fret === 0) return null // Open string
-    return 25 + (fret - 1) * fretSpacing
+  // Convert string format to number for rendering (define this first!)
+  const parseStringFret = (fret) => {
+    if (fret === 'x' || fret === 'X') return -1
+    const num = parseInt(fret)
+    return isNaN(num) ? -1 : num
+  }
+  
+  // Calculate the starting fret for the diagram
+  const fretNumbers = chordData.frets
+    .map(f => {
+      const parsed = parseStringFret(f)
+      return parsed > 0 ? parsed : null
+    })
+    .filter(f => f !== null)
+  
+  const minFret = fretNumbers.length > 0 ? Math.min(...fretNumbers) : 1
+  const maxFret = fretNumbers.length > 0 ? Math.max(...fretNumbers) : 4
+  const startFret = Math.max(1, minFret)
+  const showFretNumber = startFret > 1
+  
+  const getFretPosition = (absoluteFret, startFret) => {
+    if (absoluteFret === 0) return null // Open string
+    // Calculate relative position on the diagram (1-5 frets shown)
+    const relativeFret = absoluteFret - startFret + 1
+    // Position between frets (0.5 = middle of first fret) - adjusted for new top margin
+    return 30 + (relativeFret - 0.5) * fretSpacing
   }
   
   const getFingerColor = (finger) => {
@@ -164,33 +187,64 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
     return colors[finger] || '#333'
   }
   
-  // Convert string format to number for rendering
-  const parseStringFret = (fret) => {
-    if (fret === 'x' || fret === 'X') return -1
-    const num = parseInt(fret)
-    return isNaN(num) ? -1 : num
-  }
-  
   return (
     <div className="chord-diagram-wrapper">
       <div 
         className="chord-diagram-container"
         title={chordData.position || chord}
       >
-        <svg width={width} height={height} className="chord-diagram">
-          {/* Nut (top line) */}
-          <line x1="10" y1="20" x2={width - 10} y2="20" stroke="#8B4513" strokeWidth="3" />
+        <svg width={width} height={height + 20} className="chord-diagram">
+          {/* String names (tuning) at the top */}
+          {chordDataService.guitarStringNames.map((stringName, index) => {
+            const x = 10 + index * stringSpacing
+            return (
+              <text
+                key={`string-name-${index}`}
+                x={x}
+                y="10"
+                textAnchor="middle"
+                fontSize="11"
+                fontWeight="bold"
+                fill="#666"
+              >
+                {stringName}
+              </text>
+            )
+          })}
+          
+          {/* Fret position indicator */}
+          {showFretNumber && (
+            <text
+              x="5"
+              y="35"
+              fontSize="16"
+              fontWeight="bold"
+              fill="#333"
+            >
+              {startFret}
+            </text>
+          )}
+          
+          {/* Nut (top line) - thicker for first position, thinner for others */}
+          <line 
+            x1="10" 
+            y1="30" 
+            x2={width - 10} 
+            y2="30" 
+            stroke={startFret === 1 ? "#8B4513" : "#ddd"} 
+            strokeWidth={startFret === 1 ? "5" : "3.5"} 
+          />
           
           {/* Frets */}
           {[1, 2, 3, 4].map(fret => (
             <line
               key={fret}
               x1="10"
-              y1={20 + fret * fretSpacing}
+              y1={30 + fret * fretSpacing}
               x2={width - 10}
-              y2={20 + fret * fretSpacing}
+              y2={30 + fret * fretSpacing}
               stroke="#ddd"
-              strokeWidth="1"
+              strokeWidth="3"
             />
           ))}
           
@@ -199,11 +253,11 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
             <line
               key={string + index}
               x1={10 + index * stringSpacing}
-              y1="20"
+              y1="30"
               x2={10 + index * stringSpacing}
-              y2={20 + 4 * fretSpacing}
+              y2={30 + 4 * fretSpacing}
               stroke="#666"
-              strokeWidth="1"
+              strokeWidth="3"
             />
           ))}
           
@@ -219,47 +273,58 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
                 <g key={stringIndex}>
                   <line
                     x1={x - 3}
-                    y1="8"
+                    y1="18"
                     x2={x + 3}
-                    y2="16"
+                    y2="26"
                     stroke="#ff4444"
-                    strokeWidth="2"
+                    strokeWidth="4"
                   />
                   <line
                     x1={x - 3}
-                    y1="16"
+                    y1="26"
                     x2={x + 3}
-                    y2="8"
+                    y2="18"
                     stroke="#ff4444"
-                    strokeWidth="2"
+                    strokeWidth="4"
                   />
                 </g>
               )
             } else if (fret === 0) {
-              // Open string - circle above nut
+              // Open string - show "0" text
               return (
-                <circle
-                  key={stringIndex}
-                  cx={x}
-                  cy="12"
-                  r="4"
-                  fill="none"
-                  stroke="#4CAF50"
-                  strokeWidth="2"
-                />
+                <g key={stringIndex}>
+                  <circle
+                    cx={x}
+                    cy="22"
+                    r="6"
+                    fill="white"
+                    stroke="#4CAF50"
+                    strokeWidth="3"
+                  />
+                  <text
+                    x={x}
+                    y="26"
+                    textAnchor="middle"
+                    fontSize="10"
+                    fontWeight="bold"
+                    fill="#4CAF50"
+                  >
+                    0
+                  </text>
+                </g>
               )
             } else if (fret > 0) {
-              // Fretted note
-              const y = getFretPosition(fret)
+              // Fretted note - calculate position relative to starting fret
+              const y = getFretPosition(fret, startFret)
               return (
                 <circle
                   key={stringIndex}
                   cx={x}
                   cy={y}
-                  r="6"
+                  r="8"
                   fill={getFingerColor(finger)}
                   stroke="#333"
-                  strokeWidth="1"
+                  strokeWidth="3"
                 />
               )
             }
@@ -296,9 +361,6 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
             >
               ›
             </button>
-            <div className="variation-indicator">
-              {currentVariationIndex + 1}/{variationCount}
-            </div>
           </>
         )}
       </div>
