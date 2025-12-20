@@ -11,6 +11,8 @@ const BottomPanel = ({ scaleData }) => {
   const panelRef = useRef(null)
   const dragStartY = useRef(0)
   const startHeight = useRef(0)
+  const animationFrameRef = useRef(null)
+  const targetHeightRef = useRef(400)
 
   const togglePanel = (panelType) => {
     setActivePanel(activePanel === panelType ? null : panelType)
@@ -27,9 +29,18 @@ const BottomPanel = ({ scaleData }) => {
     if (!isDragging) return
     
     const deltaY = dragStartY.current - e.clientY
-    const maxHeight = window.innerHeight * 0.85 // Leave space for main content
+    const maxHeight = window.innerHeight * 0.85
     const newHeight = Math.min(Math.max(startHeight.current + deltaY, 200), maxHeight)
-    setPanelHeight(newHeight)
+    
+    targetHeightRef.current = newHeight
+    
+    // Update immediately with RAF for smooth 60fps rendering
+    if (!animationFrameRef.current) {
+      animationFrameRef.current = requestAnimationFrame(() => {
+        setPanelHeight(targetHeightRef.current)
+        animationFrameRef.current = null
+      })
+    }
   }
 
   const handleMouseUp = () => {
@@ -47,9 +58,18 @@ const BottomPanel = ({ scaleData }) => {
     if (!isDragging) return
     
     const deltaY = dragStartY.current - e.touches[0].clientY
-    const maxHeight = window.innerHeight * 0.85 // Leave space for main content
+    const maxHeight = window.innerHeight * 0.85
     const newHeight = Math.min(Math.max(startHeight.current + deltaY, 200), maxHeight)
-    setPanelHeight(newHeight)
+    
+    targetHeightRef.current = newHeight
+    
+    // Update immediately with RAF for smooth 60fps rendering
+    if (!animationFrameRef.current) {
+      animationFrameRef.current = requestAnimationFrame(() => {
+        setPanelHeight(targetHeightRef.current)
+        animationFrameRef.current = null
+      })
+    }
   }
 
   const handleTouchEnd = () => {

@@ -9,7 +9,9 @@
   z-index: 2000;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15);
   min-height: 60px;
-  transition: height 0.1s ease-out;
+  transition: none;
+  will-change: height;
+  transform: translateZ(0);
   border-radius: 12px 12px 0 0;
 }
 
@@ -114,6 +116,7 @@
   position: relative;
   z-index: 2001;
   touch-action: pan-y;
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .bottom-panel-content::-webkit-scrollbar {
