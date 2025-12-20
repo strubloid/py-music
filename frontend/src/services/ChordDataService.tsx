@@ -37,7 +37,7 @@ class ChordDataService {
     'C': [
       { frets: ['x', '3', '2', '0', '1', '0'], fingers: [null, 3, 2, null, 1, null], position: 'C shape (open)' },
       { frets: ['x', '3', '5', '5', '5', '3'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (3rd fret)' },
-      { frets: ['x', 'x', '5', '5', '5', '8'], fingers: [null, null, 1, 1, 1, 4], position: 'G shape (5th fret)' },
+      { frets: ['8', '7', '5', '5', '8', '8'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (8th fret)' },
       { frets: ['8', '10', '10', '9', '8', '8'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (8th fret)' },
       { frets: ['x', 'x', '10', '12', '13', '12'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (10th fret)' }
     ],
@@ -53,10 +53,10 @@ class ChordDataService {
     // D Major - CAGED system (notes: D-F#-A)
     'D': [
       { frets: ['x', 'x', '0', '2', '3', '2'], fingers: [null, null, null, 1, 3, 2], position: 'D shape (open)' },
+      { frets: ['x', '5', '4', '2', '3', '2'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (2nd fret)' },
       { frets: ['x', '5', '7', '7', '7', '5'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (5th fret)' },
-      { frets: ['x', 'x', '7', '7', '7', '10'], fingers: [null, null, 1, 1, 1, 4], position: 'G shape (7th fret)' },
-      { frets: ['10', '12', '12', '11', '10', '10'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (10th fret)' },
-      { frets: ['x', 'x', '12', '14', '15', '14'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (12th fret)' }
+      { frets: ['10', '9', '7', '7', '10', '10'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (10th fret)' },
+      { frets: ['10', '12', '12', '11', '10', '10'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (10th fret)' }
     ],
     
     // D# Major
@@ -69,19 +69,19 @@ class ChordDataService {
     // E Major - CAGED system (notes: E-G#-B)
     'E': [
       { frets: ['0', '2', '2', '1', '0', '0'], fingers: [null, 2, 3, 1, null, null], position: 'E shape (open)' },
+      { frets: ['0', '2', '1', 'x', '0', '0'], fingers: [null, 3, 1, null, null, null], position: 'D shape (open)' },
+      { frets: ['x', '7', '6', '4', '5', '4'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (4th fret)' },
       { frets: ['x', '7', '9', '9', '9', '7'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (7th fret)' },
-      { frets: ['x', 'x', '9', '9', '9', '12'], fingers: [null, null, 1, 1, 1, 4], position: 'G shape (9th fret)' },
-      { frets: ['12', '14', '14', '13', '12', '12'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (12th fret)' },
-      { frets: ['x', 'x', '14', '16', '17', '16'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (14th fret)' }
+      { frets: ['12', '11', '9', '9', '12', '12'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (12th fret)' }
     ],
     
     // F Major - CAGED system (notes: F-A-C)
     'F': [
       { frets: ['1', '3', '3', '2', '1', '1'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (1st fret)' },
-      { frets: ['x', '8', '10', '10', '10', '8'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (8th fret)' },
-      { frets: ['x', 'x', '10', '10', '10', '13'], fingers: [null, null, 1, 1, 1, 4], position: 'G shape (10th fret)' },
-      { frets: ['13', '15', '15', '14', '13', '13'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (13th fret)' },
-      { frets: ['x', 'x', '3', '5', '6', '5'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (3rd fret)' }
+      { frets: ['1', '0', 'x', 'x', '1', '1'], fingers: [2, 1, null, null, 3, 4], position: 'G shape (1st fret)' },
+      { frets: ['x', 'x', '3', '5', '6', '5'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (3rd fret)' },
+      { frets: ['x', '8', '7', '5', '6', '5'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (5th fret)' },
+      { frets: ['x', '8', '10', '10', '10', '8'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (8th fret)' }
     ],
     
     // F# Major
@@ -95,10 +95,10 @@ class ChordDataService {
     // G Major - CAGED system (notes: G-B-D)
     'G': [
       { frets: ['3', '2', '0', '0', '0', '3'], fingers: [3, 2, null, null, null, 4], position: 'G shape (open)' },
+      { frets: ['3', '2', '0', '0', '3', '3'], fingers: [2, 1, null, null, 3, 4], position: 'G shape alt' },
       { frets: ['3', '5', '5', '4', '3', '3'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (3rd fret)' },
-      { frets: ['x', '10', '12', '12', '12', '10'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (10th fret)' },
-      { frets: ['x', 'x', '12', '12', '12', '15'], fingers: [null, null, 1, 1, 1, 4], position: 'G shape (12th fret)' },
-      { frets: ['10', '12', '12', '12', '10', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 10th fret' }
+      { frets: ['x', 'x', '5', '7', '8', '7'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (5th fret)' },
+      { frets: ['x', '10', '12', '12', '12', '10'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (10th fret)' }
     ],
     
     // G# Major
@@ -112,10 +112,10 @@ class ChordDataService {
     // A Major - CAGED system (notes: A-C#-E)
     'A': [
       { frets: ['x', '0', '2', '2', '2', '0'], fingers: [null, null, 2, 3, 4, null], position: 'A shape (open)' },
+      { frets: ['5', '4', '2', '2', '5', '5'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (5th fret)' },
       { frets: ['5', '7', '7', '6', '5', '5'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (5th fret)' },
-      { frets: ['x', '12', '14', '14', '14', '12'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (12th fret)' },
-      { frets: ['x', 'x', '14', '14', '14', '17'], fingers: [null, null, 1, 1, 1, 4], position: 'G shape (14th fret)' },
-      { frets: ['x', 'x', '7', '9', '10', '9'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' }
+      { frets: ['x', 'x', '7', '9', '10', '9'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' },
+      { frets: ['x', '12', '11', '9', '10', '9'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (9th fret)' }
     ],
     
     // A# Major
@@ -129,10 +129,10 @@ class ChordDataService {
     // B Major - CAGED system (notes: B-D#-F#)
     'B': [
       { frets: ['x', '2', '4', '4', '4', '2'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (2nd fret)' },
+      { frets: ['7', '6', '4', '4', '7', '7'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (7th fret)' },
       { frets: ['7', '9', '9', '8', '7', '7'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (7th fret)' },
       { frets: ['x', 'x', '9', '11', '12', '11'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (9th fret)' },
-      { frets: ['x', '14', '16', '16', '16', '14'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (14th fret)' },
-      { frets: ['x', 'x', '16', '16', '16', '19'], fingers: [null, null, 1, 1, 1, 4], position: 'G shape (16th fret)' }
+      { frets: ['x', '14', '13', '11', '12', '11'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (11th fret)' }
     ],
     
     // Cm - C Minor (notes: C-Eb-G)
