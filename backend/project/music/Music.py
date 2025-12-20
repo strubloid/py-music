@@ -20,12 +20,14 @@ def get_function_name(degree):
                 "Dominant", "Submediant", "Leading Tone"]
     return functions[degree] if degree < len(functions) else "Extended"
 
+from backend.project.music.config import MAX_FRETS
+
 def generate_fretboard_data(notes, root_note):
     """Generate fretboard data for React component"""
     # Guitar strings from 1st (high E) to 6th (low E) - CORRECT visual order for display
     strings = ['E', 'B', 'G', 'D', 'A', 'E']  # 1st, 2nd, 3rd, 4th, 5th, 6th string
     chromatic_notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-    frets = 24
+    frets = MAX_FRETS
     
     fretboard = []
     

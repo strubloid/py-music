@@ -1,13 +1,14 @@
 import React, { useRef, useEffect, useState } from 'react'
 import Card from '../common/Card'
 import PracticeTip from '../common/PracticeTip'
+import { MAX_FRETS, DEFAULT_FRET_COUNT, MIN_FRET_COUNT, PRESET_FRET_COUNTS } from '../../config/musicConfig.tsx'
 import './GuitarFretboard.css'
 
 const GuitarFretboard = ({ fretboardData }) => {
   const scrollRef = useRef(null)
   const scrollTimeoutRef = useRef(null)
   const [scrollState, setScrollState] = useState({ left: false, right: true, showStringNames: true, isScrolling: false })
-  const [fretCount, setFretCount] = useState(13)
+  const [fretCount, setFretCount] = useState(DEFAULT_FRET_COUNT)
   const [isHoveringSelector, setIsHoveringSelector] = useState(false)
 
   // Handle scroll detection for fade indicators and string name visibility
@@ -81,11 +82,11 @@ const GuitarFretboard = ({ fretboardData }) => {
         >
           {/* Guitar neck visual */}
           <div className="neck-visual">
-            {Array.from({ length: 24 }, (_, i) => (
+            {Array.from({ length: MAX_FRETS }, (_, i) => (
               <div 
                 key={i} 
                 className={`fret-dot ${i < fretCount ? 'active' : ''} ${[3, 5, 7, 9, 12, 15, 17, 19, 21].includes(i + 1) ? 'marker' : ''}`}
-                style={{ left: `${(i / 24) * 100}%` }}
+                style={{ left: `${(i / MAX_FRETS) * 100}%` }}
               >
                 {[3, 5, 7, 9, 12, 15, 17, 19, 21].includes(i + 1) && (
                   <span className="dot-number">{i + 1}</span>
@@ -97,8 +98,8 @@ const GuitarFretboard = ({ fretboardData }) => {
           {/* Interactive range slider */}
           <input
             type="range"
-            min="5"
-            max="24"
+            min={MIN_FRET_COUNT}
+            max={MAX_FRETS}
             value={fretCount}
             onChange={(e) => setFretCount(Number(e.target.value))}
             className="fret-range-input"
@@ -114,7 +115,7 @@ const GuitarFretboard = ({ fretboardData }) => {
         
         {/* Quick preset buttons */}
         <div className="fret-presets">
-          {[12, 15, 19, 24].map(count => (
+          {PRESET_FRET_COUNTS.map(count => (
             <button
               key={count}
               onClick={() => setFretCount(count)}

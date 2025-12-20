@@ -94,10 +94,12 @@ class ScaleVisualizer:
 
         if not root_note and notes:
             root_note = notes[0]
+        
+        from backend.project.music.config import MAX_FRETS
             
         # Guitar tuning (standard)
         strings = ['E', 'Bx', 'G', 'D', 'A', 'E']
-        frets = 24  # Show all 24 frets
+        frets = MAX_FRETS  # Show all frets from config
         
         fretboard = Table(show_header=True, header_style="bold green")
         fretboard.add_column("String", style="black", width=5)
