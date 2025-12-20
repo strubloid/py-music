@@ -66,7 +66,7 @@
 /* Guitar Neck Selector */
 .fret-neck-selector {
   position: relative;
-  height: 32px;
+  height: 25px;
   flex: 1;
   padding: 0 0.75rem;
   background: linear-gradient(180deg, rgba(30, 20, 40, 0.6) 0%, rgba(20, 10, 30, 0.8) 100%);
@@ -485,38 +485,63 @@
     padding: 0 0.5rem;
   }
   
-  /* Fret Selector - More spacious on mobile */
+  /* Fret Selector - Compact on mobile, max 120px */
   .fret-selector-container {
-    max-height: none;
-    padding: 0.75rem 0.875rem;
-    gap: 0.875rem;
+    max-height: 110px;
+    padding: 0.5rem 0.75rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
   }
   
   .fret-selector-header {
     flex-shrink: 0;
+    gap: 0.5rem;
+  }
+  
+  .selector-label {
+    font-size: 0.75rem;
+  }
+  
+  .fret-count-display {
+    padding: 0.15rem 0.2rem;
+  }
+  
+  .count-number {
+    font-size: 0.95rem;
+  }
+  
+  .count-label {
+    font-size: 0.65rem;
   }
   
   .fret-neck-selector {
-    padding: 0 1.25rem;
+    padding: 0 0.75rem;
     flex: 1 1 100%;
     min-width: 200px;
     order: 3;
+    height: 20px;
   }
   
   .fret-presets {
     flex-shrink: 0;
     order: 2;
+    gap: 0.35rem;
+  }
+  
+  .preset-btn {
+    padding: 0.35rem 0.4rem;
+    font-size: 0.75rem;
+    min-width: 32px;
   }
   
   .fret-dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
   
   .fret-dot.marker {
-    width: 9px;
-    height: 9px;
+    width: 7px;
+    height: 7px;
   }
   
   .neck-visual {
@@ -618,7 +643,7 @@
   }
   
   .fret-neck-selector {
-    height: 52px !important;
+    height: 20px;
     padding: 0 1.5rem;
     flex: 1 1 100%;
     min-width: 180px;
@@ -650,7 +675,7 @@
   }
   
   .preset-btn {
-    padding: 0.45rem 0.7rem;
+    padding: 0.35rem 0.4rem;
     min-width: 36px;
     font-size: 0.85rem;
   }

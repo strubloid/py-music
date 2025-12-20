@@ -68,7 +68,7 @@ const GuitarFretboard = ({ fretboardData }) => {
       {/* Outstanding Fret Count Selector */}
       <div className="fret-selector-container">
         <div className="fret-selector-header">
-          <span className="selector-label">Fretboard Range</span>
+          
           <div className="fret-count-display">
             <span className="count-number">{fretCount}</span>
             <span className="count-label">frets</span>
