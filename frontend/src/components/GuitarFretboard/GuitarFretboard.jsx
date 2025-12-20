@@ -7,6 +7,8 @@ const GuitarFretboard = ({ fretboardData }) => {
   const scrollRef = useRef(null)
   const scrollTimeoutRef = useRef(null)
   const [scrollState, setScrollState] = useState({ left: false, right: true, showStringNames: true, isScrolling: false })
+  const [fretCount, setFretCount] = useState(13)
+  const [isHoveringSelector, setIsHoveringSelector] = useState(false)
 
   // Handle scroll detection for fade indicators and string name visibility
   useEffect(() => {
@@ -62,6 +64,69 @@ const GuitarFretboard = ({ fretboardData }) => {
   return (
     <Card title="🎸 Guitar Fretboard" size="large" className="fretboard-container">
       
+      {/* Outstanding Fret Count Selector */}
+      <div className="fret-selector-container">
+        <div className="fret-selector-header">
+          <span className="selector-label">Fretboard Range</span>
+          <div className="fret-count-display">
+            <span className="count-number">{fretCount}</span>
+            <span className="count-label">frets</span>
+          </div>
+        </div>
+        
+        <div 
+          className={`fret-neck-selector ${isHoveringSelector ? 'hovering' : ''}`}
+          onMouseEnter={() => setIsHoveringSelector(true)}
+          onMouseLeave={() => setIsHoveringSelector(false)}
+        >
+          {/* Guitar neck visual */}
+          <div className="neck-visual">
+            {Array.from({ length: 24 }, (_, i) => (
+              <div 
+                key={i} 
+                className={`fret-dot ${i < fretCount ? 'active' : ''} ${[3, 5, 7, 9, 12, 15, 17, 19, 21].includes(i + 1) ? 'marker' : ''}`}
+                style={{ left: `${(i / 24) * 100}%` }}
+              >
+                {[3, 5, 7, 9, 12, 15, 17, 19, 21].includes(i + 1) && (
+                  <span className="dot-number">{i + 1}</span>
+                )}
+              </div>
+            ))}
+          </div>
+          
+          {/* Interactive range slider */}
+          <input
+            type="range"
+            min="5"
+            max="24"
+            value={fretCount}
+            onChange={(e) => setFretCount(Number(e.target.value))}
+            className="fret-range-input"
+          />
+          
+          {/* String lines for visual effect */}
+          <div className="neck-strings">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="neck-string" style={{ top: `${(i / 5) * 100}%` }}></div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Quick preset buttons */}
+        <div className="fret-presets">
+          {[12, 15, 19, 24].map(count => (
+            <button
+              key={count}
+              onClick={() => setFretCount(count)}
+              className={`preset-btn ${fretCount === count ? 'active' : ''}`}
+            >
+              <span className="preset-count">{count}</span>
+              <span className="preset-icon">🎸</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      
       <div className="fretboard-wrapper">
         <div 
           ref={scrollRef}
@@ -71,7 +136,7 @@ const GuitarFretboard = ({ fretboardData }) => {
           {/* Fret number headers */}
           <div className="fret-headers">
             <div className="string-label-header"></div>
-            {Array.from({ length: 13 }, (_, i) => (
+            {Array.from({ length: fretCount + 1 }, (_, i) => (
               <div key={i} className="fret-number">
                 {i}
               </div>
@@ -89,7 +154,7 @@ const GuitarFretboard = ({ fretboardData }) => {
                 
                 {/* Frets */}
                 <div className="frets-row">
-                  {stringData.frets.map((fret, fretIndex) => (
+                  {stringData.frets.slice(0, fretCount + 1).map((fret, fretIndex) => (
                     <div
                       key={fretIndex}
                       className="fret-cell"
