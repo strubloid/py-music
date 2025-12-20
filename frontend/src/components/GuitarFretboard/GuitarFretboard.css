@@ -490,6 +490,44 @@
     padding: 0 0.5rem;
   }
   
+  /* Fret Selector - More spacious on mobile */
+  .fret-selector-container {
+    max-height: none;
+    padding: 0.75rem 0.875rem;
+    gap: 0.875rem;
+    flex-wrap: wrap;
+  }
+  
+  .fret-selector-header {
+    flex-shrink: 0;
+  }
+  
+  .fret-neck-selector {
+    padding: 0 1.25rem;
+    flex: 1 1 100%;
+    min-width: 200px;
+    order: 3;
+  }
+  
+  .fret-presets {
+    flex-shrink: 0;
+    order: 2;
+  }
+  
+  .fret-dot {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .fret-dot.marker {
+    width: 9px;
+    height: 9px;
+  }
+  
+  .neck-visual {
+    height: 12px;
+  }
+  
   .fretboard-scroll {
     padding-bottom: 0.75rem;
     margin: 0;
@@ -570,6 +608,56 @@
     font-size: 1.125rem;
     margin-bottom: 0.75rem;
     padding: 0 0.25rem;
+  }
+  
+  /* Fret Selector - Extra spacious on small mobile */
+  .fret-selector-container {
+    padding: 0.625rem 0.75rem;
+    gap: 0.625rem;
+    max-height: none;
+    flex-wrap: wrap;
+  }
+  
+  .fret-selector-header {
+    flex-shrink: 0;
+  }
+  
+  .fret-neck-selector {
+    height: 52px !important;
+    padding: 0 1.5rem;
+    flex: 1 1 100%;
+    min-width: 180px;
+    order: 3;
+  }
+  
+  .fret-presets {
+    flex-shrink: 0;
+    order: 2;
+    gap: 0.5rem;
+  }
+  
+  .fret-dot {
+    width: 7px;
+    height: 7px;
+  }
+  
+  .fret-dot.marker {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .neck-visual {
+    height: 14px;
+  }
+  
+  .selector-label {
+    font-size: 0.8rem;
+  }
+  
+  .preset-btn {
+    padding: 0.45rem 0.7rem;
+    min-width: 36px;
+    font-size: 0.85rem;
   }
   
   .fretboard-scroll {
