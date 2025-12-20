@@ -4,31 +4,86 @@
   overflow-x: auto;
   padding-bottom: 1rem;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
+  position: relative;
+  /* Smooth scrolling for better UX */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(102, 126, 234, 0.5) rgba(0, 0, 0, 0.1);
+}
+
+/* Custom scrollbar styling */
+.fretboard-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.fretboard-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.fretboard-scroll::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.5);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.fretboard-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.7);
+}
+
+/* Scroll fade indicators - right side only */
+.fretboard-scroll::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  right: -10px;
+  top: 0;
+  bottom: 1rem;
+  background: linear-gradient(to left, rgba(102, 126, 234, 0.6) 0%, rgba(102, 126, 234, 0.3) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 10;
+  opacity: 1;
+  transition: opacity 0.1s ease;
+}
+
+/* Hide right fade when fully scrolled */
+.fretboard-scroll.scrolled-right::after {
+  opacity: 0;
 }
 
 .fretboard-content {
   min-width: max-content;
-  margin: 0 auto;
+  margin: 0;
+  padding: 0 0.5rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 .fret-headers {
   display: flex;
   margin-bottom: 0.5rem;
+  align-items: center;
 }
 
 .string-label-header {
-  width: 4rem;
-  text-align: center;
-  font-weight: 600;
-  color: #93c5fd; /* blue-300 */
+  width: 0;
+  min-width: 0;
+  visibility: hidden;
+  position: sticky;
+  left: 0;
+  z-index: 20;
 }
 
 .fret-number {
   width: 3rem;
   text-align: center;
   font-size: 0.875rem;
-  color: #9ca3af; /* gray-400 */
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .strings-container {
@@ -43,11 +98,34 @@
 }
 
 .string-name {
-  width: 4rem;
+  width: 3rem;
+  min-width: 3rem;
   text-align: center;
-  font-weight: 600;
-  color: #93c5fd; /* blue-300 */
+  font-weight: 700;
+  color: #ffffff;
   font-size: 1.125rem;
+  position: sticky;
+  left: 0;
+  background: linear-gradient(90deg, rgba(102, 126, 234, 0.98) 0%, rgba(102, 126, 234, 0.90) 50%, transparent 100%);
+  z-index: 20;
+  backdrop-filter: blur(10px);
+  padding: 0.25rem 0.25rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border-radius: 8px 0 0 8px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Hide string names in the middle scroll range */
+.fretboard-scroll.hide-string-names .string-name {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Show string names at start or when scrolled far */
+.fretboard-scroll.show-string-names .string-name {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .frets-row {
@@ -69,8 +147,9 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 1px;
-  background: #4b5563; /* gray-600 */
+  width: 2px;
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
 }
 
 .guitar-string-line {
@@ -78,7 +157,8 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: #6b7280; /* gray-500 */
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   top: 50%;
 }
 
@@ -131,6 +211,11 @@
 
 .fret-position-spacer {
   width: 4rem;
+  min-width: 4rem;
+  position: sticky;
+  left: 0;
+  background: transparent;
+  z-index: 20;
 }
 
 .fret-position-cell {
@@ -140,7 +225,8 @@
 
 .position-marker {
   font-size: 0.75rem;
-  color: #6b7280; /* gray-500 */
+  color: rgba(255, 255, 255, 0.4);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .position-marker.double {
@@ -191,39 +277,71 @@
   background: #4b5563; /* gray-600 */
 }
 
+/* Mobile scroll hint - shows briefly on load */
+.mobile-scroll-hint {
+  display: none;
+  text-align: center;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  color: #667eea;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  20%, 80% { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .mobile-scroll-hint {
+    display: block;
+  }
+}
+
 
 
 /* Enhanced Mobile Responsiveness */
 @media (max-width: 768px) {
   .fretboard-container {
-    padding: 0.75rem 0.5rem;
+    padding: 0.75rem 0;
   }
   
   .fretboard-title {
     font-size: 1.25rem;
     margin-bottom: 1rem;
     text-align: center;
+    padding: 0 0.5rem;
   }
   
   .fretboard-scroll {
     padding-bottom: 0.75rem;
-    margin: 0 -0.5rem;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-    /* Ensure horizontal scrolling shows all frets */
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
     width: 100%;
     min-width: 100%;
+    /* Remove snap for natural scrolling */
+    scroll-snap-type: none;
+    position: relative;
+  }
+  
+  /* Scroll hint indicator - right side only */
+  .fretboard-scroll::after {
+    width: 30px;
+    right: -10px;
+    background: linear-gradient(to left, rgba(102, 126, 234, 0.6) 0%, rgba(102, 126, 234, 0.3) 50%, transparent 100%);
   }
   
   .fretboard-content {
-    /* Force minimum width to show all 13 frets */
     min-width: calc(13 * 2.5rem + 3rem);
     margin: 0;
+    padding: 0 0.5rem;
   }
   
   .string-label-header,
   .string-name {
     width: 3rem;
+    min-width: 3rem;
     font-size: 0.9rem;
     flex-shrink: 0;
   }
@@ -253,10 +371,12 @@
   }
   
   .fretboard-legend {
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
     margin-top: 1rem;
+    padding: 0 0.5rem;
   }
   
   .legend-item {
@@ -266,30 +386,46 @@
 
 @media (max-width: 480px) {
   .fretboard-container {
-    padding: 0.5rem 0.25rem;
+    padding: 0.5rem 0;
   }
   
   .fretboard-title {
     font-size: 1.125rem;
     margin-bottom: 0.75rem;
+    padding: 0 0.25rem;
   }
   
   .fretboard-scroll {
-    margin: 0 -0.25rem;
-    padding-left: 0.25rem;
-    padding-right: 0.25rem;
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+    /* Natural scrolling without snap */
+    scroll-snap-type: none;
+  }
+  
+  /* More prominent scroll indicator - right side only */
+  .fretboard-scroll::after {
+    width: 30px;
+    right: -10px;
+    background: linear-gradient(to left, rgba(102, 126, 234, 0.65) 0%, rgba(102, 126, 234, 0.3) 50%, transparent 100%);
   }
   
   .fretboard-content {
-    /* Force minimum width to show all 13 frets on small screens */
     min-width: calc(13 * 2rem + 2.5rem);
+    padding: 0 0.25rem;
   }
   
   .string-label-header,
   .string-name {
     width: 2.5rem;
+    min-width: 2.5rem;
     font-size: 0.8rem;
     flex-shrink: 0;
+  }
+  
+  .fret-position-spacer {
+    width: 2.5rem;
+    min-width: 2.5rem;
   }
   
   .fret-number {
@@ -309,6 +445,13 @@
     height: 1rem;
     font-size: 0.55rem;
     font-weight: 600;
+  }
+  
+  .fretboard-legend {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0 0.25rem;
   }
   
   .legend-item {

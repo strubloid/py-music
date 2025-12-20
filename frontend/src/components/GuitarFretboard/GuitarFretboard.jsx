@@ -1,17 +1,54 @@
-import React from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import Card from '../common/Card'
 import PracticeTip from '../common/PracticeTip'
 import './GuitarFretboard.css'
 
 const GuitarFretboard = ({ fretboardData }) => {
+  const scrollRef = useRef(null)
+  const [scrollState, setScrollState] = useState({ left: false, right: true, showStringNames: true })
+
+  // Handle scroll detection for fade indicators and string name visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      const element = scrollRef.current
+      if (!element) return
+
+      const scrollPos = element.scrollLeft
+      const isScrolledLeft = scrollPos > 10
+      const isScrolledRight = 
+        scrollPos < element.scrollWidth - element.clientWidth - 10
+
+      // Show string names when at start (0-50px) or scrolled far right (>150px)
+      const showStringNames = scrollPos < 50 || scrollPos > 150
+
+      setScrollState({ 
+        left: isScrolledLeft, 
+        right: isScrolledRight,
+        showStringNames 
+      })
+    }
+
+    const element = scrollRef.current
+    if (element) {
+      element.addEventListener('scroll', handleScroll)
+      // Initial check
+      setTimeout(handleScroll, 100)
+      
+      return () => element.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
   return (
     <Card title="🎸 Guitar Fretboard" size="large" className="fretboard-container">
       
-      <div className="fretboard-scroll">
+      <div 
+        ref={scrollRef}
+        className={`fretboard-scroll ${scrollState.left ? 'scrolled-left' : ''} ${!scrollState.right ? 'scrolled-right' : ''} ${scrollState.showStringNames ? 'show-string-names' : 'hide-string-names'}`}
+      >
         <div className="fretboard-content">
           {/* Fret number headers */}
           <div className="fret-headers">
-            <div className="string-label-header">String</div>
+            <div className="string-label-header"></div>
             {Array.from({ length: 13 }, (_, i) => (
               <div key={i} className="fret-number">
                 {i}
