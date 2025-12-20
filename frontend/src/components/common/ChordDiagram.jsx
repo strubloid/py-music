@@ -146,7 +146,8 @@ const ChordDiagram = ({ chord, size = 'medium', refreshTrigger }) => {
   }
   
   const { width, height, fretSpacing } = sizes[size]
-  const stringSpacing = (width - 20) / 5
+  const leftMargin = 20 // Space for fret position number
+  const stringSpacing = (width - leftMargin) / 5
   
   // Convert string format to number for rendering (define this first!)
   const parseStringFret = (fret) => {
@@ -199,10 +200,10 @@ const ChordDiagram = ({ chord, size = 'medium', refreshTrigger }) => {
         className="chord-diagram-container"
         title={chordData.position || chord}
       >
-        <svg width={width} height={height + 20} className="chord-diagram">
+        <svg width={width + 20} height={height + 20} className="chord-diagram">
           {/* String names (tuning) at the top */}
           {chordDataService.guitarStringNames.map((stringName, index) => {
-            const x = 10 + index * stringSpacing
+            const x = leftMargin + index * stringSpacing
             return (
               <text
                 key={`string-name-${index}`}
@@ -222,8 +223,8 @@ const ChordDiagram = ({ chord, size = 'medium', refreshTrigger }) => {
           {showFretNumber && (
             <text
               x="0"
-              y="40"
-              fontSize="16"
+              y="34"
+              fontSize="14"
               fontWeight="bold"
               fill="#333"
             >
@@ -233,9 +234,9 @@ const ChordDiagram = ({ chord, size = 'medium', refreshTrigger }) => {
           
           {/* Nut (top line) - thicker for first position, thinner for others */}
           <line 
-            x1="10" 
+            x1={leftMargin}
             y1="30" 
-            x2={width - 10} 
+            x2={width + leftMargin - 20}
             y2="30" 
             stroke={startFret === 1 ? "#8B4513" : "#ddd"} 
             strokeWidth={startFret === 1 ? "5" : "3.5"} 
@@ -245,9 +246,9 @@ const ChordDiagram = ({ chord, size = 'medium', refreshTrigger }) => {
           {[1, 2, 3, 4].map(fret => (
             <line
               key={fret}
-              x1="10"
+              x1={leftMargin}
               y1={30 + fret * fretSpacing}
-              x2={width - 10}
+              x2={width + leftMargin - 20}
               y2={30 + fret * fretSpacing}
               stroke="#ddd"
               strokeWidth="3"
@@ -258,9 +259,9 @@ const ChordDiagram = ({ chord, size = 'medium', refreshTrigger }) => {
           {chordDataService.guitarStringNames.map((string, index) => (
             <line
               key={string + index}
-              x1={10 + index * stringSpacing}
+              x1={leftMargin + index * stringSpacing}
               y1="30"
-              x2={10 + index * stringSpacing}
+              x2={leftMargin + index * stringSpacing}
               y2={30 + 4 * fretSpacing}
               stroke="#666"
               strokeWidth="3"
@@ -270,7 +271,7 @@ const ChordDiagram = ({ chord, size = 'medium', refreshTrigger }) => {
           {/* Finger positions */}
           {chordData.frets.map((fretStr, stringIndex) => {
             const fret = parseStringFret(fretStr)
-            const x = 10 + stringIndex * stringSpacing
+            const x = leftMargin + stringIndex * stringSpacing
             const finger = chordData.fingers[stringIndex]
             
             if (fret === -1) {
@@ -302,7 +303,7 @@ const ChordDiagram = ({ chord, size = 'medium', refreshTrigger }) => {
                   <circle
                     cx={x}
                     cy="22"
-                    r="6"
+                    r="5"
                     fill="white"
                     stroke="#4CAF50"
                     strokeWidth="3"

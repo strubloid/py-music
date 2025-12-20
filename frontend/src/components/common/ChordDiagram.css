@@ -8,7 +8,7 @@
 .chord-diagram-container {
   display: inline-block;
   margin: 2px;
-  padding: 4px;
+  padding: 2px;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -79,6 +79,7 @@
 }
 
 .chord-diagram {
+  margin-left: 10px;
   display: block;
 }
 

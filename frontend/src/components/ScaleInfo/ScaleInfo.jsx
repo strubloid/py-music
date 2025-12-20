@@ -174,7 +174,7 @@ const ScaleInfo = ({ scaleData }) => {
                 {showChords ? (
                   <ChordDiagram 
                     chord={degree.chord} 
-                    size="medium"
+                    size="large"
                     refreshTrigger={refreshKey}
                   />
                 ) : (
