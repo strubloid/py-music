@@ -387,14 +387,9 @@
   font-weight: bold;
   position: relative;
   z-index: 10;
-  cursor: pointer;
   transition: transform 0.2s ease;
   text-align: center;
   line-height: 1;
-}
-
-.note-dot:hover {
-  transform: scale(1.1);
 }
 
 .note-dot.root-note {
