@@ -537,7 +537,7 @@
   }
   
   .chords-layer.has-diagrams {
-    min-height: 100px;
+    min-height: 120px;
   }
   
   .chords-layer.has-text {
@@ -581,7 +581,7 @@
   }
   
   .chords-layer.has-diagrams {
-    min-height: 90px;
+    min-height: 120px;
   }
   
   .chords-layer.has-text {
