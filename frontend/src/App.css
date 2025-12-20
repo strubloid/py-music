@@ -211,7 +211,7 @@
 /* Enhanced Mobile Responsiveness */
 @media (max-width: 768px) {
   .main-content {
-    padding: 7rem 0.75rem 8rem 0.75rem;
+    padding: 5rem 0.75rem 8rem 0.75rem;
   }
   
   .app-header {

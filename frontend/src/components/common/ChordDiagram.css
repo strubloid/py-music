@@ -32,3 +32,95 @@
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
   z-index: 1000;
 }
+
+/* Piano Chord Diagram Styles */
+.chord-diagram-container.piano-mode {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 248, 255, 0.95));
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  padding: 8px;
+}
+
+.piano-chord-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.piano-keys-wrapper {
+  position: relative;
+  display: flex;
+  height: auto;
+  border-radius: 4px 4px 0 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.piano-key-diagram {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.piano-key-diagram.white {
+  position: relative;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f8f8 100%);
+  border: 1px solid #ccc;
+  border-top: 1px solid #999;
+  border-radius: 0 0 3px 3px;
+  z-index: 1;
+}
+
+.piano-key-diagram.black {
+  position: absolute;
+  background: linear-gradient(180deg, #2a2a2a 0%, #000000 100%);
+  border: 1px solid #000;
+  border-radius: 0 0 2px 2px;
+  z-index: 2;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
+}
+
+.piano-key-diagram.active .note-indicator {
+  display: block;
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle, #667eea 0%, #4c5fd5 100%);
+  border-radius: 50%;
+  margin-bottom: 2px;
+  box-shadow: 0 0 8px rgba(102, 126, 234, 0.9), 0 0 12px rgba(102, 126, 234, 0.5);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.piano-key-diagram.black.active .note-indicator {
+  background: radial-gradient(circle, #4ecdc4 0%, #38b2ac 100%);
+  box-shadow: 0 0 8px rgba(78, 205, 196, 0.9), 0 0 12px rgba(78, 205, 196, 0.5);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.85;
+  }
+}
+
+.note-indicator {
+  display: none;
+}
+
+.chord-label-piano {
+  font-size: 10px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  padding: 2px 6px;
+  background: rgba(102, 126, 234, 0.08);
+  border-radius: 3px;
+  letter-spacing: 0.3px;
+}

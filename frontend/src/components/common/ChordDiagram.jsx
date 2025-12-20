@@ -1,4 +1,6 @@
 import React from 'react'
+import { useChordDisplay } from '../../contexts/ChordDisplayContext'
+import chordDataService from '../../services/ChordDataService.tsx'
 import './ChordDiagram.css'
 
 // Guitar chord fingering data
@@ -41,7 +43,69 @@ const CHORD_FINGERINGS = {
   'Asus4': { frets: [-1, 0, 2, 2, 3, 0], fingers: [0, 0, 1, 2, 3, 0], name: 'A sus4' }
 }
 
+// Piano Chord Diagram Component
+const PianoChordDiagram = ({ chord, size = 'medium' }) => {
+  const renderData = chordDataService.renderPianoKeys(chord, { className: 'chord-diagram-piano' })
+  const notes = renderData.activeNotes
+  const keyOrder = renderData.keyOrder
+  
+  const sizes = {
+    small: { whiteWidth: 14, whiteHeight: 50, blackWidth: 9, blackHeight: 32, fontSize: 9 },
+    medium: { whiteWidth: 18, whiteHeight: 70, blackWidth: 11, blackHeight: 45, fontSize: 10 },
+    large: { whiteWidth: 22, whiteHeight: 90, blackWidth: 14, blackHeight: 58, fontSize: 11 }
+  }
+  
+  const { whiteWidth, whiteHeight, blackWidth, blackHeight, fontSize } = sizes[size]
+  
+  // Calculate white keys count for container width
+  const whiteKeysCount = keyOrder.filter(k => !k.includes('#')).length
+  
+  return (
+    <div className="chord-diagram-container piano-mode" title={chord}>
+      <div className="piano-chord-diagram" style={{ width: `${whiteKeysCount * whiteWidth}px` }}>
+        <div className="piano-keys-wrapper">
+          {keyOrder.map((note, index) => {
+            const isPressed = notes.includes(note)
+            const isBlackKey = note.includes('#')
+            
+            // Calculate position for black keys
+            let leftOffset = 0
+            if (isBlackKey) {
+              const whiteKeysBefore = keyOrder.slice(0, index).filter(k => !k.includes('#')).length
+              leftOffset = whiteKeysBefore * whiteWidth - (blackWidth / 2)
+            }
+            
+            return (
+              <div
+                key={note}
+                className={`piano-key-diagram ${isBlackKey ? 'black' : 'white'} ${isPressed ? 'active' : ''}`}
+                style={{
+                  width: isBlackKey ? `${blackWidth}px` : `${whiteWidth}px`,
+                  height: isBlackKey ? `${blackHeight}px` : `${whiteHeight}px`,
+                  left: isBlackKey ? `${leftOffset}px` : 'auto',
+                  fontSize: `${fontSize}px`
+                }}
+              >
+                {isPressed && <span className="note-indicator"></span>}
+              </div>
+            )
+          })}
+        </div>
+        <div className="chord-label-piano">{chord}</div>
+      </div>
+    </div>
+  )
+}
+
 const ChordDiagram = ({ chord, size = 'medium' }) => {
+  const { displayMode } = useChordDisplay()
+  
+  // If piano mode, render piano keys instead
+  if (displayMode === 'piano') {
+    return <PianoChordDiagram chord={chord} size={size} />
+  }
+  
+  // Otherwise render guitar diagram
   console.log('ChordDiagram rendering:', chord, size)
   const chordData = CHORD_FINGERINGS[chord] || CHORD_FINGERINGS['C']
   console.log('Using chord data:', chordData)
