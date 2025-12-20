@@ -33,13 +33,13 @@ class ChordDataService {
   // Guitar chord fingerings - fingerings are in order: E(6th low), A(5th), D(4th), G(3rd), B(2nd), E(1st high)
   // Now with multiple variations per chord
   private guitarChordVariations: Record<string, GuitarChordData[]> = {
-    // C Major - Multiple positions across the neck
+    // C Major - CAGED system (notes: C-E-G)
     'C': [
-      { frets: ['x', '3', '2', '0', '1', '0'], fingers: [null, 3, 2, null, 1, null], position: 'Open position' },
-      { frets: ['3', '5', '5', '5', '3', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 3rd fret' },
-      { frets: ['0', '1', '0', '2', '3', 'x'], fingers: [null, 1, null, 2, 3, null], position: 'Alt open' },
-      { frets: ['8', '10', '10', '9', '8', '8'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 8th fret' },
-      { frets: ['12', '13', '12', '10', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '10th position' }
+      { frets: ['x', '3', '2', '0', '1', '0'], fingers: [null, 3, 2, null, 1, null], position: 'C shape (open)' },
+      { frets: ['x', '3', '5', '5', '5', '3'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (3rd fret)' },
+      { frets: ['x', 'x', '5', '5', '5', '8'], fingers: [null, null, 1, 1, 1, 4], position: 'G shape (5th fret)' },
+      { frets: ['8', '10', '10', '9', '8', '8'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (8th fret)' },
+      { frets: ['x', 'x', '10', '12', '13', '12'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (10th fret)' }
     ],
     
     // C# Major
@@ -50,13 +50,13 @@ class ChordDataService {
       { frets: ['13', '14', '13', '11', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '11th position' }
     ],
     
-    // D Major
+    // D Major - CAGED system (notes: D-F#-A)
     'D': [
-      { frets: ['x', 'x', '0', '2', '3', '2'], fingers: [null, null, null, 2, 3, 1], position: 'Open position' },
-      { frets: ['2', '3', '2', '0', 'x', 'x'], fingers: [2, 3, 1, null, null, null], position: 'Alt open' },
-      { frets: ['5', '7', '7', '7', '5', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 5th fret' },
-      { frets: ['10', '12', '12', '11', '10', '10'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 10th fret' },
-      { frets: ['14', '15', '14', '12', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '12th position' }
+      { frets: ['x', 'x', '0', '2', '3', '2'], fingers: [null, null, null, 1, 3, 2], position: 'D shape (open)' },
+      { frets: ['x', '5', '7', '7', '7', '5'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (5th fret)' },
+      { frets: ['x', 'x', '7', '7', '7', '10'], fingers: [null, null, 1, 1, 1, 4], position: 'G shape (7th fret)' },
+      { frets: ['10', '12', '12', '11', '10', '10'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (10th fret)' },
+      { frets: ['x', 'x', '12', '14', '15', '14'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (12th fret)' }
     ],
     
     // D# Major
@@ -66,22 +66,22 @@ class ChordDataService {
       { frets: ['11', '13', '13', '12', '11', '11'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 11th fret' }
     ],
     
-    // E Major
+    // E Major - CAGED system (notes: E-G#-B)
     'E': [
-      { frets: ['0', '2', '2', '1', '0', '0'], fingers: [null, 2, 3, 1, null, null], position: 'Open position' },
-      { frets: ['0', '2', '2', '1', '0', '0'], fingers: [null, 3, 2, 1, null, null], position: 'Alt fingering' },
-      { frets: ['7', '9', '9', '9', '7', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 7th fret' },
-      { frets: ['12', '14', '14', '13', '12', '12'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 12th fret' },
-      { frets: ['16', '17', '16', '14', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '14th position' }
+      { frets: ['0', '2', '2', '1', '0', '0'], fingers: [null, 2, 3, 1, null, null], position: 'E shape (open)' },
+      { frets: ['x', '7', '9', '9', '9', '7'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (7th fret)' },
+      { frets: ['x', 'x', '9', '9', '9', '12'], fingers: [null, null, 1, 1, 1, 4], position: 'G shape (9th fret)' },
+      { frets: ['12', '14', '14', '13', '12', '12'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (12th fret)' },
+      { frets: ['x', 'x', '14', '16', '17', '16'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (14th fret)' }
     ],
     
-    // F Major
+    // F Major - CAGED system (notes: F-A-C)
     'F': [
-      { frets: ['1', '3', '3', '2', '1', '1'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 1st fret' },
-      { frets: ['5', '6', '5', '3', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '3rd position' },
-      { frets: ['1', '1', '2', '3', '3', '1'], fingers: [1, 1, 2, 3, 4, 1], position: 'Alt 1st position' },
-      { frets: ['8', '10', '10', '10', '8', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 8th fret' },
-      { frets: ['13', '15', '15', '14', '13', '13'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 13th fret' }
+      { frets: ['1', '3', '3', '2', '1', '1'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (1st fret)' },
+      { frets: ['x', '8', '10', '10', '10', '8'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (8th fret)' },
+      { frets: ['x', 'x', '10', '10', '10', '13'], fingers: [null, null, 1, 1, 1, 4], position: 'G shape (10th fret)' },
+      { frets: ['13', '15', '15', '14', '13', '13'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (13th fret)' },
+      { frets: ['x', 'x', '3', '5', '6', '5'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (3rd fret)' }
     ],
     
     // F# Major
@@ -92,12 +92,12 @@ class ChordDataService {
       { frets: ['14', '16', '16', '15', '14', '14'], fingers: [1, 3, 4, 2, 1, 1], position: 'Barre 14th fret' }
     ],
     
-    // G Major
+    // G Major - CAGED system (notes: G-B-D)
     'G': [
-      { frets: ['3', '2', '0', '0', '0', '3'], fingers: [4, 2, null, null, null, 3], position: 'Open position' },
-      { frets: ['3', '0', '0', '0', '2', '3'], fingers: [4, null, null, null, 2, 3], position: 'Alt open' },
-      { frets: ['7', '8', '7', '5', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '5th position' },
-      { frets: ['3', '3', '4', '5', '5', '3'], fingers: [1, 1, 2, 3, 4, 1], position: 'Barre 3rd fret' },
+      { frets: ['3', '2', '0', '0', '0', '3'], fingers: [3, 2, null, null, null, 4], position: 'G shape (open)' },
+      { frets: ['3', '5', '5', '4', '3', '3'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (3rd fret)' },
+      { frets: ['x', '10', '12', '12', '12', '10'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (10th fret)' },
+      { frets: ['x', 'x', '12', '12', '12', '15'], fingers: [null, null, 1, 1, 1, 4], position: 'G shape (12th fret)' },
       { frets: ['10', '12', '12', '12', '10', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 10th fret' }
     ],
     
@@ -109,13 +109,13 @@ class ChordDataService {
       { frets: ['11', '13', '13', '13', '11', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 11th fret' }
     ],
     
-    // A Major
+    // A Major - CAGED system (notes: A-C#-E)
     'A': [
-      { frets: ['x', '0', '2', '2', '2', '0'], fingers: [null, null, 4, 3, 2, null], position: 'Open position' },
-      { frets: ['x', '0', '2', '2', '2', '0'], fingers: [null, null, 3, 2, 1, null], position: 'Alt fingering' },
-      { frets: ['9', '10', '9', '7', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '7th position' },
-      { frets: ['5', '5', '6', '7', '7', '5'], fingers: [1, 1, 2, 3, 4, 1], position: 'Barre 5th fret' },
-      { frets: ['12', '14', '14', '14', '12', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 12th fret' }
+      { frets: ['x', '0', '2', '2', '2', '0'], fingers: [null, null, 2, 3, 4, null], position: 'A shape (open)' },
+      { frets: ['5', '7', '7', '6', '5', '5'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', '12', '14', '14', '14', '12'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (12th fret)' },
+      { frets: ['x', 'x', '14', '14', '14', '17'], fingers: [null, null, 1, 1, 1, 4], position: 'G shape (14th fret)' },
+      { frets: ['x', 'x', '7', '9', '10', '9'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' }
     ],
     
     // A# Major
@@ -126,13 +126,130 @@ class ChordDataService {
       { frets: ['13', '15', '15', '15', '13', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 13th fret' }
     ],
     
-    // B Major
+    // B Major - CAGED system (notes: B-D#-F#)
     'B': [
-      { frets: ['x', '2', '4', '4', '4', '2'], fingers: [null, 1, 2, 4, 3, 1], position: '2nd position' },
-      { frets: ['2', '4', '4', '4', '2', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 2nd fret' },
-      { frets: ['11', '12', '11', '9', 'x', 'x'], fingers: [2, 4, 3, 1, null, null], position: '9th position' },
-      { frets: ['7', '7', '8', '9', '9', '7'], fingers: [1, 1, 2, 3, 4, 1], position: 'Barre 7th fret' },
-      { frets: ['14', '16', '16', '16', '14', 'x'], fingers: [1, 2, 4, 3, 1, null], position: 'Barre 14th fret' }
+      { frets: ['x', '2', '4', '4', '4', '2'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (2nd fret)' },
+      { frets: ['7', '9', '9', '8', '7', '7'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (7th fret)' },
+      { frets: ['x', 'x', '9', '11', '12', '11'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (9th fret)' },
+      { frets: ['x', '14', '16', '16', '16', '14'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (14th fret)' },
+      { frets: ['x', 'x', '16', '16', '16', '19'], fingers: [null, null, 1, 1, 1, 4], position: 'G shape (16th fret)' }
+    ],
+    
+    // Cm - C Minor (notes: C-Eb-G)
+    'Cm': [
+      { frets: ['x', '3', '5', '5', '4', '3'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (3rd fret)' },
+      { frets: ['x', 'x', '5', '5', '4', '8'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (5th fret)' },
+      { frets: ['8', '10', '10', '8', '8', '8'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (8th fret)' },
+      { frets: ['x', 'x', '10', '12', '13', '11'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (10th fret)' },
+      { frets: ['x', '3', '1', '0', '1', '3'], fingers: [null, 4, 1, null, 2, 3], position: 'C shape alt' }
+    ],
+    
+    // Dm - D Minor (notes: D-F-A)
+    'Dm': [
+      { frets: ['x', 'x', '0', '2', '3', '1'], fingers: [null, null, null, 2, 3, 1], position: 'D shape (open)' },
+      { frets: ['x', '5', '7', '7', '6', '5'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (5th fret)' },
+      { frets: ['x', 'x', '7', '7', '6', '10'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (7th fret)' },
+      { frets: ['10', '12', '12', '10', '10', '10'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (10th fret)' },
+      { frets: ['x', 'x', '12', '14', '15', '13'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (12th fret)' }
+    ],
+    
+    // Em - E Minor (notes: E-G-B)
+    'Em': [
+      { frets: ['0', '2', '2', '0', '0', '0'], fingers: [null, 2, 3, null, null, null], position: 'E shape (open)' },
+      { frets: ['x', '7', '9', '9', '8', '7'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (7th fret)' },
+      { frets: ['x', 'x', '9', '9', '8', '12'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (9th fret)' },
+      { frets: ['12', '14', '14', '12', '12', '12'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (12th fret)' },
+      { frets: ['x', 'x', '14', '16', '17', '15'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (14th fret)' }
+    ],
+    
+    // Fm - F Minor (notes: F-Ab-C)
+    'Fm': [
+      { frets: ['1', '3', '3', '1', '1', '1'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (1st fret)' },
+      { frets: ['x', '8', '10', '10', '9', '8'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (8th fret)' },
+      { frets: ['x', 'x', '10', '10', '9', '13'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (10th fret)' },
+      { frets: ['13', '15', '15', '13', '13', '13'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (13th fret)' },
+      { frets: ['x', 'x', '3', '5', '6', '4'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (3rd fret)' }
+    ],
+    
+    // Gm - G Minor (notes: G-Bb-D)
+    'Gm': [
+      { frets: ['3', '5', '5', '3', '3', '3'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (3rd fret)' },
+      { frets: ['x', '10', '12', '12', '11', '10'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (10th fret)' },
+      { frets: ['x', 'x', '12', '12', '11', '15'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (12th fret)' },
+      { frets: ['15', '17', '17', '15', '15', '15'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (15th fret)' },
+      { frets: ['x', 'x', '5', '7', '8', '6'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (5th fret)' }
+    ],
+    
+    // Am - A Minor (notes: A-C-E)
+    'Am': [
+      { frets: ['x', '0', '2', '2', '1', '0'], fingers: [null, null, 2, 3, 1, null], position: 'A shape (open)' },
+      { frets: ['5', '7', '7', '5', '5', '5'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', '12', '14', '14', '13', '12'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (12th fret)' },
+      { frets: ['x', 'x', '14', '14', '13', '17'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (14th fret)' },
+      { frets: ['x', 'x', '7', '9', '10', '8'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' }
+    ],
+    
+    // Bm - B Minor (notes: B-D-F#)
+    'Bm': [
+      { frets: ['x', '2', '4', '4', '3', '2'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (2nd fret)' },
+      { frets: ['7', '9', '9', '7', '7', '7'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (7th fret)' },
+      { frets: ['x', 'x', '9', '11', '12', '10'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (9th fret)' },
+      { frets: ['x', '14', '16', '16', '15', '14'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (14th fret)' },
+      { frets: ['x', 'x', '16', '16', '15', '19'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (16th fret)' }
+    ],
+    
+    // Bdim - B Diminished (notes: B-D-F)
+    'Bdim': [
+      { frets: ['x', '2', '3', '4', '3', 'x'], fingers: [null, 1, 2, 4, 3, null], position: 'Open position' },
+      { frets: ['x', 'x', '9', '10', '10', '9'], fingers: [null, null, 1, 3, 4, 2], position: '9th position' },
+      { frets: ['7', '8', '9', '7', 'x', 'x'], fingers: [1, 2, 4, 3, null, null], position: '7th position' },
+      { frets: ['x', '2', '0', '1', '0', 'x'], fingers: [null, 3, null, 2, null, null], position: 'Alt open' },
+      { frets: ['x', 'x', '12', '13', '13', '12'], fingers: [null, null, 1, 3, 4, 2], position: '12th position' }
+    ],
+    
+    // C#m - C# Minor (notes: C#-E-G#)
+    'C#m': [
+      { frets: ['x', '4', '6', '6', '5', '4'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (4th fret)' },
+      { frets: ['x', 'x', '6', '6', '5', '9'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (6th fret)' },
+      { frets: ['9', '11', '11', '9', '9', '9'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (9th fret)' },
+      { frets: ['x', 'x', '11', '13', '14', '12'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (11th fret)' },
+      { frets: ['x', '4', '2', '1', '2', '0'], fingers: [null, 4, 2, 1, 3, null], position: 'C shape alt' }
+    ],
+    
+    // D#m - D# Minor (notes: D#-F#-A#)
+    'D#m': [
+      { frets: ['x', '6', '8', '8', '7', '6'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (6th fret)' },
+      { frets: ['x', 'x', '8', '8', '7', '11'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (8th fret)' },
+      { frets: ['11', '13', '13', '11', '11', '11'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (11th fret)' },
+      { frets: ['x', 'x', '13', '15', '16', '14'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (13th fret)' },
+      { frets: ['x', 'x', '1', '3', '4', '2'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (1st fret)' }
+    ],
+    
+    // F#m - F# Minor (notes: F#-A-C#)
+    'F#m': [
+      { frets: ['2', '4', '4', '2', '2', '2'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (2nd fret)' },
+      { frets: ['x', '9', '11', '11', '10', '9'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (9th fret)' },
+      { frets: ['x', 'x', '11', '11', '10', '14'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (11th fret)' },
+      { frets: ['14', '16', '16', '14', '14', '14'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (14th fret)' },
+      { frets: ['x', 'x', '4', '6', '7', '5'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (4th fret)' }
+    ],
+    
+    // G#m - G# Minor (notes: G#-B-D#)
+    'G#m': [
+      { frets: ['4', '6', '6', '4', '4', '4'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (4th fret)' },
+      { frets: ['x', '11', '13', '13', '12', '11'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (11th fret)' },
+      { frets: ['x', 'x', '13', '13', '12', '16'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (13th fret)' },
+      { frets: ['16', '18', '18', '16', '16', '16'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (16th fret)' },
+      { frets: ['x', 'x', '6', '8', '9', '7'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (6th fret)' }
+    ],
+    
+    // A#m - A# Minor (notes: A#-C#-F)
+    'A#m': [
+      { frets: ['x', '1', '3', '3', '2', '1'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (1st fret)' },
+      { frets: ['6', '8', '8', '6', '6', '6'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (6th fret)' },
+      { frets: ['x', 'x', '8', '10', '11', '9'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (8th fret)' },
+      { frets: ['x', '13', '15', '15', '14', '13'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (13th fret)' },
+      { frets: ['x', 'x', '15', '15', '14', '18'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (15th fret)' }
     ]
   };
   
