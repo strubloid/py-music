@@ -101,7 +101,6 @@ const PianoChordDiagram = ({ chord, size = 'medium' }) => {
 
 const ChordDiagram = ({ chord, size = 'medium' }) => {
   const { displayMode } = useChordDisplay()
-  const [showVariations, setShowVariations] = useState(false)
   const [currentVariationIndex, setCurrentVariationIndex] = useState(0)
   
   // Load preferred variation on mount or when chord changes
@@ -119,20 +118,25 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
   const chordData = chordDataService.getGuitarChordVariation(chord, currentVariationIndex)
   const hasMultipleVariations = chordDataService.hasMultipleVariations(chord)
   const variationCount = chordDataService.getVariationCount(chord)
-  const allVariations = chordDataService.getGuitarChordVariations(chord)
   
-  const handleChordClick = (e) => {
-    if (hasMultipleVariations) {
-      e.preventDefault()
-      e.stopPropagation()
-      setShowVariations(!showVariations)
-    }
+  console.log(`Chord: ${chord}, Has Multiple: ${hasMultipleVariations}, Count: ${variationCount}, Current Index: ${currentVariationIndex}`)
+  
+  const handlePrevVariation = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    console.log('Prev clicked!', currentVariationIndex)
+    const newIndex = currentVariationIndex === 0 ? variationCount - 1 : currentVariationIndex - 1
+    setCurrentVariationIndex(newIndex)
+    chordPreferenceManager.setPreferredVariation(chord, newIndex)
   }
   
-  const handleSelectVariation = (index) => {
-    setCurrentVariationIndex(index)
-    chordPreferenceManager.setPreferredVariation(chord, index)
-    setShowVariations(false)
+  const handleNextVariation = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    console.log('Next clicked!', currentVariationIndex)
+    const newIndex = (currentVariationIndex + 1) % variationCount
+    setCurrentVariationIndex(newIndex)
+    chordPreferenceManager.setPreferredVariation(chord, newIndex)
   }
   
   const sizes = {
@@ -170,9 +174,8 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
   return (
     <div className="chord-diagram-wrapper">
       <div 
-        className={`chord-diagram-container ${hasMultipleVariations ? 'clickable' : ''}`}
-        onClick={handleChordClick}
-        title={hasMultipleVariations ? `Click to see ${variationCount} variations` : chord}
+        className="chord-diagram-container"
+        title={chordData.position || chord}
       >
         <svg width={width} height={height} className="chord-diagram">
           {/* Nut (top line) */}
@@ -276,88 +279,29 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
           </text>
         </svg>
         
-        {/* Variation indicator */}
+        {/* Simple arrow navigation for variations */}
         {hasMultipleVariations && (
-          <div className="variation-indicator">
-            {variationCount} shapes
-          </div>
+          <>
+            <button 
+              className="variation-nav-btn prev"
+              onClick={handlePrevVariation}
+              title="Previous shape"
+            >
+              ‹
+            </button>
+            <button 
+              className="variation-nav-btn next"
+              onClick={handleNextVariation}
+              title="Next shape"
+            >
+              ›
+            </button>
+            <div className="variation-indicator">
+              {currentVariationIndex + 1}/{variationCount}
+            </div>
+          </>
         )}
       </div>
-      
-      {/* Inline Variations Dropdown */}
-      {showVariations && hasMultipleVariations && (
-        <div className="inline-variations-container">
-          <div className="inline-variations-header">
-            Choose shape for {chord}
-          </div>
-          <div className="inline-variations-grid">
-            {allVariations.map((variation, index) => {
-              if (index === currentVariationIndex) return null; // Skip current variation
-              
-              return (
-                <div
-                  key={index}
-                  className="inline-variation-item"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleSelectVariation(index)
-                  }}
-                >
-                  <div className="inline-variation-label">
-                    {variation.position || `Variation ${index + 1}`}
-                  </div>
-                  <svg viewBox="0 0 80 100" className="inline-mini-svg">
-                    {/* Simplified mini diagram */}
-                    {[0, 1, 2, 3, 4].map(fret => (
-                      <line
-                        key={`fret-${fret}`}
-                        x1="10"
-                        y1={15 + fret * 16}
-                        x2="70"
-                        y2={15 + fret * 16}
-                        stroke={fret === 0 ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.25)"}
-                        strokeWidth={fret === 0 ? "2" : "1"}
-                      />
-                    ))}
-                    {[0, 1, 2, 3, 4, 5].map(string => (
-                      <line
-                        key={`string-${string}`}
-                        x1={10 + string * 12}
-                        y1="15"
-                        x2={10 + string * 12}
-                        y2="79"
-                        stroke="rgba(255,255,255,0.25)"
-                        strokeWidth="1"
-                      />
-                    ))}
-                    {variation.frets.map((fret, stringIndex) => {
-                      const x = 10 + stringIndex * 12
-                      if (fret === 'x' || fret === 'X') {
-                        return (
-                          <g key={`fret-${stringIndex}`}>
-                            <line x1={x-3} y1="8" x2={x+3} y2="14" stroke="#ff4757" strokeWidth="2" />
-                            <line x1={x-3} y1="14" x2={x+3} y2="8" stroke="#ff4757" strokeWidth="2" />
-                          </g>
-                        )
-                      } else if (fret === '0') {
-                        return (
-                          <circle key={`fret-${stringIndex}`} cx={x} cy="11" r="3" fill="none" stroke="#26de81" strokeWidth="2" />
-                        )
-                      } else {
-                        const fretNum = parseInt(fret)
-                        const y = 15 + (fretNum - 0.5) * 16
-                        return (
-                          <circle key={`fret-${stringIndex}`} cx={x} cy={y} r="4" fill="#45aaf2" />
-                        )
-                      }
-                    })}
-                  </svg>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
