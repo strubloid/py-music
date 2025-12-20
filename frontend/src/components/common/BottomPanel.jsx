@@ -36,15 +36,39 @@ const BottomPanel = ({ scaleData }) => {
     setIsDragging(false)
   }
 
+  // Touch event handlers for mobile
+  const handleTouchStart = (e) => {
+    setIsDragging(true)
+    dragStartY.current = e.touches[0].clientY
+    startHeight.current = panelHeight
+  }
+
+  const handleTouchMove = (e) => {
+    if (!isDragging) return
+    
+    const deltaY = dragStartY.current - e.touches[0].clientY
+    const maxHeight = window.innerHeight * 0.85 // Leave space for main content
+    const newHeight = Math.min(Math.max(startHeight.current + deltaY, 200), maxHeight)
+    setPanelHeight(newHeight)
+  }
+
+  const handleTouchEnd = () => {
+    setIsDragging(false)
+  }
+
   useEffect(() => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
+      document.addEventListener('touchmove', handleTouchMove, { passive: false })
+      document.addEventListener('touchend', handleTouchEnd)
       document.body.style.cursor = 'ns-resize'
       document.body.style.userSelect = 'none'
     } else {
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
       document.body.style.cursor = ''
       document.body.style.userSelect = ''
     }
@@ -52,6 +76,8 @@ const BottomPanel = ({ scaleData }) => {
     return () => {
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
       document.body.style.cursor = ''
       document.body.style.userSelect = ''
     }
@@ -68,6 +94,7 @@ const BottomPanel = ({ scaleData }) => {
         <div 
           className="panel-drag-handle"
           onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
         >
           <div className={`drag-indicator ${isDragging ? 'dragging' : ''}`}></div>
         </div>
@@ -77,6 +104,7 @@ const BottomPanel = ({ scaleData }) => {
       <div 
         className="bottom-controls"
         onMouseDown={activePanel ? handleMouseDown : undefined}
+        onTouchStart={activePanel ? handleTouchStart : undefined}
         style={{ cursor: activePanel ? 'ns-resize' : 'default' }}
       >
         <button
