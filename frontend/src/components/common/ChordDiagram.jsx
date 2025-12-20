@@ -99,15 +99,15 @@ const PianoChordDiagram = ({ chord, size = 'medium' }) => {
   )
 }
 
-const ChordDiagram = ({ chord, size = 'medium' }) => {
+const ChordDiagram = ({ chord, size = 'medium', refreshTrigger }) => {
   const { displayMode } = useChordDisplay()
   const [currentVariationIndex, setCurrentVariationIndex] = useState(0)
   
-  // Load preferred variation on mount or when chord changes
+  // Load preferred variation on mount, when chord changes, or when refreshTrigger changes
   useEffect(() => {
     const preferredIndex = chordPreferenceManager.getPreferredVariation(chord)
     setCurrentVariationIndex(preferredIndex)
-  }, [chord])
+  }, [chord, refreshTrigger])
   
   // If piano mode, render piano keys instead
   if (displayMode === 'piano') {
@@ -140,9 +140,9 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
   }
   
   const sizes = {
-    small: { width: 90, height: 120, fretSpacing: 18 },
-    medium: { width: 120, height: 150, fretSpacing: 22 },
-    large: { width: 150, height: 180, fretSpacing: 27 }
+    small: { width: 90, height: 135, fretSpacing: 18 },
+    medium: { width: 120, height: 170, fretSpacing: 22 },
+    large: { width: 150, height: 200, fretSpacing: 27 }
   }
   
   const { width, height, fretSpacing } = sizes[size]
@@ -165,14 +165,20 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
   
   const minFret = fretNumbers.length > 0 ? Math.min(...fretNumbers) : 1
   const maxFret = fretNumbers.length > 0 ? Math.max(...fretNumbers) : 4
-  const startFret = Math.max(1, minFret)
-  const showFretNumber = startFret > 1
+  
+  // Check if chord has open strings
+  const hasOpenStrings = chordData.frets.some(f => parseStringFret(f) === 0)
+  
+  // If has open strings and minFret <= 5, start from 0. Otherwise start from minFret.
+  // Only show position number if starting at fret 5 or higher
+  const startFret = (hasOpenStrings && minFret <= 5) ? 0 : minFret
+  const showFretNumber = startFret >= 5
   
   const getFretPosition = (absoluteFret, startFret) => {
     if (absoluteFret === 0) return null // Open string
-    // Calculate relative position on the diagram (1-5 frets shown)
-    const relativeFret = absoluteFret - startFret + 1
-    // Position between frets (0.5 = middle of first fret) - adjusted for new top margin
+    // For positions 0-5, show absolute position. For higher, show relative.
+    const relativeFret = startFret === 0 ? absoluteFret : (absoluteFret - startFret + 1)
+    // Position between frets (0.5 = middle of first fret)
     return 30 + (relativeFret - 0.5) * fretSpacing
   }
   
@@ -215,8 +221,8 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
           {/* Fret position indicator */}
           {showFretNumber && (
             <text
-              x="5"
-              y="35"
+              x="0"
+              y="40"
               fontSize="16"
               fontWeight="bold"
               fill="#333"
@@ -317,15 +323,28 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
               // Fretted note - calculate position relative to starting fret
               const y = getFretPosition(fret, startFret)
               return (
-                <circle
-                  key={stringIndex}
-                  cx={x}
-                  cy={y}
-                  r="8"
-                  fill={getFingerColor(finger)}
-                  stroke="#333"
-                  strokeWidth="3"
-                />
+                <g key={stringIndex}>
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r="8"
+                    fill={getFingerColor(finger)}
+                    stroke="#333"
+                    strokeWidth="3"
+                  />
+                  {finger && finger !== 0 && (
+                    <text
+                      x={x}
+                      y={y + 4}
+                      textAnchor="middle"
+                      fontSize="11"
+                      fontWeight="bold"
+                      fill="#fff"
+                    >
+                      {finger}
+                    </text>
+                  )}
+                </g>
               )
             }
             return null
@@ -334,7 +353,7 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
           {/* Chord name */}
           <text
             x={width / 2}
-            y={height - 5}
+            y={height - 10}
             textAnchor="middle"
             fontSize="12"
             fontWeight="bold"
@@ -343,26 +362,6 @@ const ChordDiagram = ({ chord, size = 'medium' }) => {
             {chord}
           </text>
         </svg>
-        
-        {/* Simple arrow navigation for variations */}
-        {hasMultipleVariations && (
-          <>
-            <button 
-              className="variation-nav-btn prev"
-              onClick={handlePrevVariation}
-              title="Previous shape"
-            >
-              ‹
-            </button>
-            <button 
-              className="variation-nav-btn next"
-              onClick={handleNextVariation}
-              title="Next shape"
-            >
-              ›
-            </button>
-          </>
-        )}
       </div>
     </div>
   )

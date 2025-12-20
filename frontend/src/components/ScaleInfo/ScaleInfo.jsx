@@ -173,17 +173,12 @@ const ScaleInfo = ({ scaleData }) => {
                 <div className="roman-numeral">{degree.roman}</div>
                 {showChords ? (
                   <ChordDiagram 
-                    key={`${degree.chord}-${refreshKey}`}
                     chord={degree.chord} 
-                    size="medium" 
+                    size="medium"
+                    refreshTrigger={refreshKey}
                   />
                 ) : (
                   <div className="chord-name">{degree.chord}</div>
-                )}
-                {chordDataService.hasMultipleVariations(degree.chord) && (
-                  <div className="has-variations-indicator">
-                    {chordDataService.getVariationCount(degree.chord)} shapes
-                  </div>
                 )}
               </div>
             ))}
