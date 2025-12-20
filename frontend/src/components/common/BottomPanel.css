@@ -177,7 +177,10 @@
   }
 
   .bottom-panel-content {
-    max-height: 50vh;
+    max-height: 60vh;
+    /* Ensure scrolling works on mobile */
+    touch-action: pan-y;
+    overscroll-behavior: contain;
   }
   
   .drag-indicator {
@@ -224,6 +227,7 @@
   }
 
   .bottom-panel-content {
-    max-height: 45vh;
+    max-height: 55vh;
+    min-height: 300px;
   }
 }

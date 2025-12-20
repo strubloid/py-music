@@ -7,8 +7,9 @@
   pointer-events: auto;
   position: relative;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  /* Ensure panel can be scrolled on mobile */
+  overflow: visible;
 }
 
 .panel-header {
@@ -529,6 +530,8 @@
 @media (max-width: 768px) {
   .progression-builder-panel {
     padding: 0.5rem;
+    /* Ensure the panel title is always visible and scrollable */
+    min-height: auto;
   }
 
   .panel-header {
