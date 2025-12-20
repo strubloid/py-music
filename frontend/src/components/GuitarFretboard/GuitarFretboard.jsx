@@ -60,7 +60,7 @@ const GuitarFretboard = ({ fretboardData }) => {
         }
       }
     }
-  }, [])
+  }, [fretCount])  // Recalculate when fret count changes
 
   return (
     <Card title="🎸 Guitar Fretboard" size="large" className="fretboard-container">
@@ -194,7 +194,7 @@ const GuitarFretboard = ({ fretboardData }) => {
       </div>
       
       {/* Right fade overlay - positioned outside scroll container */}
-      <div className={`fretboard-fade-overlay ${(!scrollState.right || scrollState.isScrolling) ? 'hidden' : ''}`}></div>
+      <div className={`fretboard-fade-overlay ${(scrollState.right && !scrollState.isScrolling) ? '' : 'hidden'}`}></div>
     </div>
 
       {/* Legend */}
