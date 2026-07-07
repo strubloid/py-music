@@ -3,9 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Music, BookOpen, Zap, Gamepad2, ListMusic,
   FolderOpen, BarChart2, Settings, ChevronLeft, ChevronRight,
-  Train
+  Train, LogIn
 } from 'lucide-react'
 import UserBadge from '../auth/UserBadge'
+import { useAuth } from '../../contexts/AuthContext'
 import './Sidebar.css'
 
 const NEW_SONGS_KEY = 'newSongsCount'
@@ -44,6 +45,7 @@ const NavItemWithBadge = ({ collapsed, navigate }) => {
 const Sidebar = ({ collapsed, onToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, promptLogin } = useAuth();
 
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
 
@@ -97,6 +99,16 @@ const Sidebar = ({ collapsed, onToggle }) => {
         {!collapsed && <span className="nav-section-label">System</span>}
         {navItem(<BarChart2 size={18} />, 'Stats', '/stats')}
         {navItem(<Settings size={18} />, 'Settings', '/settings')}
+        {!user && (
+          <button
+            className={`nav-item login-nav-item ${collapsed ? 'justify-center' : ''}`}
+            onClick={promptLogin}
+            title={collapsed ? 'Sign in / Register' : undefined}
+          >
+            <span className="nav-icon"><LogIn size={18} /></span>
+            {!collapsed && <span className="nav-label">Sign in / Register</span>}
+          </button>
+        )}
       </div>
 
       {/* Collapse toggle */}

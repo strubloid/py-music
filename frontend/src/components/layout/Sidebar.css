@@ -105,6 +105,20 @@
   margin-bottom: 0;
 }
 
+.login-nav-item {
+  margin-top: 0.25rem;
+  color: #fbbf24;
+}
+
+.login-nav-item:hover {
+  background: rgba(251, 191, 36, 0.12);
+  color: #fbbf24;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
 .collapse-toggle {
   position: absolute;
   top: 50%;
