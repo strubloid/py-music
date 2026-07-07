@@ -28,14 +28,16 @@ const noteNameAt = (natural, semitoneOffset, scaleNotes = []) => {
 
 const PianoKeyboard = ({ keyboardData }) => {
   const { natural_keys, black_keys, scale_notes, root_note } = keyboardData
-  const containerRef = React.useRef(null)
-  const [containerWidth, setContainerWidth] = React.useState(0)
+  const keyboardRef = React.useRef(null)
+  const [keyboardWidth, setKeyboardWidth] = React.useState(0)
 
-  // Measure container width on mount and resize
+  // Measure the actual rendered keyboard width after CSS min/max sizing.
+  // Single octave is intentionally compact and centered; double/triple grow by
+  // adding keys, not by stretching existing keys across the full card.
   React.useEffect(() => {
-    if (!containerRef.current) return
-    const el = containerRef.current
-    const update = () => setContainerWidth(el.clientWidth)
+    if (!keyboardRef.current) return
+    const el = keyboardRef.current
+    const update = () => setKeyboardWidth(el.clientWidth)
     update()
     const ro = new ResizeObserver(update)
     ro.observe(el)
@@ -58,14 +60,19 @@ const PianoKeyboard = ({ keyboardData }) => {
   }
 
   const totalNaturals = natural_keys?.length || 7
-  const naturalWidth = containerWidth > 0 ? containerWidth / totalNaturals : 0
+  const naturalWidth = keyboardWidth > 0 ? keyboardWidth / totalNaturals : 0
   const blackWidth = naturalWidth * 0.65
 
   return (
-    <div className="piano-container" ref={containerRef}>
-      <div className="piano-keyboard" data-natural-count={totalNaturals}>
+    <div className="piano-container">
+      <div
+        className="piano-keyboard"
+        ref={keyboardRef}
+        data-natural-count={totalNaturals}
+        style={{ '--natural-count': totalNaturals }}
+      >
         {/* Black keys absolutely positioned by JS to avoid CSS calc edge cases */}
-        {containerWidth > 0 && (
+        {keyboardWidth > 0 && (
           <div className="pk-black-keys-layer" aria-hidden="true">
             {black_keys?.map((bk, i) => {
               const natural = natural_keys[bk.after_natural]

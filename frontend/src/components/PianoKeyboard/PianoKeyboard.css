@@ -13,7 +13,11 @@
 
 .piano-keyboard {
   position: relative;
-  width: 100%;
+  /* Keep one octave compact and centered. Wider ranges grow by adding keys,
+     not by stretching a short keyboard across the whole card. */
+  --pk-natural-width: clamp(42px, 4.2vw, 72px);
+  width: min(100%, calc(var(--natural-count) * var(--pk-natural-width)));
+  align-self: center;
   display: flex;
   flex-direction: column;
   isolation: isolate;

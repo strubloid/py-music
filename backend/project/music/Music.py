@@ -286,14 +286,14 @@ class Music:
         visualizer.display_fretboard(self.notes, self.tune)
 
     def _compute_piano_keyboard_data(self, root: str, scale_notes: list, octaves: int = 1) -> dict:
-        """Compute piano keyboard data for any key and scale.
+        """Compute stable C-to-C piano keyboard data for any key/scale.
 
         Returns:
-            natural_keys: list of natural (white) note names per octave, 7 × octaves.
-                           e.g. for C-root: ['C','D','E','F','G','A','B'] × octaves
+            natural_keys: C-based natural keys with inclusive octave endpoint,
+                           length = 7 * octaves + 1.
             black_keys:   list of black-key descriptors with `note` (chromatic name
                            at that position) and `after_natural` (index of the natural
-                           it sits after). e.g. for F-root: {note: 'F#', after_natural: 0}
+                           it sits after). No black keys between E-F or B-C.
             scale_notes:  all notes in the scale (kept for consumer use)
             root_note:    the root note (verbatim, including sharps)
         """
@@ -303,31 +303,14 @@ class Music:
         chromatic_names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
         naturals_with_black_after = {'C', 'D', 'F', 'G', 'A'}
 
-        # Map the root to its natural letter (drop any sharp/flat) so we can pick
-        # a starting natural in the visible sequence. The black-key pitch is
-        # preserved via the chromatic semitone.
-        if root in naturals:
-            natural_root = root
-        else:
-            # Strip trailing # or b
-            if root.endswith('#'):
-                natural_root = root[0]
-            elif root.endswith('b'):
-                # Bb → A, Eb → D, etc.
-                idx = naturals.index(root[0])
-                natural_root = naturals[(idx - 1) % 7]
-            else:
-                natural_root = 'C'
-
-        root_offset = naturals.index(natural_root)
-
-        natural_keys = []
-        for o in range(octaves):
-            for i in range(7):
-                natural_keys.append(naturals[(root_offset + i) % 7])
+        # The physical piano surface is always C-based. One octave is C→C,
+        # not C→B. Extra octaves reuse the boundary C and continue onward:
+        # 1 octave = 8 naturals, 2 = 15, 3 = 22.
+        natural_count = max(1, octaves) * 7 + 1
+        natural_keys = [naturals[i % 7] for i in range(natural_count)]
 
         black_keys = []
-        for nat_index_abs, natural in enumerate(natural_keys):
+        for nat_index_abs, natural in enumerate(natural_keys[:-1]):
             if natural not in naturals_with_black_after:
                 continue
             abs_semi = (chromatic_semitone[natural] + 1) % 12

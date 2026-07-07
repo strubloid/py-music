@@ -340,3 +340,77 @@ Visited `/learn/scales` and inspected DOM. Problems with the v1 layout:
 - **Practice tip placement**: was duplicated (one per instrument). Move to single end-of-page card. Optional dismiss.
 - **Hero name "C Ionian"**: keep in header right-aligned so the active selection is always visible regardless of scroll position.
 
+---
+
+## 9. Piano Range Layout Correction — Base C-to-C, Proportional Growth (2026-07-07)
+
+### 9.1 Problem found in the current piano render
+The piano technically rendered black keys in the right places, but the range model was wrong for the learning view:
+
+1. **Single range showed only C through B**. A learner expects the basic octave shape to start at C and resolve into the next C: `C D E F G A B C`. The closing C matters because it makes the octave boundary visible.
+2. **The selected key was rotating the physical keyboard**. For F# the visual began around F/G, which is musically clever but not the right teaching surface here. The page should keep a stable piano reference and only change which keys are highlighted.
+3. **The keyboard stretched to fill the entire card**. With one octave, the seven/eight keys became huge and looked like a banner, not a piano. Adding double/triple range should add more keys while preserving roughly the same key proportions, not stretch the same small range wider.
+
+### 9.2 Target behavior
+Always render a stable base piano starting at C:
+
+| Range | Natural keys | Black keys | Visual behavior |
+|-------|--------------|------------|-----------------|
+| Single | `C D E F G A B C` | 5 | Centered compact base octave, does not fill the card |
+| Double | `C D E F G A B C D E F G A B C` | 10 | Adds the next octave from the shared C boundary |
+| Triple | `C D E F G A B C D E F G A B C D E F G A B C` | 15 | Keeps the same per-key proportions; uses width only because more keys exist |
+
+Important: the second octave **reuses the C that ended the first octave**. Do not render `C D E F G A B C C D...`; the correct sequence is `7 * octaves + 1` natural keys.
+
+### 9.3 Research / implementation pattern
+Real piano diagrams work best when the physical keyboard is stable and the music state is an overlay:
+
+- **Stable geometry**: always draw C-to-C octave groups. The user's selected key/mode changes highlights, not physical ordering.
+- **Inclusive octave endpoint**: one octave is `C` to next `C`, not `C` to `B`.
+- **Fixed proportional unit**: define an ideal natural-key width (about `64–72px`). The piano's width should be `naturalCount * unitWidth`, capped at `100%` of the card. This creates a min/max feel: short ranges are centered; longer ranges naturally occupy more room.
+- **No full-width stretching for small ranges**: if the available card is 1700px and the single keyboard only needs ~560px, center it. Do not distribute eight keys across the entire 1700px.
+- **ResizeObserver for black keys**: black key positions depend on the actual rendered keyboard width, so measure the `.piano-keyboard` element after CSS sizing and compute positions in JS.
+
+### 9.4 Data model change
+`keyboard_data.natural_keys` should be generated from C, not from selected root:
+
+```python
+natural_keys = []
+for i in range(octaves * 7 + 1):
+    natural_keys.append(['C','D','E','F','G','A','B'][i % 7])
+```
+
+Black keys are generated for each interval between adjacent naturals, skipping E→F and B→C:
+
+```python
+for i, natural in enumerate(natural_keys[:-1]):
+    if natural in {'C', 'D', 'F', 'G', 'A'}:
+        black_keys.append({ 'note': semitone_above(natural), 'after_natural': i })
+```
+
+The selected scale still controls `scale_notes` and `root_note`, so highlighting works across the stable C-based keyboard. For example, F# Ionian should keep the keyboard starting at C but highlight F# on the black key, plus the other scale tones.
+
+### 9.5 CSS sizing rule
+Use a CSS variable for the count and a fixed proportional unit:
+
+```css
+.piano-keyboard {
+  --pk-natural-width: clamp(42px, 4.2vw, 72px);
+  width: min(100%, calc(var(--natural-count) * var(--pk-natural-width)));
+  align-self: center;
+}
+```
+
+This gives the desired behavior:
+- Single: centered, compact, readable.
+- Double/triple: grows by adding real keys, not by stretching existing keys.
+- Narrow screens: the `min(100%, ...)` cap lets the keyboard shrink to the card width.
+
+### 9.6 Verification checklist
+- Single range has 8 natural keys and 5 black keys.
+- Double range has 15 natural keys and 10 black keys.
+- Triple range has 22 natural keys and 15 black keys.
+- The first and last natural key are `C` in all ranges.
+- Single range is visually centered inside the piano card and does not fill the whole row on desktop.
+- Changing key/mode changes highlighted keys only; the piano still starts at C.
+
