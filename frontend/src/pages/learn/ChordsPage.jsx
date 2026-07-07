@@ -25,7 +25,7 @@ const CHORD_TYPES = [
 ]
 
 // Get chord name from root and type
-const getChordName = (root, type) => `${root}${type.symbol}`
+const getChordName = (root, type) => `${root}${type?.symbol ?? ''}`
 
 // Render a single chord variation SVG (standalone, not using ChordDiagram's cycling)
 const ChordVariationDiagram = ({ variation, chordName, size = 'large' }) => {
@@ -201,10 +201,14 @@ const ChordsPage = () => {
   const [selectedType, setSelectedType] = useState('major')
   const [selectedChord, setSelectedChord] = useState(null)
 
+  const selectedChordType = useMemo(() => {
+    return CHORD_TYPES.find(t => t.id === selectedType) || CHORD_TYPES[0]
+  }, [selectedType])
+
   // Build chord name from current selection
   const currentChordName = useMemo(() => {
-    return getChordName(selectedRoot, CHORD_TYPES.find(t => t.id === selectedType))
-  }, [selectedRoot, selectedType])
+    return getChordName(selectedRoot, selectedChordType)
+  }, [selectedRoot, selectedChordType])
 
   // Get all variations for the currently selected chord
   const chordVariations = useMemo(() => {
@@ -223,9 +227,13 @@ const ChordsPage = () => {
   const hasMultipleVariations = chordVariations.length > 1
 
   const handleChordClick = (root, type) => {
+    const chordType = typeof type === 'string'
+      ? CHORD_TYPES.find(t => t.id === type) || CHORD_TYPES[0]
+      : type || CHORD_TYPES[0]
+
     setSelectedRoot(root)
-    setSelectedType(type)
-    setSelectedChord(getChordName(root, type))
+    setSelectedType(chordType.id)
+    setSelectedChord(getChordName(root, chordType))
   }
 
   const handleTypeClick = (type) => {
