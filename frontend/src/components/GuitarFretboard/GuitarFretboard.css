@@ -13,8 +13,7 @@
 .fretboard-scroll {
   overflow-x: auto;
   padding-bottom: 0.5rem;
-  display: flex;
-  justify-content: flex-start;
+  display: block;
   position: relative;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
@@ -29,12 +28,18 @@
 .fretboard-scroll::-webkit-scrollbar-thumb:hover { background: rgba(251, 191, 36, 0.6); }
 
 .fretboard-content {
+  /* Same min/max idea as the piano: keep a stable fret-cell unit and grow by
+     adding frets, not by stretching all frets to fill the available card. */
+  --gf-string-label-width: 2rem;
+  --gf-fret-width: clamp(2.4rem, 3.2vw, 3.55rem);
+  width: calc(var(--gf-string-label-width) + (var(--fret-cells) * var(--gf-fret-width)));
   min-width: max-content;
+  max-width: none;
+  margin: 0 auto;
   padding: 0 0.25rem;
   display: flex;
   flex-direction: column;
   position: relative;
-  width: 100%;
 }
 
 .fret-headers {
@@ -44,14 +49,15 @@
 }
 
 .string-label-header {
-  width: 2rem;
-  min-width: 2rem;
+  width: var(--gf-string-label-width);
+  min-width: var(--gf-string-label-width);
   flex-shrink: 0;
 }
 
 .fret-number {
-  flex: 1;
-  min-width: 2.25rem;
+  flex: 0 0 var(--gf-fret-width);
+  width: var(--gf-fret-width);
+  min-width: var(--gf-fret-width);
   text-align: center;
   font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.6);
@@ -70,8 +76,8 @@
 }
 
 .string-name {
-  width: 2rem;
-  min-width: 2rem;
+  width: var(--gf-string-label-width);
+  min-width: var(--gf-string-label-width);
   text-align: center;
   font-weight: 700;
   color: #ffffff;
@@ -97,12 +103,13 @@
 
 .frets-row {
   display: flex;
-  flex: 1;
+  flex: 0 0 auto;
 }
 
 .fret-cell {
-  flex: 1;
-  min-width: 2.25rem;
+  flex: 0 0 var(--gf-fret-width);
+  width: var(--gf-fret-width);
+  min-width: var(--gf-fret-width);
   height: 1.85rem;
   display: flex;
   align-items: center;
@@ -203,22 +210,24 @@
 }
 
 @media (max-width: 1100px) {
-  .fret-cell { min-width: 2rem; height: 1.7rem; }
+  .fretboard-content { --gf-fret-width: clamp(2.15rem, 4.2vw, 3rem); }
+  .fret-cell { height: 1.7rem; }
   .note-dot { width: 1.15rem; height: 1.15rem; font-size: 0.6rem; }
-  .fret-number { min-width: 2rem; }
 }
 
 @media (max-width: 768px) {
-  .fret-cell { min-width: 1.75rem; height: 1.5rem; }
+  .fretboard-content { --gf-fret-width: clamp(1.9rem, 5.6vw, 2.45rem); }
+  .fret-cell { height: 1.5rem; }
   .note-dot { width: 1rem; height: 1rem; font-size: 0.55rem; }
-  .fret-number { min-width: 1.75rem; font-size: 0.6rem; }
+  .fret-number { font-size: 0.6rem; }
   .string-name { font-size: 0.7rem; }
 }
 
 @media (max-width: 480px) {
-  .fret-cell { min-width: 1.5rem; height: 1.35rem; }
+  .fretboard-content { --gf-fret-width: 1.65rem; --gf-string-label-width: 1.75rem; }
+  .fret-cell { height: 1.35rem; }
   .note-dot { width: 0.85rem; height: 0.85rem; font-size: 0.5rem; border-width: 1px; }
-  .fret-number { min-width: 1.5rem; font-size: 0.55rem; }
+  .fret-number { font-size: 0.55rem; }
   .string-name { font-size: 0.65rem; }
   .fretboard-legend { gap: 0.5rem; font-size: 0.65rem; }
   .legend-dot { width: 0.7rem; height: 0.7rem; }

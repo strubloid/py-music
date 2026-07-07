@@ -414,3 +414,50 @@ This gives the desired behavior:
 - Single range is visually centered inside the piano card and does not fill the whole row on desktop.
 - Changing key/mode changes highlighted keys only; the piano still starts at C.
 
+---
+
+## 10. Guitar Fretboard Proportional Layout Correction (2026-07-07)
+
+### 10.1 Problem found
+After fixing the piano, the fretboard still had the old stretch behavior. Each `.fret-cell` used `flex: 1`, so 12, 17, and 22 frets all stretched to fill the full card width. That made the spacing change per range instead of feeling like the same instrument with more range added.
+
+### 10.2 Target behavior
+Use the same min/max idea as the piano:
+
+- **Single / 12 frets**: compact and centered if the card is wider than the fretboard needs.
+- **Double / 17 frets**: grows by adding frets while keeping roughly the same fret-cell width.
+- **Triple / 22 frets**: grows further; if the card is too narrow, horizontal scroll appears instead of compressing the fret cells into unreadable spacing.
+
+### 10.3 CSS sizing rule
+The fretboard content owns the proportional unit:
+
+```css
+.fretboard-content {
+  --gf-string-label-width: 2rem;
+  --gf-fret-width: clamp(2.4rem, 3.2vw, 3.55rem);
+  width: calc(var(--gf-string-label-width) + (var(--fret-cells) * var(--gf-fret-width)));
+  min-width: max-content;
+  margin: 0 auto;
+}
+
+.fret-number,
+.fret-cell {
+  flex: 0 0 var(--gf-fret-width);
+  width: var(--gf-fret-width);
+  min-width: var(--gf-fret-width);
+}
+```
+
+The component sets `--fret-cells` inline from `fretCount + 1` because the grid includes fret 0/open plus the selected fret range:
+
+```jsx
+<div className="fretboard-content" style={{ '--fret-cells': fretCount + 1 }}>
+```
+
+### 10.4 Verification checklist
+- Single has 13 fret cells (0–12) and is centered when the card is wide.
+- Double has 18 fret cells (0–17), wider than Single with similar cell width.
+- Triple has 23 fret cells (0–22), wider again with similar cell width.
+- Frets should not stretch to fill the whole row just because the card is wide.
+- On narrower screens, the content scrolls horizontally rather than crushing fret spacing.
+
