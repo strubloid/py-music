@@ -32,8 +32,8 @@ const LoginModal = () => {
   };
 
   const getReasonText = () => {
-    if (loginReason === 'save') return 'Sign up to save your progressions permanently.';
-    if (loginReason === 'load') return 'Sign in to load your saved progressions.';
+    if (loginReason === 'save') return 'Sign up to save your songs permanently.';
+    if (loginReason === 'load') return 'Sign in to load your saved songs.';
     return null;
   };
 

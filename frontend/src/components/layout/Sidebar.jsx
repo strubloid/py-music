@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Music, BookOpen, Zap, Gamepad2, ListMusic,
   FolderOpen, BarChart2, Settings, ChevronLeft, ChevronRight,
-  Mic2, Train
+  Train
 } from 'lucide-react'
 import UserBadge from '../auth/UserBadge'
 import './Sidebar.css'
@@ -89,7 +89,6 @@ const Sidebar = ({ collapsed, onToggle }) => {
       {/* Create section */}
       <div className="nav-section">
         {!collapsed && <span className="nav-section-label">Create</span>}
-        {navItem(<ListMusic size={18} />, 'Progressions', '/create/progressions')}
         <NavItemWithBadge collapsed={collapsed} navigate={navigate} />
       </div>
 
