@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import './LoginModal.css';
 
 const LoginModal = () => {
-  const { login, register, continueAsGuest, closeLoginModal, loginReason, isLoggedIn } = useAuth();
+  const { user, login, register, continueAsGuest, closeLoginModal, loginReason, isLoggedIn } = useAuth();
   const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -12,7 +12,7 @@ const LoginModal = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  if (isLoggedIn) return null;
+  if (user) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
