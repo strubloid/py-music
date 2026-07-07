@@ -115,6 +115,16 @@
   color: #fbbf24;
 }
 
+.logout-nav-item {
+  margin-top: 0.25rem;
+  color: #f87171;
+}
+
+.logout-nav-item:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+}
+
 .justify-center {
   justify-content: center;
 }

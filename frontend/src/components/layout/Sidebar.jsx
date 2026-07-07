@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Music, BookOpen, Zap, Gamepad2, ListMusic,
   FolderOpen, BarChart2, Settings, ChevronLeft, ChevronRight,
-  Train, LogIn
+  Train, LogIn, LogOut
 } from 'lucide-react'
 import UserBadge from '../auth/UserBadge'
 import { useAuth } from '../../contexts/AuthContext'
@@ -45,7 +45,7 @@ const NavItemWithBadge = ({ collapsed, navigate }) => {
 const Sidebar = ({ collapsed, onToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, promptLogin } = useAuth();
+  const { user, promptLogin, logout } = useAuth();
 
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
 
@@ -107,6 +107,16 @@ const Sidebar = ({ collapsed, onToggle }) => {
           >
             <span className="nav-icon"><LogIn size={18} /></span>
             {!collapsed && <span className="nav-label">Sign in / Register</span>}
+          </button>
+        )}
+        {user && (
+          <button
+            className={`nav-item logout-nav-item ${collapsed ? 'justify-center' : ''}`}
+            onClick={logout}
+            title={collapsed ? 'Sign out' : undefined}
+          >
+            <span className="nav-icon"><LogOut size={18} /></span>
+            {!collapsed && <span className="nav-label">Sign out</span>}
           </button>
         )}
       </div>
