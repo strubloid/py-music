@@ -24,8 +24,11 @@ from backend.project.music.Music import Music, get_roman_numeral, get_function_n
 # Load environment variables
 load_dotenv()
 
-# Configure Flask app
-app = Flask(__name__, static_folder=str(project_root / 'frontend' / 'dist'), static_url_path='')
+# Configure Flask app. Disable Flask's built-in static route so SPA routes like
+# /create/my-songs fall through to our catch-all instead of returning a static
+# file 404 before the catch-all route can serve index.html.
+frontend_dist = project_root / 'frontend' / 'dist'
+app = Flask(__name__, static_folder=None)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', f'sqlite:///{project_root}/strubloid.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -250,10 +253,11 @@ def serve(path):
     if path.startswith('api/'):
         return jsonify({"error": "API endpoint not found"}), 404
 
-    if path and (app.static_folder / path).exists():
-        return send_from_directory(app.static_folder, path)
+    requested_file = frontend_dist / path if path else None
+    if requested_file and requested_file.exists() and requested_file.is_file():
+        return send_from_directory(frontend_dist, path)
 
-    return send_file(str(app.static_folder / 'index.html'))
+    return send_file(str(frontend_dist / 'index.html'))
 
 
 # ─── Database initialization ────────────────────────────────────────────────────
@@ -271,7 +275,7 @@ if __name__ == '__main__':
     print(f"🤖 LLM Available: {llm is not None}")
     print(f"🎼 Available Intervals: {list(INTERVALS.keys())}")
     print("🌐 Server running on http://localhost:5000")
-    print(f"📁 Serving frontend from: {app.static_folder}")
+    print(f"📁 Serving frontend from: {frontend_dist}")
     print("")
     print("📖 Example requests:")
     print("  http://localhost:5000/api/scale/G?interval=major")
