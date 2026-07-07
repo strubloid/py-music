@@ -95,7 +95,7 @@
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
-  padding: 0.25rem 0.1rem 0.4rem;
+  padding: 0.25rem 0.5rem 0.4rem;
   scrollbar-width: thin;
   scrollbar-color: rgba(251, 191, 36, 0.3) transparent;
   scroll-snap-type: x mandatory;
@@ -360,11 +360,25 @@
 
 .range-btn.active .range-btn-hint { color: #cbd5e1; }
 
-/* ── INSTRUMENTS STACK (each on its own line, full width) ── */
+/* ── INSTRUMENTS LAYOUT ───────────────────────────
+   Single range is compact enough to compare piano + fretboard side-by-side.
+   Double/Triple need one full row each. Mobile is always stacked. */
 .instruments-stack {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.instruments-stack.range-single {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+}
+
+/* The compact single-range fretboard should fit better in its half-column
+   without changing the Double/Triple full-width proportions. */
+.instruments-stack.range-single .fretboard-content {
+  --gf-fret-width: clamp(1.85rem, 2.3vw, 2.7rem);
 }
 
 .instrument-card {
@@ -605,6 +619,13 @@
   .scales-topbar {
     grid-template-columns: 1fr;
     gap: 0.6rem;
+  }
+  .instruments-stack.range-single {
+    display: flex;
+    flex-direction: column;
+  }
+  .instruments-stack.range-single .fretboard-content {
+    --gf-fret-width: clamp(1.9rem, 5.6vw, 2.45rem);
   }
   .topbar-right {
     justify-content: space-between;

@@ -276,8 +276,8 @@ const ScalesPage = () => {
             </div>
           </section>
 
-          {/* ── INSTRUMENTS: piano + fretboard stacked, each on its own line ── */}
-          <section className="instruments-stack">
+          {/* ── INSTRUMENTS: Single = side-by-side on desktop; expanded ranges stack ── */}
+          <section className={`instruments-stack ${rangeLevel === 1 ? 'range-single' : 'range-expanded'}`}>
             <div className="instrument-card">
               <div className="instrument-head">
                 <Piano size={14} />

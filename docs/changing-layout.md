@@ -461,3 +461,72 @@ The component sets `--fret-cells` inline from `fretCount + 1` because the grid i
 - Frets should not stretch to fill the whole row just because the card is wide.
 - On narrower screens, the content scrolls horizontally rather than crushing fret spacing.
 
+---
+
+## 11. Range-Aware Instrument Layout (2026-07-07)
+
+### 11.1 Final layout rule
+The instruments should not use one fixed layout for every range. The correct layout depends on how much horizontal space each instrument needs:
+
+| Range | Desktop layout | Mobile layout | Why |
+|-------|----------------|---------------|-----|
+| Single | Piano + fretboard side-by-side | Stacked | Both instruments are compact enough to compare at once |
+| Double | Stacked, one per line | Stacked | Piano/fretboard need more horizontal room |
+| Triple | Stacked, one per line | Stacked | Full-width + scroll is better than cramped columns |
+
+### 11.2 Implementation pattern
+The wrapper gets a range modifier from `rangeLevel`:
+
+```jsx
+<section className={`instruments-stack ${rangeLevel === 1 ? 'range-single' : 'range-expanded'}`}>
+```
+
+Base layout stays stacked:
+
+```css
+.instruments-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+```
+
+Only Single range switches to a two-column desktop grid:
+
+```css
+.instruments-stack.range-single {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+}
+```
+
+Mobile always returns to one-per-line:
+
+```css
+@media (max-width: 860px) {
+  .instruments-stack.range-single {
+    display: flex;
+    flex-direction: column;
+  }
+}
+```
+
+### 11.3 Single-range fretboard fit
+Because Single range now shares a row with the piano on desktop, it uses a slightly smaller fret unit only in that state:
+
+```css
+.instruments-stack.range-single .fretboard-content {
+  --gf-fret-width: clamp(1.85rem, 2.3vw, 2.7rem);
+}
+```
+
+This keeps the single fretboard compact enough to sit beside the piano without changing the Double/Triple full-width proportions.
+
+### 11.4 Verification checklist
+- Single range desktop: `.instruments-stack.range-single` is a two-column grid and has two instrument cards in the same row.
+- Double range desktop: `.instruments-stack.range-expanded` is stacked, one card per line.
+- Triple range desktop: stacked, one card per line.
+- Mobile/tablet ≤860px: Single also stacks one card per line.
+- Double/Triple fretboard proportions remain unchanged from section 10.
+
