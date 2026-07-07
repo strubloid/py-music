@@ -268,5 +268,75 @@ POST   /api/daily-challenge/submit { answer }
 
 ---
 
-*Document version: 1.0*
+*Document version: 2.0*
+*Last updated: 2026-07-07 — added Scales Explorer redesign notes & gamification research*
 *Target: Phase 1 (Sidebar + Auth) within 2 weeks of focused work*
+
+---
+
+## 8. Scales Explorer Redesign — Research Notes (2026-07-07)
+
+### 8.1 Audit of current Scales page (v1)
+Visited `/learn/scales` and inspected DOM. Problems with the v1 layout:
+1. **Vertical sidebar of mode buttons** competes with the 3-column grid for attention. The user has to scan left → center → right, then back to the sidebar to change mode. Cognitive load is high.
+2. **Mode info (name + 7 notes + 4 chords) is duplicated** between the sidebar cards and the right-panel chord list. The sidebar shows the same notes that the active scale already shows in the hero strip.
+3. **Practice Tip card is rendered TWICE** — once under piano, once under fretboard. Same copy. Pure noise.
+4. **Hero name "C Ionian (Major)" is small** in the header and easy to miss, even though it's the only piece of state that changes when the user navigates.
+5. **Right "Notes & Degrees" panel** is a tab switcher. Users mostly want degrees; the "Chords" tab is a niche use. The tab itself takes 50px of vertical space for a sub-feature.
+6. **No progression / gamification feedback** — user can read scales but there's no sense of "I'm working through modes", no highlight of the relationship between modes (e.g. sharing notes), no XP or unlock states.
+
+### 8.2 Reference products surveyed
+- **musictheory.net/lessons** — uses a single index of topics on the left, deep-linked lesson on the right. The mode-vs-degree relationship is taught *sequentially* (lessons), not visually. We don't have lesson content, so this doesn't translate directly.
+- **ToneSavvy** (`tonesavvy.com`) — gamified ear-training and identification exercises. Exercises are picked from a vertical list of drill types. The successful pattern: each drill = one big interactive surface, no nested panels. We should adopt the "one focused surface" principle for the play-mode pages, but the *learn* page is a reference, not a drill.
+- **Hooktheory TheoryTab** — combines a chord progression timeline with a roman-numeral analysis. The key UX insight: **show relationships, not isolated facts**. Our "modes share notes" insight is exactly this — make the relationship visible.
+- **Lightnote** — bite-sized animated lessons, "skip jargon" framing. Color-coded interval names. Lesson cards are large, single-idea, full-bleed. Good inspiration for the degree-card style.
+- **musictheoryforguitar.com Master of the Modes** — visual "circle of modes" but our domain is linear (key, not pitch). However, the *sequencing* idea (one mode = one position, click to learn) maps cleanly onto a horizontal pill bar.
+
+### 8.3 Gamification patterns worth adopting (B2C music ed)
+- **Progress chips**: a row of pills where each pill is "locked / in-progress / mastered". The current state can be inferred from visited-modes (localStorage). v1: no persistence, just visual state. v2: real XP.
+- **Active-mode emphasis**: the selected mode is bigger, brightly colored, with a glow. Inactive modes are muted. Adjacent modes (relative major/minor) get a subtle "related" badge.
+- **Note-highlight on hover**: hover a mode pill → piano + fretboard temporarily highlight the *differences* from the active scale. This is the killer feature nobody else has. Implementation: compute note diff = `setB - setA`, render diff class on Piano/Fretboard.
+- **One big "now playing" surface**: the active mode's hero card (name + roman numerals + 7 notes) is large, central, and above the fold. Everything else is secondary.
+- **Streak / daily**: "Today you've explored 3 modes" pill in the header. Tiny, dismissible, but it gives the page a heartbeat.
+- **Confetti on new mode**: when user visits a mode they haven't seen in 7 days, fire a small confetti burst. Frivolous but emotionally rewarding.
+
+### 8.4 v2 layout — proposed structure
+
+```
++------------------------------------------------------------------+
+|  Scale Explorer              C Ionian (Major)         [streak]  |  ← Top bar
++------------------------------------------------------------------+
+|  Key: [C C# D D# E F F# G G# A A# B]                            |  ← Key selector (compact)
++------------------------------------------------------------------+
+|  [Ionian] [Dorian] [Phrygian] [Lydian] [Mixolydian] [Aeolian] [Locrian]   ← Mode pills (single row, horizontal scroll on mobile)
++------------------------------------------------------------------+
+|                                                                  |
+|  C  →  D  →  E  →  F  →  G  →  A  →  B       Root · 2 · 3 · 4 · 5 · 6 · 7  ← Hero note strip (large)
+|                                                                  |
++------------------------------------------------------------------+
+|                                                                  |
+|  [PIANO]                              | [FRETBOARD]              |
+|  <keyboard visual>                    | <fretboard visual>       |
+|                                       |                          |
++------------------------------------------------------------------+
+|  Scale Degrees   [Cards: C, Dm, Em, F, G, Am, Bdim]              |  ← Single right block (no tabs in v2)
++------------------------------------------------------------------+
+|  Practice Tip (single card, dismissible)                         |
++------------------------------------------------------------------+
+```
+
+### 8.5 Implementation order (v2 scales explorer)
+1. **Move mode selector to a horizontal pill row** above the instruments. Remove the left sidebar.
+2. **Compress KeySelector** to one row, no Card wrappers.
+3. **Hero note strip** — 7 large chips with degree numbers, below the mode row.
+4. **Right-panel tabs → single panel**. Default view: degrees grid. Chords are accessible via a small link/modal.
+5. **Remove duplicate Practice Tip** — keep one, make it dismissible.
+6. **Add streak pill** to header (localStorage-backed).
+7. (Optional v3) **Note-diff on hover**.
+
+### 8.6 Trade-offs considered
+- **Sidebar vs top pills**: top pills win because mode-selector is the *primary* action on this page. Sidebar would only make sense if modes were secondary.
+- **Tabs vs single-panel**: tabs imply the two views are equal peers. They aren't — degrees are 90% of the use. So default to degrees, expose chords via a "Show chords" link.
+- **Practice tip placement**: was duplicated (one per instrument). Move to single end-of-page card. Optional dismiss.
+- **Hero name "C Ionian"**: keep in header right-aligned so the active selection is always visible regardless of scroll position.
+

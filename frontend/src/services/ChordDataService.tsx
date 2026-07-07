@@ -250,6 +250,986 @@ class ChordDataService {
       { frets: ['x', 'x', '8', '10', '11', '9'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (8th fret)' },
       { frets: ['x', '13', '15', '15', '14', '13'], fingers: [null, 1, 3, 4, 2, 1], position: 'A shape (13th fret)' },
       { frets: ['x', 'x', '15', '15', '14', '18'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (15th fret)' }
+    ],
+
+    // ─── DOMINANT 7TH CAGED VARIATIONS ─────────────────────────────────────
+    // Formula: Major + m7 interval (root, M3, P5, m7)
+    
+    'C7': [
+      { frets: ['x', '3', '2', '3', '1', '0'], fingers: [null, 3, 2, 4, 1, null], position: 'C7 Open (add 7th)' },
+      { frets: ['x', '3', '5', '3', '5', '3'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (3rd fret)' },
+      { frets: ['8', '10', '8', '9', '8', '8'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (8th fret)' },
+      { frets: ['3', '2', '0', '0', '0', '1'], fingers: [3, 2, null, null, null, 1], position: 'G shape (open)' },
+      { frets: ['x', 'x', '10', '12', '13', '11'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (10th fret)' }
+    ],
+    
+    'C#7': [
+      { frets: ['x', '4', '3', '4', '2', 'x'], fingers: [null, 3, 2, 4, 1, null], position: 'C#7 Open' },
+      { frets: ['x', '4', '6', '4', '6', '4'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (4th fret)' },
+      { frets: ['9', '11', '9', '10', '9', '9'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (9th fret)' },
+      { frets: ['4', '3', '1', '1', '4', '4'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (1st fret)' },
+      { frets: ['x', 'x', '11', '13', '14', '12'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (11th fret)' }
+    ],
+    
+    'D7': [
+      { frets: ['x', 'x', '0', '2', '1', '2'], fingers: [null, null, null, 3, 1, 2], position: 'D7 Open' },
+      { frets: ['x', '5', '7', '5', '7', '5'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (5th fret)' },
+      { frets: ['10', '12', '10', '11', '10', '10'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (10th fret)' },
+      { frets: ['5', '4', '2', '2', '5', '5'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (5th fret)' },
+      { frets: ['x', 'x', '7', '9', '10', '8'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' }
+    ],
+    
+    'D#7': [
+      { frets: ['x', '1', '3', '1', '3', '1'], fingers: [null, 1, 3, 1, 4, 1], position: 'D#7 1st position' },
+      { frets: ['6', '8', '6', '7', '6', '6'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (6th fret)' },
+      { frets: ['x', 'x', '8', '10', '11', '9'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (8th fret)' },
+      { frets: ['11', '13', '11', '12', '11', '11'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (11th fret)' },
+      { frets: ['6', '6', '7', '8', '8', '6'], fingers: [1, 1, 2, 3, 4, 1], position: 'Barre 6th fret' }
+    ],
+    
+    'E7': [
+      { frets: ['0', '2', '0', '1', '0', '0'], fingers: [null, 2, null, 1, null, null], position: 'E7 Open' },
+      { frets: ['0', '2', '0', '1', '3', '0'], fingers: [null, 2, null, 1, 3, null], position: 'E7 Open (add 9)' },
+      { frets: ['x', '7', '6', '4', '5', '4'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (4th fret)' },
+      { frets: ['x', '7', '9', '7', '9', '7'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (7th fret)' },
+      { frets: ['12', '14', '12', '13', '12', '12'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (12th fret)' }
+    ],
+    
+    'F7': [
+      { frets: ['1', '3', '1', '2', '1', '1'], fingers: [1, 3, 1, 2, 1, 1], position: 'F7 E shape' },
+      { frets: ['1', '1', '1', '2', '3', '1'], fingers: [1, 1, 1, 2, 3, 1], position: 'F7 Barre 1st fret' },
+      { frets: ['x', '8', '7', '5', '6', '5'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (5th fret)' },
+      { frets: ['x', '8', '10', '8', '10', '8'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (8th fret)' },
+      { frets: ['x', 'x', '3', '5', '6', '4'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (3rd fret)' }
+    ],
+    
+    'F#7': [
+      { frets: ['2', '4', '2', '3', '2', '2'], fingers: [1, 3, 1, 2, 1, 1], position: 'F#7 E shape' },
+      { frets: ['9', '11', '9', '10', '9', '9'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (9th fret)' },
+      { frets: ['x', '9', '8', '6', '7', '6'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (6th fret)' },
+      { frets: ['x', '9', '11', '9', '11', '9'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (9th fret)' },
+      { frets: ['x', 'x', '4', '6', '7', '5'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (4th fret)' }
+    ],
+    
+    'G7': [
+      { frets: ['3', '2', '0', '0', '0', '1'], fingers: [3, 2, null, null, null, 1], position: 'G7 Open' },
+      { frets: ['3', '2', '0', '0', '3', '3'], fingers: [2, 1, null, null, 3, 4], position: 'G7 G shape alt' },
+      { frets: ['3', '5', '5', '4', '3', '3'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (3rd fret)' },
+      { frets: ['x', '10', '12', '10', '12', '10'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (10th fret)' },
+      { frets: ['x', 'x', '5', '7', '8', '6'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (5th fret)' }
+    ],
+    
+    'G#7': [
+      { frets: ['4', '6', '4', '5', '4', '4'], fingers: [1, 3, 1, 2, 1, 1], position: 'G#7 E shape' },
+      { frets: ['11', '13', '11', '12', '11', '11'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (11th fret)' },
+      { frets: ['x', '11', '10', '8', '9', '8'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (8th fret)' },
+      { frets: ['x', '11', '13', '11', '13', '11'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (11th fret)' },
+      { frets: ['x', 'x', '6', '8', '9', '7'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (6th fret)' }
+    ],
+    
+    'A7': [
+      { frets: ['x', '0', '2', '0', '2', '0'], fingers: [null, null, 3, null, 2, null], position: 'A7 Open' },
+      { frets: ['x', '0', '2', '0', '3', '1'], fingers: [null, null, 3, null, 4, 2], position: 'A7 Open (add b7)' },
+      { frets: ['5', '4', '2', '2', '5', '5'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (5th fret)' },
+      { frets: ['5', '7', '5', '6', '5', '5'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', 'x', '7', '9', '10', '8'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' }
+    ],
+    
+    'A#7': [
+      { frets: ['x', '1', '3', '1', '3', '1'], fingers: [null, 1, 4, 1, 3, 1], position: 'A#7 1st position' },
+      { frets: ['6', '6', '7', '8', '8', '6'], fingers: [1, 1, 2, 3, 4, 1], position: 'Barre 6th fret' },
+      { frets: ['6', '8', '6', '7', '6', '6'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (6th fret)' },
+      { frets: ['x', 'x', '8', '10', '11', '9'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (8th fret)' },
+      { frets: ['13', '15', '13', '14', '13', '13'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (13th fret)' }
+    ],
+    
+    'B7': [
+      { frets: ['x', '2', '1', '2', '0', '2'], fingers: [null, 4, 1, 3, null, 2], position: 'B7 Open' },
+      { frets: ['x', '2', '4', '2', '5', '2'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (2nd fret)' },
+      { frets: ['7', '6', '4', '4', '7', '7'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (7th fret)' },
+      { frets: ['7', '9', '7', '8', '7', '7'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (7th fret)' },
+      { frets: ['x', 'x', '9', '11', '12', '10'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (9th fret)' }
+    ],
+
+    // ─── MAJOR 7TH CAGED VARIATIONS ────────────────────────────────────────
+    // Formula: Major + M7 interval (root, M3, P5, M7)
+    
+    'Cmaj7': [
+      { frets: ['x', '3', '2', '0', '0', '0'], fingers: [null, 3, 2, null, null, null], position: 'Cmaj7 Open' },
+      { frets: ['x', '3', '5', '4', '5', '3'], fingers: [null, 1, 3, 2, 4, 1], position: 'A shape (3rd fret)' },
+      { frets: ['8', '7', '5', '5', '5', '5'], fingers: [3, 2, 1, 1, 1, 1], position: 'G shape (8th fret)' },
+      { frets: ['8', '10', '9', '9', '8', '8'], fingers: [1, 3, 2, 2, 1, 1], position: 'E shape (8th fret)' },
+      { frets: ['x', 'x', '10', '12', '12', '12'], fingers: [null, null, 1, 3, 4, 4], position: 'D shape (10th fret)' }
+    ],
+    
+    'C#maj7': [
+      { frets: ['x', '4', '3', '1', '1', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C#maj7 1st position' },
+      { frets: ['x', '4', '6', '5', '6', '4'], fingers: [null, 1, 3, 2, 4, 1], position: 'A shape (4th fret)' },
+      { frets: ['9', '11', '10', '10', '9', '9'], fingers: [1, 3, 2, 2, 1, 1], position: 'E shape (9th fret)' },
+      { frets: ['9', '9', '10', '11', '11', '9'], fingers: [1, 1, 2, 3, 4, 1], position: 'Barre 9th fret' },
+      { frets: ['x', 'x', '11', '13', '13', '13'], fingers: [null, null, 1, 3, 4, 4], position: 'D shape (11th fret)' }
+    ],
+    
+    'Dmaj7': [
+      { frets: ['x', 'x', '0', '2', '2', '2'], fingers: [null, null, null, 1, 3, 2], position: 'Dmaj7 D shape' },
+      { frets: ['x', '5', '4', '2', '2', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (2nd fret)' },
+      { frets: ['5', '7', '6', '6', '5', '5'], fingers: [1, 3, 2, 2, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', '5', '7', '6', '7', '5'], fingers: [null, 1, 3, 2, 4, 1], position: 'A shape (5th fret)' },
+      { frets: ['10', '12', '11', '11', '10', '10'], fingers: [1, 3, 2, 2, 1, 1], position: 'E shape (10th fret)' }
+    ],
+    
+    'D#maj7': [
+      { frets: ['x', '1', '3', '2', '3', 'x'], fingers: [null, 1, 4, 2, 3, null], position: 'D#maj7 1st position' },
+      { frets: ['6', '8', '7', '7', '6', '6'], fingers: [1, 3, 2, 2, 1, 1], position: 'E shape (6th fret)' },
+      { frets: ['x', '6', '5', '3', '3', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (3rd fret)' },
+      { frets: ['x', '6', '8', '7', '8', '6'], fingers: [null, 1, 3, 2, 4, 1], position: 'A shape (6th fret)' },
+      { frets: ['11', '13', '12', '12', '11', '11'], fingers: [1, 3, 2, 2, 1, 1], position: 'E shape (11th fret)' }
+    ],
+    
+    'Emaj7': [
+      { frets: ['0', '2', '1', '1', '0', '0'], fingers: [null, 3, 2, 1, null, null], position: 'Emaj7 Open' },
+      { frets: ['0', '2', '1', '1', '0', '4'], fingers: [null, 2, 1, 1, null, 3], position: 'Emaj7 Open alt' },
+      { frets: ['x', '7', '6', '4', '4', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (4th fret)' },
+      { frets: ['x', '7', '9', '8', '9', '7'], fingers: [null, 1, 3, 2, 4, 1], position: 'A shape (7th fret)' },
+      { frets: ['12', '14', '13', '13', '12', '12'], fingers: [1, 3, 2, 2, 1, 1], position: 'E shape (12th fret)' }
+    ],
+    
+    'Fmaj7': [
+      { frets: ['x', 'x', '3', '2', '1', '0'], fingers: [null, null, 3, 2, 1, null], position: 'Fmaj7 D shape' },
+      { frets: ['1', '3', '2', '2', '1', '1'], fingers: [1, 4, 2, 3, 1, 1], position: 'E shape (1st fret)' },
+      { frets: ['x', '8', '7', '5', '5', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (5th fret)' },
+      { frets: ['x', '8', '10', '9', '10', '8'], fingers: [null, 1, 3, 2, 4, 1], position: 'A shape (8th fret)' },
+      { frets: ['x', 'x', '3', '5', '6', '4'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (3rd fret)' }
+    ],
+    
+    'F#maj7': [
+      { frets: ['x', 'x', '3', '3', '1', '2'], fingers: [null, null, 4, 3, 1, 2], position: 'F#maj7 D shape' },
+      { frets: ['2', '4', '3', '3', '2', '2'], fingers: [1, 4, 2, 3, 1, 1], position: 'E shape (2nd fret)' },
+      { frets: ['x', '9', '8', '6', '6', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (6th fret)' },
+      { frets: ['x', '9', '11', '10', '11', '9'], fingers: [null, 1, 3, 2, 4, 1], position: 'A shape (9th fret)' },
+      { frets: ['x', 'x', '4', '6', '7', '5'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (4th fret)' }
+    ],
+    
+    'Gmaj7': [
+      { frets: ['3', '2', '0', '0', '0', '2'], fingers: [3, 2, null, null, null, 1], position: 'Gmaj7 Open' },
+      { frets: ['3', '2', '0', '0', '2', '2'], fingers: [2, 1, null, null, 3, 4], position: 'Gmaj7 G shape alt' },
+      { frets: ['3', '5', '4', '4', '3', '3'], fingers: [1, 4, 2, 3, 1, 1], position: 'E shape (3rd fret)' },
+      { frets: ['x', '10', '12', '11', '12', '10'], fingers: [null, 1, 3, 2, 4, 1], position: 'A shape (10th fret)' },
+      { frets: ['x', 'x', '5', '7', '7', '7'], fingers: [null, null, 1, 3, 4, 4], position: 'D shape (5th fret)' }
+    ],
+    
+    'G#maj7': [
+      { frets: ['4', '6', '5', '5', '4', '4'], fingers: [1, 4, 2, 3, 1, 1], position: 'E shape (4th fret)' },
+      { frets: ['x', 'x', '5', '5', '3', '4'], fingers: [null, null, 4, 3, 1, 2], position: 'G#maj7 D shape' },
+      { frets: ['x', '11', '10', '8', '8', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (8th fret)' },
+      { frets: ['x', '11', '13', '12', '13', '11'], fingers: [null, 1, 3, 2, 4, 1], position: 'A shape (11th fret)' },
+      { frets: ['11', '13', '12', '12', '11', '11'], fingers: [1, 4, 2, 3, 1, 1], position: 'E shape (11th fret)' }
+    ],
+    
+    'Amaj7': [
+      { frets: ['x', '0', '2', '1', '2', '0'], fingers: [null, null, 2, 1, 3, null], position: 'Amaj7 Open' },
+      { frets: ['5', '4', '2', '2', '2', 'x'], fingers: [3, 2, 1, 1, 1, null], position: 'G shape (5th fret)' },
+      { frets: ['5', '7', '6', '6', '5', '5'], fingers: [1, 4, 2, 3, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', 'x', '7', '9', '9', '9'], fingers: [null, null, 1, 3, 4, 4], position: 'D shape (7th fret)' },
+      { frets: ['x', '12', '11', '9', '9', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (9th fret)' }
+    ],
+    
+    'A#maj7': [
+      { frets: ['x', '1', '3', '2', '3', '1'], fingers: [null, 1, 4, 2, 3, 1], position: 'A#maj7 1st position' },
+      { frets: ['6', '6', '7', '7', '5', '6'], fingers: [1, 1, 2, 3, 1, 1], position: 'Barre 6th fret' },
+      { frets: ['6', '8', '7', '7', '6', '6'], fingers: [1, 4, 2, 3, 1, 1], position: 'E shape (6th fret)' },
+      { frets: ['x', 'x', '8', '10', '10', '10'], fingers: [null, null, 1, 3, 4, 4], position: 'D shape (8th fret)' },
+      { frets: ['13', '15', '14', '14', '13', '13'], fingers: [1, 4, 2, 3, 1, 1], position: 'E shape (13th fret)' }
+    ],
+    
+    'Bmaj7': [
+      { frets: ['x', '2', '4', '3', '4', '2'], fingers: [null, 1, 4, 2, 3, 1], position: 'Bmaj7 A shape' },
+      { frets: ['7', '6', '4', '4', '4', 'x'], fingers: [3, 2, 1, 1, 1, null], position: 'G shape (7th fret)' },
+      { frets: ['7', '9', '8', '8', '7', '7'], fingers: [1, 4, 2, 3, 1, 1], position: 'E shape (7th fret)' },
+      { frets: ['x', 'x', '9', '11', '11', '11'], fingers: [null, null, 1, 3, 4, 4], position: 'D shape (9th fret)' },
+      { frets: ['x', '14', '13', '11', '11', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (11th fret)' }
+    ],
+
+    // ─── MINOR 7TH CAGED VARIATIONS ─────────────────────────────────────────
+    // Formula: Minor + m7 interval (root, m3, P5, m7)
+    
+    'Cm7': [
+      { frets: ['x', '3', '5', '3', '4', '3'], fingers: [null, 1, 3, 1, 2, 1], position: 'Cm7 A shape' },
+      { frets: ['x', 'x', '5', '5', '4', '8'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (5th fret)' },
+      { frets: ['8', '10', '10', '8', '8', '8'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (8th fret)' },
+      { frets: ['x', '3', '1', '0', '1', '3'], fingers: [null, 4, 1, null, 2, 3], position: 'C shape alt' },
+      { frets: ['x', 'x', '10', '12', '13', '11'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (10th fret)' }
+    ],
+    
+    'C#m7': [
+      { frets: ['x', '4', '6', '4', '5', '4'], fingers: [null, 1, 3, 1, 2, 1], position: 'C#m7 A shape' },
+      { frets: ['x', 'x', '6', '6', '5', '9'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (6th fret)' },
+      { frets: ['9', '11', '11', '9', '9', '9'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (9th fret)' },
+      { frets: ['x', '4', '2', '1', '2', '0'], fingers: [null, 4, 2, 1, 3, null], position: 'C shape alt' },
+      { frets: ['x', 'x', '11', '13', '14', '12'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (11th fret)' }
+    ],
+    
+    'Dm7': [
+      { frets: ['x', 'x', '0', '2', '1', '1'], fingers: [null, null, null, 3, 1, 2], position: 'Dm7 D shape' },
+      { frets: ['x', '5', '7', '5', '6', '5'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (5th fret)' },
+      { frets: ['5', '7', '7', '5', '5', '5'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', 'x', '7', '7', '6', '10'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (7th fret)' },
+      { frets: ['10', '12', '12', '10', '10', '10'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (10th fret)' }
+    ],
+    
+    'D#m7': [
+      { frets: ['x', '1', '3', '1', '2', '1'], fingers: [null, 1, 3, 1, 2, 1], position: 'D#m7 1st position' },
+      { frets: ['x', 'x', '8', '8', '7', '11'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (8th fret)' },
+      { frets: ['6', '8', '8', '6', '6', '6'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (6th fret)' },
+      { frets: ['6', '8', '6', '7', '6', '6'], fingers: [1, 3, 1, 2, 1, 1], position: 'A shape (6th fret)' },
+      { frets: ['x', 'x', '13', '15', '16', '14'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (13th fret)' }
+    ],
+    
+    'Em7': [
+      { frets: ['0', '2', '0', '0', '0', '0'], fingers: [null, 2, null, null, null, null], position: 'Em7 Open' },
+      { frets: ['0', '2', '0', '0', '0', '3'], fingers: [null, 2, null, null, null, 3], position: 'Em7 Open alt' },
+      { frets: ['x', '7', '9', '7', '8', '7'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (7th fret)' },
+      { frets: ['x', 'x', '9', '9', '8', '12'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (9th fret)' },
+      { frets: ['12', '14', '14', '12', '12', '12'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (12th fret)' }
+    ],
+    
+    'Fm7': [
+      { frets: ['1', '3', '1', '1', '1', '1'], fingers: [1, 3, 1, 1, 1, 1], position: 'Fm7 E shape' },
+      { frets: ['x', '8', '10', '8', '9', '8'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (8th fret)' },
+      { frets: ['x', 'x', '10', '10', '9', '13'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (10th fret)' },
+      { frets: ['13', '15', '15', '13', '13', '13'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (13th fret)' },
+      { frets: ['x', 'x', '3', '5', '6', '4'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (3rd fret)' }
+    ],
+    
+    'F#m7': [
+      { frets: ['2', '4', '2', '2', '2', '2'], fingers: [1, 3, 1, 1, 1, 1], position: 'F#m7 E shape' },
+      { frets: ['x', '9', '11', '9', '10', '9'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (9th fret)' },
+      { frets: ['x', 'x', '11', '11', '10', '14'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (11th fret)' },
+      { frets: ['14', '16', '16', '14', '14', '14'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (14th fret)' },
+      { frets: ['x', 'x', '4', '6', '7', '5'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (4th fret)' }
+    ],
+    
+    'Gm7': [
+      { frets: ['3', '5', '3', '3', '3', '3'], fingers: [1, 3, 1, 1, 1, 1], position: 'Gm7 E shape' },
+      { frets: ['3', '1', '0', '0', '3', '3'], fingers: [2, 1, null, null, 3, 4], position: 'G shape open' },
+      { frets: ['x', '10', '12', '10', '11', '10'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (10th fret)' },
+      { frets: ['x', 'x', '12', '12', '11', '15'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (12th fret)' },
+      { frets: ['x', 'x', '5', '7', '8', '6'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (5th fret)' }
+    ],
+    
+    'G#m7': [
+      { frets: ['4', '6', '4', '4', '4', '4'], fingers: [1, 3, 1, 1, 1, 1], position: 'G#m7 E shape' },
+      { frets: ['4', '2', '1', '1', '4', '4'], fingers: [2, 1, 1, 1, 3, 4], position: 'G shape 1st fret' },
+      { frets: ['x', '11', '13', '11', '12', '11'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (11th fret)' },
+      { frets: ['x', 'x', '13', '13', '12', '16'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (13th fret)' },
+      { frets: ['16', '18', '18', '16', '16', '16'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (16th fret)' }
+    ],
+    
+    'Am7': [
+      { frets: ['x', '0', '2', '0', '1', '0'], fingers: [null, null, 2, null, 1, null], position: 'Am7 Open' },
+      { frets: ['5', '7', '7', '5', '5', '5'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', '12', '14', '12', '13', '12'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (12th fret)' },
+      { frets: ['x', 'x', '14', '14', '13', '17'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (14th fret)' },
+      { frets: ['x', 'x', '7', '9', '10', '8'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' }
+    ],
+    
+    'A#m7': [
+      { frets: ['x', '1', '3', '1', '2', '1'], fingers: [null, 1, 4, 1, 3, 1], position: 'A#m7 1st position' },
+      { frets: ['6', '8', '8', '6', '6', '6'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (6th fret)' },
+      { frets: ['x', '13', '15', '13', '14', '13'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (13th fret)' },
+      { frets: ['x', 'x', '15', '15', '14', '18'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (15th fret)' },
+      { frets: ['x', 'x', '8', '10', '11', '9'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (8th fret)' }
+    ],
+    
+    'Bm7': [
+      { frets: ['x', '2', '4', '2', '3', '2'], fingers: [null, 1, 4, 1, 3, 1], position: 'Bm7 A shape' },
+      { frets: ['7', '9', '9', '7', '7', '7'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (7th fret)' },
+      { frets: ['x', 'x', '9', '11', '12', '10'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (9th fret)' },
+      { frets: ['x', '14', '16', '14', '15', '14'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (14th fret)' },
+      { frets: ['x', 'x', '16', '16', '15', '19'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (16th fret)' }
+    ],
+
+    // ─── DIMINISHED CAGED VARIATIONS ─────────────────────────────────────────
+    // Formula: m3 + d5 (root, m3, d5) - Two adjacent shapes form full diminished
+    
+    'Cdim': [
+      { frets: ['x', '3', '4', '5', '4', 'x'], fingers: [null, 1, 2, 3, 2, null], position: 'Cdim Open position' },
+      { frets: ['x', 'x', '9', '10', '10', '9'], fingers: [null, null, 1, 3, 4, 2], position: '9th position' },
+      { frets: ['7', '8', '9', '7', 'x', 'x'], fingers: [1, 2, 3, 1, null, null], position: '7th position' },
+      { frets: ['x', '3', '1', '2', '1', 'x'], fingers: [null, 4, 1, 2, 1, null], position: 'Cdim Alt' },
+      { frets: ['x', 'x', '4', '5', '6', '4'], fingers: [null, null, 1, 2, 3, 1], position: 'Diminished cycle' }
+    ],
+    
+    'C#dim': [
+      { frets: ['x', '4', '5', '6', '5', 'x'], fingers: [null, 1, 2, 3, 2, null], position: 'C#dim Open' },
+      { frets: ['x', 'x', '10', '11', '11', '10'], fingers: [null, null, 1, 3, 4, 2], position: '10th position' },
+      { frets: ['8', '9', '10', '8', 'x', 'x'], fingers: [1, 2, 3, 1, null, null], position: '8th position' },
+      { frets: ['x', '4', '2', '3', '2', 'x'], fingers: [null, 4, 1, 2, 1, null], position: 'C#dim Alt' },
+      { frets: ['x', 'x', '5', '6', '7', '5'], fingers: [null, null, 1, 2, 3, 1], position: 'Diminished cycle' }
+    ],
+    
+    'Ddim': [
+      { frets: ['x', 'x', '0', '1', '0', '1'], fingers: [null, null, null, 1, null, 2], position: 'Ddim Open' },
+      { frets: ['x', '1', '2', '3', '2', 'x'], fingers: [null, 1, 2, 3, 2, null], position: '1st position' },
+      { frets: ['x', 'x', '5', '6', '6', '5'], fingers: [null, null, 1, 3, 4, 2], position: '5th position' },
+      { frets: ['3', '4', '5', '3', 'x', 'x'], fingers: [1, 2, 3, 1, null, null], position: '3rd position' },
+      { frets: ['x', 'x', '11', '12', '12', '11'], fingers: [null, null, 1, 3, 4, 2], position: '11th position' }
+    ],
+    
+    'D#dim': [
+      { frets: ['x', '1', '2', '3', '2', 'x'], fingers: [null, 1, 2, 3, 2, null], position: 'D#dim 1st position' },
+      { frets: ['6', '7', '8', '6', 'x', 'x'], fingers: [1, 2, 3, 1, null, null], position: '6th position' },
+      { frets: ['x', 'x', '6', '7', '7', '6'], fingers: [null, null, 1, 3, 4, 2], position: '6th position alt' },
+      { frets: ['x', '1', '0', '1', '0', 'x'], fingers: [null, 3, null, 2, null, null], position: 'D#dim Open' },
+      { frets: ['x', 'x', '12', '13', '13', '12'], fingers: [null, null, 1, 3, 4, 2], position: '12th position' }
+    ],
+    
+    'Edim': [
+      { frets: ['x', 'x', '2', '3', '3', '2'], fingers: [null, null, 1, 3, 4, 2], position: 'Edim 2nd position' },
+      { frets: ['x', '2', '3', '4', '3', 'x'], fingers: [null, 1, 2, 3, 2, null], position: '2nd position alt' },
+      { frets: ['7', '8', '9', '7', 'x', 'x'], fingers: [1, 2, 3, 1, null, null], position: '7th position' },
+      { frets: ['x', 'x', '7', '8', '8', '7'], fingers: [null, null, 1, 3, 4, 2], position: '7th position alt' },
+      { frets: ['x', '2', '0', '1', '0', 'x'], fingers: [null, 3, null, 2, null, null], position: 'Edim Open' }
+    ],
+    
+    'Fdim': [
+      { frets: ['1', '2', '3', '4', '3', 'x'], fingers: [1, 2, 3, 4, 3, null], position: 'Fdim 1st position' },
+      { frets: ['x', 'x', '3', '4', '4', '3'], fingers: [null, null, 1, 3, 4, 2], position: '3rd position' },
+      { frets: ['8', '9', '10', '8', 'x', 'x'], fingers: [1, 2, 3, 1, null, null], position: '8th position' },
+      { frets: ['x', 'x', '8', '9', '9', '8'], fingers: [null, null, 1, 3, 4, 2], position: '8th position alt' },
+      { frets: ['x', '2', '1', '2', '1', 'x'], fingers: [null, 4, 1, 3, 2, null], position: 'Fdim Alt' }
+    ],
+    
+    'F#dim': [
+      { frets: ['2', '3', '4', '5', '4', 'x'], fingers: [1, 2, 3, 4, 3, null], position: 'F#dim 2nd position' },
+      { frets: ['x', 'x', '4', '5', '5', '4'], fingers: [null, null, 1, 3, 4, 2], position: '4th position' },
+      { frets: ['9', '10', '11', '9', 'x', 'x'], fingers: [1, 2, 3, 1, null, null], position: '9th position' },
+      { frets: ['x', 'x', '9', '10', '10', '9'], fingers: [null, null, 1, 3, 4, 2], position: '9th position alt' },
+      { frets: ['x', '3', '2', '3', '2', 'x'], fingers: [null, 4, 1, 3, 2, null], position: 'F#dim Alt' }
+    ],
+    
+    'Gdim': [
+      { frets: ['3', '4', '5', '6', '5', 'x'], fingers: [1, 2, 3, 4, 3, null], position: 'Gdim 3rd position' },
+      { frets: ['x', 'x', '5', '6', '6', '5'], fingers: [null, null, 1, 3, 4, 2], position: '5th position' },
+      { frets: ['10', '11', '12', '10', 'x', 'x'], fingers: [1, 2, 3, 1, null, null], position: '10th position' },
+      { frets: ['x', 'x', '10', '11', '11', '10'], fingers: [null, null, 1, 3, 4, 2], position: '10th position alt' },
+      { frets: ['x', '4', '3', '4', '3', 'x'], fingers: [null, 4, 1, 3, 2, null], position: 'Gdim Alt' }
+    ],
+    
+    'G#dim': [
+      { frets: ['4', '5', '6', '7', '6', 'x'], fingers: [1, 2, 3, 4, 3, null], position: 'G#dim 4th position' },
+      { frets: ['x', 'x', '6', '7', '7', '6'], fingers: [null, null, 1, 3, 4, 2], position: '6th position' },
+      { frets: ['11', '12', '13', '11', 'x', 'x'], fingers: [1, 2, 3, 1, null, null], position: '11th position' },
+      { frets: ['x', 'x', '11', '12', '12', '11'], fingers: [null, null, 1, 3, 4, 2], position: '11th position alt' },
+      { frets: ['x', '5', '4', '5', '4', 'x'], fingers: [null, 4, 1, 3, 2, null], position: 'G#dim Alt' }
+    ],
+    
+    'Adim': [
+      { frets: ['x', '1', '2', '1', '0', 'x'], fingers: [null, 2, 3, 1, null, null], position: 'Adim Open' },
+      { frets: ['x', 'x', '2', '3', '3', '2'], fingers: [null, null, 1, 3, 4, 2], position: '2nd position' },
+      { frets: ['5', '6', '7', '5', 'x', 'x'], fingers: [1, 2, 3, 1, null, null], position: '5th position' },
+      { frets: ['x', 'x', '7', '8', '8', '7'], fingers: [null, null, 1, 3, 4, 2], position: '7th position' },
+      { frets: ['x', '1', '0', '1', '0', 'x'], fingers: [null, 3, null, 2, null, null], position: 'Adim Open alt' }
+    ],
+    
+    'A#dim': [
+      { frets: ['x', '2', '3', '2', '1', 'x'], fingers: [null, 3, 4, 2, 1, null], position: 'A#dim 2nd position' },
+      { frets: ['x', 'x', '3', '4', '4', '3'], fingers: [null, null, 1, 3, 4, 2], position: '3rd position' },
+      { frets: ['6', '7', '8', '6', 'x', 'x'], fingers: [1, 2, 3, 1, null, null], position: '6th position' },
+      { frets: ['x', 'x', '8', '9', '9', '8'], fingers: [null, null, 1, 3, 4, 2], position: '8th position' },
+      { frets: ['x', '2', '1', '2', '1', 'x'], fingers: [null, 4, 1, 3, 2, null], position: 'A#dim Alt' }
+    ],
+
+    // ─── AUGMENTED CAGED VARIATIONS ─────────────────────────────────────────
+    // Formula: M3 + #5 (root, M3, #5) - 5th raised by 1 semitone
+    
+    'Caug': [
+      { frets: ['x', '3', '2', '1', '1', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'Caug Open' },
+      { frets: ['x', '3', '5', '6', '5', 'x'], fingers: [null, 1, 2, 4, 3, null], position: 'A shape (3rd fret)' },
+      { frets: ['8', '7', '5', '6', '8', '8'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (8th fret)' },
+      { frets: ['x', 'x', '10', '13', '13', '12'], fingers: [null, null, 1, 4, 4, 2], position: 'D shape (10th fret)' },
+      { frets: ['8', '10', '10', '9', '8', '8'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (8th fret)' }
+    ],
+    
+    'C#aug': [
+      { frets: ['x', '4', '3', '2', '2', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C#aug 1st position' },
+      { frets: ['x', '4', '6', '7', '6', 'x'], fingers: [null, 1, 2, 4, 3, null], position: 'A shape (4th fret)' },
+      { frets: ['9', '11', '11', '10', '9', '9'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (9th fret)' },
+      { frets: ['x', 'x', '11', '14', '14', '13'], fingers: [null, null, 1, 4, 4, 2], position: 'D shape (11th fret)' },
+      { frets: ['9', '8', '6', '7', '9', '9'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (9th fret)' }
+    ],
+    
+    'Daug': [
+      { frets: ['x', 'x', '0', '3', '3', '2'], fingers: [null, null, null, 2, 3, 1], position: 'Daug D shape' },
+      { frets: ['x', '5', '7', '8', '7', 'x'], fingers: [null, 1, 2, 4, 3, null], position: 'A shape (5th fret)' },
+      { frets: ['10', '12', '12', '11', '10', '10'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (10th fret)' },
+      { frets: ['x', 'x', '7', '10', '10', '9'], fingers: [null, null, 1, 4, 4, 2], position: 'D shape (7th fret)' },
+      { frets: ['10', '9', '7', '8', '10', '10'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (10th fret)' }
+    ],
+    
+    'D#aug': [
+      { frets: ['x', '1', '3', '4', '3', 'x'], fingers: [null, 1, 2, 4, 3, null], position: 'D#aug 1st position' },
+      { frets: ['x', '6', '8', '9', '8', 'x'], fingers: [null, 1, 2, 4, 3, null], position: 'A shape (6th fret)' },
+      { frets: ['6', '8', '8', '7', '6', '6'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (6th fret)' },
+      { frets: ['x', 'x', '8', '11', '11', '10'], fingers: [null, null, 1, 4, 4, 2], position: 'D shape (8th fret)' },
+      { frets: ['11', '13', '13', '12', '11', '11'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (11th fret)' }
+    ],
+    
+    'Eaug': [
+      { frets: ['0', '3', '2', '1', '1', '0'], fingers: [null, 4, 3, 1, 1, null], position: 'Eaug Open' },
+      { frets: ['0', '7', '6', '4', '5', '4'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (4th fret)' },
+      { frets: ['x', '7', '9', '10', '9', 'x'], fingers: [null, 1, 2, 4, 3, null], position: 'A shape (7th fret)' },
+      { frets: ['12', '14', '14', '13', '12', '12'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (12th fret)' },
+      { frets: ['x', 'x', '9', '12', '12', '11'], fingers: [null, null, 1, 4, 4, 2], position: 'D shape (9th fret)' }
+    ],
+    
+    'Faug': [
+      { frets: ['1', '4', '3', '2', '2', '1'], fingers: [1, 4, 3, 1, 1, 1], position: 'Faug 1st fret' },
+      { frets: ['x', '8', '10', '11', '10', 'x'], fingers: [null, 1, 2, 4, 3, null], position: 'A shape (8th fret)' },
+      { frets: ['x', 'x', '3', '6', '6', '5'], fingers: [null, null, 1, 4, 4, 2], position: 'D shape (3rd fret)' },
+      { frets: ['13', '15', '15', '14', '13', '13'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (13th fret)' },
+      { frets: ['8', '7', '5', '6', '8', '8'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (8th fret)' }
+    ],
+    
+    'F#aug': [
+      { frets: ['2', '5', '4', '3', '3', '2'], fingers: [1, 4, 3, 1, 1, 1], position: 'F#aug 2nd fret' },
+      { frets: ['x', '9', '11', '12', '11', 'x'], fingers: [null, 1, 2, 4, 3, null], position: 'A shape (9th fret)' },
+      { frets: ['9', '8', '6', '7', '9', '9'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (9th fret)' },
+      { frets: ['x', 'x', '4', '7', '7', '6'], fingers: [null, null, 1, 4, 4, 2], position: 'D shape (4th fret)' },
+      { frets: ['14', '16', '16', '15', '14', '14'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (14th fret)' }
+    ],
+    
+    'Gaug': [
+      { frets: ['3', '7', '6', '4', '5', '4'], fingers: [1, 4, 3, 1, 2, 1], position: 'C shape (4th fret)' },
+      { frets: ['3', '0', '0', '1', '2', '3'], fingers: [4, null, null, 1, 2, 3], position: 'Gaug Open' },
+      { frets: ['x', '10', '12', '13', '12', 'x'], fingers: [null, 1, 2, 4, 3, null], position: 'A shape (10th fret)' },
+      { frets: ['10', '9', '7', '8', '10', '10'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (10th fret)' },
+      { frets: ['x', 'x', '5', '8', '8', '7'], fingers: [null, null, 1, 4, 4, 2], position: 'D shape (5th fret)' }
+    ],
+    
+    'G#aug': [
+      { frets: ['4', '1', '1', '2', '3', '4'], fingers: [4, 1, 1, 2, 3, 4], position: 'G#aug Open' },
+      { frets: ['4', '7', '6', '4', '5', '4'], fingers: [1, 4, 3, 1, 2, 1], position: 'C shape (4th fret)' },
+      { frets: ['x', '11', '13', '14', '13', 'x'], fingers: [null, 1, 2, 4, 3, null], position: 'A shape (11th fret)' },
+      { frets: ['11', '10', '8', '9', '11', '11'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (11th fret)' },
+      { frets: ['11', '13', '13', '12', '11', '11'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (11th fret)' }
+    ],
+    
+    'Aaug': [
+      { frets: ['x', '0', '2', '3', '3', 'x'], fingers: [null, null, 1, 3, 4, null], position: 'Aaug Open' },
+      { frets: ['5', '4', '2', '3', '5', '5'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (5th fret)' },
+      { frets: ['5', '8', '7', '5', '6', '5'], fingers: [1, 4, 3, 1, 2, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', 'x', '7', '10', '10', '9'], fingers: [null, null, 1, 4, 4, 2], position: 'D shape (7th fret)' },
+      { frets: ['x', '12', '14', '15', '14', 'x'], fingers: [null, 1, 2, 4, 3, null], position: 'A shape (12th fret)' }
+    ],
+    
+    'A#aug': [
+      { frets: ['x', '1', '3', '4', '4', 'x'], fingers: [null, 1, 2, 3, 4, null], position: 'A#aug 1st position' },
+      { frets: ['6', '5', '3', '4', '6', '6'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (6th fret)' },
+      { frets: ['6', '9', '8', '6', '7', '6'], fingers: [1, 4, 3, 1, 2, 1], position: 'E shape (6th fret)' },
+      { frets: ['x', 'x', '8', '11', '11', '10'], fingers: [null, null, 1, 4, 4, 2], position: 'D shape (8th fret)' },
+      { frets: ['13', '15', '15', '14', '13', '13'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (13th fret)' }
+    ],
+    
+    'Baug': [
+      { frets: ['x', '2', '4', '5', '5', 'x'], fingers: [null, 1, 2, 3, 4, null], position: 'Baug 2nd position' },
+      { frets: ['7', '6', '4', '5', '7', '7'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (7th fret)' },
+      { frets: ['7', '10', '9', '7', '8', '7'], fingers: [1, 4, 3, 1, 2, 1], position: 'E shape (7th fret)' },
+      { frets: ['x', 'x', '9', '12', '12', '11'], fingers: [null, null, 1, 4, 4, 2], position: 'D shape (9th fret)' },
+      { frets: ['14', '16', '16', '15', '14', '14'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (14th fret)' }
+    ],
+
+    // ─── SUS2 CAGED VARIATIONS ──────────────────────────────────────────────
+    // Formula: Root + M2 + P5 (replace 3rd with 2nd)
+    
+    'Csus2': [
+      { frets: ['x', '3', '1', '0', '3', 'x'], fingers: [null, 4, 1, null, 3, null], position: 'Csus2 Open' },
+      { frets: ['x', '3', '5', '5', '5', '3'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (3rd fret)' },
+      { frets: ['8', '10', '10', '9', '8', '8'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (8th fret)' },
+      { frets: ['3', '3', '0', '0', '3', '3'], fingers: [2, 3, null, null, 4, 4], position: 'G shape (open)' },
+      { frets: ['x', 'x', '10', '12', '13', '12'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (10th fret)' }
+    ],
+    
+    'C#sus2': [
+      { frets: ['x', '4', '2', '1', '4', 'x'], fingers: [null, 4, 2, 1, 3, null], position: 'C#sus2 1st position' },
+      { frets: ['x', '4', '6', '6', '6', '4'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (4th fret)' },
+      { frets: ['9', '11', '11', '10', '9', '9'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (9th fret)' },
+      { frets: ['x', 'x', '11', '13', '14', '13'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (11th fret)' },
+      { frets: ['4', '4', '1', '1', '4', '4'], fingers: [2, 3, 1, 1, 4, 4], position: 'G shape (1st fret)' }
+    ],
+    
+    'Dsus2': [
+      { frets: ['x', 'x', '0', '2', '3', '3'], fingers: [null, null, null, 1, 3, 4], position: 'Dsus2 D shape' },
+      { frets: ['x', '5', '7', '7', '7', '5'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (5th fret)' },
+      { frets: ['10', '12', '12', '11', '10', '10'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (10th fret)' },
+      { frets: ['5', '5', '2', '2', '5', '5'], fingers: [2, 3, 1, 1, 4, 4], position: 'G shape (5th fret)' },
+      { frets: ['x', 'x', '7', '9', '10', '9'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' }
+    ],
+    
+    'D#sus2': [
+      { frets: ['x', '1', '4', '3', '1', 'x'], fingers: [null, 1, 4, 3, 1, null], position: 'D#sus2 1st position' },
+      { frets: ['x', '6', '8', '8', '8', '6'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (6th fret)' },
+      { frets: ['11', '13', '13', '12', '11', '11'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (11th fret)' },
+      { frets: ['6', '6', '3', '3', '6', '6'], fingers: [2, 3, 1, 1, 4, 4], position: 'G shape (6th fret)' },
+      { frets: ['x', 'x', '8', '10', '11', '10'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (8th fret)' }
+    ],
+    
+    'Esus2': [
+      { frets: ['0', '0', '4', '4', '2', '0'], fingers: [null, null, 4, 3, 1, null], position: 'Esus2 Open' },
+      { frets: ['0', '2', '2', '2', '0', '0'], fingers: [null, 3, 4, 4, null, null], position: 'E shape (open)' },
+      { frets: ['x', '7', '6', '4', '5', '4'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (4th fret)' },
+      { frets: ['x', '7', '9', '9', '9', '7'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (7th fret)' },
+      { frets: ['7', '7', '4', '4', '7', '7'], fingers: [2, 3, 1, 1, 4, 4], position: 'G shape (7th fret)' }
+    ],
+    
+    'Fsus2': [
+      { frets: ['1', '1', '3', '3', 'x', 'x'], fingers: [2, 3, 4, 4, null, null], position: 'Fsus2 1st fret' },
+      { frets: ['x', '8', '7', '5', '6', '5'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (5th fret)' },
+      { frets: ['x', '8', '10', '10', '10', '8'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (8th fret)' },
+      { frets: ['8', '8', '5', '5', '8', '8'], fingers: [2, 3, 1, 1, 4, 4], position: 'G shape (8th fret)' },
+      { frets: ['x', 'x', '3', '5', '6', '5'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (3rd fret)' }
+    ],
+    
+    'F#sus2': [
+      { frets: ['2', '2', '4', '4', 'x', 'x'], fingers: [2, 3, 4, 4, null, null], position: 'F#sus2 2nd fret' },
+      { frets: ['x', '9', '8', '6', '7', '6'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (6th fret)' },
+      { frets: ['x', '9', '11', '11', '11', '9'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (9th fret)' },
+      { frets: ['9', '9', '6', '6', '9', '9'], fingers: [2, 3, 1, 1, 4, 4], position: 'G shape (9th fret)' },
+      { frets: ['x', 'x', '4', '6', '7', '6'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (4th fret)' }
+    ],
+    
+    'Gsus2': [
+      { frets: ['3', '3', '0', '0', '0', '3'], fingers: [2, 3, null, null, null, 4], position: 'Gsus2 Open' },
+      { frets: ['3', '5', '5', '4', '3', '3'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (3rd fret)' },
+      { frets: ['x', '10', '9', '7', '8', '7'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (7th fret)' },
+      { frets: ['x', '10', '12', '12', '12', '10'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (10th fret)' },
+      { frets: ['x', 'x', '5', '7', '8', '7'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (5th fret)' }
+    ],
+    
+    'G#sus2': [
+      { frets: ['4', '4', '1', '1', '4', '4'], fingers: [2, 3, 1, 1, 4, 4], position: 'G#sus2 1st fret' },
+      { frets: ['4', '6', '6', '5', '4', '4'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (4th fret)' },
+      { frets: ['x', '11', '10', '8', '9', '8'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (8th fret)' },
+      { frets: ['x', '11', '13', '13', '13', '11'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (11th fret)' },
+      { frets: ['x', 'x', '6', '8', '9', '8'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (6th fret)' }
+    ],
+    
+    'Asus2': [
+      { frets: ['0', '0', '2', '2', '0', '0'], fingers: [null, null, 3, 4, null, null], position: 'Asus2 Open' },
+      { frets: ['5', '4', '2', '2', '5', '5'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (5th fret)' },
+      { frets: ['5', '7', '7', '6', '5', '5'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', 'x', '7', '9', '10', '9'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' },
+      { frets: ['x', '12', '11', '9', '10', '9'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (9th fret)' }
+    ],
+    
+    'A#sus2': [
+      { frets: ['1', '1', '3', '3', '1', 'x'], fingers: [1, 1, 4, 4, 1, null], position: 'A#sus2 1st position' },
+      { frets: ['6', '5', '3', '3', '6', '6'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (6th fret)' },
+      { frets: ['6', '8', '8', '7', '6', '6'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (6th fret)' },
+      { frets: ['x', 'x', '8', '10', '11', '10'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (8th fret)' },
+      { frets: ['13', '15', '15', '14', '13', '13'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (13th fret)' }
+    ],
+    
+    'Bsus2': [
+      { frets: ['2', '2', '4', '4', '2', 'x'], fingers: [1, 1, 4, 4, 1, null], position: 'Bsus2 2nd position' },
+      { frets: ['7', '6', '4', '4', '7', '7'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (7th fret)' },
+      { frets: ['7', '9', '9', '8', '7', '7'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (7th fret)' },
+      { frets: ['x', 'x', '9', '11', '12', '11'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (9th fret)' },
+      { frets: ['x', '14', '13', '11', '12', '11'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (11th fret)' }
+    ],
+
+    // ─── SUS4 CAGED VARIATIONS ──────────────────────────────────────────────
+    // Formula: Root + P4 + P5 (replace 3rd with 4th)
+    
+    'Csus4': [
+      { frets: ['x', '3', '3', '1', '3', 'x'], fingers: [null, 2, 3, 1, 4, null], position: 'Csus4 Open' },
+      { frets: ['x', '3', '5', '5', '5', '3'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (3rd fret)' },
+      { frets: ['8', '10', '10', '9', '8', '8'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (8th fret)' },
+      { frets: ['x', '1', '1', '3', '3', 'x'], fingers: [null, 1, 1, 3, 4, null], position: 'Sus4 D shape' },
+      { frets: ['x', 'x', '10', '12', '13', '12'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (10th fret)' }
+    ],
+    
+    'C#sus4': [
+      { frets: ['x', '4', '4', '2', '4', 'x'], fingers: [null, 2, 3, 1, 4, null], position: 'C#sus4 1st position' },
+      { frets: ['x', '4', '6', '6', '6', '4'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (4th fret)' },
+      { frets: ['9', '11', '11', '10', '9', '9'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (9th fret)' },
+      { frets: ['x', '2', '2', '4', '4', 'x'], fingers: [null, 1, 1, 3, 4, null], position: 'Sus4 2nd fret' },
+      { frets: ['x', 'x', '11', '13', '14', '13'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (11th fret)' }
+    ],
+    
+    'Dsus4': [
+      { frets: ['x', 'x', '0', '3', '3', '3'], fingers: [null, null, null, 2, 3, 4], position: 'Dsus4 D shape' },
+      { frets: ['x', '5', '7', '7', '7', '5'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (5th fret)' },
+      { frets: ['10', '12', '12', '11', '10', '10'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (10th fret)' },
+      { frets: ['x', '3', '3', '5', '5', 'x'], fingers: [null, 1, 1, 3, 4, null], position: 'Sus4 3rd fret' },
+      { frets: ['x', 'x', '7', '9', '10', '9'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' }
+    ],
+    
+    'D#sus4': [
+      { frets: ['x', '1', '1', '4', '4', 'x'], fingers: [null, 1, 1, 3, 4, null], position: 'D#sus4 1st fret' },
+      { frets: ['x', '6', '8', '8', '8', '6'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (6th fret)' },
+      { frets: ['11', '13', '13', '12', '11', '11'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (11th fret)' },
+      { frets: ['x', '4', '4', '6', '6', 'x'], fingers: [null, 1, 1, 3, 4, null], position: 'Sus4 4th fret' },
+      { frets: ['x', 'x', '8', '10', '11', '10'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (8th fret)' }
+    ],
+    
+    'Esus4': [
+      { frets: ['0', '0', '2', '2', '0', '0'], fingers: [null, null, 3, 4, null, null], position: 'Esus4 Open' },
+      { frets: ['0', '7', '6', '4', '5', '4'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (4th fret)' },
+      { frets: ['x', '7', '9', '9', '9', '7'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (7th fret)' },
+      { frets: ['7', '7', '4', '4', '7', '7'], fingers: [2, 3, 1, 1, 4, 4], position: 'G shape (7th fret)' },
+      { frets: ['12', '14', '14', '13', '12', '12'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (12th fret)' }
+    ],
+    
+    'Fsus4': [
+      { frets: ['1', '1', '3', '3', 'x', 'x'], fingers: [2, 3, 4, 4, null, null], position: 'Fsus4 1st fret' },
+      { frets: ['x', '8', '7', '5', '6', '5'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (5th fret)' },
+      { frets: ['x', '8', '10', '10', '10', '8'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (8th fret)' },
+      { frets: ['8', '8', '5', '5', '8', '8'], fingers: [2, 3, 1, 1, 4, 4], position: 'G shape (8th fret)' },
+      { frets: ['x', 'x', '3', '5', '6', '5'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (3rd fret)' }
+    ],
+    
+    'F#sus4': [
+      { frets: ['2', '2', '4', '4', 'x', 'x'], fingers: [2, 3, 4, 4, null, null], position: 'F#sus4 2nd fret' },
+      { frets: ['x', '9', '8', '6', '7', '6'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (6th fret)' },
+      { frets: ['x', '9', '11', '11', '11', '9'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (9th fret)' },
+      { frets: ['9', '9', '6', '6', '9', '9'], fingers: [2, 3, 1, 1, 4, 4], position: 'G shape (9th fret)' },
+      { frets: ['x', 'x', '4', '6', '7', '6'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (4th fret)' }
+    ],
+    
+    'Gsus4': [
+      { frets: ['3', '3', '1', '1', '3', '3'], fingers: [2, 3, 1, 1, 4, 4], position: 'Gsus4 1st fret' },
+      { frets: ['3', '5', '5', '4', '3', '3'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (3rd fret)' },
+      { frets: ['x', '10', '9', '7', '8', '7'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (7th fret)' },
+      { frets: ['x', '10', '12', '12', '12', '10'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (10th fret)' },
+      { frets: ['x', 'x', '5', '7', '8', '7'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (5th fret)' }
+    ],
+    
+    'G#sus4': [
+      { frets: ['4', '4', '2', '2', '4', '4'], fingers: [2, 3, 1, 1, 4, 4], position: 'G#sus4 2nd fret' },
+      { frets: ['4', '6', '6', '5', '4', '4'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (4th fret)' },
+      { frets: ['x', '11', '10', '8', '9', '8'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (8th fret)' },
+      { frets: ['x', '11', '13', '13', '13', '11'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (11th fret)' },
+      { frets: ['11', '13', '13', '12', '11', '11'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (11th fret)' }
+    ],
+    
+    'Asus4': [
+      { frets: ['0', '0', '3', '2', '0', '0'], fingers: [null, null, 4, 3, null, null], position: 'Asus4 Open' },
+      { frets: ['x', '0', '3', '2', '0', '0'], fingers: [null, null, 4, 3, null, null], position: 'Asus4 Open alt' },
+      { frets: ['5', '4', '2', '2', '5', '5'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (5th fret)' },
+      { frets: ['5', '7', '7', '6', '5', '5'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', 'x', '7', '9', '10', '9'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' }
+    ],
+    
+    'A#sus4': [
+      { frets: ['1', '1', '4', '3', '1', 'x'], fingers: [1, 1, 4, 3, 1, null], position: 'A#sus4 1st position' },
+      { frets: ['6', '5', '3', '3', '6', '6'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (6th fret)' },
+      { frets: ['6', '8', '8', '7', '6', '6'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (6th fret)' },
+      { frets: ['x', 'x', '8', '10', '11', '10'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (8th fret)' },
+      { frets: ['13', '15', '15', '14', '13', '13'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (13th fret)' }
+    ],
+    
+    'Bsus4': [
+      { frets: ['2', '2', '5', '4', '2', 'x'], fingers: [1, 1, 4, 3, 1, null], position: 'Bsus4 2nd position' },
+      { frets: ['7', '6', '4', '4', '7', '7'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (7th fret)' },
+      { frets: ['7', '9', '9', '8', '7', '7'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (7th fret)' },
+      { frets: ['x', 'x', '9', '11', '12', '11'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (9th fret)' },
+      { frets: ['x', '14', '13', '11', '12', '11'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (11th fret)' }
+    ],
+
+    // ─── ADD9 CAGED VARIATIONS ──────────────────────────────────────────────
+    // Formula: Major + M9 (root, M3, P5, + M2)
+    
+    'Cadd9': [
+      { frets: ['x', '3', '0', '2', '3', 'x'], fingers: [null, 4, null, 1, 3, null], position: 'Cadd9 Open' },
+      { frets: ['x', '3', '5', '5', '5', '3'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (3rd fret)' },
+      { frets: ['8', '7', '5', '5', '5', '5'], fingers: [3, 2, 1, 1, 1, 1], position: 'G shape (8th fret)' },
+      { frets: ['8', '10', '10', '9', '8', '8'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (8th fret)' },
+      { frets: ['x', 'x', '10', '12', '13', '12'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (10th fret)' }
+    ],
+    
+    'Dadd9': [
+      { frets: ['x', 'x', '0', '2', '1', '2'], fingers: [null, null, null, 3, 1, 2], position: 'Dadd9 Open' },
+      { frets: ['x', '5', '4', '2', '2', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (2nd fret)' },
+      { frets: ['5', '7', '7', '6', '5', '5'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', 'x', '7', '9', '10', '8'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' },
+      { frets: ['5', '4', '2', '2', '5', '5'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (5th fret)' }
+    ],
+    
+    'Eadd9': [
+      { frets: ['0', '0', '1', '2', '0', '0'], fingers: [null, null, 1, 2, null, null], position: 'Eadd9 Open' },
+      { frets: ['0', '7', '6', '4', '4', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (4th fret)' },
+      { frets: ['0', '2', '1', '1', '0', '4'], fingers: [null, 2, 1, 1, null, 3], position: 'Eadd9 Open alt' },
+      { frets: ['x', '7', '9', '9', '9', '7'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (7th fret)' },
+      { frets: ['12', '14', '14', '13', '12', '12'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (12th fret)' }
+    ],
+    
+    'Fadd9': [
+      { frets: ['x', 'x', '3', '2', '1', '3'], fingers: [null, null, 3, 2, 1, 4], position: 'Fadd9 D shape' },
+      { frets: ['1', '1', '1', '2', '1', '1'], fingers: [1, 1, 1, 2, 1, 1], position: 'Fadd9 Barre 1st' },
+      { frets: ['x', '8', '7', '5', '5', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (5th fret)' },
+      { frets: ['x', '8', '10', '10', '10', '8'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (8th fret)' },
+      { frets: ['8', '7', '5', '5', '8', '8'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (8th fret)' }
+    ],
+    
+    'Gadd9': [
+      { frets: ['3', '0', '0', '0', '0', '3'], fingers: [4, null, null, null, null, 3], position: 'Gadd9 Open' },
+      { frets: ['3', '2', '0', '0', '0', '5'], fingers: [3, 2, null, null, null, 4], position: 'Gadd9 Open alt' },
+      { frets: ['3', '5', '5', '4', '3', '3'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (3rd fret)' },
+      { frets: ['x', '10', '9', '7', '7', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (7th fret)' },
+      { frets: ['x', 'x', '5', '7', '8', '7'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (5th fret)' }
+    ],
+    
+    'Aadd9': [
+      { frets: ['x', '0', '2', '4', '2', '0'], fingers: [null, null, 1, 3, 2, null], position: 'Aadd9 Open' },
+      { frets: ['5', '4', '2', '2', '2', 'x'], fingers: [3, 2, 1, 1, 1, null], position: 'G shape (5th fret)' },
+      { frets: ['5', '7', '7', '6', '5', '5'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', 'x', '7', '9', '10', '8'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' },
+      { frets: ['x', '12', '11', '9', '9', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (9th fret)' }
+    ],
+    
+    'Badd9': [
+      { frets: ['x', 'x', '4', '4', '2', 'x'], fingers: [null, null, 4, 3, 1, null], position: 'Badd9 2nd position' },
+      { frets: ['x', '2', '4', '4', '2', 'x'], fingers: [null, 1, 3, 4, 1, null], position: 'Badd9 A shape' },
+      { frets: ['7', '6', '4', '4', '4', 'x'], fingers: [3, 2, 1, 1, 1, null], position: 'G shape (7th fret)' },
+      { frets: ['7', '9', '9', '8', '7', '7'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (7th fret)' },
+      { frets: ['x', 'x', '9', '11', '12', '10'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (9th fret)' }
+    ],
+
+    // ─── 6TH CAGED VARIATIONS ───────────────────────────────────────────────
+    // Formula: Major + M6 (root, M3, P5, M6)
+    
+    'C6': [
+      { frets: ['x', '3', '2', '2', '1', 'x'], fingers: [null, 4, 2, 3, 1, null], position: 'C6 Open' },
+      { frets: ['x', '3', '5', '5', '5', '3'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (3rd fret)' },
+      { frets: ['8', '7', '5', '5', '5', '5'], fingers: [3, 2, 1, 1, 1, 1], position: 'G shape (8th fret)' },
+      { frets: ['8', '10', '9', '9', '8', '8'], fingers: [1, 3, 2, 2, 1, 1], position: 'E shape (8th fret)' },
+      { frets: ['x', 'x', '10', '12', '12', '12'], fingers: [null, null, 1, 3, 4, 4], position: 'D shape (10th fret)' }
+    ],
+    
+    'D6': [
+      { frets: ['x', 'x', '0', '2', '2', '2'], fingers: [null, null, null, 1, 3, 4], position: 'D6 D shape' },
+      { frets: ['x', '5', '7', '5', '7', '5'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (5th fret)' },
+      { frets: ['5', '7', '6', '6', '5', '5'], fingers: [1, 3, 2, 2, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', 'x', '7', '9', '10', '8'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' },
+      { frets: ['5', '4', '2', '2', '5', '5'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (5th fret)' }
+    ],
+    
+    'E6': [
+      { frets: ['0', '2', '1', '2', '2', '0'], fingers: [null, 2, 1, 3, 4, null], position: 'E6 Open' },
+      { frets: ['0', '2', '1', '2', '2', '0'], fingers: [null, 2, 1, 3, 4, null], position: 'E6 Open alt' },
+      { frets: ['x', '7', '6', '4', '4', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (4th fret)' },
+      { frets: ['x', '7', '9', '9', '9', '7'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (7th fret)' },
+      { frets: ['12', '14', '13', '13', '12', '12'], fingers: [1, 3, 2, 2, 1, 1], position: 'E shape (12th fret)' }
+    ],
+    
+    'F6': [
+      { frets: ['x', 'x', '3', '2', '1', '3'], fingers: [null, null, 3, 2, 1, 4], position: 'F6 D shape' },
+      { frets: ['1', '3', '3', '2', '1', '1'], fingers: [1, 3, 4, 2, 1, 1], position: 'F6 E shape' },
+      { frets: ['x', '8', '7', '5', '5', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (5th fret)' },
+      { frets: ['x', '8', '10', '10', '10', '8'], fingers: [null, 1, 3, 3, 3, 1], position: 'A shape (8th fret)' },
+      { frets: ['8', '7', '5', '5', '8', '8'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (8th fret)' }
+    ],
+    
+    'G6': [
+      { frets: ['3', '2', '0', '0', '0', '0'], fingers: [3, 2, null, null, null, null], position: 'G6 Open' },
+      { frets: ['3', '2', '0', '0', '0', '5'], fingers: [3, 2, null, null, null, 4], position: 'G6 Open alt' },
+      { frets: ['3', '5', '5', '4', '3', '3'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (3rd fret)' },
+      { frets: ['x', 'x', '5', '7', '8', '7'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (5th fret)' },
+      { frets: ['x', '10', '9', '7', '7', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (7th fret)' }
+    ],
+    
+    'A6': [
+      { frets: ['x', '0', '2', '2', '2', '0'], fingers: [null, null, 3, 4, 4, null], position: 'A6 Open' },
+      { frets: ['5', '4', '2', '2', '2', 'x'], fingers: [3, 2, 1, 1, 1, null], position: 'G shape (5th fret)' },
+      { frets: ['5', '7', '6', '6', '5', '5'], fingers: [1, 3, 2, 2, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', 'x', '7', '9', '9', '9'], fingers: [null, null, 1, 3, 4, 4], position: 'D shape (7th fret)' },
+      { frets: ['x', '12', '11', '9', '9', 'x'], fingers: [null, 4, 3, 1, 1, null], position: 'C shape (9th fret)' }
+    ],
+    
+    'B6': [
+      { frets: ['x', '2', '4', '4', '3', 'x'], fingers: [null, 1, 3, 4, 2, null], position: 'B6 A shape' },
+      { frets: ['7', '6', '4', '4', '4', 'x'], fingers: [3, 2, 1, 1, 1, null], position: 'G shape (7th fret)' },
+      { frets: ['7', '9', '8', '8', '7', '7'], fingers: [1, 3, 2, 2, 1, 1], position: 'E shape (7th fret)' },
+      { frets: ['x', 'x', '9', '11', '11', '11'], fingers: [null, null, 1, 3, 4, 4], position: 'D shape (9th fret)' },
+      { frets: ['x', '2', '1', '1', '1', 'x'], fingers: [null, 4, 1, 1, 1, null], position: 'B6 Open' }
+    ],
+
+    // ─── 9TH CAGED VARIATIONS ───────────────────────────────────────────────
+    // Formula: Dominant 7 + M9 (root, M3, P5, m7, M9)
+    
+    'C9': [
+      { frets: ['x', '3', '2', '3', '3', 'x'], fingers: [null, 2, 1, 3, 4, null], position: 'C9 Open' },
+      { frets: ['x', '3', '5', '3', '5', '3'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (3rd fret)' },
+      { frets: ['8', '10', '8', '9', '8', '8'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (8th fret)' },
+      { frets: ['x', 'x', '10', '12', '13', '11'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (10th fret)' },
+      { frets: ['3', '2', '0', '0', '3', '3'], fingers: [2, 1, null, null, 3, 4], position: 'G shape (open)' }
+    ],
+    
+    'D9': [
+      { frets: ['x', 'x', '0', '2', '1', '2'], fingers: [null, null, null, 3, 1, 2], position: 'D9 D shape' },
+      { frets: ['x', '5', '7', '5', '7', '5'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (5th fret)' },
+      { frets: ['5', '7', '5', '6', '5', '5'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', 'x', '7', '9', '10', '8'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' },
+      { frets: ['5', '4', '2', '2', '5', '5'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (5th fret)' }
+    ],
+    
+    'E9': [
+      { frets: ['0', '2', '0', '1', '0', '2'], fingers: [null, 2, null, 1, null, 3], position: 'E9 Open' },
+      { frets: ['0', '2', '0', '1', '3', '0'], fingers: [null, 2, null, 1, 3, null], position: 'E9 Open alt' },
+      { frets: ['x', '7', '6', '4', '5', '4'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (4th fret)' },
+      { frets: ['x', '7', '9', '7', '9', '7'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (7th fret)' },
+      { frets: ['12', '14', '12', '13', '12', '12'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (12th fret)' }
+    ],
+    
+    'F9': [
+      { frets: ['1', '1', '1', '2', '1', '1'], fingers: [1, 1, 1, 2, 1, 1], position: 'F9 E shape' },
+      { frets: ['x', '3', '1', '2', '1', 'x'], fingers: [null, 4, 1, 3, 2, null], position: 'F9 Open' },
+      { frets: ['x', '8', '7', '5', '6', '5'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (5th fret)' },
+      { frets: ['x', '8', '10', '8', '10', '8'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (8th fret)' },
+      { frets: ['x', 'x', '3', '5', '6', '4'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (3rd fret)' }
+    ],
+    
+    'G9': [
+      { frets: ['3', '2', '0', '0', '1', '0'], fingers: [3, 2, null, null, 1, null], position: 'G9 Open' },
+      { frets: ['3', '2', '0', '0', '3', '1'], fingers: [2, 1, null, null, 3, 1], position: 'G9 Open alt' },
+      { frets: ['3', '5', '5', '4', '3', '3'], fingers: [1, 3, 4, 2, 1, 1], position: 'E shape (3rd fret)' },
+      { frets: ['x', '10', '9', '7', '8', '7'], fingers: [null, 4, 3, 1, 2, 1], position: 'C shape (7th fret)' },
+      { frets: ['x', '10', '12', '10', '12', '10'], fingers: [null, 1, 3, 1, 4, 1], position: 'A shape (10th fret)' }
+    ],
+    
+    'A9': [
+      { frets: ['x', '0', '2', '0', '2', '0'], fingers: [null, null, 3, null, 2, null], position: 'A9 Open' },
+      { frets: ['x', '0', '2', '0', '3', '1'], fingers: [null, null, 3, null, 4, 2], position: 'A9 Open alt' },
+      { frets: ['5', '4', '2', '2', '5', '5'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (5th fret)' },
+      { frets: ['5', '7', '5', '6', '5', '5'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', 'x', '7', '9', '10', '8'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' }
+    ],
+    
+    'B9': [
+      { frets: ['x', '2', '1', '2', '2', 'x'], fingers: [null, 4, 1, 3, 2, null], position: 'B9 A shape' },
+      { frets: ['x', '2', '1', '2', '0', 'x'], fingers: [null, 4, 1, 3, null, null], position: 'B9 Open' },
+      { frets: ['7', '6', '4', '4', '7', '7'], fingers: [3, 2, 1, 1, 4, 4], position: 'G shape (7th fret)' },
+      { frets: ['7', '9', '7', '8', '7', '7'], fingers: [1, 3, 1, 2, 1, 1], position: 'E shape (7th fret)' },
+      { frets: ['x', 'x', '9', '11', '12', '10'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (9th fret)' }
+    ],
+
+    // ─── POWER CHORD (5) CAGED VARIATIONS ──────────────────────────────────
+    // Formula: Root + P5 only
+    
+    'C5': [
+      { frets: ['x', '3', 'x', 'x', '3', 'x'], fingers: [null, 1, null, null, 2, null], position: 'C5 3rd fret' },
+      { frets: ['x', '3', 'x', 'x', '3', '3'], fingers: [null, 1, null, null, 2, 2], position: 'C5 3rd fret alt' },
+      { frets: ['x', 'x', '10', '12', 'x', 'x'], fingers: [null, null, 1, 2, null, null], position: 'D shape (10th fret)' },
+      { frets: ['x', '8', 'x', 'x', '8', '8'], fingers: [null, 1, null, null, 2, 2], position: 'E shape (8th fret)' },
+      { frets: ['3', '3', 'x', 'x', 'x', 'x'], fingers: [1, 1, null, null, null, null], position: 'Power chord 3' }
+    ],
+    
+    'D5': [
+      { frets: ['x', 'x', '0', '2', '3', 'x'], fingers: [null, null, null, 1, 2, null], position: 'D5 Open' },
+      { frets: ['x', 'x', '0', '2', '3', '3'], fingers: [null, null, null, 1, 2, 2], position: 'D5 Open alt' },
+      { frets: ['x', '3', 'x', 'x', 'x', 'x'], fingers: [null, 1, null, null, null, null], position: 'Power chord 3' },
+      { frets: ['x', 'x', '7', '9', 'x', 'x'], fingers: [null, null, 1, 2, null, null], position: 'D shape (7th fret)' },
+      { frets: ['x', '5', 'x', 'x', '5', '5'], fingers: [null, 1, null, null, 2, 2], position: 'E shape (5th fret)' }
+    ],
+    
+    'E5': [
+      { frets: ['0', 'x', 'x', 'x', '2', '0'], fingers: [null, null, null, null, 1, null], position: 'E5 Open' },
+      { frets: ['0', 'x', 'x', 'x', '2', '2'], fingers: [null, null, null, null, 1, 1], position: 'E5 Open alt' },
+      { frets: ['x', 'x', '7', '9', 'x', 'x'], fingers: [null, null, 1, 2, null, null], position: 'D shape (7th fret)' },
+      { frets: ['x', '7', 'x', 'x', '7', '7'], fingers: [null, 1, null, null, 2, 2], position: 'E shape (7th fret)' },
+      { frets: ['x', 'x', '12', '14', 'x', 'x'], fingers: [null, null, 1, 2, null, null], position: 'D shape (12th fret)' }
+    ],
+    
+    'F5': [
+      { frets: ['1', 'x', 'x', 'x', '3', '1'], fingers: [1, null, null, null, 2, 1], position: 'F5 1st fret' },
+      { frets: ['x', 'x', '3', '5', 'x', 'x'], fingers: [null, null, 1, 2, null, null], position: 'D shape (3rd fret)' },
+      { frets: ['x', '8', 'x', 'x', '8', '8'], fingers: [null, 1, null, null, 2, 2], position: 'E shape (8th fret)' },
+      { frets: ['x', 'x', '8', '10', 'x', 'x'], fingers: [null, null, 1, 2, null, null], position: 'D shape (8th fret)' },
+      { frets: ['x', '3', 'x', 'x', 'x', 'x'], fingers: [null, 1, null, null, null, null], position: 'Power chord 3' }
+    ],
+    
+    'G5': [
+      { frets: ['3', 'x', 'x', 'x', '5', '3'], fingers: [1, null, null, null, 2, 1], position: 'G5 3rd fret' },
+      { frets: ['x', 'x', '5', '7', 'x', 'x'], fingers: [null, null, 1, 2, null, null], position: 'D shape (5th fret)' },
+      { frets: ['x', '10', 'x', 'x', '10', '10'], fingers: [null, 1, null, null, 2, 2], position: 'E shape (10th fret)' },
+      { frets: ['x', 'x', '10', '12', 'x', 'x'], fingers: [null, null, 1, 2, null, null], position: 'D shape (10th fret)' },
+      { frets: ['x', 'x', 'x', 'x', 'x', 'x'], fingers: [null, null, null, null, null, null], position: 'G5 3rd fret alt' }
+    ],
+    
+    'A5': [
+      { frets: ['x', '0', 'x', 'x', '2', '0'], fingers: [null, null, null, null, 1, null], position: 'A5 Open' },
+      { frets: ['x', '0', 'x', 'x', '2', '2'], fingers: [null, null, null, null, 1, 1], position: 'A5 Open alt' },
+      { frets: ['x', 'x', '7', '9', 'x', 'x'], fingers: [null, null, 1, 2, null, null], position: 'D shape (7th fret)' },
+      { frets: ['x', '5', 'x', 'x', '5', '5'], fingers: [null, 1, null, null, 2, 2], position: 'E shape (5th fret)' },
+      { frets: ['x', 'x', '12', '14', 'x', 'x'], fingers: [null, null, 1, 2, null, null], position: 'D shape (12th fret)' }
+    ],
+    
+    'B5': [
+      { frets: ['x', 'x', 'x', 'x', '2', 'x'], fingers: [null, null, null, null, 1, null], position: 'B5 2nd fret' },
+      { frets: ['x', 'x', '9', '11', 'x', 'x'], fingers: [null, null, 1, 2, null, null], position: 'D shape (9th fret)' },
+      { frets: ['x', '7', 'x', 'x', '7', '7'], fingers: [null, 1, null, null, 2, 2], position: 'E shape (7th fret)' },
+      { frets: ['x', '2', 'x', 'x', 'x', 'x'], fingers: [null, 1, null, null, null, null], position: 'B5 2nd fret alt' },
+      { frets: ['x', 'x', '14', '16', 'x', 'x'], fingers: [null, null, 1, 2, null, null], position: 'D shape (14th fret)' }
+    ],
+
+    // ─── MINOR MAJOR 7 (mM7) CAGED VARIATIONS ──────────────────────────────
+    // Formula: Minor + M7 (root, m3, P5, M7)
+    
+    'CmM7': [
+      { frets: ['x', '3', '5', '4', '4', '3'], fingers: [null, 1, 4, 2, 3, 1], position: 'CmM7 A shape' },
+      { frets: ['x', 'x', '5', '5', '4', '8'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (5th fret)' },
+      { frets: ['8', '10', '10', '8', '8', '8'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (8th fret)' },
+      { frets: ['x', '3', '1', '0', '1', '3'], fingers: [null, 4, 1, null, 2, 3], position: 'C shape alt' },
+      { frets: ['x', 'x', '10', '12', '12', '12'], fingers: [null, null, 1, 3, 4, 4], position: 'D shape (10th fret)' }
+    ],
+    
+    'DmM7': [
+      { frets: ['x', 'x', '0', '2', '2', '1'], fingers: [null, null, null, 2, 3, 1], position: 'DmM7 D shape' },
+      { frets: ['x', '5', '7', '5', '6', '5'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (5th fret)' },
+      { frets: ['5', '7', '7', '5', '5', '5'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', 'x', '7', '7', '6', '10'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (7th fret)' },
+      { frets: ['10', '12', '12', '10', '10', '10'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (10th fret)' }
+    ],
+    
+    'EmM7': [
+      { frets: ['0', '2', '0', '0', '0', '1'], fingers: [null, 2, null, null, null, 1], position: 'EmM7 Open' },
+      { frets: ['0', '2', '0', '0', '0', '4'], fingers: [null, 2, null, null, null, 3], position: 'EmM7 Open alt' },
+      { frets: ['x', '7', '9', '7', '8', '7'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (7th fret)' },
+      { frets: ['x', 'x', '9', '9', '8', '12'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (9th fret)' },
+      { frets: ['12', '14', '14', '12', '12', '12'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (12th fret)' }
+    ],
+    
+    'FmM7': [
+      { frets: ['1', '3', '1', '1', '1', '4'], fingers: [1, 3, 1, 1, 1, 4], position: 'FmM7 E shape' },
+      { frets: ['x', '8', '10', '8', '9', '8'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (8th fret)' },
+      { frets: ['x', 'x', '10', '10', '9', '13'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (10th fret)' },
+      { frets: ['13', '15', '15', '13', '13', '13'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (13th fret)' },
+      { frets: ['x', 'x', '3', '5', '6', '4'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (3rd fret)' }
+    ],
+    
+    'GmM7': [
+      { frets: ['3', '5', '3', '3', '3', '4'], fingers: [1, 3, 1, 1, 1, 4], position: 'GmM7 E shape' },
+      { frets: ['3', '1', '0', '0', '3', '3'], fingers: [2, 1, null, null, 3, 4], position: 'G shape open' },
+      { frets: ['x', '10', '12', '10', '11', '10'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (10th fret)' },
+      { frets: ['x', 'x', '12', '12', '11', '15'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (12th fret)' },
+      { frets: ['x', 'x', '5', '7', '8', '6'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (5th fret)' }
+    ],
+    
+    'AmM7': [
+      { frets: ['x', '0', '2', '1', '1', '0'], fingers: [null, null, 3, 1, 2, null], position: 'AmM7 Open' },
+      { frets: ['5', '7', '7', '5', '5', '5'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (5th fret)' },
+      { frets: ['x', '12', '14', '12', '13', '12'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (12th fret)' },
+      { frets: ['x', 'x', '14', '14', '13', '17'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (14th fret)' },
+      { frets: ['x', 'x', '7', '9', '10', '8'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (7th fret)' }
+    ],
+    
+    'BmM7': [
+      { frets: ['x', '2', '4', '3', '4', '2'], fingers: [null, 1, 4, 2, 3, 1], position: 'BmM7 A shape' },
+      { frets: ['7', '9', '9', '7', '7', '7'], fingers: [1, 3, 4, 1, 1, 1], position: 'E shape (7th fret)' },
+      { frets: ['x', 'x', '9', '11', '12', '10'], fingers: [null, null, 1, 3, 4, 2], position: 'D shape (9th fret)' },
+      { frets: ['x', '14', '16', '14', '15', '14'], fingers: [null, 1, 3, 1, 2, 1], position: 'A shape (14th fret)' },
+      { frets: ['x', 'x', '16', '16', '15', '19'], fingers: [null, null, 2, 3, 1, 4], position: 'G shape (16th fret)' }
     ]
   };
   

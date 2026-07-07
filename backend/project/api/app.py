@@ -111,12 +111,13 @@ def get_scale_analysis(key):
     """Get complete scale analysis for a given key and interval"""
     try:
         interval_type = request.args.get('interval', 'major').lower()
+        octaves = max(1, min(4, int(request.args.get('octaves', 1))))
 
         if interval_type not in INTERVALS:
             return jsonify({"error": f"Invalid interval type. Available: {list(INTERVALS.keys())}"}), 400
 
         if music_system:
-            response = music_system.getCompleteScaleAnalysis(key, interval_type)
+            response = music_system.getCompleteScaleAnalysis(key, interval_type, octaves=octaves)
         else:
             class MockLLM:
                 def getParser(self):
@@ -128,7 +129,7 @@ def get_scale_analysis(key):
                     pass
 
             music = Music(MockLLM())
-            response = music.getCompleteScaleAnalysis(key, interval_type)
+            response = music.getCompleteScaleAnalysis(key, interval_type, octaves=octaves)
 
         return jsonify(response)
 

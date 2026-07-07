@@ -285,39 +285,65 @@ class Music:
         
         visualizer.display_fretboard(self.notes, self.tune)
 
-    def _compute_piano_keyboard_data(self, root: str, scale_notes: list) -> dict:
+    def _compute_piano_keyboard_data(self, root: str, scale_notes: list, octaves: int = 1) -> dict:
         """Compute piano keyboard data for any key and scale.
-        Returns 7 white keys (one octave starting from root) and 7 corresponding
-        black-key positions (None where E→F or B→C with no black key between)."""
-        chromatic = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-        sharp_notes = {'C#', 'D#', 'F#', 'G#', 'A#'}
 
-        root_idx = chromatic.index(root)
+        Returns:
+            natural_keys: list of natural (white) note names per octave, 7 × octaves.
+                           e.g. for C-root: ['C','D','E','F','G','A','B'] × octaves
+            black_keys:   list of black-key descriptors with `note` (chromatic name
+                           at that position) and `after_natural` (index of the natural
+                           it sits after). e.g. for F-root: {note: 'F#', after_natural: 0}
+            scale_notes:  all notes in the scale (kept for consumer use)
+            root_note:    the root note (verbatim, including sharps)
+        """
+        naturals = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
+        chromatic_semitone = {'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5,
+                              'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11}
+        chromatic_names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+        naturals_with_black_after = {'C', 'D', 'F', 'G', 'A'}
 
-        # Collect white keys: one octave from root
-        white_keys = []
-        for i in range(7):
-            note = chromatic[(root_idx + i) % 12]
-            white_keys.append(note)
-
-        # For each white key, check if the semitone after it is a black key
-        black_keys = []
-        for i in range(7):
-            next_idx = (root_idx + i + 1) % 12
-            next_note = chromatic[next_idx]
-            if next_note in sharp_notes:
-                black_keys.append(next_note)
+        # Map the root to its natural letter (drop any sharp/flat) so we can pick
+        # a starting natural in the visible sequence. The black-key pitch is
+        # preserved via the chromatic semitone.
+        if root in naturals:
+            natural_root = root
+        else:
+            # Strip trailing # or b
+            if root.endswith('#'):
+                natural_root = root[0]
+            elif root.endswith('b'):
+                # Bb → A, Eb → D, etc.
+                idx = naturals.index(root[0])
+                natural_root = naturals[(idx - 1) % 7]
             else:
-                black_keys.append(None)
+                natural_root = 'C'
+
+        root_offset = naturals.index(natural_root)
+
+        natural_keys = []
+        for o in range(octaves):
+            for i in range(7):
+                natural_keys.append(naturals[(root_offset + i) % 7])
+
+        black_keys = []
+        for nat_index_abs, natural in enumerate(natural_keys):
+            if natural not in naturals_with_black_after:
+                continue
+            abs_semi = (chromatic_semitone[natural] + 1) % 12
+            black_keys.append({
+                'note': chromatic_names[abs_semi],
+                'after_natural': nat_index_abs
+            })
 
         return {
-            "white_keys": white_keys,
+            "natural_keys": natural_keys,
             "black_keys": black_keys,
             "scale_notes": scale_notes,
             "root_note": root
         }
 
-    def getCompleteScaleAnalysis(self, key: str, interval_type: str) -> dict:
+    def getCompleteScaleAnalysis(self, key: str, interval_type: str, octaves: int = 1) -> dict:
         """Get complete scale analysis for API responses"""
         self.setTune(key.upper())
         
@@ -368,7 +394,7 @@ class Music:
                 }
                 for i in range(len(notes))
             ],
-            "keyboard_data": self._compute_piano_keyboard_data(key.upper(), notes),
+            "keyboard_data": self._compute_piano_keyboard_data(key.upper(), notes, octaves=octaves),
             "fretboard_data": generate_fretboard_data(notes, key.upper())
         }
         
