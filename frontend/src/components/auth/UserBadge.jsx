@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LogOut, User, ChevronDown, Star, Settings } from 'lucide-react';
+import { LogOut, User, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import './UserBadge.css';
 
@@ -71,14 +71,6 @@ const UserBadge = () => {
             </button>
           ) : (
             <>
-              <button className="dropdown-item">
-                <Star size={15} />
-                Favorites
-              </button>
-              <button className="dropdown-item">
-                <Settings size={15} />
-                Settings
-              </button>
               <div className="dropdown-divider" />
               <button
                 className="dropdown-item danger"
