@@ -1,203 +1,199 @@
 # 🎵 Strubloid Music Theory App
 
-A comprehensive full-stack music theory application featuring an interactive Python Flask backend and modern React frontend for exploring scales, chords, and musical progressions.
+A full-stack music theory platform with a Python Flask backend and React/Vite frontend. Explore scales, build chord progressions, practice with daily challenges, and track your learning with XP and levels.
 
-## ✨ Features
+## Features
 
-- 🎹 **Interactive Piano Keyboard** - Visual scale representation with highlighted notes
-- 🎸 **Guitar Fretboard** - Scale patterns across all strings with proper string ordering  
-- 📊 **Scale Information** - Detailed scale degrees, chord analysis, and music theory
-- 🎵 **Chord Progressions** - Common progressions in any key with Roman numeral analysis
-- 🎯 **Secondary Dominants** - Advanced harmonic analysis and chord relationships
-- 🔄 **Real-time Key Changes** - Instant scale analysis across 12 keys
-- 🎨 **Modern UI** - Clean, responsive design with tabbed interface
-- ⚡ **Hot Module Replacement** - Auto-refresh development experience
+- 🎹 **Interactive Piano Keyboard** — scale representation with highlighted notes
+- 🎸 **Guitar Fretboard** — scale patterns across all strings
+- 📊 **Scale Analysis** — degrees, chords, Roman numerals, secondary dominants
+- 🎵 **Chord Progression Builder** — build, save, and load progressions
+- 🎮 **Daily Challenges** — earn XP and build streaks
+- 👤 **User Accounts** — register to save progress across devices
+- 🎯 **Gamification** — XP system, levels, achievement tracking
+- 🌙 **Dark Theme** — modern indigo/purple gradient UI
 
-## 🏗️ Architecture
+## Quick Start
 
-- **Backend**: Python Flask API with comprehensive music theory engine
-- **Frontend**: React 18 with Vite, component-based architecture
-- **Styling**: Custom CSS with semantic class names (no utility classes)
-- **Music Engine**: Custom Python classes for scales, chords, intervals, and visualization
-- **Component Structure**: Organized folder structure with reusable UI components
+### 1. Backend
 
-## Setup Instructions
-
-### Backend Setup
-
-1. **Create and activate virtual environment:**
 ```bash
+cd /home/strubloid/apps/py-music
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate
+pip install -r requirements.txt
+python backend/project/api/app.py
 ```
 
-2. **Install Python dependencies:**
-```bash
-pip install flask flask-cors
-# OR from requirements if available:
-# pip install -r requirements.txt
-```
+Backend runs on `http://localhost:5000`. On first start it creates a SQLite database (`music.db`) automatically.
 
-3. **Run the Flask API:**
-```bash
-cd src/api
-python app.py
-```
+### 2. Frontend
 
-The API will start on `http://localhost:5000`
-
-**Note**: The app uses a simplified API that doesn't require OpenAI API keys for basic functionality.
-
-### Frontend Setup
-
-1. **Install Node.js dependencies:**
 ```bash
 cd frontend
 npm install
-```
-
-2. **Start the development server:**
-```bash
 npm run dev
 ```
 
-The frontend will start on `http://localhost:3000`
+Frontend dev server runs on `http://localhost:5173` (or as printed by Vite).
 
-## 🔌 API Endpoints
+### 3. Open the app
 
-### `GET /api/scale/{key}?interval={interval}`
-Get complete scale analysis including:
-- Scale notes and degrees with Roman numeral analysis
-- Chord progressions (I-V-vi-IV, ii-V-I, etc.)
-- Secondary dominants and chord relationships
-- Piano keyboard data with highlighted scale notes
-- Guitar fretboard patterns with correct string ordering
+Navigate to the frontend URL. You'll see the dashboard. Click any card to explore scales or build progressions.
 
-### `GET /api/intervals`
-Get list of available intervals/modes:
-- Major, Minor, Dorian, Mixolydian scales
+---
 
-### `GET /api/chord-progressions/{key}`
-Get common chord progressions for a specific key
-
-### `GET /api/secondary-dominants/{key}`
-Get secondary dominant analysis
-
-### `GET /api/keys`
-Get list of all available keys (C, C#, D, D#, etc.)
-
-### `GET /api/health`
-Health check endpoint
-
-## Usage Examples
-
-### Get G Major Scale Analysis
-```bash
-curl http://localhost:5000/api/scale/G?interval=major
-```
-
-### Get Available Intervals
-```bash
-curl http://localhost:5000/api/intervals
-```
-
-### Get Available Keys
-```bash
-curl http://localhost:5000/api/keys
-```
-
-## 📁 Project Structure
+## Architecture
 
 ```
 py-music/
-├── src/
-│   ├── api/
-│   │   └── app.py         # Main Flask API server
-│   ├── music/             # Music theory engine
-│   │   ├── Music.py       # Core music classes
-│   │   ├── chords/        # Chord analysis
-│   │   ├── notes/         # Note handling
-│   │   └── scales/        # Scale generation
-│   └── llm/               # AI integration (optional)
-├── frontend/              # React frontend
+├── backend/
+│   ├── project/
+│   │   ├── api/
+│   │   │   ├── app.py              # Flask entry, CORS, route registration
+│   │   │   └── protected.py        # Authenticated API (progressions, favorites)
+│   │   ├── auth/
+│   │   │   └── __init__.py         # Auth blueprint: register/login/logout/me
+│   │   ├── models/
+│   │   │   ├── __init__.py         # SQLAlchemy db + bcrypt instances
+│   │   │   └── user.py             # User, Progression, Favorite, ChallengeAttempt models
+│   │   ├── music/
+│   │   │   ├── Music.py            # Core orchestrator
+│   │   │   ├── chords/            # Chord & interval logic
+│   │   │   ├── notes/             # Note utilities
+│   │   │   ├── scales/            # Scale generation
+│   │   │   └── visualization/      # Fretboard & keyboard data
+│   │   └── llm/                   # Optional LLM integration
+│   └── requirements.txt
+├── frontend/
 │   ├── src/
-│   │   ├── components/    # Organized component folders
-│   │   │   ├── common/    # Reusable UI components
-│   │   │   │   ├── Card.jsx & Card.css
-│   │   │   │   └── Button.jsx & Button.css
-│   │   │   ├── KeySelector/
-│   │   │   │   ├── KeySelector.jsx
-│   │   │   │   └── KeySelector.css
-│   │   │   ├── ScaleInfo/
-│   │   │   ├── GuitarFretboard/
-│   │   │   ├── PianoKeyboard/
-│   │   │   ├── ChordProgressions/
-│   │   │   └── SecondaryDominants/
-│   │   ├── App.jsx        # Main orchestrator
-│   │   ├── App.css        # Global styles
-│   │   └── main.jsx       # Entry point
-│   ├── package.json       # Node dependencies
-│   └── vite.config.js     # Vite config with HMR
-├── api/                   # Legacy API (alternative)
-└── main.py               # Original CLI interface
+│   │   ├── components/
+│   │   │   ├── auth/              # LoginModal, UserBadge
+│   │   │   └── layout/            # Sidebar
+│   │   ├── contexts/
+│   │   │   └── AuthContext.jsx    # User state, login/logout, guest mode
+│   │   ├── pages/
+│   │   │   ├── Dashboard.jsx      # Landing / home
+│   │   │   ├── learn/             # ScalesPage
+│   │   │   ├── play/              # DailyChallenge, EarTraining, Quests
+│   │   │   ├── create/            # CreateProgressionsPage, MySongsPage
+│   │   │   └── system/            # Stats, Settings
+│   │   ├── services/
+│   │   │   └── api.js             # Axios service layer
+│   │   ├── App.jsx               # Router + sidebar shell
+│   │   └── main.jsx              # Entry point
+│   ├── package.json
+│   └── vite.config.js
+└── requirements.txt
 ```
 
-## 🛠️ Technology Stack
+---
 
-**Backend:**
-- Python 3.8+
-- Flask (Lightweight API framework)
-- Flask-CORS (Cross-origin resource sharing)
-- Custom music theory engine
+## User System
 
-**Frontend:**
-- React 18 (Component framework)
-- Vite (Fast build tool with HMR)
-- Custom CSS (Semantic class names, no utility frameworks)
-- Lucide React (Modern icon library)
-- Axios (HTTP client for API calls)
+### Auth Flow
 
-**Development:**
-- Hot Module Replacement (Auto-refresh)
-- Component-based architecture
-- Organized folder structure
-- Responsive design patterns
+- **Register / Login** — email + password, bcrypt hashing, Flask-Login sessions
+- **Guest mode** — browse freely, data saved to `localStorage` only
+- **Persistent sessions** — cookie-based, survives page refresh
+- **XP tracking** — +10 XP per saved progression, +50 XP per daily challenge
 
-## 🚀 Development
+### Data Model
 
-### Architecture Principles
-- **Component Isolation**: Each component has its own folder with JSX and CSS
-- **Reusable UI**: Common components (Card, Button) used throughout
-- **Semantic CSS**: No utility classes, meaningful class names
-- **Clean Imports**: Direct file paths, no unnecessary index files
+```sql
+users             -- id, username, email, password_hash, xp, level, skill_level
+progressions      -- id, user_id, name, key, interval, chords_json
+favorites         -- id, user_id, type, name, key, interval, data_json
+challenge_attempts -- id, user_id, challenge_date, score, completed
+```
 
-### Adding New Features
+### XP & Levels
 
-1. **Backend**: Add new endpoints in `src/api/app.py`
-2. **Frontend**: 
-   - Create component folder: `frontend/src/components/NewComponent/`
-   - Add `NewComponent.jsx` and `NewComponent.css`
-   - Use common Card/Button components
-3. **Music Theory**: Extend classes in `src/music/`
+- Level threshold: 500 XP per level
+- XP is awarded automatically: saving a progression (+10), completing a daily challenge (+50)
+- Level and XP display in the `UserBadge` top-right component
 
-### Development Workflow
+---
+
+## API Endpoints
+
+### Public (no auth)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | Health check + LLM availability |
+| GET | `/api/keys` | Available musical keys |
+| GET | `/api/intervals` | Available intervals |
+| GET | `/api/scale/{key}?interval={interval}` | Full scale analysis |
+
+### Authenticated (`/api/auth/*`)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Create account |
+| POST | `/api/auth/login` | Sign in |
+| POST | `/api/auth/logout` | Sign out |
+| GET | `/api/auth/me` | Current user + XP/level |
+
+### Progressions (requires login)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/progressions` | List user's progressions |
+| POST | `/api/progressions` | Save a new progression |
+| PUT | `/api/progressions/{id}` | Update a progression |
+| DELETE | `/api/progressions/{id}` | Delete a progression |
+
+### Favorites (requires login)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/favorites` | List favorites |
+| POST | `/api/favorites` | Add a favorite |
+| DELETE | `/api/favorites/{id}` | Remove a favorite |
+
+### Gamification
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/me/xp` | Award XP to current user |
+
+---
+
+## Navigation
+
+The sidebar provides three main sections:
+
+| Section | Routes | Purpose |
+|---------|--------|---------|
+| **Learn** | `/learn/scales`, `/learn/chords` | Explore theory |
+| **Play** | `/play/daily`, `/play/ear-training`, `/play/quests` | Practice & earn XP |
+| **Create** | `/create/progressions`, `/create/my-songs` | Build & save music |
+
+System links: `/stats`, `/settings`
+
+---
+
+## Development
+
 ```bash
-# Start backend
-cd src/api && python app.py
+# Backend — always start first
+cd /home/strubloid/apps/py-music
+source venv/bin/activate
+python backend/project/api/app.py
 
-# Start frontend (in new terminal)
-cd frontend && npm run dev
+# Frontend — hot reload in another terminal
+cd frontend
+npm run dev
 
-# Both servers auto-refresh on file changes
+# Production build
+cd frontend && npm run build
 ```
 
-## Contributing
+**Note:** The app works without an OpenAI API key. LLM features initialize if `OPENAI_API_KEY` is set in `.env`; otherwise it runs in simplified mode.
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+---
 
 ## License
 
-MIT License - see LICENSE file for details
+MIT License

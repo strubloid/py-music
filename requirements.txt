@@ -9,3 +9,6 @@ rich
 flask
 flask-cors
 langgraph
+flask-sqlalchemy
+flask-bcrypt
+flask-login

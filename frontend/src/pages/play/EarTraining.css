@@ -1,0 +1,47 @@
+.ear-page {
+  padding: 1.5rem;
+  /* max-width: 640px; */
+  width: 90%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ear-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ear-icon {
+  color: #fbbf24;
+}
+
+.ear-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(to right, #fbbf24, #f97316);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+
+.placeholder-card {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.placeholder-card p {
+  margin: 0;
+}
+
+.coming-soon {
+  margin-top: 0.75rem !important;
+  font-size: 0.875rem;
+  color: #6b7280;
+}

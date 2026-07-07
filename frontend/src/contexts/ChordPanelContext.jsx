@@ -36,8 +36,11 @@ export const ChordPanelProvider = ({ children }) => {
   };
 
   const addProgressionLine = () => {
-    setProgressionLines(prev => [...prev, []]);
-    setCurrentLine(progressionLines.length);
+    setProgressionLines(prev => {
+      const newLineIndex = prev.length;
+      setCurrentLine(newLineIndex);
+      return [...prev, []];
+    });
   };
 
   const removeProgressionLine = (lineIndex) => {
