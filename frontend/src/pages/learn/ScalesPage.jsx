@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Music, Piano, Guitar } from 'lucide-react';
+import { Music, Piano, Guitar, Layers } from 'lucide-react';
 import KeySelector from '../../components/KeySelector/KeySelector';
 import PianoKeyboard from '../../components/PianoKeyboard/PianoKeyboard';
 import ScaleInfo from '../../components/ScaleInfo/ScaleInfo';
 import GuitarFretboard from '../../components/GuitarFretboard/GuitarFretboard';
-import ChordProgressions from '../../components/ChordProgressions/ChordProgressions';
 import './ScalesPage.css';
 
 const ScalesPage = () => {
   const [selectedKey, setSelectedKey] = useState('C');
-  const [selectedInterval, setSelectedInterval] = useState('major');
+  const [selectedInterval, setSelectedInterval] = useState('ionian');
   const [scaleData, setScaleData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('scale');
-  const [availableIntervals, setAvailableIntervals] = useState([]);
+  const [availableModes, setAvailableModes] = useState([]);
+  const [allModes, setAllModes] = useState([]); // all modes for the current key
 
   useEffect(() => {
-    fetchAvailableIntervals();
+    fetchAvailableModes();
   }, []);
 
   useEffect(() => {
@@ -27,17 +27,53 @@ const ScalesPage = () => {
     }
   }, [selectedKey, selectedInterval]);
 
-  const fetchAvailableIntervals = async () => {
+  const fetchAvailableModes = async () => {
     try {
       const response = await axios.get('/api/intervals');
-      setAvailableIntervals(response.data.intervals);
+      const modes = response.data.intervals || [];
+      // Filter out major/minor — they are aliases for ionian/aeolian
+      const filtered = modes.filter(m => m.key !== 'major' && m.key !== 'minor');
+      setAvailableModes(filtered);
+      // Default to ionian if it's available
+      const defaultMode = filtered.find(m => m.key === 'ionian') || filtered[0];
+      if (defaultMode) setSelectedInterval(defaultMode.key);
     } catch {
-      setAvailableIntervals([
-        { key: 'major', name: 'Major' },
-        { key: 'minor', name: 'Minor' }
+      setAvailableModes([
+        { key: 'ionian',     name: 'Ionian',     description: 'The major scale. Bright, happy, resolved.' },
+        { key: 'aeolian',    name: 'Aeolian',    description: 'The natural minor scale. Sad, dark, introspective.' },
+        { key: 'dorian',     name: 'Dorian',     description: 'Minor with raised 6th. Soulful, jazzy.' },
+        { key: 'phrygian',   name: 'Phrygian',   description: 'Minor with flattened 2nd. Spanish, exotic.' },
+        { key: 'lydian',     name: 'Lydian',     description: 'Major with raised 4th. Dreamy, ethereal.' },
+        { key: 'mixolydian', name: 'Mixolydian', description: 'Major with flattened 7th. Blues, rock.' },
+        { key: 'locrian',    name: 'Locrian',    description: 'Diminished, unstable. Very rare as tonal center.' },
       ]);
     }
   };
+
+  // Fetch scale data for ALL modes of the selected key, then update allModes
+  useEffect(() => {
+    if (!selectedKey) return;
+    const fetchAllModes = async () => {
+      const key = selectedKey;
+      const modeResults = [];
+      for (const mode of availableModes) {
+        try {
+          const response = await axios.get(`/api/scale/${encodeURIComponent(key)}?interval=${mode.key}`);
+          if (response.data) {
+            modeResults.push({ ...response.data, modeKey: mode.key, modeName: mode.name });
+          }
+        } catch {
+          // skip failed modes
+        }
+      }
+      if (key === selectedKey) {
+        setAllModes(modeResults);
+      }
+    };
+    if (availableModes.length > 0) {
+      fetchAllModes();
+    }
+  }, [selectedKey, availableModes]);
 
   const fetchScaleData = async (key, interval) => {
     try {
@@ -53,6 +89,14 @@ const ScalesPage = () => {
     }
   };
 
+  // Sync selectedInterval when switching modes
+  const handleModeSelect = (modeKey) => {
+    setSelectedInterval(modeKey);
+  };
+
+  const currentMode = allModes.find(m => m.modeKey === selectedInterval);
+  const displayData = currentMode || scaleData;
+
   if (error) {
     return (
       <div className="scales-page">
@@ -67,7 +111,7 @@ const ScalesPage = () => {
 
   return (
     <div className="scales-page">
-      {/* Key + Interval selector — sticky top */}
+      {/* Header + key selector */}
       <div className="scales-header">
         <div className="scales-title-row">
           <Music className="header-icon-inline" />
@@ -78,10 +122,35 @@ const ScalesPage = () => {
           onKeyChange={setSelectedKey}
           selectedInterval={selectedInterval}
           onIntervalChange={setSelectedInterval}
-          availableIntervals={availableIntervals}
+          availableIntervals={availableModes}
           loading={loading}
         />
       </div>
+
+      {/* Mode cards — all modes for selected key, horizontal scroll */}
+      {allModes.length > 1 && (
+        <div className="mode-cards-section">
+          <div className="section-label">
+            <Layers size={13} />
+            Modes in {selectedKey}
+          </div>
+          <div className="mode-cards-row">
+            {allModes.map((mode) => (
+              <button
+                key={mode.modeKey}
+                className={`mode-card ${selectedInterval === mode.modeKey ? 'active' : ''}`}
+                onClick={() => handleModeSelect(mode.modeKey)}
+              >
+                <span className="mode-card-name">{mode.modeName}</span>
+                <span className="mode-card-key">{selectedKey}</span>
+                <span className="mode-card-chords">
+                  {mode.chords ? mode.chords.slice(0, 4).join(' · ') : ''}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {loading && (
         <div className="loading-row">
@@ -90,10 +159,24 @@ const ScalesPage = () => {
         </div>
       )}
 
-      {scaleData && !loading && (
+      {displayData && !loading && (
         <>
-          {/* Instrument shortcuts */}
+          {/* Scale title */}
+          <div className="scale-mode-title">
+            <span className="scale-mode-name">{displayData.scale_name || `${selectedKey} ${selectedInterval}`}</span>
+            {displayData.interval_type && (
+              <span className="scale-type-badge">{displayData.interval_type}</span>
+            )}
+          </div>
+
+          {/* Instrument shortcut pills */}
           <div className="instrument-pills">
+            <button
+              className={`pill ${activeTab === 'scale' ? 'active' : ''}`}
+              onClick={() => setActiveTab('scale')}
+            >
+              <Music size={14} /> Notes & Degrees
+            </button>
             <button
               className={`pill ${activeTab === 'piano' ? 'active' : ''}`}
               onClick={() => setActiveTab('piano')}
@@ -104,42 +187,25 @@ const ScalesPage = () => {
               className={`pill ${activeTab === 'guitar' ? 'active' : ''}`}
               onClick={() => setActiveTab('guitar')}
             >
-              <Guitar size={14} /> Guitar
-            </button>
-            <button
-              className={`pill ${activeTab === 'scale' ? 'active' : ''}`}
-              onClick={() => setActiveTab('scale')}
-            >
-              <Music size={14} /> Scale Info
-            </button>
-            <button
-              className={`pill ${activeTab === 'progressions' ? 'active' : ''}`}
-              onClick={() => setActiveTab('progressions')}
-            >
-              Progressions
+              <Guitar size={14} /> Fretboard
             </button>
           </div>
 
-          {/* Instrument panels — side by side on large screens */}
+          {/* Instrument panels */}
           <div className="instrument-layout">
+            {activeTab === 'scale' && (
+              <div className="instrument-panel scale-panel">
+                <ScaleInfo scaleData={displayData} />
+              </div>
+            )}
             {activeTab === 'piano' && (
               <div className="instrument-panel piano-panel">
-                <PianoKeyboard keyboardData={scaleData.keyboard_data} />
+                <PianoKeyboard keyboardData={displayData.keyboard_data} />
               </div>
             )}
             {activeTab === 'guitar' && (
               <div className="instrument-panel guitar-panel">
-                <GuitarFretboard fretboardData={scaleData.fretboard_data} />
-              </div>
-            )}
-            {activeTab === 'scale' && (
-              <div className="instrument-panel scale-panel">
-                <ScaleInfo scaleData={scaleData} />
-              </div>
-            )}
-            {activeTab === 'progressions' && (
-              <div className="instrument-panel progressions-panel">
-                <ChordProgressions progressions={scaleData.progressions} keyName={scaleData.key} />
+                <GuitarFretboard fretboardData={displayData.fretboard_data} />
               </div>
             )}
           </div>

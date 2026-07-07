@@ -11,6 +11,13 @@ sys.path.insert(0, str(project_root))
 
 from backend.project.music.chords.intervals.Major import MajorInterval
 from backend.project.music.chords.intervals.Minor import MinorInterval
+from backend.project.music.chords.intervals.Ionian import IonianInterval
+from backend.project.music.chords.intervals.Dorian import DorianInterval
+from backend.project.music.chords.intervals.Phrygian import PhrygianInterval
+from backend.project.music.chords.intervals.Lydian import LydianInterval
+from backend.project.music.chords.intervals.Mixolydian import MixolydianInterval
+from backend.project.music.chords.intervals.Aeolian import AeolianInterval
+from backend.project.music.chords.intervals.Locrian import LocrianInterval
 from backend.project.llm.ChatGPT import ChatGPT
 from backend.project.music.Music import Music, get_roman_numeral, get_function_name, generate_fretboard_data
 
@@ -51,10 +58,16 @@ except Exception as e:
     llm = None
     music_system = None
 
-# Available interval types
+# Available interval types — all 7 diatonic modes.
+# 'major' and 'minor' are removed (aliases for ionian/aeolian; use those instead).
 INTERVALS = {
-    'major': MajorInterval,
-    'minor': MinorInterval
+    'ionian':     IonianInterval,
+    'dorian':     DorianInterval,
+    'phrygian':   PhrygianInterval,
+    'lydian':     LydianInterval,
+    'mixolydian': MixolydianInterval,
+    'aeolian':    AeolianInterval,
+    'locrian':    LocrianInterval,
 }
 
 
@@ -69,13 +82,17 @@ def health_check():
 
 @app.route('/api/intervals', methods=['GET'])
 def get_available_intervals():
-    """Get list of available intervals"""
-    return jsonify({
-        "intervals": [
-            {"key": "major", "name": "Major"},
-            {"key": "minor", "name": "Minor"}
-        ]
-    })
+    """Get list of available scale modes"""
+    modes = []
+    for key, cls in INTERVALS.items():
+        instance = cls()
+        modes.append({
+            "key": key,
+            "name": getattr(instance, 'name', key.title()),
+            "description": getattr(instance, 'description', ''),
+            "mode": getattr(instance, 'mode', key)
+        })
+    return jsonify({"intervals": modes})
 
 @app.route('/api/music-config', methods=['GET'])
 def get_music_config():

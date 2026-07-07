@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ListMusic, Plus } from 'lucide-react';
+import { ListMusic, Plus, Music } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getProgressions, deleteProgression } from '../../services/api';
 import './MySongsPage.css';
@@ -11,6 +11,7 @@ const MySongsPage = () => {
   const [progressions, setProgressions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
+  const [expandedId, setExpandedId] = useState(null); // For music sheet preview
 
   const loadProgressions = useCallback(async () => {
     if (!isLoggedIn) {
@@ -58,6 +59,87 @@ const MySongsPage = () => {
     return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  // Parse progression data
+  const parseProgression = (p) => {
+    const chords = typeof p.chords_json === 'string' ? JSON.parse(p.chords_json) : (p.chords_json || []);
+    const lyrics = typeof p.lyrics_json === 'string' ? JSON.parse(p.lyrics_json) : (p.lyrics_json || {});
+    const chordOverLyrics = typeof p.chord_over_lyrics_json === 'string' 
+      ? JSON.parse(p.chord_over_lyrics_json) 
+      : (p.chord_over_lyrics_json || {});
+    return { chords, lyrics, chordOverLyrics };
+  };
+
+  // Get words from lyric text
+  const getWords = (text) => {
+    if (!text) return [];
+    const regex = /"([^"]+)"|\S+/g;
+    const words = [];
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      words.push(match[1] || match[0]);
+    }
+    return words;
+  };
+
+  // Render music sheet preview for a progression
+  const renderMusicSheetPreview = (p) => {
+    const { chords, lyrics, chordOverLyrics } = parseProgression(p);
+    const lineCount = Object.keys(lyrics).length || 1;
+    
+    return (
+      <div className="music-sheet-preview">
+        <div className="preview-header">
+          <Music size={14} />
+          <span>Music Sheet Preview</span>
+        </div>
+        <div className="preview-lines">
+          {Array.from({ length: lineCount }, (_, lineIndex) => {
+            const lyricText = lyrics[lineIndex] || '';
+            const words = getWords(lyricText);
+            const lineChords = chordOverLyrics[lineIndex] || [];
+            
+            // Build chord map
+            const chordMap = {};
+            lineChords.forEach(({ wordIndex, chord }) => {
+              chordMap[wordIndex] = chord;
+            });
+
+            if (!lyricText.trim()) {
+              return (
+                <div key={lineIndex} className="preview-line empty">
+                  <span className="preview-empty-hint">Line {lineIndex + 1}: No lyrics</span>
+                </div>
+              );
+            }
+
+            return (
+              <div key={lineIndex} className="preview-line">
+                <div className="preview-chord-row">
+                  {words.map((word, wordIndex) => {
+                    const chord = chordMap[wordIndex];
+                    return (
+                      <span key={wordIndex} className={`preview-chord-slot ${chord ? 'has-chord' : ''}`}>
+                        {chord || ''}
+                      </span>
+                    );
+                  })}
+                </div>
+                <div className="preview-lyric-row">
+                  {words.join(' ')}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {chords.length > 0 && (
+          <div className="preview-summary">
+            {chords.length} chord{chords.length !== 1 ? 's' : ''} · {Object.values(chordOverLyrics).flat().length} placed
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="mysongs-page">
       <div className="mysongs-header">
@@ -88,18 +170,33 @@ const MySongsPage = () => {
       {!loading && progressions.length > 0 && (
         <div className="songs-grid">
           {progressions.map(p => {
-            const chords = typeof p.chords_json === 'string' ? JSON.parse(p.chords_json) : (p.chords_json || []);
+            const { chords, lyrics, chordOverLyrics } = parseProgression(p);
+            const hasLyrics = Object.values(lyrics).some(t => t && t.trim());
+            const placedChords = Object.values(chordOverLyrics).flat().length;
+            const isExpanded = expandedId === p.id;
+
             return (
-              <div key={p.id} className="song-card">
+              <div key={p.id} className={`song-card ${isExpanded ? 'expanded' : ''}`}>
                 <div className="song-meta">
                   <span className="song-key">{p.key}</span>
                   <span className="song-interval">{p.interval}</span>
+                  {hasLyrics && <span className="song-lyrics-badge">Lyrics</span>}
+                  {placedChords > 0 && <span className="song-sheet-badge">Sheet</span>}
                   <span className="song-date">{formatDate(p.created_at)}</span>
                 </div>
                 <h3 className="song-name">{p.name}</h3>
+                
                 <div className="song-chords">
-                  {chords.length > 0 ? chords.join(' → ') : <em>No chords</em>}
+                  {chords.length > 0 ? chords.slice(0, 6).join(' → ') : <em>No chords</em>}
+                  {chords.length > 6 && <span> +{chords.length - 6} more</span>}
                 </div>
+
+                {hasLyrics && (
+                  <div className="song-lyrics-preview">
+                    {Object.values(lyrics).filter(t => t.trim()).slice(0, 2).join(' / ')}
+                  </div>
+                )}
+
                 <div className="song-actions">
                   <button
                     className="song-load"
@@ -107,6 +204,14 @@ const MySongsPage = () => {
                   >
                     Load
                   </button>
+                  {hasLyrics && (
+                    <button
+                      className="song-preview"
+                      onClick={() => setExpandedId(isExpanded ? null : p.id)}
+                    >
+                      {isExpanded ? 'Hide' : 'Preview'}
+                    </button>
+                  )}
                   <button
                     className="song-delete"
                     onClick={() => handleDelete(p.id)}
@@ -115,6 +220,8 @@ const MySongsPage = () => {
                     {deletingId === p.id ? '...' : 'Delete'}
                   </button>
                 </div>
+
+                {isExpanded && hasLyrics && renderMusicSheetPreview(p)}
               </div>
             );
           })}

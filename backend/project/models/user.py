@@ -66,6 +66,8 @@ class Progression(db.Model):
     key = db.Column(db.String(10), nullable=False)
     interval = db.Column(db.String(20), nullable=False, default='major')
     chords_json = db.Column(db.Text, nullable=False)  # JSON array of chord strings
+    lyrics_json = db.Column(db.Text, nullable=True)  # JSON object { lineIndex: "lyric text" }
+    chord_over_lyrics_json = db.Column(db.Text, nullable=True)  # JSON { lineIndex: [{ chord, wordIndex }] }
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -77,6 +79,8 @@ class Progression(db.Model):
             'key': self.key,
             'interval': self.interval,
             'chords_json': self.chords_json,
+            'lyrics_json': self.lyrics_json,
+            'chord_over_lyrics_json': self.chord_over_lyrics_json,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
         }

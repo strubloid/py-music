@@ -11,7 +11,7 @@ import './CreateProgressionsPage.css';
 
 const CreateProgressionsPage = () => {
   const { isLoggedIn, isGuest, promptLogin } = useAuth();
-  const { progressionLines } = useChordPanel();
+  const { progressionLines, lyrics, chordOverLyrics } = useChordPanel();
   const [selectedKey, setSelectedKey] = useState('C');
   const [selectedInterval, setSelectedInterval] = useState('major');
   const [scaleData, setScaleData] = useState(null);
@@ -52,6 +52,8 @@ const CreateProgressionsPage = () => {
           key: selectedKey,
           interval: selectedInterval,
           chords,
+          lyrics: JSON.stringify(lyrics),
+          chordOverLyrics: JSON.stringify(chordOverLyrics),
         });
       } else {
         // Guest: save to localStorage
@@ -62,6 +64,8 @@ const CreateProgressionsPage = () => {
           key: selectedKey,
           interval: selectedInterval,
           chords_json: JSON.stringify(chords),
+          lyrics_json: JSON.stringify(lyrics),
+          chord_over_lyrics_json: JSON.stringify(chordOverLyrics),
           created_at: new Date().toISOString(),
         };
         existing.push(newProg);
@@ -74,7 +78,7 @@ const CreateProgressionsPage = () => {
     } finally {
       setSaving(false);
     }
-  }, [saveName, isLoggedIn, selectedKey, selectedInterval]);
+  }, [saveName, isLoggedIn, selectedKey, selectedInterval, lyrics, chordOverLyrics]);
 
   const onSaveClick = () => {
     if (!saveName.trim()) {
@@ -131,7 +135,7 @@ const CreateProgressionsPage = () => {
         )}
       </div>
 
-      {scaleData && <ProgressionBuilder scaleData={scaleData} onSave={handleSave} />}
+      {scaleData && <ProgressionBuilder scaleData={scaleData} onSave={handleSave} saveName={saveName} />}
       <LyricsSection />
     </div>
   );

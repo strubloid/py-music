@@ -94,6 +94,16 @@
   color: #fff;
   padding: 0.75rem 0.5rem;
   font-size: 0.9375rem;
+  -webkit-text-fill-color: #fff;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Block browser autofill yellow — apply dark bg via box-shadow trick */
+.form-group input:-webkit-autofill,
+.form-group input:focus:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 100px #1e1b4b inset !important;
+  -webkit-text-fill-color: #fff !important;
+  background-color: transparent !important;
 }
 
 .form-group input::placeholder {

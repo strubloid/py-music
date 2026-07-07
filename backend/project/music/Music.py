@@ -113,91 +113,42 @@ class Music:
     
     ## Getting notes from scale
     def getNotesFromTune(self) -> list[str]:
-        
-        ## Determine interval type from the interval object
-        interval_type = 'major'  # default
-        if hasattr(self.interval_obj, '__class__'):
-            if 'Minor' in self.interval_obj.__class__.__name__:
-                interval_type = 'minor'
-            elif 'Major' in self.interval_obj.__class__.__name__:
-                interval_type = 'major'
+        """Compute scale notes from the interval's semitone pattern, starting from tune."""
+        chromatic_sharp  = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+        chromatic_flat   = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+        # Prefer flats for keys that conventionally use flats (F, Bb, Eb, Ab, Db, Gb, Eb, Bb)
+        flat_keys = {'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'E', 'B', 'Bb', 'A'}
 
-        ## Use comprehensive scale definitions with proper enharmonic equivalents
-        self.notes = self._getScaleNotes(self.tune, interval_type)
+        # Normalise the root (strip any accidental from self.tune)
+        root = (self.tune or '').strip()
+        chromatic = chromatic_flat if root in flat_keys else chromatic_sharp
 
+        # Build the chromatic circle from root
+        try:
+            root_idx = chromatic.index(root)
+        except ValueError:
+            # Fallback: try the other set
+            chromatic = chromatic_flat if root not in chromatic_sharp else chromatic_sharp
+            try:
+                root_idx = chromatic.index(root)
+            except ValueError:
+                root_idx = 0
+
+        # Use the interval's semitone pattern to build the scale
+        semitones = getattr(self.interval_obj, 'interval_semitones', [0, 2, 4, 5, 7, 9, 11])
+        self.notes = [chromatic[(root_idx + s) % 12] for s in semitones]
         return self.notes
-    
-    def _getScaleNotes(self, tune: str, interval_type: str) -> list[str]:
-        """Get scale notes with comprehensive definitions and proper enharmonic equivalents"""
-        
-        # Define proper scales with sharps and flats for each key
-        major_scales = {
-            "C": ["C", "D", "E", "F", "G", "A", "B"],
-            "G": ["G", "A", "B", "C", "D", "E", "F#"],
-            "D": ["D", "E", "F#", "G", "A", "B", "C#"],
-            "A": ["A", "B", "C#", "D", "E", "F#", "G#"],
-            "E": ["E", "F#", "G#", "A", "B", "C#", "D#"],
-            "B": ["B", "C#", "D#", "E", "F#", "G#", "A#"],
-            "F#": ["F#", "G#", "A#", "B", "C#", "D#", "F"],
-            "C#": ["C#", "D#", "F", "F#", "G#", "A#", "C"],  # E#→F, B#→C
-            "F": ["F", "G", "A", "Bb", "C", "D", "E"],
-            "Bb": ["Bb", "C", "D", "Eb", "F", "G", "A"],
-            "Eb": ["Eb", "F", "G", "Ab", "Bb", "C", "D"],
-            "Ab": ["Ab", "Bb", "C", "Db", "Eb", "F", "G"],
-            "Db": ["Db", "Eb", "F", "Gb", "Ab", "Bb", "C"],
-            "Gb": ["Gb", "Ab", "Bb", "B", "Db", "Eb", "F"],  # Cb→B
-            # Sharp key variants using actual chromatic notes
-            "G#": ["G#", "A#", "C", "C#", "D#", "F", "F#"],  # B#→C, E#→F
-            "D#": ["D#", "F", "F#", "G#", "A#", "C", "C#"],  # E#→F, B#→C
-            "A#": ["A#", "C", "C#", "D#", "F", "F#", "G#"],  # B#→C, E#→F
-        }
-        
-        minor_scales = {
-            "C": ["C", "D", "D#", "F", "G", "G#", "A#"],  # Eb→D#, Ab→G#, Bb→A#
-            "G": ["G", "A", "A#", "C", "D", "D#", "F"],   # Bb→A#, Eb→D#
-            "D": ["D", "E", "F", "G", "A", "A#", "C"],    # Bb→A#
-            "A": ["A", "B", "C", "D", "E", "F", "G"],
-            "E": ["E", "F#", "G", "A", "B", "C", "D"],
-            "B": ["B", "C#", "D", "E", "F#", "G", "A"],
-            "F#": ["F#", "G#", "A", "B", "C#", "D", "E"],
-            "C#": ["C#", "D#", "E", "F#", "G#", "A", "B"],
-            "G#": ["G#", "A#", "B", "C#", "D#", "E", "F#"],
-            "D#": ["D#", "F", "F#", "G#", "A#", "B", "C#"],  # E#→F
-            "A#": ["A#", "C", "C#", "D#", "F", "F#", "G#"],  # B#→C, E#→F
-            "F": ["F", "G", "G#", "A#", "C", "C#", "D#"],    # Ab→G#, Bb→A#, Db→C#, Eb→D#
-            # Flat keys converted to sharp equivalents
-            "A#": ["A#", "C", "C#", "D#", "F", "F#", "G#"],  # Bb minor → A# minor
-            "D#": ["D#", "F", "F#", "G#", "A#", "B", "C#"],  # Eb minor → D# minor  
-            "G#": ["G#", "A#", "B", "C#", "D#", "E", "F#"],  # Ab minor → G# minor
-            "C#": ["C#", "D#", "E", "F#", "G#", "A", "B"],   # Db minor → C# minor
-            "F#": ["F#", "G#", "A", "B", "C#", "D", "E"]     # Gb minor → F# minor
-        }
-        
-        if interval_type == 'major':
-            return major_scales.get(tune, major_scales["C"])
-        else:  # minor
-            return minor_scales.get(tune, minor_scales["C"])
 
     ## Getting notes from scale
     def getChords(self) -> list[str]:
-
-        ## Use improved chord generation based on scale degrees and interval type
+        """Build chords from the interval object's chord-quality array."""
         if self.notes:
-            interval_type = 'major'  # default
-            if hasattr(self.interval_obj, '__class__'):
-                if 'Minor' in self.interval_obj.__class__.__name__:
-                    interval_type = 'minor'
-            
-            if interval_type == 'major':
-                chord_types = ['', 'm', 'm', '', '', 'm', 'dim']  # Major scale triads: I ii iii IV V vi vii°
-            else:  # minor (natural minor)
-                chord_types = ['m', 'dim', '', 'm', 'm', '', '']  # Natural minor triads: i ii° III iv v VI VII
-            
-            self.chords = [self.notes[i] + chord_types[i] for i in range(len(self.notes))]
+            chord_suffixes = getattr(self.interval_obj, 'interval',
+                                   ['', 'm', 'm', '', '', 'm', 'dim'])
+            self.chords = [self.notes[i] + chord_suffixes[i]
+                           for i in range(min(len(self.notes), len(chord_suffixes)))]
         else:
-            # Fallback to chordsTeacher if no notes available
             self.chords = self.chordsTeacher.getChords(self.notes)
-
         return self.chords
     
     ## Getting borrowed chords from parallel minor scale
@@ -333,18 +284,62 @@ class Music:
         scale_name = f"{self.tune} Major Scale"
         
         visualizer.display_fretboard(self.notes, self.tune)
-    
+
+    def _compute_piano_keyboard_data(self, root: str, scale_notes: list) -> dict:
+        """Compute piano keyboard data for any key and scale.
+        Returns 7 white keys (one octave starting from root) and 7 corresponding
+        black-key positions (None where E→F or B→C with no black key between)."""
+        chromatic = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+        sharp_notes = {'C#', 'D#', 'F#', 'G#', 'A#'}
+
+        root_idx = chromatic.index(root)
+
+        # Collect white keys: one octave from root
+        white_keys = []
+        for i in range(7):
+            note = chromatic[(root_idx + i) % 12]
+            white_keys.append(note)
+
+        # For each white key, check if the semitone after it is a black key
+        black_keys = []
+        for i in range(7):
+            next_idx = (root_idx + i + 1) % 12
+            next_note = chromatic[next_idx]
+            if next_note in sharp_notes:
+                black_keys.append(next_note)
+            else:
+                black_keys.append(None)
+
+        return {
+            "white_keys": white_keys,
+            "black_keys": black_keys,
+            "scale_notes": scale_notes,
+            "root_note": root
+        }
+
     def getCompleteScaleAnalysis(self, key: str, interval_type: str) -> dict:
         """Get complete scale analysis for API responses"""
         self.setTune(key.upper())
         
-        # Set interval based on string type
-        if interval_type == 'minor':
-            from .chords.intervals.Minor import MinorInterval
-            self.setInterval(MinorInterval())
-        else:
-            self.setInterval(MajorInterval())
-        
+        # Set interval based on interval type — map all 9 interval keys to their classes
+        import sys as _sys
+        import importlib as _importlib
+        _interval_class_map = {
+            'major':      ('backend.project.music.chords.intervals.Major', 'MajorInterval'),
+            'minor':      ('backend.project.music.chords.intervals.Minor', 'MinorInterval'),
+            'ionian':     ('backend.project.music.chords.intervals.Ionian', 'IonianInterval'),
+            'dorian':     ('backend.project.music.chords.intervals.Dorian', 'DorianInterval'),
+            'phrygian':   ('backend.project.music.chords.intervals.Phrygian', 'PhrygianInterval'),
+            'lydian':     ('backend.project.music.chords.intervals.Lydian', 'LydianInterval'),
+            'mixolydian': ('backend.project.music.chords.intervals.Mixolydian', 'MixolydianInterval'),
+            'aeolian':    ('backend.project.music.chords.intervals.Aeolian', 'AeolianInterval'),
+            'locrian':    ('backend.project.music.chords.intervals.Locrian', 'LocrianInterval'),
+        }
+        if interval_type in _interval_class_map:
+            _module_path, _class_name = _interval_class_map[interval_type]
+            _module = _importlib.import_module(_module_path)
+            _interval_cls = getattr(_module, _class_name)
+            self.setInterval(_interval_cls())
         # Generate all data
         notes = self.getNotesFromTune()
         chords = self.getChords()
@@ -373,12 +368,7 @@ class Music:
                 }
                 for i in range(len(notes))
             ],
-            "keyboard_data": {
-                "white_keys": ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
-                "black_keys": ['C#', 'D#', None, 'F#', 'G#', 'A#', None],
-                "scale_notes": notes,
-                "root_note": key.upper()
-            },
+            "keyboard_data": self._compute_piano_keyboard_data(key.upper(), notes),
             "fretboard_data": generate_fretboard_data(notes, key.upper())
         }
         

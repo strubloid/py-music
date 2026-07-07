@@ -32,18 +32,32 @@ This document tracks issues discovered during project investigation that could c
 
 ### 2.1 Placeholder Pages
 
-These pages exist but are minimal placeholders with no real functionality:
-
-| Page | Path | Status |
-|------|------|--------|
-| EarTraining | `pages/play/EarTraining.jsx` | Placeholder - just text "Coming soon" |
-| Quests | `pages/play/Quests.jsx` | Placeholder - just text "Coming soon" |
-
-**Impact:** Clicking these pages in navigation leads to empty/warning states.
+**Status:** IMPROVED — EarTraining and Quests still empty but no longer blocking navigation.
 
 ---
 
-### 2.2 Settings Page
+### 2.2 Chord-Lyrics Integration
+
+**Issue:** Lyrics and chord progressions were stored separately with no way to position chords over specific words in lyrics.
+
+**Status:** FIXED (2026-07-07) — Added full chord-lyrics positioning system:
+- `ChordPanelContext.jsx`: New state and methods for `chordOverLyrics`, `lyrics`, `viewMode`
+- `LyricsSection.jsx`: "Builder" view for typing lyrics, "Music Sheet" view for positioning chords
+- Chord picker popup to select which chord goes above each word
+- `ProgressionBuilder.jsx`: Updated PDF export renders chords above lyrics with proper alignment
+- `MySongsPage.jsx`: Shows music sheet preview with chords over lyrics
+- Backend: `Progression` model extended with `lyrics_json` and `chord_over_lyrics_json` fields
+- API: Create/update endpoints now save lyrics and chord positions
+
+**Usage:**
+1. Type lyrics in Builder view
+2. Switch to "Music Sheet" view
+3. Click above words to position chords (uses chord picker popup)
+4. Export PDF shows properly formatted chord-over-lyrics layout
+
+---
+
+### 2.3 Settings Page
 
 **Status:** Minimal implementation with hardcoded values:
 - Note naming: "Sharps"
@@ -53,7 +67,7 @@ No actual functionality to change these settings.
 
 ---
 
-### 2.3 Stats Page
+### 2.4 Stats Page
 
 **Status:** Shows placeholder dashes for "Progressions Created" and "Challenges Completed" - these are not tracked.
 
@@ -64,7 +78,6 @@ No actual functionality to change these settings.
 ### 3.1 Chord Fingerings in ChordDataService.tsx
 
 **Issue:** The file contains TWO chord databases:
-1. `guitarChordVariations` - Multiple CAGED positions per chord (new)
 2. `guitarChords` - Single fingering per chord (legacy)
 
 **Problem:** Some chords in `guitarChords` don't match the variations in `guitarChordVariations`.

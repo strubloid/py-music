@@ -25,6 +25,8 @@ def create_progression():
     key = data.get('key', '')
     interval = data.get('interval', 'major')
     chords = data.get('chords', [])
+    lyrics = data.get('lyrics')
+    chord_over_lyrics = data.get('chordOverLyrics')
 
     if not name or not key:
         return jsonify({'error': 'Name and key are required'}), 400
@@ -34,7 +36,9 @@ def create_progression():
         name=name,
         key=key,
         interval=interval,
-        chords_json=json.dumps(chords)
+        chords_json=json.dumps(chords),
+        lyrics_json=lyrics if lyrics else None,
+        chord_over_lyrics_json=chord_over_lyrics if chord_over_lyrics else None,
     )
     db.session.add(progression)
     db.session.commit()
@@ -62,6 +66,10 @@ def update_progression(progression_id):
         progression.key = data['key']
     if 'interval' in data:
         progression.interval = data['interval']
+    if 'lyrics' in data:
+        progression.lyrics_json = data['lyrics'] if data['lyrics'] else None
+    if 'chordOverLyrics' in data:
+        progression.chord_over_lyrics_json = data['chordOverLyrics'] if data['chordOverLyrics'] else None
 
     db.session.commit()
     return jsonify({'progression': progression.to_dict()}), 200

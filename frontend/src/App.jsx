@@ -5,6 +5,7 @@ import Sidebar from './components/layout/Sidebar'
 import LoginModal from './components/auth/LoginModal'
 import Dashboard from './pages/Dashboard'
 import ScalesPage from './pages/learn/ScalesPage'
+import ChordsPage from './pages/learn/ChordsPage'
 import CreateProgressionsPage from './pages/create/CreateProgressionsPage'
 import MySongsPage from './pages/create/MySongsPage'
 import DailyChallenge from './pages/play/DailyChallenge'
@@ -31,7 +32,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/learn/scales" element={<ScalesPage />} />
-            <Route path="/learn/chords" element={<ScalesPage />} />
+            <Route path="/learn/chords" element={<ChordsPage />} />
             <Route path="/create/progressions" element={<CreateProgressionsPage />} />
             <Route path="/create/my-songs" element={<MySongsPage />} />
             <Route path="/play/daily" element={<DailyChallenge />} />

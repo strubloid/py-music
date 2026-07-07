@@ -170,9 +170,17 @@ const ChordDiagram = ({ chord, size = 'medium', refreshTrigger }) => {
   // Check if chord has open strings
   const hasOpenStrings = chordData.frets.some(f => parseStringFret(f) === 0)
   
-  // If has open strings and minFret <= 5, start from 0. Otherwise start from minFret.
-  // Only show position number if starting at fret 5 or higher
-  const startFret = (hasOpenStrings && minFret <= 5) ? 0 : minFret
+  // Determine starting fret: prefer 0 (open strings) if valid, else shift down
+  // to keep all fingered frets within the 4 visible frets of the diagram.
+  // Only show position number if starting at fret 5 or higher.
+  // The diagram always shows 4 frets (frets startFret..startFret+3), so we cap
+  // startFret so that maxFret doesn't exceed startFret+3.
+  const maxVisibleFret = 3  // 4 frets: indices 0,1,2,3
+  let startFret = (hasOpenStrings && minFret <= 5) ? 0 : minFret
+  if (maxFret - startFret > maxVisibleFret) {
+    // Chord spans too many frets for current startFret — shift down
+    startFret = maxFret - maxVisibleFret
+  }
   const showFretNumber = startFret >= 5
   
   const getFretPosition = (absoluteFret, startFret) => {
