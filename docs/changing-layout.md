@@ -530,3 +530,155 @@ This keeps the single fretboard compact enough to sit beside the piano without c
 - Mobile/tablet ≤860px: Single also stacks one card per line.
 - Double/Triple fretboard proportions remain unchanged from section 10.
 
+---
+
+## 12. Implementation Status — What Was Actually Built (2026-07-07)
+
+### 12.1 Navigation: Sidebar + Route-Based Views (Milestone C)
+
+Replaced the single-page tab strip with a collapsible **sidebar + route-based workspace**:
+
+- `Sidebar.jsx` with logo, UserBadge, sectioned nav (Learn / Play / Create / System)
+- `react-router-dom` powers `/learn/scales`, `/learn/chords`, `/play/daily`, `/play/ear-training`, `/play/quests`, `/create/my-songs`, `/stats`, `/settings`
+- Sidebar collapses to icon-only on toggle, responsive bottom sheet on mobile
+- New song badge counter on My Songs nav item
+- Sign in / Sign out buttons at the bottom of the System section
+
+### 12.2 Auth System (Milestones A + B)
+
+**Backend** (`backend/project/auth/`, `backend/project/models/`, `backend/project/api/protected.py`):
+- Flask blueprints for register / login / logout / me endpoints
+- `User`, `Progression`, `Favorite`, `ChallengeAttempt` models with SQLAlchemy
+- bcrypt password hashing, Flask-Login sessions
+- `models/__init__.py` now eagerly imports all model classes so `db.create_all()` works reliably in production
+
+**Frontend** (`AuthContext.jsx`, `LoginModal.jsx`, `UserBadge.jsx`):
+- `AuthProvider` wraps the app at the root level in `main.jsx`
+- `AuthContext` provides `user`, `isLoggedIn`, `isGuest`, `login`, `register`, `logout`, `continueAsGuest`, `promptLogin`, `showLoginModal`
+- LoginModal with Sign In / Sign Up tabs + "Continue as Guest"
+- Three guard gates: `loading`, `showLoginModal`, `user` existence
+- Guest mode auto-promotes first-time visitors (no forced login)
+- Guest data persists in `localStorage`
+
+### 12.3 UserBadge Evolution
+
+Current state of the UserBadge dropdown:
+
+1. **XP progress bar** with current / next-level display
+2. **Quick stats row** — streak counter (localStorage-backed, consecutive daily visits) + songs count
+3. **Guest mode**: "Sign in to save progress" button that opens LoginModal
+4. **Logged-in mode**: Sign out button (red/danger style)
+5. Favorites and Settings items were removed (Favorites has backend but no frontend "add" flow; Settings is accessible from sidebar)
+
+### 12.4 Scales Page v2 (Section 8)
+
+Implemented the v2 ScalesPage redesign:
+- **Top bar** with scale name + mode pills (horizontal row)
+- **Key selector** below (compact inline buttons)
+- **Hero note strip** with 7 large chips + degree numbers
+- **Instruments** — piano + fretboard, range-aware layout (side-by-side for single octave, stacked for double/triple)
+- **Theory row** — scale degrees + chords in a single right block
+- Removed duplicate practice tip (now one dismissible card)
+
+### 12.5 Piano & Fretboard Fixes (Sections 9-11)
+
+**Piano (Section 9)**:
+- Stable C-to-C base range (doesn't rotate with selected key)
+- Single: C D E F G A B C (8 naturals + 5 black keys)
+- Double: 15 naturals + 10 black keys
+- Triple: 22 naturals + 15 black keys
+- Proportional sizing via `clamp(42px, 4.2vw, 72px)` per key
+
+**Fretboard (Section 10)**:
+- Proportional fret cells via `--gf-fret-width: clamp(2.4rem, 3.2vw, 3.55rem)`
+- Single (13 cells) centered, Double/Triple grow with width
+- Horizontal scroll on narrow screens instead of crushing
+
+**Layout (Section 11)**:
+- Single range: side-by-side grid (desktop), stacked (mobile)
+- Double/Triple: stacked always
+
+### 12.6 Production Deploy Fixes
+
+- **LLM init**: Moved to background thread (`threading.Thread`) so Flask starts immediately — fixes Fly.io connection refused
+- **Model imports**: `models/__init__.py` now imports `User`, `Progression`, `Favorite`, `ChallengeAttempt` before `db.create_all()`
+- **Favicon**: Replaced `/vite.svg` 404 with inline emoji favicon (`🎵`)
+- **Session secret**: Persistent `SECRET_KEY` recommended for session stability across deploys
+
+### 12.7 Current Architecture
+
+```
+py-music/
+├── backend/
+│   ├── project/
+│   │   ├── api/
+│   │   │   ├── app.py              # Flask entry, lazy LLM init on thread
+│   │   │   └── protected.py        # Authenticated endpoints
+│   │   ├── auth/
+│   │   │   └── __init__.py         # Auth blueprint (register/login/logout/me)
+│   │   ├── models/
+│   │   │   ├── __init__.py         # SQLAlchemy db + bcrypt + model import
+│   │   │   └── user.py             # User, Progression, Favorite, ChallengeAttempt
+│   │   ├── music/                  # Core music theory engine
+│   │   └── llm/                    # Optional LLM integration
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── auth/               # LoginModal, UserBadge
+│   │   │   └── layout/             # Sidebar
+│   │   ├── contexts/
+│   │   │   └── AuthContext.jsx     # User state, login/logout, guest mode
+│   │   ├── pages/
+│   │   │   ├── Dashboard.jsx       # Landing page with quick links
+│   │   │   ├── learn/              # ScalesPage (v2)
+│   │   │   ├── play/               # DailyChallenge, EarTraining, Quests
+│   │   │   ├── create/             # MySongsPage
+│   │   │   └── system/             # Stats, Settings
+│   │   ├── services/
+│   │   │   └── api.js              # Axios service layer
+│   │   ├── App.jsx                 # Router + sidebar shell + LoginModal
+│   │   └── main.jsx                # Entry with AuthProvider + BrowserRouter
+│   ├── package.json
+│   └── vite.config.js
+└── requirements.txt
+```
+
+### 12.8 Auth Flow (Implemented)
+
+```
+First visit
+  ↓
+AuthProvider → GET /api/auth/me (no session)
+  ↓
+No user → app renders fully, no modal
+  ↓
+User clicks Sign In (sidebar, UserBadge, or MySongs)
+  ↓
+LoginModal opens
+  ├─ Sign In (email + password)
+  ├─ Sign Up (username + email + password)
+  └─ Continue as Guest → user = Guest, modal dismissed, data in localStorage
+  ↓
+On return visits:
+  ├─ Session cookie exists → user restored from backend
+  └─ No session → guestUser restored from localStorage
+```
+
+### 12.9 What's Still Missing (from original plan)
+
+| Original Plan Item | Status |
+|-------------------|--------|
+| Milestone D: Progression persistence (save/load) | Partial — guest save works (localStorage), MySongs page lists |
+| Milestone E: Gamification foundation | Partial — XP/level in model, UserBadge dropdown stats |
+| Milestone F: Audio (Tone.js) + animated transitions | Not started |
+| Onboarding wizard | Not started |
+| Collaborative jam room | Not started |
+| Achievement system | Not started |
+| Password reset / email verification | Not started |
+
+---
+
+*Document version: 3.0*
+*Last updated: 2026-07-07 — added implementation status after Phase 1 completion*
+*Phase 1 (Sidebar + Auth) complete. Next: Phase 2 (Progression persistence, gamification)*

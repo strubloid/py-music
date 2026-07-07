@@ -181,9 +181,36 @@ if (user) return null;              // hide if any user (guest or logged-in)
 ```
 
 - `showLoginModal` is `false` on first visit → modal stays hidden
-- `promptLogin()` (called from `UserBadge` or `MySongsPage`) sets it to `true`
+- `promptLogin()` (called from `UserBadge`, sidebar "Sign in / Register", or `MySongsPage`) sets it to `true`
 - `continueAsGuest()` / `closeLoginModal()` sets it back to `false`
 - Guest user (`id: null`) still counts as `user` → modal hides correctly
+
+### Sidebar Login / Logout
+
+The sidebar **System** section shows:
+
+- **Guest**: "Sign in / Register" button (amber accent, `LogIn` icon) at the bottom
+- **Logged in**: "Sign out" button (red, `LogOut` icon) at the bottom — in addition to the UserBadge dropdown logout
+
+### UserBadge Dropdown
+
+The badge in the sidebar header shows:
+
+- Avatar (logged-in user icon or guest "G")
+- Username + level (e.g. "Lv. 3")
+- XP progress ring (circular SVG gauge)
+- Chevron toggle for dropdown
+
+**Dropdown contents for all users:**
+- XP progress bar (current / next level)
+- Quick stats row: **Streak** (🔥 consecutive daily visits, localStorage-backed) + **Songs** (🎵 count)
+
+**Guest dropdown:**
+- "Sign in to save progress" button → opens LoginModal
+
+**Logged-in dropdown:**
+- Divider
+- "Sign out" button (red danger style)
 
 ### What is Missing / Known Gaps
 

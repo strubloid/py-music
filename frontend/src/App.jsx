@@ -12,6 +12,7 @@ import EarTraining from './pages/play/EarTraining'
 import Quests from './pages/play/Quests'
 import Stats from './pages/system/Stats'
 import Settings from './pages/system/Settings'
+import ResetPasswordPage from './pages/auth/ResetPasswordPage'
 import './App.css'
 
 const App = () => {
@@ -39,6 +40,7 @@ const App = () => {
             <Route path="/play/quests" element={<Quests />} />
             <Route path="/stats" element={<Stats />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

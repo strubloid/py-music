@@ -1,14 +1,52 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { LogOut, User, ChevronDown } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { LogOut, User, ChevronDown, Music, Flame } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import './UserBadge.css';
 
 const XP_PER_LEVEL = 500;
+const GUEST_SONGS_KEY = 'guestSongs';
+const STREAK_KEY = 'streakData';
+
+// Load streak data from localStorage
+const loadStreak = () => {
+  try {
+    const raw = localStorage.getItem(STREAK_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { count: 0, lastVisit: null };
+};
+
+// Save + update streak
+const updateStreak = () => {
+  const data = loadStreak();
+  const today = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+  if (data.lastVisit === today) {
+    // Already visited today — don't increment
+    return data.count;
+  }
+
+  const newCount = data.lastVisit === yesterday ? data.count + 1 : 1;
+  localStorage.setItem(STREAK_KEY, JSON.stringify({ count: newCount, lastVisit: today }));
+  return newCount;
+};
 
 const UserBadge = () => {
   const { user, logout, isLoggedIn, isGuest, promptLogin } = useAuth();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+
+  // Stats derived from localStorage
+  const streak = useMemo(() => updateStreak(), []);
+  const songCount = useMemo(() => {
+    try {
+      const raw = localStorage.getItem(GUEST_SONGS_KEY);
+      return raw ? JSON.parse(raw).length : 0;
+    } catch {
+      return 0;
+    }
+  }, []);
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -22,8 +60,8 @@ const UserBadge = () => {
 
   const xpInLevel = user.xp % XP_PER_LEVEL;
   const xpProgress = (xpInLevel / XP_PER_LEVEL) * 100;
-
   const level = user.level || 1;
+  const nextLevelXp = XP_PER_LEVEL * level;
 
   return (
     <div className="user-badge" ref={ref}>
@@ -39,7 +77,7 @@ const UserBadge = () => {
           <span className="badge-name">{user.username}</span>
           <span className="badge-level">Lv. {level}</span>
         </div>
-        <div className="badge-xp-ring" style={{ '--progress': xpProgress }}>
+        <div className="badge-xp-ring">
           <svg viewBox="0 0 36 36">
             <circle className="xp-bg" cx="18" cy="18" r="15.5" />
             <circle
@@ -57,10 +95,24 @@ const UserBadge = () => {
           <div className="dropdown-header">
             <div className="dropdown-xp">
               <span className="xp-label">XP</span>
-              <span className="xp-value">{user.xp} / {XP_PER_LEVEL * level}</span>
+              <span className="xp-value">{user.xp} / {nextLevelXp}</span>
             </div>
             <div className="xp-bar">
               <div className="xp-bar-fill" style={{ width: `${xpProgress}%` }} />
+            </div>
+          </div>
+
+          {/* Quick stats */}
+          <div className="dropdown-stats">
+            <div className="stat-item">
+              <Flame size={14} className="stat-icon streak-icon" />
+              <span className="stat-label">Streak</span>
+              <span className="stat-value">{streak} {streak === 1 ? 'day' : 'days'}</span>
+            </div>
+            <div className="stat-item">
+              <Music size={14} className="stat-icon songs-icon" />
+              <span className="stat-label">Songs</span>
+              <span className="stat-value">{songCount}</span>
             </div>
           </div>
 

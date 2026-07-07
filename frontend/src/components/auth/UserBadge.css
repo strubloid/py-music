@@ -172,6 +172,53 @@
   color: #fca5a5;
 }
 
+.dropdown-stats {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 0.25rem 0.75rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  justify-content: flex-start;
+  text-align: center;
+}
+
+.stat-icon {
+  opacity: 0.7;
+}
+
+.stat-icon.streak-icon {
+  color: #f97316;
+}
+
+.stat-icon.songs-icon {
+  color: #fbbf24;
+}
+
+.stat-label {
+  font-size: 0.625rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
 .dropdown-divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.08);

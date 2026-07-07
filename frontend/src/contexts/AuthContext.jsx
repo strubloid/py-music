@@ -91,6 +91,10 @@ export const AuthProvider = ({ children }) => {
     setShowLoginModal(true);
   }, []);
 
+  const requestPasswordReset = useCallback(async (email) => {
+    return await api.post('/api/auth/forgot-password', { email });
+  }, []);
+
   const closeLoginModal = useCallback(() => {
     // If user isn't logged in, become a guest so the app has a usable state
     if (!isLoggedIn && !user) {
@@ -114,6 +118,7 @@ export const AuthProvider = ({ children }) => {
       showLoginModal,
       loginReason,
       promptLogin,
+      requestPasswordReset,
       closeLoginModal,
       setShowLoginModal,
     }}>
