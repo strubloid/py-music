@@ -40,6 +40,15 @@ from backend.project.models import db, bcrypt
 db.init_app(app)
 bcrypt.init_app(app)
 
+# Create database tables on startup — critical for production where
+# `if __name__ == '__main__'` is never reached (Docker runs `python -m flask run`).
+with app.app_context():
+    try:
+        db.create_all()
+        print("✅ Database tables created / verified")
+    except Exception as e:
+        print(f"⚠️  DB init failed (will retry on first request): {e}")
+
 from backend.project.auth import auth_bp, login_manager
 login_manager.init_app(app)
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
