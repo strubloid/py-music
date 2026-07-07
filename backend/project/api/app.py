@@ -57,18 +57,31 @@ from backend.project.api.protected import api_bp
 app.register_blueprint(api_bp)
 
 from backend.project.error_logger import log_error, log_request_error
+import threading
+import time
+
+# Lazy LLM initialization — start in a background thread so Flask serves
+# immediately and Fly.io health checks don't timeout. While the LLM is
+# loading, route handlers fall back to MockLLM (already handled in each route).
 llm = None
 music_system = None
-try:
-    print("🔄 Initializing LLM...")
-    llm = ChatGPT()
-    print("✅ LLM initialized successfully")
-    music_system = Music(llm)
-    print("✅ Music system initialized with LLM")
-except Exception as e:
-    print(f"⚠️  LLM initialization failed: {e}. Using simplified mode.")
-    llm = None
-    music_system = None
+llm_ready = False
+
+def _init_llm_background():
+    global llm, music_system, llm_ready
+    try:
+        print("🔄 Initializing LLM (background)...")
+        _llm = ChatGPT()
+        _music = Music(_llm)
+        llm = _llm
+        music_system = _music
+        llm_ready = True
+        print("✅ LLM initialized successfully (background)")
+    except Exception as e:
+        print(f"⚠️  LLM initialization failed: {e}. Using simplified mode.")
+        llm_ready = True  # mark done so health check reflects failure too
+
+threading.Thread(target=_init_llm_background, daemon=True).start()
 
 # Available interval types — all 7 diatonic modes.
 # 'major' and 'minor' are removed (aliases for ionian/aeolian; use those instead).

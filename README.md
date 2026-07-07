@@ -9,9 +9,11 @@ A full-stack music theory platform with a Python Flask backend and React/Vite fr
 - 📊 **Scale Analysis** — degrees, chords, Roman numerals, secondary dominants
 - 🎵 **Chord Progression Builder** — build, save, and load progressions
 - 🎮 **Daily Challenges** — earn XP and build streaks
-- 👤 **User Accounts** — register to save progress across devices
+- ✍️ **Songwriting Desk** — write lyrics, assign chords per line, place harmony changes over exact words, export as PDF
+- 👤 **User Accounts** — register to save progress across devices, or use guest mode (localStorage)
 - 🎯 **Gamification** — XP system, levels, achievement tracking
-- 🌙 **Dark Theme** — modern indigo/purple gradient UI
+- 🌙 **Dark Theme** — modern indigo/purple gradient UI with glassmorphism panels
+- 🐳 **Docker / Fly.io** — containerized deployment with multi-stage Docker build
 
 ## Quick Start
 
@@ -91,12 +93,110 @@ py-music/
 
 ## User System
 
-### Auth Flow
+The app supports two modes of access: **Guest mode** (no account) and **Registered user** (account).
 
-- **Register / Login** — email + password, bcrypt hashing, Flask-Login sessions
-- **Guest mode** — browse freely, data saved to `localStorage` only
-- **Persistent sessions** — cookie-based, survives page refresh
-- **XP tracking** — +10 XP per saved progression, +50 XP per daily challenge
+### Guest User Flow
+
+```
+First visit
+  ↓
+AuthProvider checks session (GET /api/auth/me)
+  ↓
+No session → checks localStorage for saved guest
+  ↓
+No saved guest → user stays null → app fully visible
+  Nothing forced — user can browse every page
+  ↓
+Navbar shows "Guest" badge with "Sign in" option
+  ↓
+User clicks Sign In → LoginModal appears
+  ├─ Sign up (create account)
+  ├─ Continue as Guest → user is set, modal dismissed
+  └─ Close → user auto-promoted to guest, modal dismissed
+  ↓
+On subsequent visits
+  ↓
+guestUser restored from localStorage → full access
+```
+
+**Guest limitations:**
+- Songs saved to `localStorage` only (single device, cleared on browser data wipe)
+- No XP/level tracking
+- No cross-device sync
+
+### Registered User Flow
+
+```
+User clicks "Sign up" in the LoginModal
+  ↓
+POST /api/auth/register { username, email, password }
+  ↓
+Server validates, bcrypt-hashes password, inserts into `users` table
+  ↓
+Flask-Login creates server-side session (cookie)
+  ↓
+Frontend sets user from response → modal dismissed
+  ↓
+On return visits:
+  GET /api/auth/me → session cookie recognised → user restored
+  ↓
+guestUser removed from localStorage
+  ↓
+Full access with XP/level + server-side persistence
+  ↓
+Logout → POST /api/auth/logout → session cleared → guest mode resumes
+```
+
+**Registered benefits:**
+- Songs saved to PostgreSQL on Fly.io (or SQLite locally)
+- XP/level tracking persists across devices
+- Favorites synced to account
+
+### Auth Architecture
+
+```
+frontend/                          backend/
+  AuthContext.jsx    ──HTTP──►     auth/__init__.py
+  ├─ user state                     ├─ POST /api/auth/register
+  ├─ isLoggedIn / isGuest            ├─ POST /api/auth/login
+  ├─ showLoginModal                  ├─ POST /api/auth/logout
+  └─ promptLogin()                   └─ GET  /api/auth/me
+       │                                   │
+       ▼                                   ▼
+  LoginModal.jsx                  models/user.py
+  ├─ sign in / sign up tabs       └─ User model with bcrypt
+  └─ Continue as Guest
+       │
+       ▼
+  localStorage.setItem('guestUser')
+```
+
+### Guard Logic (LoginModal.jsx)
+
+```js
+// Modal renders in App.jsx unconditionally but hides via early returns:
+if (authLoading) return null;      // wait for session check
+if (!showLoginModal) return null;   // only show when triggered
+if (user) return null;              // hide if any user (guest or logged-in)
+```
+
+- `showLoginModal` is `false` on first visit → modal stays hidden
+- `promptLogin()` (called from `UserBadge` or `MySongsPage`) sets it to `true`
+- `continueAsGuest()` / `closeLoginModal()` sets it back to `false`
+- Guest user (`id: null`) still counts as `user` → modal hides correctly
+
+### What is Missing / Known Gaps
+
+| Gap | Impact | Priority |
+|-----|--------|----------|
+| Guest data is localStorage-only | Lost on browser clear | Low |
+| No "Merge guest data into account" flow | Guest songs can't be migrated on sign-up | Medium |
+| No password reset flow | Users who forget password are locked out | Low |
+| No email verification | Any email can be used | Low |
+| No rate limiting on auth endpoints | Vulnerable to brute force | Low (dev mode) |
+| SQLite in dev / PostgreSQL on Fly.io | Schema mismatch risk on deploy | Medium |
+
+If any of these become blockers, the auth module is self-contained in `backend/project/auth/` and `frontend/src/contexts/AuthContext.jsx`.
 
 ### Data Model
 

@@ -4,20 +4,22 @@ import { useAuth } from '../../contexts/AuthContext';
 import './LoginModal.css';
 
 const LoginModal = () => {
-  const { user, login, register, continueAsGuest, closeLoginModal, loginReason, isLoggedIn } = useAuth();
+  const { user, showLoginModal, loading: authLoading, login, register, continueAsGuest, closeLoginModal, loginReason, isLoggedIn } = useAuth();
   const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
+  if (authLoading) return null;
+  if (!showLoginModal) return null;
   if (user) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    setSubmitting(true);
     try {
       if (mode === 'login') {
         await login(email, password);
@@ -27,7 +29,7 @@ const LoginModal = () => {
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong. Please try again.');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -91,8 +93,8 @@ const LoginModal = () => {
 
           {error && <div className="form-error">{error}</div>}
 
-          <button type="submit" className="submit-btn" disabled={loading}>
-            {loading ? (
+          <button type="submit" className="submit-btn" disabled={submitting}>
+            {submitting ? (
               'Please wait...'
             ) : mode === 'login' ? (
               <>Sign in <ArrowRight size={16} /></>
