@@ -4,15 +4,20 @@
   bottom: 0;
   left: 0;
   right: 0;
+  background: rgba(11, 16, 34, 0.95);
   backdrop-filter: blur(15px);
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 2000;
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15);
   min-height: 60px;
+  height: auto;
   transition: none;
   will-change: height;
   transform: translateZ(0);
   border-radius: 12px 12px 0 0;
+}
+
+.bottom-panel.expanded {
+  height: 200px;
 }
 
 .panel-drag-handle {
@@ -32,14 +37,14 @@
 .drag-indicator {
   width: 40px;
   height: 4px;
-  background: rgba(102, 126, 234, 0.6);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 2px;
   transition: all 0.2s ease;
 }
 
 .panel-drag-handle:hover .drag-indicator,
 .drag-indicator.dragging {
-  background: rgba(102, 126, 234, 0.9);
+  background: rgba(251, 191, 36, 0.6);
   width: 60px;
   height: 6px;
 }
@@ -49,10 +54,16 @@
   justify-content: center;
   gap: 1rem;
   padding: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
   position: relative;
   z-index: 2001;
   border-radius: 12px 12px 0 0;
+  cursor: default;
+}
+
+.bottom-controls.resizable {
+  cursor: ns-resize;
 }
 
 .bottom-button {
@@ -61,25 +72,24 @@
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
   color: white;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.15s ease, transform 0.15s ease;
   backdrop-filter: blur(10px);
 }
 
 .bottom-button:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .bottom-button.active {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.5);
+  color: #fbbf24;
 }
 
 .button-icon {
@@ -94,7 +104,7 @@
 }
 
 .chord-count {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
   padding: 0.2rem 0.5rem;
   border-radius: 8px;
   font-size: 0.8rem;
@@ -107,9 +117,9 @@
   max-height: calc(85vh - 80px);
   overflow-y: auto;
   overflow-x: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: rgba(11, 16, 34, 0.95);
   scrollbar-width: thin;
-  scrollbar-color: rgba(102, 126, 234, 0.3) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
   scroll-behavior: smooth;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -129,13 +139,19 @@
 }
 
 .bottom-panel-content::-webkit-scrollbar-thumb {
-  background: rgba(102, 126, 234, 0.3);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
   transition: background 0.2s ease;
 }
 
 .bottom-panel-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(102, 126, 234, 0.5);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bottom-button {
+    transition: none;
+  }
 }
 
 /* Enhanced Mobile Responsiveness */
@@ -143,11 +159,9 @@
   .bottom-panel {
     min-height: 60px;
     border-radius: 8px 8px 0 0;
-    /* Ensure panel is visible above other content */
     z-index: 2100;
   }
   
-  /* Make drag handle visible and functional on mobile */
   .panel-drag-handle {
     pointer-events: auto;
     opacity: 1;
@@ -156,14 +170,12 @@
     z-index: 2003;
   }
   
-  /* Make bottom-controls draggable on mobile */
   .bottom-controls {
     pointer-events: auto;
     touch-action: none;
     cursor: ns-resize;
   }
   
-  /* But allow buttons to be clickable */
   .bottom-button {
     pointer-events: auto;
   }
@@ -181,7 +193,7 @@
     min-width: max-content;
     flex: 1;
     max-width: calc(50% - 0.25rem);
-    min-height: 48px; /* Touch target */
+    min-height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -205,7 +217,6 @@
     height: 65vh;
     max-height: 65vh;
     min-height: 300px;
-    /* Allow content scrolling inside */
     touch-action: pan-y;
     overscroll-behavior: contain;
     overflow-y: scroll;
@@ -217,7 +228,7 @@
   .drag-indicator {
     width: 60px;
     height: 5px;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.5);
   }
   
   .panel-drag-handle:hover .drag-indicator,
@@ -243,7 +254,7 @@
     font-size: 0.8rem;
     flex: 1;
     max-width: calc(50% - 0.1875rem);
-    min-height: 44px; /* Touch target */
+    min-height: 44px;
   }
 
   .button-text {

@@ -106,8 +106,8 @@ const BottomPanel = ({ scaleData }) => {
   return (
     <div 
       ref={panelRef}
-      className="bottom-panel"
-      style={{ height: activePanel ? `${panelHeight}px` : 'auto' }}
+      className={`bottom-panel${activePanel ? ' expanded' : ''}`}
+      style={activePanel ? { height: panelHeight } : undefined}
     >
       {/* Drag Handle */}
       {activePanel && (
@@ -122,10 +122,9 @@ const BottomPanel = ({ scaleData }) => {
       
       {/* Bottom Controls */}
       <div 
-        className="bottom-controls"
+        className={`bottom-controls${activePanel ? ' resizable' : ''}`}
         onMouseDown={activePanel ? handleMouseDown : undefined}
         onTouchStart={activePanel ? handleTouchStart : undefined}
-        style={{ cursor: activePanel ? 'ns-resize' : 'default' }}
       >
         <button
           className={`bottom-button ${activePanel === 'progression' ? 'active' : ''}`}

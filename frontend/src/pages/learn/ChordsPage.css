@@ -9,9 +9,6 @@
 }
 
 .chords-hero {
-  /* display: grid;
-  grid-template-columns: minmax(0, 620px) minmax(320px, 840px) minmax(120px, 140px); */
-  /* grid-template-areas: "copy selected summary"; */
   display: flex;
   justify-content: space-between;
   align-self: center;
@@ -20,7 +17,7 @@
   margin-bottom: 1rem;
   padding: 1.1rem;
   border: 1px solid var(--border-soft);
-  border-radius: 22px;
+  border-radius: 16px;
   background: var(--surface-1);
 }
 
@@ -121,7 +118,7 @@
 .selector-panel {
   background: var(--surface-1);
   border: 1px solid var(--border-soft);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 1rem;
   min-width: 0;
 }
@@ -228,7 +225,7 @@
   grid-area: selected;
   grid-column: auto;
   background: var(--surface-1);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 0.9rem 1.05rem;
   border: 1px solid rgba(251, 191, 36, 0.2);
   display: flex;
@@ -278,7 +275,7 @@
 /* Chord Variations Panel */
 .chord-variations-panel {
   background: var(--surface-1);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 1.1rem 1.2rem;
   border: 1px solid var(--border-soft);
   min-width: 0;
@@ -315,7 +312,7 @@
 
 .piano-chord-panel {
   background: var(--surface-1);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 1.1rem 1.2rem;
   border: 1px solid var(--border-soft);
   min-width: 0;
@@ -348,7 +345,7 @@
   padding: 0.6rem;
   border-radius: 12px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 248, 255, 0.95));
-  border: 1px solid rgba(102, 126, 234, 0.2);
+  border: 1px solid rgba(251, 191, 36, 0.2);
 }
 
 .piano-chord-notes {
@@ -408,7 +405,7 @@
 /* Quick Reference Grid */
 .chord-quick-reference {
   background: var(--surface-1);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 1.1rem 1.2rem;
   border: 1px solid var(--border-soft);
   min-width: 0;

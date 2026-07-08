@@ -21,9 +21,7 @@
 .daily-header h1 {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(to right, #fbbf24, #f97316);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #fff;
   margin: 0;
 }
 
@@ -77,7 +75,7 @@
 }
 
 .empty-icon {
-  color: #4ade80;
+  color: #fbbf24;
 }
 
 .daily-empty h2 {
@@ -165,8 +163,8 @@
 }
 
 .daily-feedback-burst.positive {
-  background: rgba(16, 185, 129, 0.12);
-  color: #6ee7b7;
+  background: rgba(251, 191, 36, 0.12);
+  color: #fde68a;
 }
 
 .daily-feedback-burst.negative {
@@ -196,7 +194,7 @@
 }
 
 .challenge-card.card-correct {
-  border-color: rgba(16, 185, 129, 0.4);
+  border-color: rgba(251, 191, 36, 0.4);
 }
 
 .challenge-card.card-incorrect {
@@ -212,7 +210,7 @@
 }
 
 .challenge-category {
-  color: #a5b4fc;
+  color: #9ca3af;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -309,7 +307,7 @@
   justify-content: space-between;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 0.75rem 1rem;
   color: #e5e7eb;
   font-size: 0.9375rem;
@@ -325,9 +323,9 @@
 }
 
 .challenge-option.correct {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: #10b981;
-  color: #6ee7b7;
+  background: rgba(251, 191, 36, 0.15);
+  border-color: #fbbf24;
+  color: #fde68a;
 }
 
 .challenge-option.wrong {
@@ -337,21 +335,21 @@
 }
 
 .opt-correct-icon {
-  color: #10b981;
+  color: #fbbf24;
   flex-shrink: 0;
 }
 
 .challenge-result {
   margin-top: 1rem;
   padding: 0.875rem 1rem;
-  border-radius: 10px;
+  border-radius: 12px;
   text-align: center;
   font-size: 0.9375rem;
 }
 
 .result-correct {
-  background: rgba(16, 185, 129, 0.1);
-  color: #6ee7b7;
+  background: rgba(251, 191, 36, 0.1);
+  color: #fde68a;
 }
 
 .result-incorrect {
@@ -407,7 +405,7 @@
   gap: 0.5rem;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 0.75rem 1.5rem;
   color: #d1d5db;
   font-size: 0.875rem;

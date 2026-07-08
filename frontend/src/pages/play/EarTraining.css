@@ -21,9 +21,7 @@
 .ear-header h1 {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(to right, #fbbf24, #f97316);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #fff;
   margin: 0;
 }
 
@@ -64,7 +62,7 @@
 .ear-card {
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
+  border-radius: 16px;
   padding: 1.25rem;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
@@ -94,9 +92,9 @@
   align-items: center;
   padding: 0.25rem 0.6rem;
   border-radius: 9999px;
-  background: rgba(165, 180, 252, 0.12);
-  border: 1px solid rgba(165, 180, 252, 0.2);
-  color: #c7d2fe;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  color: #fde68a;
   font-size: 0.725rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -127,7 +125,7 @@
 .ear-power-button {
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 0.8rem 0.9rem;
   color: #e5e7eb;
   cursor: pointer;
@@ -228,8 +226,8 @@
 }
 
 .ear-feedback-burst.positive {
-  background: rgba(16, 185, 129, 0.12);
-  color: #6ee7b7;
+  background: rgba(251, 191, 36, 0.12);
+  color: #fde68a;
 }
 
 .ear-feedback-burst.negative {
@@ -254,7 +252,7 @@
   display: inline-grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   padding: 0.25rem;
-  border-radius: 14px;
+  border-radius: 12px;
   background: rgba(15, 23, 42, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.08);
   width: min(100%, 280px);
@@ -280,9 +278,8 @@
 }
 
 .ear-instrument-button.selected {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.95), rgba(249, 115, 22, 0.95));
+  background: #fbbf24;
   color: #111827;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
 .ear-instrument-button:focus-visible {
@@ -313,14 +310,13 @@
 }
 
 .ear-play-button {
-  background: linear-gradient(135deg, #fbbf24, #f97316);
+  background: #fbbf24;
   color: #111827;
-  box-shadow: 0 10px 22px rgba(249, 115, 22, 0.18);
 }
 
 .ear-play-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 26px rgba(249, 115, 22, 0.25);
+  background: #f59e0b;
+  transform: scale(1.05);
 }
 
 .ear-action-button {
@@ -365,9 +361,9 @@
 }
 
 .result-correct {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  color: #6ee7b7;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  color: #fde68a;
 }
 
 .result-incorrect {
@@ -425,7 +421,7 @@
 
 .ear-stat {
   padding: 0.9rem;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.04);
   color: #fbbf24;
@@ -453,7 +449,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 0.8rem 0.95rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.06);
@@ -471,9 +467,9 @@
 }
 
 .ear-option.correct {
-  background: rgba(16, 185, 129, 0.14);
-  border-color: rgba(16, 185, 129, 0.38);
-  color: #6ee7b7;
+  background: rgba(251, 191, 36, 0.14);
+  border-color: rgba(251, 191, 36, 0.38);
+  color: #fde68a;
 }
 
 .ear-option.wrong {
@@ -484,7 +480,7 @@
 
 .opt-correct-icon {
   flex-shrink: 0;
-  color: #10b981;
+  color: #fbbf24;
 }
 
 .ear-hint-card p {

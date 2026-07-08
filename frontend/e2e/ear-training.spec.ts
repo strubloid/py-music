@@ -3,11 +3,11 @@ import { answerCapturedChallenge, captureChallengeResponse, loginSharedUser } fr
 
 test('ear training shows live XP preview and final breakdown when powers reduce reward', async ({ page }) => {
   await loginSharedUser(page);
-  const challenge = await captureChallengeResponse(page, '/play/ear-training');
+  const challenge = await captureChallengeResponse(page, '/play/ear-training', 'ear_training');
 
   await expect(page.getByText(`Base +${challenge.xp_reward} XP`)).toBeVisible();
   await page.getByRole('button', { name: /remove one option/i }).click();
-  await expect(page.getByText('-10 XP')).toBeVisible();
+  await expect(page.getByText('-10 XP').first()).toBeVisible();
   await expect(page.getByText(`Current reward ${Math.max(1, challenge.xp_reward - 10)} XP`)).toBeVisible();
 
   await answerCapturedChallenge(page, challenge);

@@ -8,11 +8,11 @@
 
 .progression-card {
   background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   padding: 1rem;
   transition: all 0.3s ease;
   cursor: pointer;
-  touch-action: manipulation;
 }
 
 .progression-card:hover {
@@ -20,18 +20,7 @@
   transform: translateY(-2px);
 }
 
-.progression-card:active {
-  transform: translateY(0);
-}
-
 .chord-progression-item {
-  display: inline-block;
-  margin: 4px;
-  touch-action: manipulation;
-}
-
-.secondary-dominant-chord,
-.target-chord {
   display: inline-block;
   margin: 4px;
 }
@@ -45,18 +34,17 @@
 
 .progression-name {
   font-weight: 600;
-  color: #93c5fd; /* blue-300 */
+  color: #fbbf24;
 }
 
 .play-icon {
   width: 1rem;
   height: 1rem;
-  color: #9ca3af; /* gray-400 */
-  transition: color 0.3s ease;
+  color: #9ca3af;
 }
 
 .progression-card:hover .play-icon {
-  color: #fbbf24; /* yellow-400 */
+  color: #fbbf24;
 }
 
 .progression-content {
@@ -73,17 +61,17 @@
 }
 
 .chord-badge {
-  background: linear-gradient(135deg, #2563eb, #7c3aed); /* blue-600 to purple-600 */
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 50px;
+  background: #fbbf24;
+  color: #111827;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
   white-space: nowrap;
 }
 
 .chord-arrow {
-  color: #9ca3af; /* gray-400 */
+  color: #9ca3af;
   display: flex;
   align-items: center;
   font-size: 0.875rem;
@@ -91,8 +79,16 @@
 
 .progression-analysis {
   font-size: 0.75rem;
-  color: #9ca3af; /* gray-400 */
+  color: #6b7280;
   margin-top: 0.5rem;
+}
+
+.progressions-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fbbf24;
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
 

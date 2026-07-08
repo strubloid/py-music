@@ -5,10 +5,17 @@
   left: 0;
   right: 0;
   z-index: 3000;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   min-height: 60px;
+  height: auto;
   transition: height 0.1s ease-out;
   border-radius: 0 0 12px 12px;
+  background: rgba(11, 16, 34, 0.95);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.top-header.expanded {
+  height: 200px;
 }
 
 /* Block mode - takes up normal document flow instead of fixed positioning */
@@ -43,14 +50,14 @@
 .drag-indicator {
   width: 40px;
   height: 4px;
-  background: rgba(102, 126, 234, 0.6);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 2px;
   transition: all 0.2s ease;
 }
 
 .panel-drag-handle:hover .drag-indicator,
 .drag-indicator.dragging {
-  background: rgba(102, 126, 234, 0.9);
+  background: rgba(251, 191, 36, 0.6);
   width: 60px;
   height: 6px;
 }
@@ -60,10 +67,16 @@
   justify-content: center;
   gap: 1rem;
   padding: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
   position: relative;
   z-index: 3001;
   border-radius: 0 0 12px 12px;
+  cursor: default;
+}
+
+.top-controls.resizable {
+  cursor: ns-resize;
 }
 
 /* Block mode controls styling */
@@ -77,25 +90,24 @@
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
   color: white;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.15s ease, transform 0.15s ease;
   backdrop-filter: blur(10px);
 }
 
 .top-button:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .top-button.active {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.5);
+  color: #fbbf24;
 }
 
 .button-icon {
@@ -111,11 +123,11 @@
 
 /* Panel Content */
 .top-panel-content {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(11, 16, 34, 0.95);
   backdrop-filter: blur(10px);
   padding: 1.5rem;
   overflow-y: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .top-panel-content.floating {
@@ -135,7 +147,7 @@
 .favorites-content h3,
 .controls-content h3 {
   margin: 0 0 1rem 0;
-  color: #4a5568;
+  color: var(--text-muted);
   font-size: 1.1rem;
   font-weight: 600;
 }
@@ -149,25 +161,26 @@
 
 .shortcut-item {
   padding: 0.75rem 1rem;
-  background: rgba(102, 126, 234, 0.1);
-  border: 1px solid rgba(102, 126, 234, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-  color: #4a5568;
+  color: var(--text-strong);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.15s ease, transform 0.15s ease;
 }
 
 .shortcut-item:hover {
-  background: rgba(102, 126, 234, 0.2);
+  background: rgba(251, 191, 36, 0.08);
+  border-color: rgba(251, 191, 36, 0.3);
   transform: translateY(-1px);
 }
 
 .favorite-item {
   padding: 0.75rem 1rem;
-  background: rgba(255, 193, 7, 0.1);
-  border: 1px solid rgba(255, 193, 7, 0.2);
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.2);
   border-radius: 8px;
-  color: #4a5568;
+  color: var(--text-strong);
 }
 
 .controls-grid {
@@ -181,13 +194,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  background: rgba(102, 126, 234, 0.1);
-  border: 1px solid rgba(102, 126, 234, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
 }
 
 .control-group label {
-  color: #4a5568;
+  color: var(--text-strong);
   font-weight: 500;
 }
 
@@ -239,12 +252,24 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .top-header {
+    animation: none;
+  }
+  .top-button {
+    transition: none;
+  }
+  .shortcut-item {
+    transition: none;
+  }
+}
+
 /* Ensure content doesn't overlap with floating header */
 .app-container:has(.top-header.floating) .main-content {
-  padding-top: 7rem; /* Ensure top padding when floating header is present */
+  padding-top: 7rem;
 }
 
 /* Adjust when panel is expanded in floating mode */
 .app-container:has(.top-header.floating .top-panel-content) .main-content {
-  padding-top: 7rem; /* Reduce padding when panel is expanded as it will provide the necessary space */
+  padding-top: 7rem;
 }

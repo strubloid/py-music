@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import { Music, Piano, Guitar, Target, Zap, Maximize2 } from "lucide-react";
 import KeySelector from "../../components/KeySelector/KeySelector";
@@ -111,11 +111,13 @@ const ScalesPage = () => {
         if (!selectedKey || availableModes.length === 0) return;
         // Clear stale data so pill row doesn't show the previous key's mode previews
         setAllModes([]);
+        let cancelled = false;
         const fetchAllModes = async () => {
             const key = selectedKey;
             const level = RANGE_LEVELS.find((r) => r.id === rangeLevel) || RANGE_LEVELS[0];
             const results = [];
             for (const mode of availableModes) {
+                if (cancelled) return;
                 try {
                     const response = await axios.get(`/api/scale/${encodeURIComponent(key)}?interval=${mode.key}&octaves=${level.octaves}`);
                     if (response.data) results.push({ ...response.data, modeKey: mode.key, modeName: mode.name });
@@ -123,9 +125,10 @@ const ScalesPage = () => {
                     /* skip */
                 }
             }
-            if (key === selectedKey) setAllModes(results);
+            if (!cancelled && key === selectedKey) setAllModes(results);
         };
         fetchAllModes();
+        return () => { cancelled = true; };
     }, [selectedKey, availableModes, rangeLevel]);
 
     const fetchScaleData = async (key, interval) => {

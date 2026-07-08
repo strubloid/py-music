@@ -57,16 +57,13 @@ const TopHeader = () => {
   return (
     <div 
       ref={panelRef}
-      className="top-header"
-      style={{ 
-        height: activePanel ? `${panelHeight}px` : 'auto'
-      }}
+      className={`top-header${activePanel ? ' expanded' : ''}`}
+      style={activePanel ? { height: panelHeight } : undefined}
     >
       {/* Top Controls */}
       <div 
-        className="top-controls"
+        className={`top-controls${activePanel ? ' resizable' : ''}`}
         onMouseDown={activePanel ? handleMouseDown : undefined}
-        style={{ cursor: activePanel ? 'ns-resize' : 'default' }}
       >
         <button
           className={`top-button ${activePanel === 'shortcuts' ? 'active' : ''}`}

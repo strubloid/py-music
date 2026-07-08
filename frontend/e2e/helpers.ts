@@ -94,8 +94,22 @@ export const loginSharedUser = async (page: Page) => {
     });
   }, 250);
 
-  // Reload to pick up level 3 in React state
+  // Reload to pick up level in React state
   await page.goto('/');
+  await page.waitForLoadState('networkidle');
+
+  // Dismiss the level-up modal overlay that may appear after gaining XP
+  const keepBtn = page.getByRole('button', { name: /keep training/i });
+  try {
+    await keepBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await keepBtn.click();
+    // Reload again so lastLevelSeen is persisted and modal won't reappear
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+  } catch {
+    // No level-up modal appeared — that's fine
+  }
+
   await expect(page.locator('.badge-trigger')).toBeVisible();
   return SHARED_USER;
 };
@@ -105,7 +119,7 @@ const PATH_BUTTON_LABEL: Record<string, RegExp> = {
   '/play/ear-training': /^ear training$/i,
 };
 
-export const captureChallengeResponse = async (page: Page, path: string) => {
+export const captureChallengeResponse = async (page: Page, path: string, category?: string) => {
   const challengeResponsePromise = page.waitForResponse((response) => (
     response.url().includes('/api/daily-challenges') && response.request().method() === 'GET'
   ));
@@ -119,12 +133,23 @@ export const captureChallengeResponse = async (page: Page, path: string) => {
 
   const response = await challengeResponsePromise;
   const data = await response.json();
-  return data.challenges?.[0];
+  const challenges = data.challenges ?? [];
+  const match = category ? challenges.find((c: any) => c.category === category) : challenges[0];
+  return match;
 };
 
 export const answerCapturedChallenge = async (page: Page, challenge: any) => {
   const correctOption = challenge.options[challenge.correct_index];
-  await page.getByRole('button', { name: new RegExp(`^${escapeForRegex(correctOption)}$`) }).click();
+  const btn = page.getByRole('button', { name: new RegExp(`^${escapeForRegex(correctOption)}$`) });
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await btn.click({ timeout: 5000 });
+      return correctOption;
+    } catch (e) {
+      if (attempt === 2) throw e;
+      await page.waitForTimeout(500);
+    }
+  }
   return correctOption;
 };
 

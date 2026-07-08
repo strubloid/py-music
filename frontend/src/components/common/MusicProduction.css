@@ -2,21 +2,9 @@
 .music-production-panel {
   padding: 2rem;
   margin: 0 auto;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--bg-1);
   min-height: 100vh;
   position: relative;
-}
-
-.music-production-panel::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(10px);
-  pointer-events: none;
 }
 
 /* Compact Header */
@@ -37,7 +25,6 @@
   font-weight: 700;
   margin: 0;
   color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .panel-actions {
@@ -77,21 +64,21 @@
 }
 
 .chord-text-display {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
   padding: 8px 12px;
   font-size: 16px;
   font-weight: bold;
-  border: 2px solid #4CAF50;
-  color: #333;
+  border: 2px solid #fbbf24;
+  color: #111827;
   text-align: center;
   min-width: 40px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .toggle-chord-display {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%) !important;
-  color: white !important;
+  background: #fbbf24 !important;
+  color: #111827 !important;
   font-size: 12px;
 }
 
@@ -453,7 +440,7 @@
   bottom: 0;
   border: 2px solid transparent;
   border-radius: 16px;
-  background: linear-gradient(45deg, #4ecdc4, #44a08d);
+  background: #fbbf24;
   background-clip: padding-box;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -472,22 +459,20 @@
   height: 30px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 107, 107, 0.9);
-  backdrop-filter: blur(10px);
-  color: white;
+  background: transparent;
+  color: #9ca3af;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
   z-index: 10;
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
 }
 
 .remove-section-btn.modern:hover {
-  background: rgba(255, 107, 107, 1);
+  background: transparent;
+  color: #fff;
   transform: scale(1.15);
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
 }
 
 .remove-icon-small {
@@ -602,11 +587,11 @@
 
 /* Add Song Section */
 .add-song-section {
-  background: rgba(156, 39, 176, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 12px;
   padding: 1rem;
   margin-bottom: 1.5rem;
-  border: 1px solid rgba(156, 39, 176, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .section-title {
@@ -614,7 +599,6 @@
   font-weight: 700;
   margin: 0;
   color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .song-form {
@@ -644,56 +628,61 @@
   flex: 1;
   min-width: 100%;
   padding: 0.75rem;
-  border: 2px solid rgba(156, 39, 176, 0.2);
+  border: 2px solid rgba(251, 191, 36, 0.2);
   border-radius: 8px;
   font-size: 0.95rem;
   font-family: inherit;
   resize: vertical;
   min-height: 100px;
   transition: border-color 0.2s ease;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
 }
 
 .song-lyrics-textarea:focus {
   outline: none;
-  border-color: #9c27b0;
+  border-color: #fbbf24;
 }
 
 .song-title-input {
   flex: 1;
   min-width: 200px;
   padding: 0.75rem;
-  border: 2px solid rgba(156, 39, 176, 0.2);
+  border: 2px solid rgba(251, 191, 36, 0.2);
   border-radius: 8px;
   font-size: 0.95rem;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
   transition: border-color 0.2s ease;
 }
 
 .song-title-input:focus {
   outline: none;
-  border-color: #9c27b0;
+  border-color: #fbbf24;
 }
 
 .progression-select {
   flex: 1;
   min-width: 200px;
   padding: 0.75rem;
-  border: 2px solid rgba(156, 39, 176, 0.2);
+  border: 2px solid rgba(251, 191, 36, 0.2);
   border-radius: 8px;
   font-size: 0.95rem;
-  background: white;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
   cursor: pointer;
   transition: border-color 0.2s ease;
 }
 
 .progression-select:focus {
   outline: none;
-  border-color: #9c27b0;
+  border-color: #fbbf24;
 }
 
 .add-song-button {
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
-  color: white;
+  background: #fbbf24;
+  color: #111827;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -703,15 +692,15 @@
 }
 
 .add-song-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(156, 39, 176, 0.3);
+  background: #f59e0b;
+  transform: scale(1.05);
 }
 
 .add-song-button:disabled {
-  background: #ccc;
+  background: rgba(255, 255, 255, 0.1);
+  color: #6b7280;
   cursor: not-allowed;
   transform: none;
-  box-shadow: none;
 }
 
 /* Songs Section */
@@ -722,19 +711,19 @@
 .empty-songs {
   text-align: center;
   padding: 2rem;
-  background: #f9f9f9;
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 12px;
-  color: #666;
+  color: #9ca3af;
   font-style: italic;
 }
 
 .no-progressions-message {
   text-align: center;
   padding: 2rem;
-  background: rgba(156, 39, 176, 0.05);
+  background: rgba(251, 191, 36, 0.05);
   border-radius: 12px;
-  color: #666;
-  border: 2px dashed rgba(156, 39, 176, 0.2);
+  color: #9ca3af;
+  border: 2px dashed rgba(251, 191, 36, 0.2);
 }
 
 .no-progressions-message p {
@@ -744,7 +733,7 @@
 .no-progressions-message p:first-child {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #9c27b0;
+  color: #fbbf24;
 }
 
 .songs-grid {
@@ -755,18 +744,16 @@
 }
 
 .song-card {
-  background: white;
+  background: var(--surface-1);
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(156, 39, 176, 0.1);
+  border: 1px solid var(--border-soft);
   transition: all 0.2s ease;
 }
 
 .song-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  border-color: rgba(156, 39, 176, 0.2);
+  border-color: var(--border-accent);
 }
 
 .song-header {
@@ -779,7 +766,7 @@
 .song-title {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #333;
+  color: #fff;
   margin: 0;
 }
 
@@ -788,8 +775,8 @@
   height: 24px;
   border-radius: 50%;
   border: none;
-  background: #ff6b6b;
-  color: white;
+  background: transparent;
+  color: #9ca3af;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -800,7 +787,7 @@
 }
 
 .remove-song-button:hover {
-  background: #ff5252;
+  color: #fff;
   transform: scale(1.1);
 }
 
@@ -820,13 +807,13 @@
 
 .song-key {
   font-weight: 600;
-  color: #9c27b0;
+  color: #fbbf24;
   font-size: 0.9rem;
 }
 
 .song-date {
   font-size: 0.8rem;
-  color: #666;
+  color: #9ca3af;
 }
 
 .bpm-control {
@@ -835,15 +822,17 @@
   gap: 0.5rem;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #555;
+  color: #9ca3af;
 }
 
 .bpm-input {
   width: 60px;
   padding: 0.25rem 0.5rem;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 4px;
   text-align: center;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
 }
 
 .song-progression {
@@ -852,7 +841,7 @@
 
 .progression-title {
   font-weight: 600;
-  color: #555;
+  color: #9ca3af;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
@@ -865,8 +854,8 @@
 
 .chord-badge {
   padding: 0.25rem 0.75rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #fbbf24;
+  color: #111827;
   border-radius: 6px;
   font-size: 0.8rem;
   font-weight: 600;
@@ -878,20 +867,20 @@
 
 .lyrics-title {
   font-weight: 600;
-  color: #555;
+  color: #9ca3af;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
 
 .lyrics-content {
-  background: rgba(156, 39, 176, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   padding: 1rem;
   border-radius: 8px;
   font-size: 0.9rem;
   line-height: 1.6;
   white-space: pre-wrap;
-  color: #555;
-  border: 1px solid rgba(156, 39, 176, 0.1);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .song-actions {
@@ -913,30 +902,30 @@
 }
 
 .play-button {
-  background: #4caf50;
-  color: white;
+  background: #fbbf24;
+  color: #111827;
 }
 
 .play-button:hover {
-  background: #45a049;
+  background: #f59e0b;
 }
 
 .edit-button {
-  background: #ff9800;
-  color: white;
+  background: #fbbf24;
+  color: #111827;
 }
 
 .edit-button:hover {
-  background: #f57c00;
+  background: #f59e0b;
 }
 
 .export-button {
-  background: #2196f3;
-  color: white;
+  background: #fbbf24;
+  color: #111827;
 }
 
 .export-button:hover {
-  background: #1976d2;
+  background: #f59e0b;
 }
 
 /* Responsive Design */

@@ -32,7 +32,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-radius: 24px;
+  border-radius: 16px;
   padding: clamp(1.25rem, 3vw, 2rem);
   position: relative;
   overflow: hidden;
@@ -78,11 +78,9 @@
   margin: 0.35rem 0;
   font-size: clamp(2rem, 5vw, 4.4rem);
   line-height: 0.95;
-  letter-spacing: -0.06em;
-  background: linear-gradient(135deg, #ffffff, #fef3c7 48%, #fbbf24);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  
+  letter-spacing: -0.03em;
+  color: var(--text-strong);
+  text-wrap: balance;
 }
 
 .mysongs-hero p {
@@ -96,25 +94,36 @@
 .save-song-btn,
 .add-line-wide,
 .empty-library button {
-  border: none;
-  background: linear-gradient(135deg, #fbbf24, #f97316);
-  color: #1f1300;
-  border-radius: 999px;
-  padding: 0.75rem 1.05rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-weight: 800;
+  padding: 0.75rem 1rem;
+  background: #fbbf24;
+  color: #000;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(1rem, 2.5vw, 1.125rem);
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 10px 30px rgba(249, 115, 22, 0.25);
+  min-height: 44px;
+  transition: background 0.15s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .new-song-btn:hover,
 .save-song-btn:hover,
 .add-line-wide:hover,
 .empty-library button:hover {
-  transform: translateY(-1px);
+  background: #f59e0b;
+  transform: scale(1.05);
+}
+
+.new-song-btn:active,
+.save-song-btn:active,
+.add-line-wide:active,
+.empty-library button:active {
+  transform: scale(0.98);
 }
 
 .save-song-btn:disabled {
@@ -126,7 +135,7 @@
   color: var(--ms-muted);
   background: rgba(251, 191, 36, 0.08);
   border: 1px solid rgba(251, 191, 36, 0.16);
-  border-radius: 14px;
+  border-radius: 12px;
   padding: 0.85rem 1rem;
 }
 
@@ -148,7 +157,7 @@
 }
 
 .empty-library {
-  border-radius: 22px;
+  border-radius: 16px;
   align-items: center;
   display: flex;
   flex-direction: column;
@@ -177,7 +186,7 @@
 }
 
 .library-song-card {
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -209,7 +218,7 @@
 .song-key-pill {
   color: #111827;
   background: #fbbf24;
-  border-radius: 999px;
+  border-radius: 9999px;
   padding: 0.18rem 0.55rem;
   font-weight: 900;
 }
@@ -287,7 +296,7 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.07);
   color: var(--ms-text);
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -327,7 +336,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 0.85rem;
   display: grid;
   grid-template-columns: auto minmax(220px, 1fr) auto;
@@ -366,7 +375,7 @@
 }
 
 .song-key-panel {
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 1rem;
   display: grid;
   grid-template-columns: minmax(260px, 0.7fr) 1fr;
@@ -414,13 +423,13 @@
   color: #fef3c7;
   background: rgba(251, 191, 36, 0.1);
   border: 1px solid rgba(251, 191, 36, 0.18);
-  border-radius: 999px;
+  border-radius: 9999px;
   padding: 0.35rem 0.65rem;
   font-weight: 800;
 }
 
 .writer-help-card {
-  border-radius: 18px;
+  border-radius: 16px;
   padding: 0.9rem 1rem;
   color: var(--ms-muted);
   display: flex;
@@ -441,7 +450,7 @@
 }
 
 .song-line-card {
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -464,7 +473,7 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.08);
   color: var(--ms-text);
-  border-radius: 14px;
+  border-radius: 12px;
   outline: none;
 }
 
@@ -518,7 +527,7 @@
   align-items: center;
   padding: 0.65rem;
   background: rgba(255, 255, 255, 0.07);
-  border-radius: 14px;
+  border-radius: 12px;
 }
 
 .custom-chord-input {
@@ -561,7 +570,7 @@
   font-size: 0.86rem;
   min-height: 18px;
   line-height: 1;
-  border-radius: 999px;
+  border-radius: 9999px;
   padding: 0.12rem 0.28rem;
 }
 
@@ -684,7 +693,7 @@
   .mysongs-hero {
     flex-direction: column;
     align-items: flex-start;
-    border-radius: 18px;
+    border-radius: 16px;
   }
 
   .mysongs-hero h1 {

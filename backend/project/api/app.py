@@ -365,6 +365,7 @@ def get_music_config():
         "fretboardDirection": "leftToRight"
     })
 
+@limiter.limit("30 per minute")
 @app.route('/api/scale/<key>', methods=['GET'])
 def get_scale_analysis(key):
     """Get complete scale analysis for a given key and interval"""
