@@ -163,11 +163,6 @@ const EarTraining = () => {
                     targetToneNote: nextStimulus.targetToneNote,
                 });
 
-                const alternateInstrumentId = EAR_TRAINING_INSTRUMENTS.find((item) => item.id !== instrumentId)?.id;
-                if (alternateInstrumentId) {
-                    audioEngineRef.current.preloadInstrument(alternateInstrumentId);
-                }
-
                 if (playbackTimerRef.current) window.clearTimeout(playbackTimerRef.current);
                 playbackTimerRef.current = window.setTimeout(() => setPlaying(false), durationMs);
             } catch {

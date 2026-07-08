@@ -1,7 +1,7 @@
 import { Reverb, SampleLoader, Soundfont, SplendidGrandPiano } from 'smplr';
 
 const PRE_ROLL_SECONDS = 0.08;
-const PIANO_NOTES_TO_LOAD = [48, 52, 55, 60, 64, 67, 72, 76, 79, 84];
+const PIANO_NOTES_TO_LOAD = [48, 55, 60, 67, 72];
 const PIANO_PROXY_BASE_URL = '/api/audio-proxy/piano';
 const GUITAR_PROXY_URL = '/api/audio-proxy/soundfont/FluidR3_GM/acoustic_guitar_steel';
 
