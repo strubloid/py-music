@@ -1,4 +1,6 @@
 from datetime import datetime
+
+from ..daily_challenge_explanations import build_daily_challenge_explanation
 from . import db, bcrypt
 
 
@@ -133,20 +135,31 @@ class DailyChallenge(db.Model):
     question = db.Column(db.Text, nullable=False)
     options_json = db.Column(db.Text, nullable=False)  # JSON array of answer strings
     correct_index = db.Column(db.Integer, nullable=False)  # index into options_json
+    explanation = db.Column(db.Text, nullable=True)
     xp_reward = db.Column(db.Integer, default=50)
     difficulty = db.Column(db.Integer, default=1)  # 1-5
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
+        options = json.loads(self.options_json)
+        explanation = self.explanation or build_daily_challenge_explanation(
+            self.category,
+            self.title,
+            self.question,
+            options,
+            self.correct_index,
+        )
+
         return {
             'id': self.id,
             'category': self.category,
             'title': self.title,
             'question': self.question,
-            'options': json.loads(self.options_json),
+            'options': options,
             'correct_index': self.correct_index,
             'xp_reward': self.xp_reward,
             'difficulty': self.difficulty,
+            'explanation': explanation,
         }
 
 
@@ -185,13 +198,58 @@ def run_migrations():
     from sqlalchemy import inspect
 
     inspector = inspect(db.engine)
-    columns = [c['name'] for c in inspector.get_columns('challenge_attempts')]
-    if 'challenge_id' not in columns:
+
+    challenge_attempt_columns = [c['name'] for c in inspector.get_columns('challenge_attempts')]
+    if 'challenge_id' not in challenge_attempt_columns:
         db.session.execute(
             sa.text('ALTER TABLE challenge_attempts ADD COLUMN challenge_id INTEGER REFERENCES daily_challenges(id)')
         )
         db.session.commit()
         print("✅ Added challenge_id column to challenge_attempts")
+
+    unique_constraints = inspector.get_unique_constraints('challenge_attempts')
+    has_old_daily_unique = any(
+        set(constraint.get('column_names') or []) == {'user_id', 'challenge_date'}
+        for constraint in unique_constraints
+    )
+    has_challenge_unique = any(
+        set(constraint.get('column_names') or []) == {'user_id', 'challenge_id'}
+        for constraint in unique_constraints
+    )
+    if has_old_daily_unique and not has_challenge_unique:
+        db.session.execute(sa.text('PRAGMA foreign_keys=OFF'))
+        db.session.execute(sa.text('''
+            CREATE TABLE challenge_attempts_new (
+                id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                challenge_id INTEGER REFERENCES daily_challenges(id),
+                challenge_date VARCHAR(10) NOT NULL,
+                score INTEGER,
+                completed BOOLEAN,
+                PRIMARY KEY (id),
+                CONSTRAINT unique_user_challenge UNIQUE (user_id, challenge_id),
+                FOREIGN KEY(user_id) REFERENCES users (id)
+            )
+        '''))
+        db.session.execute(sa.text('''
+            INSERT OR IGNORE INTO challenge_attempts_new
+                (id, user_id, challenge_id, challenge_date, score, completed)
+            SELECT id, user_id, challenge_id, challenge_date, score, completed
+            FROM challenge_attempts
+        '''))
+        db.session.execute(sa.text('DROP TABLE challenge_attempts'))
+        db.session.execute(sa.text('ALTER TABLE challenge_attempts_new RENAME TO challenge_attempts'))
+        db.session.execute(sa.text('PRAGMA foreign_keys=ON'))
+        db.session.commit()
+        print("✅ Migrated challenge_attempts uniqueness to user + challenge")
+
+    challenge_columns = [c['name'] for c in inspector.get_columns('daily_challenges')]
+    if 'explanation' not in challenge_columns:
+        db.session.execute(
+            sa.text('ALTER TABLE daily_challenges ADD COLUMN explanation TEXT')
+        )
+        db.session.commit()
+        print("✅ Added explanation column to daily_challenges")
 
 
 import json  # noqa: E402 — must be after DailyChallenge to_dict

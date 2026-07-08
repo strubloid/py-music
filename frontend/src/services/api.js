@@ -54,8 +54,17 @@ export const awardXp = (amount) =>
 
 // ─── Daily Challenges ─────────────────────────────────────────────────────────
 
-export const getDailyChallenges = (limit = 10, offset = 0) =>
-  api.get(`/api/daily-challenges?limit=${limit}&offset=${offset}`);
+export const getDailyChallenges = (limit = 10, offset = 0, options = {}) => {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (options.random) params.set('random', '1');
+  if (options.excludeIds?.length) params.set('exclude_ids', options.excludeIds.join(','));
+
+  return api.get(`/api/daily-challenges?${params.toString()}`);
+};
 
 export const completeDailyChallenge = (challengeId) =>
   api.post(`/api/daily-challenge/${challengeId}/complete`);

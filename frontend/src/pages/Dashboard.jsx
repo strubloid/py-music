@@ -43,8 +43,8 @@ const Dashboard = () => {
 
         <button className="dash-card accent" onClick={() => navigate('/play/daily')}>
           <Zap size={28} className="card-icon" />
-          <h2>Daily Challenge</h2>
-          <p>Earn XP and keep your streak alive</p>
+          <h2>Challenges</h2>
+          <p>Keep practicing with random questions and XP rewards</p>
         </button>
       </div>
     </div>

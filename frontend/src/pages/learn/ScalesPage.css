@@ -99,6 +99,7 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(251, 191, 36, 0.3) transparent;
   scroll-snap-type: x mandatory;
+  justify-content: center;
 }
 
 .modes-pill-row::-webkit-scrollbar { height: 6px; }
@@ -225,6 +226,7 @@
   gap: 0.45rem;
   flex-wrap: wrap;
   flex: 1;
+  justify-content: center;
 }
 
 .hero-note {

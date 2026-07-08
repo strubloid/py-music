@@ -162,11 +162,12 @@ CREATE TABLE favorites (
 CREATE TABLE challenge_attempts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
+    challenge_id INTEGER REFERENCES daily_challenges(id),
     challenge_date TEXT NOT NULL,       -- YYYY-MM-DD
     score INTEGER DEFAULT 0,
     completed BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    UNIQUE(user_id, challenge_date)
+    UNIQUE(user_id, challenge_id)
 );
 ```
 
@@ -187,8 +188,9 @@ GET    /api/favorites
 POST   /api/favorites
 DELETE /api/favorites/<id>
 
-GET    /api/daily-challenge        -> today's challenge
-POST   /api/daily-challenge/submit { answer }
+GET    /api/daily-challenges?random=1&limit=1 -> random available challenge
+POST   /api/daily-challenge/<id>/complete     -> complete challenge, award XP
+GET    /api/user/streak                       -> streak + completed_today
 ```
 
 ### 4.4 Auth Flow
@@ -237,9 +239,9 @@ POST   /api/daily-challenge/submit { answer }
 
 ### Milestone E: Gamification Foundation (Week 3)
 1. Add `xp`, `level` columns to User model
-2. Award XP on: save progression (+10), view new scale (+1), complete daily (+50)
-3. Dashboard: show XP ring, recent activity, daily challenge CTA
-4. Simple streak tracker in localStorage (even for guests)
+2. Award XP on: save progression (+10), view new scale (+1), complete daily challenge (`xp_reward`)
+3. Dashboard/sidebar: show XP ring, recent activity, daily challenge CTA
+4. Streak tracks distinct completed days; daily challenge practice should still rotate through multiple random questions per day
 
 ### Milestone F: Audio & Delight (Week 3-4)
 1. Integrate Tone.js for chord playback

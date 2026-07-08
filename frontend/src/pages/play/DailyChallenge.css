@@ -167,8 +167,23 @@
 .challenge-question {
   color: #d1d5db;
   font-size: 0.9375rem;
-  line-height: 1.6;
-  margin: 0 0 1rem;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.challenge-explanation {
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(251, 191, 36, 0.18);
+  background: rgba(251, 191, 36, 0.08);
+  color: #fde68a;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.challenge-explanation strong {
+  color: #fbbf24;
 }
 
 .challenge-options {

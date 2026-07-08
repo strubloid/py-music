@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Zap, Flame, RefreshCw, CheckCircle, Loader } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -10,9 +10,25 @@ import {
 import './DailyChallenge.css';
 
 const INITIAL_LIMIT = 1;
+const RANDOM_FETCH_LIMIT = 10;
+const NEXT_CHALLENGE_DELAY_MS = 900;
+
+const getCompletedChallengeIds = () => {
+  try {
+    return JSON.parse(sessionStorage.getItem('strubloid:completed-challenge-ids') || '[]');
+  } catch {
+    return [];
+  }
+};
+
+const rememberCompletedChallengeId = (challengeId) => {
+  const ids = new Set(getCompletedChallengeIds());
+  ids.add(challengeId);
+  sessionStorage.setItem('strubloid:completed-challenge-ids', JSON.stringify(Array.from(ids)));
+};
 
 const DailyChallenge = () => {
-  const { user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn, updateUserProgress } = useAuth();
   const [challenges, setChallenges] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -24,18 +40,80 @@ const DailyChallenge = () => {
   const [completing, setCompleting] = useState({}); // { [challengeId]: bool }
   const [results, setResults] = useState({}); // { [challengeId]: { correct: bool, xpAwarded: int } }
   const [totalRemaining, setTotalRemaining] = useState(0);
+  const seenChallengeIdsRef = useRef([]);
+  const advanceTimerRef = useRef(null);
+
+  const rememberSeenChallenges = useCallback((nextChallenges) => {
+    const ids = new Set(seenChallengeIdsRef.current);
+    nextChallenges.forEach((challenge) => ids.add(challenge.id));
+    seenChallengeIdsRef.current = Array.from(ids);
+  }, []);
+
+  const loadRandomChallenge = useCallback(async ({
+    replace = false,
+    excludeIds = [],
+    fallbackExcludeIds = [],
+    avoidIds = [],
+  } = {}) => {
+    const pickChallenge = (items) => items.find((challenge) => !avoidIds.includes(challenge.id));
+    let res = await getDailyChallenges(RANDOM_FETCH_LIMIT, 0, {
+      random: true,
+      excludeIds,
+    });
+    let nextChallenge = pickChallenge(res.data.challenges);
+
+    if (!nextChallenge && excludeIds.length > fallbackExcludeIds.length) {
+      seenChallengeIdsRef.current = fallbackExcludeIds;
+      res = await getDailyChallenges(RANDOM_FETCH_LIMIT, 0, {
+        random: true,
+        excludeIds: fallbackExcludeIds,
+      });
+      nextChallenge = pickChallenge(res.data.challenges);
+    }
+
+    if (!nextChallenge) {
+      setTotalRemaining(0);
+      if (replace) {
+        setChallenges([]);
+        setActiveIndex(0);
+        setResults({});
+        setCompleting({});
+      }
+      return null;
+    }
+
+    rememberSeenChallenges([nextChallenge]);
+
+    if (replace) {
+      setChallenges([nextChallenge]);
+      setActiveIndex(0);
+      setResults({});
+      setCompleting({});
+    } else {
+      setChallenges((prev) => [...prev, nextChallenge]);
+      setActiveIndex((current) => current + 1);
+    }
+
+    setTotalRemaining(res.data.remaining);
+    return nextChallenge;
+  }, [rememberSeenChallenges]);
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
       const [chalRes, streakRes] = await Promise.all([
-        getDailyChallenges(INITIAL_LIMIT, 0),
+        getDailyChallenges(INITIAL_LIMIT, 0, {
+          random: true,
+          excludeIds: getCompletedChallengeIds(),
+        }),
         isLoggedIn ? getUserStreak() : Promise.resolve({ data: { streak: 0, completed_today: false } }),
       ]);
       setChallenges(chalRes.data.challenges);
       setActiveIndex(0);
       setTotalRemaining(chalRes.data.remaining);
+      const initialSeenIds = chalRes.data.challenges.map((challenge) => challenge.id);
+      seenChallengeIdsRef.current = initialSeenIds;
       setStreak(streakRes.data.streak);
       setCompletedToday(streakRes.data.completed_today);
       setCompleting({});
@@ -52,31 +130,59 @@ const DailyChallenge = () => {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => () => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+  }, []);
+
   const activeChallenge = challenges[activeIndex] || null;
   const activeResult = activeChallenge ? results[activeChallenge.id] : null;
 
   const handleAnswer = async (challengeId, selectedIdx, correctIdx) => {
-    if (completing[challengeId] || results[challengeId] || completedToday) return;
+    if (completing[challengeId] || results[challengeId]) return;
 
     const isCorrect = selectedIdx === correctIdx;
     setCompleting((prev) => ({ ...prev, [challengeId]: true }));
 
+    const queueNextChallenge = () => {
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+      const excludeIds = Array.from(new Set([...seenChallengeIdsRef.current, challengeId]));
+      const fallbackExcludeIds = [challengeId];
+      const avoidIds = [challengeId];
+      advanceTimerRef.current = setTimeout(() => {
+        loadRandomChallenge({ replace: true, excludeIds, fallbackExcludeIds, avoidIds }).catch(() => {
+          setError('Failed to load next challenge.');
+        });
+      }, NEXT_CHALLENGE_DELAY_MS);
+    };
+
     try {
       if (isCorrect) {
-        const res = await completeDailyChallenge(challengeId);
-        setResults((prev) => ({
-          ...prev,
-          [challengeId]: {
-            correct: true,
-            xpAwarded: res.data.xp_awarded,
-          },
-        }));
-
         if (isLoggedIn) {
+          const res = await completeDailyChallenge(challengeId);
+          updateUserProgress({ xp: res.data.xp, level: res.data.level });
+          rememberCompletedChallengeId(challengeId);
+          setResults((prev) => ({
+            ...prev,
+            [challengeId]: {
+              correct: true,
+              xpAwarded: res.data.xp_awarded,
+            },
+          }));
+
           const streakRes = await getUserStreak();
           setStreak(streakRes.data.streak);
           setCompletedToday(streakRes.data.completed_today);
           window.dispatchEvent(new Event('streak:updated'));
+          queueNextChallenge();
+        } else {
+          setResults((prev) => ({
+            ...prev,
+            [challengeId]: {
+              correct: true,
+              xpAwarded: 0,
+            },
+          }));
+          queueNextChallenge();
         }
       } else {
         setResults((prev) => ({
@@ -86,6 +192,8 @@ const DailyChallenge = () => {
             xpAwarded: 0,
           },
         }));
+        rememberCompletedChallengeId(challengeId);
+        queueNextChallenge();
       }
     } catch (err) {
       if (err.response?.status === 400) {
@@ -96,6 +204,7 @@ const DailyChallenge = () => {
             xpAwarded: 0,
           },
         }));
+        queueNextChallenge();
       } else {
         setError('Failed to submit answer.');
       }
@@ -110,8 +219,11 @@ const DailyChallenge = () => {
     setLoadingMore(true);
     setError('');
     try {
-      const nextOffset = challenges.length;
-      const res = await getDailyChallenges(INITIAL_LIMIT, nextOffset);
+      const excludeIds = Array.from(new Set([...seenChallengeIdsRef.current, ...challenges.map((challenge) => challenge.id)]));
+      const res = await getDailyChallenges(INITIAL_LIMIT, 0, {
+        random: true,
+        excludeIds,
+      });
       if (res.data.challenges.length === 0) {
         setTotalRemaining(0);
         return;
@@ -119,6 +231,7 @@ const DailyChallenge = () => {
 
       setChallenges((prev) => [...prev, ...res.data.challenges]);
       setActiveIndex(challenges.length);
+      rememberSeenChallenges(res.data.challenges);
       setTotalRemaining(res.data.remaining);
     } catch (err) {
       setError('Failed to load more challenges.');
@@ -169,9 +282,9 @@ const DailyChallenge = () => {
       <div className="daily-header">
         <Zap className="daily-icon" size={28} />
         <div>
-          <h1>Daily Challenge</h1>
+          <h1>Challenges</h1>
           <p className="daily-subtitle">
-            {isLoggedIn ? `Welcome back, ${user?.username}` : 'Sign up to save your progress!'}
+            {isLoggedIn ? `Keep practicing, ${user?.username}` : 'Practice now. Sign up to save XP!'}
           </p>
         </div>
         {isLoggedIn && (
@@ -211,6 +324,11 @@ const DailyChallenge = () => {
 
               <h3 className="challenge-title">{activeChallenge.title}</h3>
               <p className="challenge-question">{activeChallenge.question}</p>
+              {activeChallenge.explanation && (
+                <div className="challenge-explanation">
+                  <strong>Helpful hint:</strong> {activeChallenge.explanation}
+                </div>
+              )}
 
               <div className="challenge-options">
                 {activeChallenge.options.map((opt, i) => {
@@ -222,9 +340,9 @@ const DailyChallenge = () => {
                   return (
                     <button
                       key={i}
+                      type="button"
                       className={optClass}
-                      onClick={() => !activeResult && !completedToday && handleAnswer(activeChallenge.id, i, activeChallenge.correct_index)}
-                      disabled={!!activeResult || completing[activeChallenge.id] || completedToday}
+                      onClick={() => handleAnswer(activeChallenge.id, i, activeChallenge.correct_index)}
                     >
                       {opt}
                       {activeResult && i === activeChallenge.correct_index && <CheckCircle size={16} className="opt-correct-icon" />}
@@ -236,8 +354,12 @@ const DailyChallenge = () => {
               {activeResult && (
                 <div className={`challenge-result ${activeResult.correct ? 'result-correct' : 'result-incorrect'}`}>
                   {activeResult.correct
-                    ? <>🎉 Correct! <strong>+{activeResult.xpAwarded} XP</strong></>
-                    : <>❌ Incorrect. The answer was <strong>{activeChallenge.options[activeChallenge.correct_index]}</strong></>
+                    ? isLoggedIn
+                      ? (activeResult.xpAwarded > 0
+                        ? <>🎉 Perfect groove! <strong>+{activeResult.xpAwarded} XP</strong></>
+                        : <>🎉 Perfect groove! <strong>Reward already claimed</strong></>)
+                      : <>🎉 Nice hit! <strong>Sign in to save XP</strong></>
+                    : <>🎯 Off beat — the answer was <strong>{activeChallenge.options[activeChallenge.correct_index]}</strong></>
                   }
                 </div>
               )}

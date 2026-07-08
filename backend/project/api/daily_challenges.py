@@ -15,8 +15,9 @@ import random
 from datetime import datetime, timedelta
 
 from flask import Blueprint, request, jsonify
-from flask_login import login_required, current_user
+from flask_login import current_user
 
+from ..daily_challenge_explanations import build_daily_challenge_explanation
 from backend.project.models import db
 from backend.project.models.user import DailyChallenge, ChallengeAttempt
 
@@ -120,10 +121,11 @@ def generate_scales_questions(count):
 
         questions.append({
             'category': 'scales',
-            'title': f'Identify the {scale_type.replace("_", " ").title()} Scale',
-            'question': f'Which scale type is built on the root note {root} with the interval pattern: {", ".join(MAJOR_SCALE_INTERVALS if "major" in scale_type or scale_type in ("ionian", "lydian", "mixolydian") else MINOR_SCALE_INTERVALS)}?',
+            'title': f'Scale Recipe: {scale_type.replace("_", " ").title()}',
+            'question': f'Scale recipe time: {root} uses the pattern {", ".join(MAJOR_SCALE_INTERVALS if "major" in scale_type or scale_type in ("ionian", "lydian", "mixolydian") else MINOR_SCALE_INTERVALS)}. Which scale fits?',
             'options': options,
             'correct_index': correct_idx,
+            'explanation': build_daily_challenge_explanation('scales', f'Identify the {scale_type.replace("_", " ").title()} Scale', f'Which scale type is built on the root note {root} with the interval pattern: {", ".join(MAJOR_SCALE_INTERVALS if "major" in scale_type or scale_type in ("ionian", "lydian", "mixolydian") else MINOR_SCALE_INTERVALS)}?', options, correct_idx),
             'xp_reward': random.choice([25, 50, 75]),
             'difficulty': random.choice([1, 2]),
         })
@@ -147,10 +149,11 @@ def generate_chords_questions(count):
 
         questions.append({
             'category': 'chords',
-            'title': f'Identify the {root} Chord',
-            'question': f'What type of chord is {root}{correct_name}? (e.g., Major, Minor, Seventh, etc.)',
+            'title': 'Chord Stack',
+            'question': f'Chord stack check: what quality is {root}{correct_name}?',
             'options': options,
             'correct_index': correct_idx,
+            'explanation': build_daily_challenge_explanation('chords', f'Identify the {root} Chord', f'What type of chord is {root}{correct_name}? (e.g., Major, Minor, Seventh, etc.)', options, correct_idx),
             'xp_reward': random.choice([25, 50, 75]),
             'difficulty': random.choice([1, 2, 3]),
         })
@@ -177,10 +180,11 @@ def generate_intervals_questions(count):
 
         questions.append({
             'category': 'intervals',
-            'title': 'Identify the Interval',
-            'question': f'What is the interval between {n1} and {n2}? ({n1} → {n2} = {semitones} semitones)',
+            'title': 'Leap Check',
+            'question': f'Leap check: {n1} → {n2} is {semitones} semitones. What interval is it?',
             'options': options,
             'correct_index': correct_idx,
+            'explanation': build_daily_challenge_explanation('intervals', 'Identify the Interval', f'What is the interval between {n1} and {n2}? ({n1} → {n2} = {semitones} semitones)', options, correct_idx),
             'xp_reward': random.choice([25, 50]),
             'difficulty': random.choice([1, 2]),
         })
@@ -372,10 +376,11 @@ def generate_theory_questions(count):
         q = random.choice(theory_bank)
         questions.append({
             'category': 'theory',
-            'title': 'Music Theory',
+            'title': 'Theory Quest',
             'question': q['question'],
             'options': q['options'],
             'correct_index': q['correct_index'],
+            'explanation': build_daily_challenge_explanation('theory', 'Music Theory', q['question'], q['options'], q['correct_index']),
             'xp_reward': q['xp_reward'],
             'difficulty': q['difficulty'],
         })
@@ -399,10 +404,11 @@ def generate_ear_training_questions(count):
 
         questions.append({
             'category': 'ear_training',
-            'title': 'Interval Recognition',
-            'question': f'From {n1} to {n2}, what interval do you hear? (Distance: {semitones} semitones)',
+            'title': 'Ear Check',
+            'question': f'Ear check: {n1} → {n2} ({semitones} semitones). What interval do you hear?',
             'options': options,
             'correct_index': correct_idx,
+            'explanation': build_daily_challenge_explanation('ear_training', 'Interval Recognition', f'From {n1} to {n2}, what interval do you hear? (Distance: {semitones} semitones)', options, correct_idx),
             'xp_reward': random.choice([50, 75, 100]),
             'difficulty': random.choice([2, 3, 4]),
         })
@@ -507,10 +513,11 @@ def generate_general_questions(count):
         title, question, options, correct_idx, xp, diff = bank_copy[i % len(bank_copy)]
         questions.append({
             'category': 'general',
-            'title': title,
+            'title': f'Groove Quiz: {title}',
             'question': question,
             'options': options,
             'correct_index': correct_idx,
+            'explanation': build_daily_challenge_explanation('general', title, question, options, correct_idx),
             'xp_reward': xp,
             'difficulty': diff,
         })
@@ -558,6 +565,7 @@ def seed_challenges(target=1000):
                 question=q['question'],
                 options_json=json.dumps(q['options']),
                 correct_index=q['correct_index'],
+                explanation=q.get('explanation'),
                 xp_reward=q['xp_reward'],
                 difficulty=q['difficulty'],
             ))
@@ -604,29 +612,44 @@ def compute_streak(user_id):
 # ─── Routes ────────────────────────────────────────────────────────────────────
 
 @daily_bp.route('/daily-challenges', methods=['GET'])
-@login_required
 def get_daily_challenges():
     """Return challenges the current user hasn't completed yet."""
     limit = min(int(request.args.get('limit', 10)), 50)
     offset = int(request.args.get('offset', 0))
+    random_mode = request.args.get('random', '0') == '1'
+    exclude_ids_raw = request.args.get('exclude_ids', '')
+    exclude_ids = {
+        int(part)
+        for part in exclude_ids_raw.split(',')
+        if part.strip().isdigit()
+    }
 
     # Get IDs of completed challenges
-    completed_ids = db.session.query(ChallengeAttempt.challenge_id).filter(
-        ChallengeAttempt.user_id == current_user.id,
-        ChallengeAttempt.completed == True,
-        ChallengeAttempt.challenge_id.isnot(None),
-    ).all()
-    completed_ids = {c[0] for c in completed_ids}
+    completed_ids = set()
+    if current_user.is_authenticated:
+        completed_rows = db.session.query(ChallengeAttempt.challenge_id).filter(
+            ChallengeAttempt.user_id == current_user.id,
+            ChallengeAttempt.completed == True,
+            ChallengeAttempt.challenge_id.isnot(None),
+        ).all()
+        completed_ids = {c[0] for c in completed_rows}
 
     # Fetch challenges excluding completed ones before paginating so offsets stay stable.
     available_query = DailyChallenge.query
     if completed_ids:
         available_query = available_query.filter(~DailyChallenge.id.in_(completed_ids))
+    if exclude_ids:
+        available_query = available_query.filter(~DailyChallenge.id.in_(exclude_ids))
 
     available_total = available_query.count()
-    challenges = available_query \
-        .order_by(DailyChallenge.difficulty.asc(), DailyChallenge.id.asc()) \
-        .offset(offset).limit(limit).all()
+
+    if random_mode:
+        candidates = available_query.all()
+        challenges = random.sample(candidates, k=min(limit, len(candidates))) if candidates else []
+    else:
+        challenges = available_query \
+            .order_by(DailyChallenge.difficulty.asc(), DailyChallenge.id.asc()) \
+            .offset(offset).limit(limit).all()
 
     result = [c.to_dict() for c in challenges]
     completed_count = len(completed_ids)
@@ -635,36 +658,49 @@ def get_daily_challenges():
         'challenges': result,
         'total': DailyChallenge.query.count(),
         'completed': completed_count,
-        'remaining': max(available_total - offset - len(result), 0),
+        'remaining': max(available_total - len(result), 0) if random_mode else max(available_total - offset - len(result), 0),
         'limit': limit,
         'offset': offset,
     })
 
 
 @daily_bp.route('/daily-challenge/<int:challenge_id>/complete', methods=['POST'])
-@login_required
 def complete_challenge(challenge_id):
     """Mark a challenge as complete and award XP."""
     challenge = DailyChallenge.query.get(challenge_id)
     if not challenge:
         return jsonify({'error': 'Challenge not found'}), 404
 
+    if not current_user.is_authenticated:
+        return jsonify({
+            'xp': 0,
+            'level': 1,
+            'xp_awarded': 0,
+            'message': 'Correct! Sign in to save XP and streak progress.',
+        })
+
     today = datetime.utcnow().strftime('%Y-%m-%d')
     xp_award = challenge.xp_reward
 
-    # One completion per day: reuse today's row if it exists, otherwise create it.
+    # One reward per challenge: completed challenges are filtered out of the list,
+    # so a visible challenge should pay its own reward exactly once.
     existing = ChallengeAttempt.query.filter_by(
         user_id=current_user.id,
-        challenge_date=today,
+        challenge_id=challenge_id,
     ).first()
     if existing and existing.completed:
-        return jsonify({'error': 'Challenge already completed today', 'xp': current_user.xp, 'level': current_user.level}), 400
+        return jsonify({
+            'xp': current_user.xp,
+            'level': current_user.level,
+            'xp_awarded': 0,
+            'already_completed': True,
+            'message': 'Challenge already completed.',
+        })
 
     if existing:
-        existing.challenge_id = challenge_id
+        existing.challenge_date = today
         existing.score = xp_award
         existing.completed = True
-        existing.challenge_date = today
     else:
         attempt = ChallengeAttempt(
             user_id=current_user.id,
@@ -684,6 +720,7 @@ def complete_challenge(challenge_id):
         'xp': current_user.xp,
         'level': current_user.level,
         'xp_awarded': xp_award,
+        'already_completed': False,
         'message': f'+{xp_award} XP!',
     })
 
@@ -699,9 +736,14 @@ def seed():
 
 
 @daily_bp.route('/user/streak', methods=['GET'])
-@login_required
 def get_streak():
     """Get the user's current daily streak."""
+    if not current_user.is_authenticated:
+        return jsonify({
+            'streak': 0,
+            'completed_today': False,
+        })
+
     streak = compute_streak(current_user.id)
 
     today = datetime.utcnow().strftime('%Y-%m-%d')

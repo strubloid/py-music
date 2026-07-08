@@ -95,6 +95,32 @@ export const AuthProvider = ({ children }) => {
     return await api.post('/api/auth/forgot-password', { email });
   }, []);
 
+  const updateUserProgress = useCallback((progress) => {
+    setUser((current) => {
+      if (!current) return current;
+
+      const nextUser = {
+        ...current,
+        ...(progress.xp !== undefined ? { xp: progress.xp } : {}),
+        ...(progress.level !== undefined ? { level: progress.level } : {}),
+      };
+
+      if (!nextUser.id) {
+        localStorage.setItem('guestUser', JSON.stringify(nextUser));
+      }
+
+      return nextUser;
+    });
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    const res = await api.get('/api/auth/me');
+    if (res.data.user) {
+      setUser(res.data.user);
+    }
+    return res.data.user;
+  }, []);
+
   const closeLoginModal = useCallback(() => {
     // If user isn't logged in, become a guest so the app has a usable state
     if (!isLoggedIn && !user) {
@@ -115,6 +141,8 @@ export const AuthProvider = ({ children }) => {
       register,
       logout,
       continueAsGuest,
+      updateUserProgress,
+      refreshUser,
       showLoginModal,
       loginReason,
       promptLogin,

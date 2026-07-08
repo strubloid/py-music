@@ -83,7 +83,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
       {/* Play section */}
       <div className="nav-section">
         {!collapsed && <span className="nav-section-label">Play</span>}
-        {navItem(<Zap size={18} />, 'Daily Challenge', '/play/daily')}
+        {navItem(<Zap size={18} />, 'Challenges', '/play/daily')}
         {navItem(<Train size={18} />, 'Ear Training', '/play/ear-training')}
         {navItem(<Gamepad2 size={18} />, 'Quests', '/play/quests')}
       </div>
