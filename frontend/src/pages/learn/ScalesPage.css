@@ -130,11 +130,15 @@
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
+  overflow-y: hidden;
   padding: 0.25rem 0.5rem 0.4rem;
   scrollbar-width: thin;
   scrollbar-color: rgba(251, 191, 36, 0.3) transparent;
   scroll-snap-type: x mandatory;
   justify-content: flex-start;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: contain;
+  touch-action: pan-x;
 }
 
 .modes-pill-row::-webkit-scrollbar { height: 6px; }

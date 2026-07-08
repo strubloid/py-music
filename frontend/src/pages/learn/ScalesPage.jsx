@@ -62,6 +62,13 @@ const ScalesPage = () => {
         }
     });
 
+    const handleModesWheel = (event) => {
+        const { deltaX, deltaY, currentTarget } = event;
+        if (Math.abs(deltaY) <= Math.abs(deltaX)) return;
+        event.preventDefault();
+        currentTarget.scrollLeft += deltaY;
+    };
+
     useEffect(() => {
         fetchAvailableModes();
     }, []);
@@ -218,7 +225,7 @@ const ScalesPage = () => {
                 <aside className="scales-rail">
                     <section className="rail-panel rail-panel-modes">
                         <div className="rail-label">Modes</div>
-                        <div className="modes-pill-row" role="tablist" aria-label="Mode selector">
+                        <div className="modes-pill-row" role="tablist" aria-label="Mode selector" onWheel={handleModesWheel}>
                             {allModes.map((mode) => {
                                 const isActive = selectedInterval === mode.modeKey;
                                 const isVisited = !!(visited[selectedKey] || {})[mode.modeKey];
