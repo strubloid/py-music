@@ -566,6 +566,8 @@ During gameplay, show:
 - current question number
 - combo
 - possible XP
+- current XP penalties from powers or replays
+- current net reward preview after penalties
 - selected instrument
 - available powers
 - replay count
@@ -575,6 +577,33 @@ Design rule:
 
 - the gameplay surface should stay fast and readable
 - deep progression details should appear in summary or profile views
+
+## XP Visibility Rule
+
+If a power or action reduces XP, the reduction must be visible immediately in the gameplay UI.
+
+Examples:
+
+- base reward shows as `+50 XP`
+- using `Remove One Option` immediately shows `-10 XP`
+- the live preview updates to `Current reward 40 XP`
+
+After the answer, the game should show a short XP breakdown such as:
+
+- base XP
+- penalty XP
+- bonus XP
+- final XP earned
+
+This is important because hidden penalties feel fake even when the math is correct.
+
+The game should also use small positive or negative feedback bursts for reward changes, such as:
+
+- `+48 XP`
+- `-10 XP`
+- `-1 focus`
+
+That makes powers feel strategic and makes reward changes easy to understand.
 
 # Data Model Suggestions
 

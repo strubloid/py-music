@@ -33,19 +33,8 @@
   margin: 0.125rem 0 0;
 }
 
-.ear-streak {
+.streak-badge-shared {
   margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: rgba(251, 191, 36, 0.15);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  border-radius: 9999px;
-  padding: 0.4rem 0.9rem;
-  color: #fbbf24;
-  font-size: 0.875rem;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 .ear-loading,
@@ -195,6 +184,62 @@
   margin-top: 0.25rem;
   color: #fff;
   font-size: 0.98rem;
+}
+
+.ear-xp-preview,
+.ear-xp-breakdown {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  color: #cbd5e1;
+  font-size: 0.86rem;
+}
+
+.xp-preview-base,
+.xp-preview-penalty,
+.ear-xp-breakdown span,
+.ear-xp-breakdown strong,
+.xp-preview-total {
+  padding: 0.45rem 0.7rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.xp-preview-penalty {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.xp-preview-total,
+.ear-xp-breakdown strong {
+  color: #fbbf24;
+}
+
+.ear-feedback-burst {
+  margin-top: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.85rem;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.ear-feedback-burst.positive {
+  background: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
+}
+
+.ear-feedback-burst.negative {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+}
+
+.ear-feedback-burst.neutral {
+  background: rgba(251, 191, 36, 0.12);
+  color: #fde68a;
 }
 .ear-instrument-container {
     display: flex;
@@ -477,7 +522,7 @@
     flex-direction: column;
   }
 
-  .ear-streak {
+  .streak-badge-shared {
     margin-left: 0;
   }
 

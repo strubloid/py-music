@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Zap, Flame, RefreshCw, CheckCircle, Loader } from 'lucide-react';
+import { Zap, RefreshCw, CheckCircle, Loader } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGameProgress } from '../../contexts/GameProgressContext.jsx';
+import StreakBadge from '../../components/game/StreakBadge.jsx';
 import {
-  awardXp,
   getDailyChallenges,
   completeDailyChallenge,
   seedChallenges,
   getUserStreak,
 } from '../../services/api';
-import { calculateChallengeBonuses, calculateQuestionXp, getPowerById } from '../../game/gameSystem.tsx';
+import { calculateChallengeBonuses, calculateQuestionXp, calculateXpPreview, getPowerById } from '../../game/gameSystem.tsx';
 import './DailyChallenge.css';
 
 const INITIAL_LIMIT = 1;
@@ -49,11 +49,20 @@ const DailyChallenge = () => {
   const [hiddenOptionIndexes, setHiddenOptionIndexes] = useState([]);
   const [questionPowersUsed, setQuestionPowersUsed] = useState([]);
   const [dailyBonusClaimed, setDailyBonusClaimed] = useState(false);
+  const [xpBreakdown, setXpBreakdown] = useState(null);
+  const [feedbackBurst, setFeedbackBurst] = useState(null);
   const seenChallengeIdsRef = useRef([]);
   const advanceTimerRef = useRef(null);
   const questionStartedAtRef = useRef(Date.now());
   const sessionStatsRef = useRef({ answered: 0, correct: 0, totalXp: 0, powersUsed: [] });
-  const { unlockedPowers, consumeFocus, recordChallengeResult, addBonusXp, levelMeta, progressState } = useGameProgress();
+  const burstTimerRef = useRef(null);
+  const { unlockedPowers, consumeFocus, recordChallengeResult, levelMeta, progressState } = useGameProgress();
+
+  const showFeedbackBurst = useCallback((label, tone = 'positive') => {
+    if (burstTimerRef.current) clearTimeout(burstTimerRef.current);
+    setFeedbackBurst({ label, tone });
+    burstTimerRef.current = setTimeout(() => setFeedbackBurst(null), 1600);
+  }, []);
 
   const rememberSeenChallenges = useCallback((nextChallenges) => {
     const ids = new Set(seenChallengeIdsRef.current);
@@ -135,6 +144,7 @@ const DailyChallenge = () => {
       setDailySummary(null);
       setHiddenOptionIndexes([]);
       setQuestionPowersUsed([]);
+      setXpBreakdown(null);
       sessionStatsRef.current = { answered: 0, correct: 0, totalXp: 0, powersUsed: [] };
       window.dispatchEvent(new Event('streak:updated'));
     } catch (err) {
@@ -160,6 +170,7 @@ const DailyChallenge = () => {
 
   const activeChallenge = challenges[activeIndex] || null;
   const activeResult = activeChallenge ? results[activeChallenge.id] : null;
+  const xpPreview = calculateXpPreview({ baseXp: activeChallenge?.xp_reward || 0, replayCount: 0, powerIds: questionPowersUsed });
 
   const handleAnswer = async (challengeId, selectedIdx, correctIdx) => {
     if (completing[challengeId] || results[challengeId]) return;
@@ -167,6 +178,8 @@ const DailyChallenge = () => {
     const isCorrect = selectedIdx === correctIdx;
     const isFastAnswer = Date.now() - questionStartedAtRef.current <= 7000;
     const penalties = (questionPowersUsed.includes('remove_one_option') ? 10 : 0);
+    const comboBonus = combo >= 10 ? 5 : combo >= 5 ? 3 : combo >= 2 ? 1 : 0;
+    const bonusXp = (isCorrect ? 5 : 0) + (isCorrect && isFastAnswer ? 3 : 0) + (isCorrect ? comboBonus : 0);
     const awardedXp = calculateQuestionXp({
       baseXp: activeChallenge?.xp_reward || 10,
       isCorrect,
@@ -174,6 +187,12 @@ const DailyChallenge = () => {
       isFastAnswer,
       combo,
       penalties,
+    });
+    setXpBreakdown({
+      baseXp: activeChallenge?.xp_reward || 10,
+      penalties,
+      bonusXp,
+      finalXp: isCorrect ? awardedXp : 0,
     });
     setCompleting((prev) => ({ ...prev, [challengeId]: true }));
 
@@ -195,9 +214,25 @@ const DailyChallenge = () => {
         setCombo(nextCombo);
         setMaxCombo((current) => Math.max(current, nextCombo));
         if (isLoggedIn) {
-          const res = await completeDailyChallenge(challengeId, { xp_award: awardedXp });
-          updateUserProgress({ xp: res.data.xp, level: res.data.level });
+          const streakRes = await getUserStreak();
+          setStreak(streakRes.data.streak);
+          setCompletedToday(streakRes.data.completed_today);
+
+          const bonuses = !dailyBonusClaimed
+            ? calculateChallengeBonuses({ answeredCorrectly: 1, totalQuestions: 1, maxCombo: nextCombo, isDaily: true })
+            : { completionXp: 0, perfectXp: 0, dailyXp: 0, comboXp: 0 };
+          const streakBonus = !dailyBonusClaimed && streakRes.data.streak >= 3 ? 20 : 0;
+          const bonusTotal = bonuses.completionXp + bonuses.perfectXp + bonuses.dailyXp + streakBonus;
+          const totalAwardXp = awardedXp + bonusTotal;
+
+          const res = await completeDailyChallenge(challengeId, { xp_award: totalAwardXp });
           rememberCompletedChallengeId(challengeId);
+          const isAuthenticatedReward = res.data.authenticated !== false;
+
+          if (isAuthenticatedReward) {
+            updateUserProgress({ xp: res.data.xp, level: res.data.level });
+          }
+
           setResults((prev) => ({
             ...prev,
             [challengeId]: {
@@ -206,22 +241,21 @@ const DailyChallenge = () => {
             },
           }));
 
-          const streakRes = await getUserStreak();
-          setStreak(streakRes.data.streak);
-          setCompletedToday(streakRes.data.completed_today);
-
-          if (!dailyBonusClaimed) {
-            const bonuses = calculateChallengeBonuses({ answeredCorrectly: 1, totalQuestions: 1, maxCombo: nextCombo, isDaily: true });
-            const bonusTotal = bonuses.completionXp + bonuses.perfectXp + bonuses.dailyXp + (streakRes.data.streak >= 3 ? 20 : 0);
-            if (bonusTotal > 0) {
-              await awardXp(bonusTotal);
-              await addBonusXp(bonusTotal);
-            }
+          if (isAuthenticatedReward && !dailyBonusClaimed) {
             setDailyBonusClaimed(true);
             setDailySummary({
               score: 1,
               accuracy: 1,
-              xpEarned: awardedXp + bonusTotal,
+              xpEarned: totalAwardXp,
+              combo: nextCombo,
+              powersUsed: questionPowersUsed,
+              streak: streakRes.data.streak,
+            });
+          } else if (isAuthenticatedReward) {
+            setDailySummary({
+              score: 1,
+              accuracy: 1,
+              xpEarned: totalAwardXp,
               combo: nextCombo,
               powersUsed: questionPowersUsed,
               streak: streakRes.data.streak,
@@ -230,7 +264,7 @@ const DailyChallenge = () => {
             setDailySummary({
               score: 1,
               accuracy: 1,
-              xpEarned: awardedXp,
+              xpEarned: 0,
               combo: nextCombo,
               powersUsed: questionPowersUsed,
               streak: streakRes.data.streak,
@@ -240,7 +274,7 @@ const DailyChallenge = () => {
           sessionStatsRef.current = {
             answered: sessionStatsRef.current.answered + 1,
             correct: sessionStatsRef.current.correct + 1,
-            totalXp: sessionStatsRef.current.totalXp + awardedXp,
+            totalXp: sessionStatsRef.current.totalXp + (isAuthenticatedReward ? totalAwardXp : 0),
             powersUsed: [...sessionStatsRef.current.powersUsed, ...questionPowersUsed],
           };
           recordChallengeResult({
@@ -248,12 +282,13 @@ const DailyChallenge = () => {
             mode: 'daily',
             score: 1,
             accuracy: 1,
-            xpEarned: awardedXp,
+            xpEarned: isAuthenticatedReward ? totalAwardXp : 0,
             maxCombo: Math.max(maxCombo, nextCombo),
             powersUsed: questionPowersUsed,
             streakDays: streakRes.data.streak,
             completedAt: new Date().toISOString(),
           });
+          showFeedbackBurst(isAuthenticatedReward ? `+${totalAwardXp} XP` : 'Sign in to save XP', isAuthenticatedReward ? 'positive' : 'neutral');
           window.dispatchEvent(new Event('streak:updated'));
           queueNextChallenge();
         } else {
@@ -282,6 +317,7 @@ const DailyChallenge = () => {
             streakDays: streak,
             completedAt: new Date().toISOString(),
           });
+          showFeedbackBurst(`+${awardedXp} XP`, 'positive');
           queueNextChallenge();
         }
       } else {
@@ -299,6 +335,7 @@ const DailyChallenge = () => {
           answered: sessionStatsRef.current.answered + 1,
         };
         setDailySummary({ score: 0, accuracy: 0, xpEarned: 0, combo, powersUsed: questionPowersUsed, streak });
+        if (penalties > 0) showFeedbackBurst(`-${penalties} XP lost`, 'negative');
         rememberCompletedChallengeId(challengeId);
         queueNextChallenge();
       }
@@ -331,6 +368,11 @@ const DailyChallenge = () => {
       }
     }
     setQuestionPowersUsed((current) => [...current, powerId]);
+    if (power.xpPenalty) {
+      showFeedbackBurst(`-${power.xpPenalty} XP`, 'negative');
+    } else if (power.focusCost) {
+      showFeedbackBurst(`-${power.focusCost} focus`, 'neutral');
+    }
   };
 
   const handleLoadMore = async () => {
@@ -408,10 +450,7 @@ const DailyChallenge = () => {
           </p>
         </div>
         {isLoggedIn && (
-          <div className="streak-badge">
-            <Flame size={16} />
-            <span>{streak} day streak</span>
-          </div>
+          <StreakBadge streak={streak} />
         )}
       </div>
 
@@ -444,9 +483,16 @@ const DailyChallenge = () => {
                 <span className="challenge-category">
                   {categoryEmoji(activeChallenge.category)} {activeChallenge.category.replace('_', ' ')}
                 </span>
-                <span className="challenge-xp">+{activeChallenge.xp_reward} XP</span>
+                <span className="challenge-xp">+{xpPreview.previewXp} XP</span>
                 <span className="challenge-diff">{diffStars(activeChallenge.difficulty)}</span>
               </div>
+
+              <div className="daily-xp-preview">
+                <span className="daily-xp-base">Base +{xpPreview.baseXp} XP</span>
+                {xpPreview.penalties > 0 && <span className="daily-xp-penalty">-{xpPreview.penalties} XP</span>}
+                <strong className="daily-xp-total">Current reward {xpPreview.previewXp} XP</strong>
+              </div>
+              {feedbackBurst && <div className={`daily-feedback-burst ${feedbackBurst.tone}`}>{feedbackBurst.label}</div>}
 
               <h3 className="challenge-title">{activeChallenge.title}</h3>
               <p className="challenge-question">{activeChallenge.question}</p>
@@ -497,6 +543,15 @@ const DailyChallenge = () => {
                       : <>🎉 Nice hit! <strong>Sign in to save XP</strong></>
                     : <>🎯 Off beat — the answer was <strong>{activeChallenge.options[activeChallenge.correct_index]}</strong></>
                   }
+                </div>
+              )}
+
+              {xpBreakdown && activeResult?.correct && (
+                <div className="daily-xp-breakdown">
+                  <span>Base {xpBreakdown.baseXp} XP</span>
+                  {xpBreakdown.penalties > 0 && <span>-{xpBreakdown.penalties} XP penalties</span>}
+                  {xpBreakdown.bonusXp > 0 && <span>+{xpBreakdown.bonusXp} XP bonuses</span>}
+                  <strong>= {xpBreakdown.finalXp} XP</strong>
                 </div>
               )}
 

@@ -674,6 +674,7 @@ def complete_challenge(challenge_id):
 
     if not current_user.is_authenticated:
         return jsonify({
+            'authenticated': False,
             'xp': 0,
             'level': 1,
             'xp_awarded': 0,
@@ -698,6 +699,7 @@ def complete_challenge(challenge_id):
     ).first()
     if existing and existing.completed:
         return jsonify({
+            'authenticated': True,
             'xp': current_user.xp,
             'level': current_user.level,
             'xp_awarded': 0,
@@ -725,6 +727,7 @@ def complete_challenge(challenge_id):
     db.session.commit()
 
     return jsonify({
+        'authenticated': True,
         'xp': current_user.xp,
         'level': current_user.level,
         'xp_awarded': xp_award,

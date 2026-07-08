@@ -72,6 +72,30 @@ export const calculateQuestionXp = ({
   return Math.max(1, baseXp + bonusXp - penalties);
 };
 
+export const calculatePowerPenalty = (powerIds: string[] = []) => powerIds.reduce((total, powerId) => {
+  const power = getPowerById(powerId);
+  return total + (power?.xpPenalty || 0);
+}, 0);
+
+export const calculateReplayPenalty = (replayCount = 0) => Math.max(0, replayCount - 1) * 2;
+
+export const calculateXpPreview = ({
+  baseXp = 10,
+  replayCount = 0,
+  powerIds = [],
+}) => {
+  const replayPenalty = calculateReplayPenalty(replayCount);
+  const powerPenalty = calculatePowerPenalty(powerIds);
+  const penalties = replayPenalty + powerPenalty;
+  return {
+    baseXp,
+    penalties,
+    replayPenalty,
+    powerPenalty,
+    previewXp: Math.max(1, baseXp - penalties),
+  };
+};
+
 export const calculateChallengeBonuses = ({
   answeredCorrectly = 0,
   totalQuestions = 0,

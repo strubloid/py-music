@@ -194,6 +194,7 @@ def csp_violation():
 
 
 @app.route('/api/audio-proxy/piano/<path:asset_path>', methods=['GET'])
+@limiter.exempt
 def proxy_piano_asset(asset_path):
     """Serve whitelisted piano sample assets from a same-origin endpoint."""
     safe_path = asset_path.strip('/')
@@ -208,6 +209,7 @@ def proxy_piano_asset(asset_path):
 
 
 @app.route('/api/audio-proxy/soundfont/<kit>/<instrument>', methods=['GET'])
+@limiter.exempt
 def proxy_soundfont_asset(kit, instrument):
     """Serve whitelisted soundfont JS payloads from a same-origin endpoint."""
     allowed_kits = {'FluidR3_GM'}
