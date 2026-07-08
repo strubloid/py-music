@@ -70,7 +70,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
 
       {/* User badge */}
       <div className="sidebar-user">
-        <UserBadge />
+        <UserBadge collapsed={collapsed} />
       </div>
 
       {/* Learn section */}
@@ -101,8 +101,9 @@ const Sidebar = ({ collapsed, onToggle }) => {
         {navItem(<Settings size={18} />, 'Settings', '/settings')}
         {!user && (
           <button
+            type="button"
             className={`nav-item login-nav-item ${collapsed ? 'justify-center' : ''}`}
-            onClick={promptLogin}
+            onClick={() => promptLogin('save')}
             title={collapsed ? 'Sign in / Register' : undefined}
           >
             <span className="nav-icon"><LogIn size={18} /></span>
@@ -120,8 +121,9 @@ const Sidebar = ({ collapsed, onToggle }) => {
           </button>
         ) : user ? (
           <button
+            type="button"
             className={`nav-item login-nav-item ${collapsed ? 'justify-center' : ''}`}
-            onClick={promptLogin}
+            onClick={() => promptLogin('save')}
             title={collapsed ? 'Sign in / Register' : undefined}
           >
             <span className="nav-icon"><LogIn size={18} /></span>

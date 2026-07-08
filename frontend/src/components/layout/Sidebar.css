@@ -10,6 +10,7 @@
   transition: width 0.25s ease;
   flex-shrink: 0;
   position: relative;
+  box-sizing: border-box;
 }
 
 .sidebar.collapsed {
@@ -23,6 +24,13 @@
   padding: 0.25rem 0.5rem 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   margin-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.sidebar.collapsed .sidebar-logo {
+  justify-content: center;
+  gap: 0;
+  padding: 0.75rem 0 0.9rem;
 }
 
 .logo-icon {
@@ -42,6 +50,11 @@
 .sidebar-user {
   padding: 0 0.25rem;
   margin-bottom: 1.25rem;
+  box-sizing: border-box;
+}
+
+.sidebar.collapsed .sidebar-user {
+  padding: 0;
 }
 
 .nav-section {
@@ -76,6 +89,13 @@
   text-align: left;
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .nav-item:hover {
@@ -93,6 +113,10 @@
   align-items: center;
   flex-shrink: 0;
   width: 18px;
+}
+
+.sidebar.collapsed .nav-icon {
+  width: auto;
 }
 
 .nav-label {

@@ -30,7 +30,7 @@ const LoginModal = () => {
 
   if (authLoading) return null;
   if (!showLoginModal) return null;
-  if (user) return null;
+  if (isLoggedIn) return null;
 
   const resetForm = () => {
     setUsername('');
@@ -70,7 +70,7 @@ const LoginModal = () => {
   };
 
   const getReasonText = () => {
-    if (loginReason === 'save') return 'Sign up to save your songs permanently.';
+    if (loginReason === 'save') return 'Sign in to save progress and keep your work synced.';
     if (loginReason === 'load') return 'Sign in to load your saved songs.';
     return null;
   };

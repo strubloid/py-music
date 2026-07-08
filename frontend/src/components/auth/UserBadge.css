@@ -2,6 +2,10 @@
   position: relative;
 }
 
+.user-badge.collapsed {
+  width: 100%;
+}
+
 .badge-trigger {
   display: flex;
   align-items: center;
@@ -12,6 +16,13 @@
   padding: 0.375rem 0.75rem 0.375rem 0.5rem;
   cursor: pointer;
   transition: background 0.2s;
+  box-sizing: border-box;
+}
+
+.badge-trigger.collapsed {
+  width: 100%;
+  justify-content: center;
+  padding: 0.375rem 0.375rem;
 }
 
 .badge-trigger:hover {
@@ -100,6 +111,11 @@
   min-width: 220px;
   z-index: 200;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.user-badge.collapsed .badge-dropdown {
+  left: 0;
+  right: auto;
 }
 
 .dropdown-header {

@@ -33,7 +33,7 @@ const updateGuestStreak = () => {
   return newCount;
 };
 
-const UserBadge = () => {
+const UserBadge = ({ collapsed = false }) => {
   const { user, logout, isLoggedIn, isGuest, promptLogin } = useAuth();
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -95,8 +95,8 @@ const UserBadge = () => {
   const nextLevelXp = XP_PER_LEVEL * level;
 
   return (
-    <div className="user-badge" ref={ref}>
-      <button className="badge-trigger" onClick={() => setOpen(!open)}>
+    <div className={`user-badge ${collapsed ? 'collapsed' : ''}`} ref={ref}>
+      <button className={`badge-trigger ${collapsed ? 'collapsed' : ''}`} onClick={() => setOpen(!open)}>
         <div className="badge-avatar">
           {isLoggedIn ? (
             <User size={16} />
@@ -104,21 +104,25 @@ const UserBadge = () => {
             <span className="guest-avatar">G</span>
           )}
         </div>
-        <div className="badge-info">
-          <span className="badge-name">{user.username}</span>
-          <span className="badge-level">Lv. {level}</span>
-        </div>
-        <div className="badge-xp-ring">
-          <svg viewBox="0 0 36 36">
-            <circle className="xp-bg" cx="18" cy="18" r="15.5" />
-            <circle
-              className="xp-fill"
-              cx="18" cy="18" r="15.5"
-              strokeDasharray={`${xpProgress}, 100`}
-            />
-          </svg>
-        </div>
-        <ChevronDown size={14} className={`badge-chevron ${open ? 'open' : ''}`} />
+        {!collapsed && (
+          <>
+            <div className="badge-info">
+              <span className="badge-name">{user.username}</span>
+              <span className="badge-level">Lv. {level}</span>
+            </div>
+            <div className="badge-xp-ring">
+              <svg viewBox="0 0 36 36">
+                <circle className="xp-bg" cx="18" cy="18" r="15.5" />
+                <circle
+                  className="xp-fill"
+                  cx="18" cy="18" r="15.5"
+                  strokeDasharray={`${xpProgress}, 100`}
+                />
+              </svg>
+            </div>
+          </>
+        )}
+        {!collapsed && <ChevronDown size={14} className={`badge-chevron ${open ? 'open' : ''}`} />}
       </button>
 
       {open && (
@@ -148,7 +152,11 @@ const UserBadge = () => {
           </div>
 
           {isGuest ? (
-            <button className="dropdown-item" onClick={() => { setOpen(false); promptLogin(); }}>
+            <button
+              type="button"
+              className="dropdown-item"
+              onClick={() => { setOpen(false); promptLogin('save'); }}
+            >
               <User size={15} />
               Sign in to save progress
             </button>
