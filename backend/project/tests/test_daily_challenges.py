@@ -1,3 +1,4 @@
+import json
 import os
 import tempfile
 import unittest
@@ -7,8 +8,9 @@ os.environ.setdefault('OPENAI_API_KEY', 'test')
 
 from flask import Flask
 
-from backend.project.api.daily_challenges import daily_bp
+from backend.project.api.daily_challenges import daily_bp, seed_challenges
 from backend.project.auth import auth_bp, login_manager
+from backend.project.daily_challenge_explanations import build_daily_challenge_explanation
 from backend.project.models import bcrypt, db
 from backend.project.models.user import ChallengeAttempt, DailyChallenge, User, run_migrations
 
@@ -101,6 +103,30 @@ class DailyChallengeFlowTest(unittest.TestCase):
                 completed=True,
             ).count()
         self.assertEqual(attempts, 2)
+
+    def test_generated_hints_do_not_reveal_correct_answer(self):
+        with self.app.app_context():
+            DailyChallenge.query.delete()
+            db.session.commit()
+            seed_challenges(1000)
+
+            leaks = []
+            for challenge in DailyChallenge.query.all():
+                options = json.loads(challenge.options_json)
+                correct = options[challenge.correct_index]
+                hint = build_daily_challenge_explanation(
+                    challenge.category,
+                    challenge.title,
+                    challenge.question,
+                    options,
+                    challenge.correct_index,
+                )
+                normalized_hint = hint.lower()
+                normalized_correct = correct.lower().strip()
+                if len(normalized_correct) > 1 and normalized_correct in normalized_hint:
+                    leaks.append((challenge.id, correct, hint))
+
+        self.assertEqual(leaks, [])
 
     def test_migration_replaces_old_one_completion_per_day_constraint(self):
         with self.app.app_context():

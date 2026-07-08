@@ -68,14 +68,19 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = useCallback(async () => {
-    try {
-      await api.post('/api/auth/logout');
-    } catch {
-      // ignore
+    const wasLoggedIn = Boolean(user?.id);
+
+    if (wasLoggedIn) {
+      try {
+        await api.post('/api/auth/logout');
+      } catch {
+        // Still clear local auth state if the remote session is already gone.
+      }
     }
-    setUser(GUEST_USER);
-    localStorage.setItem('guestUser', JSON.stringify(GUEST_USER));
-  }, []);
+
+    setUser(null);
+    localStorage.removeItem('guestUser');
+  }, [user?.id]);
 
   const continueAsGuest = useCallback(() => {
     setUser(GUEST_USER);

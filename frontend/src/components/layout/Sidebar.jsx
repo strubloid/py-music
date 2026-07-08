@@ -45,7 +45,7 @@ const NavItemWithBadge = ({ collapsed, navigate }) => {
 const Sidebar = ({ collapsed, onToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, promptLogin, logout } = useAuth();
+  const { user, isLoggedIn, promptLogin, logout } = useAuth();
 
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
 
@@ -109,7 +109,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
             {!collapsed && <span className="nav-label">Sign in / Register</span>}
           </button>
         )}
-        {user && (
+        {isLoggedIn ? (
           <button
             className={`nav-item logout-nav-item ${collapsed ? 'justify-center' : ''}`}
             onClick={logout}
@@ -118,7 +118,16 @@ const Sidebar = ({ collapsed, onToggle }) => {
             <span className="nav-icon"><LogOut size={18} /></span>
             {!collapsed && <span className="nav-label">Sign out</span>}
           </button>
-        )}
+        ) : user ? (
+          <button
+            className={`nav-item login-nav-item ${collapsed ? 'justify-center' : ''}`}
+            onClick={promptLogin}
+            title={collapsed ? 'Sign in / Register' : undefined}
+          >
+            <span className="nav-icon"><LogIn size={18} /></span>
+            {!collapsed && <span className="nav-label">Sign in / Register</span>}
+          </button>
+        ) : null}
       </div>
 
       {/* Collapse toggle */}

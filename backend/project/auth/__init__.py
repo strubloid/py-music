@@ -6,7 +6,7 @@ import hashlib
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from flask import Blueprint, request, jsonify, current_app
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_login import LoginManager, login_user, logout_user, current_user
 from backend.project.models import db
 from backend.project.models.user import User, PasswordResetToken
 
@@ -72,9 +72,9 @@ def login():
 
 
 @auth_bp.route('/logout', methods=['POST'])
-@login_required
 def logout():
-    logout_user()
+    if current_user.is_authenticated:
+        logout_user()
     return jsonify({'message': 'Logged out successfully'}), 200
 
 

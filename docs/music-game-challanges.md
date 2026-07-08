@@ -76,13 +76,16 @@ Better still for some modes:
 
 The explanation should be a hint, not a lesson.
 
+Because the hint is visible before the player answers, it must never contain the exact correct choice. It should teach the method or clue type only.
+
 Good explanation shapes:
 - “W = whole step (2 semitones). H = half step (1 semitone).”
-- “That pattern matches natural minor.”
-- “The 3rd decides major vs minor.”
-- “A perfect 5th is 7 semitones.”
+- “Compare the recipe with the scale choices.”
+- “Look at the chord formula: root, 3rd quality, 5th quality, and any added 7th.”
+- “Count the semitone distance, then match that number to the interval name.”
 
 Avoid long multi-clause paragraphs.
+Avoid pre-answer hints like “The answer is F#”, “This is Aeolian”, or “A perfect 5th is 7 semitones” when those exact values are answer options.
 
 ### Use music-native words
 
