@@ -2,6 +2,8 @@ import { Reverb, SampleLoader, Soundfont, SplendidGrandPiano } from 'smplr';
 
 const PRE_ROLL_SECONDS = 0.08;
 const PIANO_NOTES_TO_LOAD = [48, 52, 55, 60, 64, 67, 72, 76, 79, 84];
+const PIANO_PROXY_BASE_URL = '/api/audio-proxy/piano';
+const GUITAR_PROXY_URL = '/api/audio-proxy/soundfont/FluidR3_GM/acoustic_guitar_steel';
 
 export const EAR_TRAINING_INSTRUMENTS = [
   {
@@ -29,8 +31,7 @@ const createBrowserAudioContext = () => {
 const buildInstrument = (context, loader, instrumentId, onLoadProgress) => {
   if (instrumentId === 'guitar') {
     const guitar = Soundfont(context, {
-      instrument: 'acoustic_guitar_steel',
-      kit: 'FluidR3_GM',
+      instrumentUrl: GUITAR_PROXY_URL,
       loader,
       volume: 108,
       velocity: 108,
@@ -42,10 +43,12 @@ const buildInstrument = (context, loader, instrumentId, onLoadProgress) => {
   }
 
   const piano = SplendidGrandPiano(context, {
+    baseUrl: PIANO_PROXY_BASE_URL,
     loader,
     volume: 104,
     velocity: 104,
     decayTime: 0.9,
+    formats: ['ogg', 'm4a'],
     notesToLoad: {
       notes: PIANO_NOTES_TO_LOAD,
       velocityRange: [1, 127],

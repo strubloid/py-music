@@ -6,6 +6,7 @@ from functools import wraps
 import sys
 import os
 from pathlib import Path
+from urllib.parse import quote
 
 # Add the project root to sys.path (need to go up 3 levels: api -> project -> backend -> root)
 project_root = Path(__file__).parent.parent.parent.parent
@@ -201,11 +202,12 @@ def proxy_piano_asset(asset_path):
     if not (safe_path.endswith('.ogg') or safe_path.endswith('.m4a')):
         return jsonify({'error': 'Unsupported asset type'}), 400
 
-    remote_url = f'{PIANO_SAMPLE_REMOTE_BASE}/{safe_path}'
+    encoded_path = '/'.join(quote(segment, safe='') for segment in safe_path.split('/'))
+    remote_url = f'{PIANO_SAMPLE_REMOTE_BASE}/{encoded_path}'
     return _proxy_remote_audio_asset(remote_url)
 
 
-@app.route('/api/audio-proxy/soundfont/<kit>/<instrument>.js', methods=['GET'])
+@app.route('/api/audio-proxy/soundfont/<kit>/<instrument>', methods=['GET'])
 def proxy_soundfont_asset(kit, instrument):
     """Serve whitelisted soundfont JS payloads from a same-origin endpoint."""
     allowed_kits = {'FluidR3_GM'}
