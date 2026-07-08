@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { CheckCircle, Play, RefreshCw, Train, Trophy, Volume2, Waves, XCircle } from "lucide-react";
+import { CheckCircle, Flame, Play, RefreshCw, Train, Trophy, Volume2, Waves, XCircle } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useGameProgress } from "../../contexts/GameProgressContext.jsx";
 import StreakBadge from '../../components/game/StreakBadge.jsx';

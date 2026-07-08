@@ -23,44 +23,52 @@ export const createUser = async (page: Page, suffix: string) => {
   return { username, email, password };
 };
 
-export const loginSharedUser = async (page: Page) => {
-  await page.goto('/');
-  await page.getByRole('button', { name: /sign in \/ register/i }).click();
+const registerWithRetry = async (page: Page) => {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const res = await page.request.post('/api/auth/register', { data: SHARED_USER });
+    if (res.status() === 429) {
+      await page.waitForTimeout(2000 * (attempt + 1)); // backoff: 2s, 4s, 6s, 8s
+      continue;
+    }
+    if (![201, 409].includes(res.status())) {
+      throw new Error(`Unexpected register status: ${res.status()}`);
+    }
+    return res;
+  }
+  throw new Error('Register rate limited after 5 retries');
+};
+
+const loginViaForm = async (page: Page) => {
   await page.getByPlaceholder('Email').fill(SHARED_USER.email);
   await page.getByPlaceholder('Password').fill(SHARED_USER.password);
-
-  const loginPromise = page.waitForResponse(
+  const p = page.waitForResponse(
     (r) => r.url().includes('/api/auth/login') && r.request().method() === 'POST',
   );
   await page.locator('.login-form .submit-btn').click();
-  const loginRes = await loginPromise;
+  return await p;
+};
+
+export const loginSharedUser = async (page: Page) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /sign in \/ register/i }).click();
+  let loginRes = await loginViaForm(page);
 
   if (!loginRes.ok()) {
-    // User doesn't exist yet — register via CSRF-exempt API
-    const reg = await page.request.post('/api/auth/register', { data: SHARED_USER });
-    if (![201, 409].includes(reg.status())) {
-      throw new Error(`Unexpected register status: ${reg.status()}`);
-    }
-    // Retry login via form (reg sets session for 201, but React doesn't know)
+    await registerWithRetry(page);
+    // Session might be set (201). Reload so React picks it up, then login.
     await page.goto('/');
     await page.getByRole('button', { name: /sign in \/ register/i }).click();
-    await page.getByPlaceholder('Email').fill(SHARED_USER.email);
-    await page.getByPlaceholder('Password').fill(SHARED_USER.password);
-    const retry = page.waitForResponse(
-      (r) => r.url().includes('/api/auth/login') && r.request().method() === 'POST',
-    );
-    await page.locator('.login-form .submit-btn').click();
-    const r2 = await retry;
-    if (!r2.ok()) throw new Error(`Login failed: ${await r2.text()}`);
+    loginRes = await loginViaForm(page);
+    if (!loginRes.ok()) throw new Error(`Login failed: ${await loginRes.text()}`);
   }
 
   // Logged in (level 1). Award XP via page-context fetch (handles CSRF natively).
   await page.evaluate(async (amount) => {
-    const getCookie = (n: string) => {
+    const g = (n: string) => {
       const m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)'));
       return m ? decodeURIComponent(m[2]) : null;
     };
-    const csrf = getCookie('csrf_token');
+    const csrf = g('csrf_token');
     await fetch('/api/me/xp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(csrf ? { 'X-CSRFToken': csrf } : {}) },
