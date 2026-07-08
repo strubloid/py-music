@@ -143,7 +143,7 @@ const EarTraining = () => {
 
     const playChallenge = useCallback(
         async (instrumentId = selectedInstrument) => {
-            if (!challenge) return;
+            if (!challenge || playing) return;
 
             clearScheduledAudio();
             setError("");
@@ -175,7 +175,7 @@ const EarTraining = () => {
                 setError("Unable to start audio. Check your browser sound settings.");
             }
         },
-        [challenge, clearScheduledAudio, playbackMode, selectedInstrument],
+        [challenge, clearScheduledAudio, playbackMode, playing, selectedInstrument],
     );
 
     const loadChallenge = useCallback(async ({ replace = false, excludeIds = [] } = {}) => {
@@ -429,11 +429,11 @@ const EarTraining = () => {
                         </div>
                     </div>
                     <div className="ear-audio-panel">
-                        <button type="button" className="ear-play-button" onClick={() => playChallenge()} disabled={loadingNext}>
+                        <button type="button" className="ear-play-button" onClick={() => playChallenge()} disabled={loadingNext || playing}>
                             <Play size={18} />
                             {playing ? "Playing..." : instrumentReady ? "Play interval" : `Load ${selectedInstrumentMeta?.label?.toLowerCase() || "instrument"}`}
                         </button>
-                        <button type="button" className="ear-action-button" onClick={() => playChallenge()} disabled={loadingNext}>
+                        <button type="button" className="ear-action-button" onClick={() => playChallenge()} disabled={loadingNext || playing}>
                             <Volume2 size={16} />
                             Replay
                         </button>
