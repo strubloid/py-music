@@ -124,24 +124,74 @@ class Favorite(db.Model):
         }
 
 
+class DailyChallenge(db.Model):
+    __tablename__ = 'daily_challenges'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    category = db.Column(db.String(50), nullable=False)  # scales, chords, intervals, theory
+    title = db.Column(db.String(255), nullable=False)
+    question = db.Column(db.Text, nullable=False)
+    options_json = db.Column(db.Text, nullable=False)  # JSON array of answer strings
+    correct_index = db.Column(db.Integer, nullable=False)  # index into options_json
+    xp_reward = db.Column(db.Integer, default=50)
+    difficulty = db.Column(db.Integer, default=1)  # 1-5
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'category': self.category,
+            'title': self.title,
+            'question': self.question,
+            'options': json.loads(self.options_json),
+            'correct_index': self.correct_index,
+            'xp_reward': self.xp_reward,
+            'difficulty': self.difficulty,
+        }
+
+
 class ChallengeAttempt(db.Model):
     __tablename__ = 'challenge_attempts'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    challenge_id = db.Column(db.Integer, db.ForeignKey('daily_challenges.id'), nullable=True)
     challenge_date = db.Column(db.String(10), nullable=False)  # YYYY-MM-DD
     score = db.Column(db.Integer, default=0)
     completed = db.Column(db.Boolean, default=False)
 
     __table_args__ = (
-        db.UniqueConstraint('user_id', 'challenge_date', name='unique_user_date'),
+        db.UniqueConstraint('user_id', 'challenge_id', name='unique_user_challenge'),
     )
+
+    challenge = db.relationship('DailyChallenge', backref='attempts', lazy=True)
 
     def to_dict(self):
         return {
             'id': self.id,
             'user_id': self.user_id,
+            'challenge_id': self.challenge_id,
             'challenge_date': self.challenge_date,
             'score': self.score,
             'completed': self.completed,
         }
+
+
+# ─── Migration helpers ─────────────────────────────────────────────────────────
+
+def run_migrations():
+    """Add columns that db.create_all() won't add to existing tables."""
+    import sqlalchemy as sa
+    from sqlalchemy import inspect
+
+    inspector = inspect(db.engine)
+    columns = [c['name'] for c in inspector.get_columns('challenge_attempts')]
+    if 'challenge_id' not in columns:
+        db.session.execute(
+            sa.text('ALTER TABLE challenge_attempts ADD COLUMN challenge_id INTEGER REFERENCES daily_challenges(id)')
+        )
+        db.session.commit()
+        print("✅ Added challenge_id column to challenge_attempts")
+
+
+import json  # noqa: E402 — must be after DailyChallenge to_dict

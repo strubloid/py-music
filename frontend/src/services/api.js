@@ -52,6 +52,20 @@ export const deleteFavorite = (id) =>
 export const awardXp = (amount) =>
   api.post('/api/me/xp', { amount });
 
+// ─── Daily Challenges ─────────────────────────────────────────────────────────
+
+export const getDailyChallenges = (limit = 10, offset = 0) =>
+  api.get(`/api/daily-challenges?limit=${limit}&offset=${offset}`);
+
+export const completeDailyChallenge = (challengeId) =>
+  api.post(`/api/daily-challenge/${challengeId}/complete`);
+
+export const seedChallenges = () =>
+  api.post('/api/daily-challenge/seed');
+
+export const getUserStreak = () =>
+  api.get('/api/user/streak');
+
 // ─── Error Logging ─────────────────────────────────────────────────────────────
 
 export const logError = (category, message, details) =>

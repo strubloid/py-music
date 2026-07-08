@@ -49,12 +49,24 @@ with app.app_context():
     except Exception as e:
         print(f"⚠️  DB init failed (will retry on first request): {e}")
 
+# Run schema migrations for existing tables
+try:
+    from backend.project.models.user import run_migrations
+    with app.app_context():
+        run_migrations()
+    print("✅ Schema migrations applied")
+except Exception as e:
+    print(f"⚠️  Migration failed (will retry on seed): {e}")
+
 from backend.project.auth import auth_bp, login_manager
 login_manager.init_app(app)
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 
 from backend.project.api.protected import api_bp
 app.register_blueprint(api_bp)
+
+from backend.project.api.daily_challenges import daily_bp
+app.register_blueprint(daily_bp)
 
 from backend.project.error_logger import log_error, log_request_error
 import threading

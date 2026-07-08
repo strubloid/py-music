@@ -1,14 +1,16 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { LogOut, User, ChevronDown, Music, Flame } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { getUserStreak } from '../../services/api';
 import './UserBadge.css';
 
 const XP_PER_LEVEL = 500;
 const GUEST_SONGS_KEY = 'guestSongs';
 const STREAK_KEY = 'streakData';
 
-// Load streak data from localStorage
-const loadStreak = () => {
+// Load streak data from localStorage (fallback for guests)
+const loadGuestStreak = () => {
   try {
     const raw = localStorage.getItem(STREAK_KEY);
     if (raw) return JSON.parse(raw);
@@ -16,14 +18,13 @@ const loadStreak = () => {
   return { count: 0, lastVisit: null };
 };
 
-// Save + update streak
-const updateStreak = () => {
-  const data = loadStreak();
+// Save + update streak for guest users only
+const updateGuestStreak = () => {
+  const data = loadGuestStreak();
   const today = new Date().toISOString().slice(0, 10);
   const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
 
   if (data.lastVisit === today) {
-    // Already visited today — don't increment
     return data.count;
   }
 
@@ -34,11 +35,25 @@ const updateStreak = () => {
 
 const UserBadge = () => {
   const { user, logout, isLoggedIn, isGuest, promptLogin } = useAuth();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const [streak, setStreak] = useState(0);
 
-  // Stats derived from localStorage
-  const streak = useMemo(() => updateStreak(), []);
+  const refreshStreak = useCallback(async () => {
+    if (isLoggedIn) {
+      try {
+        const res = await getUserStreak();
+        setStreak(res.data.streak);
+      } catch {
+        // keep the last known value if the backend call fails
+      }
+    } else {
+      setStreak(updateGuestStreak());
+    }
+  }, [isLoggedIn]);
+
+  // Guest song count from localStorage
   const songCount = useMemo(() => {
     try {
       const raw = localStorage.getItem(GUEST_SONGS_KEY);
@@ -47,6 +62,22 @@ const UserBadge = () => {
       return 0;
     }
   }, []);
+
+  // Streak: backend for logged-in, localStorage for guests.
+  // Refresh on route changes and whenever a challenge page broadcasts an update.
+  useEffect(() => {
+    refreshStreak();
+  }, [refreshStreak, location.pathname]);
+
+  useEffect(() => {
+    const handleStreakUpdated = () => refreshStreak();
+    window.addEventListener('streak:updated', handleStreakUpdated);
+    window.addEventListener('focus', handleStreakUpdated);
+    return () => {
+      window.removeEventListener('streak:updated', handleStreakUpdated);
+      window.removeEventListener('focus', handleStreakUpdated);
+    };
+  }, [refreshStreak]);
 
   useEffect(() => {
     const handleClick = (e) => {

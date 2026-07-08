@@ -5,7 +5,7 @@ import './LoginModal.css';
 
 const LoginModal = () => {
   const { user, showLoginModal, loading: authLoading, login, register, requestPasswordReset, continueAsGuest, closeLoginModal, loginReason, isLoggedIn } = useAuth();
-  const [mode, setMode] = useState('login'); // 'login' | 'register' | 'forgot'
+  const [mode, setMode] = useState('login');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,6 +13,20 @@ const LoginModal = () => {
   const [submitting, setSubmitting] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [resetConfirm, setResetConfirm] = useState('');
+
+  // Reset form state every time the modal opens
+  React.useEffect(() => {
+    if (showLoginModal) {
+      setMode('login');
+      setUsername('');
+      setEmail('');
+      setPassword('');
+      setError('');
+      setSubmitting(false);
+      setResetSent(false);
+      setResetConfirm('');
+    }
+  }, [showLoginModal]);
 
   if (authLoading) return null;
   if (!showLoginModal) return null;

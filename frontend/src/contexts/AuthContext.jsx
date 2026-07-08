@@ -73,8 +73,8 @@ export const AuthProvider = ({ children }) => {
     } catch {
       // ignore
     }
-    setUser(null);
-    localStorage.removeItem('guestUser');
+    setUser(GUEST_USER);
+    localStorage.setItem('guestUser', JSON.stringify(GUEST_USER));
   }, []);
 
   const continueAsGuest = useCallback(() => {
