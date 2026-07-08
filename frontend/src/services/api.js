@@ -8,6 +8,26 @@ const api = axios.create({
   },
 });
 
+// ─── CSRF Token Interceptor ─────────────────────────────────────────────────────
+// Read csrf_token cookie set by the server and attach it as X-CSRFToken header
+// on every state-changing request (POST, PUT, DELETE, PATCH).
+// This implements the double-submit cookie pattern for CSRF protection.
+
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+api.interceptors.request.use((config) => {
+  if (['post', 'put', 'delete', 'patch'].includes(config.method?.toLowerCase())) {
+    const csrfToken = getCookie('csrf_token');
+    if (csrfToken) {
+      config.headers['X-CSRFToken'] = csrfToken;
+    }
+  }
+  return config;
+});
+
 // ─── Auth ──────────────────────────────────────────────────────────────────────
 
 export const login = (email, password) =>

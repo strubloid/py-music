@@ -5,10 +5,20 @@ import smtplib
 import hashlib
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, session
 from flask_login import LoginManager, login_user, logout_user, current_user
 from backend.project.models import db
 from backend.project.models.user import User, PasswordResetToken
+from backend.project.extensions import (
+    limiter,
+    is_account_locked,
+    record_failed_attempt,
+    validate_password_strength,
+    is_password_breached,
+    validate_email_format,
+    validate_username,
+    log_auth_event,
+)
 
 # Initialize Flask-Login
 login_manager = LoginManager()
@@ -23,6 +33,7 @@ def load_user(user_id):
 
 
 @auth_bp.route('/register', methods=['POST'])
+@limiter.limit("3 per minute", override_defaults=False)
 def register():
     data = request.get_json()
     username = data.get('username', '').strip()
@@ -32,13 +43,34 @@ def register():
     if not username or not email or not password:
         return jsonify({'error': 'Username, email, and password are required'}), 400
 
-    if len(password) < 6:
-        return jsonify({'error': 'Password must be at least 6 characters'}), 400
+    # Username format validation
+    username_error = validate_username(username)
+    if username_error:
+        log_auth_event('register', email, False, details=username_error)
+        return jsonify({'error': username_error}), 400
+
+    # Email format validation
+    if not validate_email_format(email):
+        log_auth_event('register', email, False, details='Invalid email format')
+        return jsonify({'error': 'Invalid email format'}), 400
+
+    # Password strength validation
+    password_errors = validate_password_strength(password)
+    if password_errors:
+        log_auth_event('register', email, False, details='Weak password')
+        return jsonify({'error': '; '.join(password_errors)}), 400
+
+    # Breached password check
+    if is_password_breached(password):
+        log_auth_event('register', email, False, details='Breached password')
+        return jsonify({'error': 'This password has been exposed in a data breach. Please choose a different password.'}), 400
 
     if User.query.filter_by(username=username).first():
+        log_auth_event('register', email, False, details='Username taken')
         return jsonify({'error': 'Username already taken'}), 409
 
     if User.query.filter_by(email=email).first():
+        log_auth_event('register', email, False, details='Email already registered')
         return jsonify({'error': 'Email already registered'}), 409
 
     user = User(username=username, email=email)
@@ -47,34 +79,53 @@ def register():
     db.session.commit()
 
     login_user(user)
+    session.permanent = True
+    log_auth_event('register', email, True)
     return jsonify({'user': user.to_dict()}), 201
 
 
 @auth_bp.route('/login', methods=['POST'])
+@limiter.limit("5 per minute", override_defaults=False)
 def login():
     data = request.get_json()
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
 
     if not email or not password:
+        log_auth_event('login', email, False, details='Missing credentials')
         return jsonify({'error': 'Email and password are required'}), 400
+
+    # Account lockout check
+    if is_account_locked(email):
+        log_auth_event('lockout', email, False, details='Account temporarily locked')
+        return jsonify({'error': 'Account temporarily locked due to too many failed attempts. Try again in 15 minutes.'}), 429
 
     user = User.query.filter_by(email=email).first()
 
     if not user or not user.check_password(password):
+        record_failed_attempt(email)
+        log_auth_event('login', email, False, details='Invalid credentials')
         return jsonify({'error': 'Invalid email or password'}), 401
 
+    # Successful login — clear any previous lockout state
     user.last_login = datetime.utcnow()
     db.session.commit()
 
     login_user(user)
+    session.permanent = True
+    log_auth_event('login', email, True)
     return jsonify({'user': user.to_dict()}), 200
 
 
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
     if current_user.is_authenticated:
+        email = current_user.email
         logout_user()
+        session.clear()
+        # Regenerate session to prevent session fixation
+        # (called after clearing to start fresh)
+        log_auth_event('logout', email, True)
     return jsonify({'message': 'Logged out successfully'}), 200
 
 
@@ -118,6 +169,7 @@ def _send_email(to_email, subject, body):
 
 
 @auth_bp.route('/forgot-password', methods=['POST'])
+@limiter.limit("2 per minute", override_defaults=False)
 def forgot_password():
     """Generate a reset token and email a reset link to the user."""
     data = request.get_json() or {}
@@ -126,10 +178,14 @@ def forgot_password():
     if not email:
         return jsonify({'error': 'Email is required'}), 400
 
+    if not validate_email_format(email):
+        return jsonify({'error': 'Invalid email format'}), 400
+
     user = User.query.filter_by(email=email).first()
 
     # Always return 200 to prevent email enumeration — even if user doesn't exist
     if not user:
+        log_auth_event('forgot_password', email, False, details='Email not found')
         return jsonify({'message': 'If that email is registered, you will receive a password reset link.'}), 200
 
     # Invalidate any existing unused tokens for this user
@@ -165,9 +221,11 @@ def forgot_password():
 
     try:
         _send_email(email, subject, body)
+        log_auth_event('forgot_password', email, True)
         print(f"✅ Password reset email sent to {email}")
     except Exception as e:
         print(f"⚠️  Failed to send reset email to {email}: {e}")
+        log_auth_event('forgot_password', email, False, details='SMTP send failed')
         # Don't expose SMTP failure details to the client
         return jsonify({'message': 'Failed to send reset email. Please contact support.'}), 500
 
@@ -175,6 +233,7 @@ def forgot_password():
 
 
 @auth_bp.route('/reset-password', methods=['POST'])
+@limiter.limit("3 per minute", override_defaults=False)
 def reset_password():
     """Verify reset token and set a new password."""
     data = request.get_json() or {}
@@ -184,8 +243,14 @@ def reset_password():
     if not token or not password:
         return jsonify({'error': 'Token and new password are required'}), 400
 
-    if len(password) < 6:
-        return jsonify({'error': 'Password must be at least 6 characters'}), 400
+    # Password strength validation on reset
+    password_errors = validate_password_strength(password)
+    if password_errors:
+        return jsonify({'error': '; '.join(password_errors)}), 400
+
+    # Breached password check
+    if is_password_breached(password):
+        return jsonify({'error': 'This password has been exposed in a data breach. Please choose a different password.'}), 400
 
     # Hash the incoming token to find matching DB record
     token_hash = hashlib.sha256(token.encode()).hexdigest()
@@ -208,4 +273,5 @@ def reset_password():
     reset_token.used = True
     db.session.commit()
 
+    log_auth_event('reset', user.email, True)
     return jsonify({'message': 'Password reset successful. You can now sign in with your new password.'}), 200

@@ -31,5 +31,6 @@ ENV PORT=5000
 # Expose port
 EXPOSE 5000
 
-# Run the Flask app with frontend serving
-CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000", "--no-reload"]
+# Run with gunicorn (production WSGI server) instead of Flask dev server
+# single-worker multi-threaded for SQLite safety
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "2", "--timeout", "30", "--forwarded-allow-ips", "*", "backend.project.api.app:app"]

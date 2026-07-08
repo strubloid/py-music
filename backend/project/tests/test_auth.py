@@ -2,11 +2,10 @@ import os
 import tempfile
 import unittest
 
-os.environ.setdefault('OPENAI_API_KEY', 'test')
-
 from flask import Flask
 
 from backend.project.auth import auth_bp, login_manager
+from backend.project.extensions import limiter
 from backend.project.models import bcrypt, db
 
 
@@ -24,6 +23,7 @@ class AuthFlowTest(unittest.TestCase):
         )
         db.init_app(self.app)
         bcrypt.init_app(self.app)
+        limiter.init_app(self.app)
         login_manager.init_app(self.app)
         self.app.register_blueprint(auth_bp, url_prefix='/api/auth')
 
@@ -47,7 +47,7 @@ class AuthFlowTest(unittest.TestCase):
         register = self.client.post('/api/auth/register', json={
             'username': 'player',
             'email': 'player@example.com',
-            'password': 'secret123',
+            'password': 'Secret@123',
         })
         self.assertEqual(register.status_code, 201, register.get_data(as_text=True))
 

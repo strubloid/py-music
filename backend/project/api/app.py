@@ -1,6 +1,8 @@
-from flask import Flask, jsonify, request, send_from_directory, send_file
+from flask import Flask, jsonify, request, send_from_directory, send_file, session, current_app
 from flask_cors import CORS
 from dotenv import load_dotenv
+from werkzeug.exceptions import HTTPException
+from functools import wraps
 import sys
 import os
 from pathlib import Path
@@ -8,6 +10,10 @@ from pathlib import Path
 # Add the project root to sys.path (need to go up 3 levels: api -> project -> backend -> root)
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
+
+from backend.project.extensions import limiter, generate_csrf_token, validate_csrf_token
+
+import threading
 
 from backend.project.music.chords.intervals.Major import MajorInterval
 from backend.project.music.chords.intervals.Minor import MinorInterval
@@ -29,34 +35,203 @@ load_dotenv()
 # file 404 before the catch-all route can serve index.html.
 frontend_dist = project_root / 'frontend' / 'dist'
 app = Flask(__name__, static_folder=None)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
+
+# ─── Security Configuration ────────────────────────────────────────────────────
+
+# SECRET_KEY — fail hard if not set in production
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    if os.getenv('FLASK_ENV') == 'production':
+        raise RuntimeError('SECRET_KEY environment variable is required in production')
+    SECRET_KEY = 'dev-secret-key-change-in-production'
+app.config['SECRET_KEY'] = SECRET_KEY
+
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', f'sqlite:///{project_root}/strubloid.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-CORS(app, supports_credentials=True)  # Enable CORS with credentials for session cookies
+# Session cookie hardening
+IS_PRODUCTION = os.getenv('FLASK_ENV') == 'production' or os.getenv('FLY_APP_NAME') is not None
+app.config['SESSION_COOKIE_SECURE'] = IS_PRODUCTION      # HTTPS only in production
+app.config['SESSION_COOKIE_HTTPONLY'] = True       # not accessible to JS
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'      # CSRF mitigation
+app.config['SESSION_COOKIE_NAME'] = 'py_music_session'  # non-default name
+
+# Session lifetime — force re-login after 30 days of inactivity
+app.config['PERMANENT_SESSION_LIFETIME'] = 30 * 24 * 3600  # 30 days in seconds
+app.config['SESSION_REFRESH_EACH_REQUEST'] = True
+
+# Request size limit
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB
+
+# CORS — restrict to known frontend origin
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5000')
+CORS(app, supports_credentials=True, origins=[FRONTEND_URL])
+
+# Rate limiting — init the shared limiter with this app
+limiter.init_app(app)
+
+# ─── HTTPS Redirect Middleware ──────────────────────────────────────────────────
+
+@app.before_request
+def enforce_https():
+    """Redirect HTTP to HTTPS when behind Fly.io proxy.
+    Defense-in-depth: the Fly.io edge already terminates TLS, but this ensures
+    the app itself rejects plain HTTP requests.
+    """
+    if IS_PRODUCTION:
+        # Fly.io sets X-Forwarded-Proto; Werkzeug/Flask respects it
+        if request.headers.get('X-Forwarded-Proto', 'http') != 'https':
+            if request.url.startswith('http://'):
+                https_url = request.url.replace('http://', 'https://', 1)
+                return jsonify({'error': 'HTTPS required'}), 301, {'Location': https_url}
+
+
+# ─── CSRF Protection ───────────────────────────────────────────────────────────
+
+@app.before_request
+def csrf_protect():
+    """Double-submit cookie CSRF protection for state-changing requests.
+
+    On every response, a 'csrf_token' cookie (non-httponly, readable by JS)
+    is set via after_request.  For POST/PUT/DELETE/PATCH requests, the
+    X-CSRFToken header must match the cookie value.  Exempts auth endpoints
+    (login/register use the cookie they just received), GET/HEAD/OPTIONS,
+    and testing mode.
+    """
+    if current_app.config.get('TESTING', False):
+        return None
+    if request.method in ('POST', 'PUT', 'DELETE', 'PATCH'):
+        # Skip CSRF check for auth flows (they establish the session + cookie)
+        if request.path.startswith('/api/auth/'):
+            return None
+        cookie_token = request.cookies.get('csrf_token')
+        header_token = request.headers.get('X-CSRFToken')
+        if not validate_csrf_token(cookie_token, header_token):
+            return jsonify({'error': 'CSRF token missing or invalid'}), 403
+
+
+@app.after_request
+def set_csrf_cookie(response):
+    """Set the CSRF token cookie on every response so the SPA always has one."""
+    if 'csrf_token' not in session:
+        session['csrf_token'] = generate_csrf_token()
+    response.set_cookie(
+        'csrf_token',
+        session['csrf_token'],
+        httponly=False,        # must be readable by JS
+        samesite='Lax',
+        secure=IS_PRODUCTION,
+        max_age=86400,          # 24h — refreshed on each request
+    )
+    return response
+
+
+# ─── Security Headers ───────────────────────────────────────────────────────────
+
+@app.after_request
+def remove_server_header(response):
+    """Strip Server header to prevent info disclosure."""
+    if 'Server' in response.headers:
+        del response.headers['Server']
+    return response
+
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data:; "
+        "font-src 'self'; "
+        "connect-src 'self'; "
+        "form-action 'self'; "
+        "frame-ancestors 'none'; "
+        "report-uri /api/csp-violation"
+    )
+    return response
+
+
+# ─── Global JSON Error Handler ──────────────────────────────────────────────────
+
+@app.errorhandler(400)
+@app.errorhandler(401)
+@app.errorhandler(403)
+@app.errorhandler(404)
+@app.errorhandler(405)
+@app.errorhandler(413)
+@app.errorhandler(415)
+@app.errorhandler(429)
+def json_client_error(error):
+    """Return JSON for client errors instead of HTML."""
+    return jsonify({'error': error.description or 'Request error'}), error.code
+
+
+@app.errorhandler(500)
+def json_server_error(error):
+    """Return generic JSON for server errors — no stack traces."""
+    return jsonify({'error': 'Internal server error'}), 500
+
+
+# ─── CSP Violation Reporting ──────────────────────────────────────────────────
+
+@app.route('/api/csp-violation', methods=['POST'])
+def csp_violation():
+    """Receive Content-Security-Policy violation reports from browsers."""
+    report = request.get_json(silent=True) or {}
+    from backend.project.error_logger import log_error
+    log_error('CSP', 'Content Security Policy violation', details=str(report))
+    return '', 204
+
+
+# ─── Content-Type Enforcement ──────────────────────────────────────────────────
+
+def require_json_content_type(f):
+    """Decorator to enforce application/json Content-Type on state-changing requests."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if request.method in ('POST', 'PUT', 'PATCH'):
+            ct = request.content_type or ''
+            if 'application/json' not in ct:
+                return jsonify({'error': 'Content-Type must be application/json'}), 415
+        return f(*args, **kwargs)
+    return decorated
+
 
 # Initialize extensions
 from backend.project.models import db, bcrypt
 db.init_app(app)
 bcrypt.init_app(app)
 
-# Create database tables on startup — critical for production where
-# `if __name__ == '__main__'` is never reached (Docker runs `python -m flask run`).
-with app.app_context():
-    try:
-        db.create_all()
-        print("✅ Database tables created / verified")
-    except Exception as e:
-        print(f"⚠️  DB init failed (will retry on first request): {e}")
+# Background DB initialization — defer create_all + migrations so the app starts
+# listening immediately.  Fly.io health checks time out if the module-level
+# synchronous db.create_all() blocks import for several seconds.
+db_ready = False
 
-# Run schema migrations for existing tables
-try:
-    from backend.project.models.user import run_migrations
+def _init_db_background():
+    global db_ready
     with app.app_context():
-        run_migrations()
-    print("✅ Schema migrations applied")
-except Exception as e:
-    print(f"⚠️  Migration failed (will retry on seed): {e}")
+        try:
+            db.create_all()
+            print("✅ Database tables created / verified")
+        except Exception as e:
+            print(f"⚠️  DB init failed (will retry on first request): {e}")
+    # Run schema migrations for existing tables
+    try:
+        from backend.project.models.user import run_migrations
+        with app.app_context():
+            run_migrations()
+        print("✅ Schema migrations applied")
+    except Exception as e:
+        print(f"⚠️  Migration failed (will retry on seed): {e}")
+    db_ready = True
+
+threading.Thread(target=_init_db_background, daemon=True).start()
 
 from backend.project.auth import auth_bp, login_manager
 login_manager.init_app(app)
@@ -69,7 +244,6 @@ from backend.project.api.daily_challenges import daily_bp
 app.register_blueprint(daily_bp)
 
 from backend.project.error_logger import log_error, log_request_error
-import threading
 import time
 
 # Lazy LLM initialization — start in a background thread so Flask serves

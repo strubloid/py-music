@@ -4,13 +4,12 @@ import tempfile
 import unittest
 from datetime import datetime
 
-os.environ.setdefault('OPENAI_API_KEY', 'test')
-
 from flask import Flask
 
 from backend.project.api.daily_challenges import daily_bp, seed_challenges
 from backend.project.auth import auth_bp, login_manager
 from backend.project.daily_challenge_explanations import build_daily_challenge_explanation
+from backend.project.extensions import limiter
 from backend.project.models import bcrypt, db
 from backend.project.models.user import ChallengeAttempt, DailyChallenge, User, run_migrations
 
@@ -29,6 +28,7 @@ class DailyChallengeFlowTest(unittest.TestCase):
         )
         db.init_app(self.app)
         bcrypt.init_app(self.app)
+        limiter.init_app(self.app)
         login_manager.init_app(self.app)
         self.app.register_blueprint(auth_bp, url_prefix='/api/auth')
         self.app.register_blueprint(daily_bp)
@@ -63,7 +63,7 @@ class DailyChallengeFlowTest(unittest.TestCase):
         response = self.client.post('/api/auth/register', json={
             'username': 'player',
             'email': 'player@example.com',
-            'password': 'secret123',
+            'password': 'Secret@123',
         })
         self.assertEqual(response.status_code, 201, response.get_data(as_text=True))
 

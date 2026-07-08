@@ -12,3 +12,7 @@ langgraph
 flask-sqlalchemy
 flask-bcrypt
 flask-login
+flask-limiter>=3.7
+gunicorn>=22.0.0
+pip-audit>=2.7
+requests>=2.31.0

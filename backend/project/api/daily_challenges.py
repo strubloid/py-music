@@ -15,7 +15,7 @@ import random
 from datetime import datetime, timedelta
 
 from flask import Blueprint, request, jsonify
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 from ..daily_challenge_explanations import build_daily_challenge_explanation
 from backend.project.models import db
@@ -726,6 +726,7 @@ def complete_challenge(challenge_id):
 
 
 @daily_bp.route('/daily-challenge/seed', methods=['POST'])
+@login_required
 def seed():
     """(Re)generate the daily challenge question bank."""
     count = seed_challenges(1000)
