@@ -9,10 +9,14 @@
 }
 
 .chords-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) auto;
+  /* display: grid;
+  grid-template-columns: minmax(0, 620px) minmax(320px, 840px) minmax(120px, 140px); */
+  /* grid-template-areas: "copy selected summary"; */
+  display: flex;
+  justify-content: space-between;
+  align-self: center;
   gap: 1rem;
-  align-items: end;
+  align-items: center;
   margin-bottom: 1rem;
   padding: 1.1rem;
   border: 1px solid var(--border-soft);
@@ -20,18 +24,28 @@
   background: var(--surface-1);
 }
 
+.chords-hero-copy {
+  grid-area: copy;
+  min-width: 0;
+  max-width: 20rem;
+}
+
 .chords-hero-copy h1 {
-  font-size: 2rem;
+  font-size: clamp(1.85rem, 2.2vw, 2.3rem);
   font-weight: 700;
   color: var(--text-strong);
   margin: 0.15rem 0 0.25rem;
+  line-height: 1.08;
+  text-wrap: balance;
 }
 
 .chords-page-subtitle {
-  font-size: 0.92rem;
+  font-size: 0.94rem;
   color: var(--text-muted);
   margin: 0;
-  max-width: 64ch;
+  max-width: 50ch;
+  line-height: 1.5;
+  text-wrap: pretty;
 }
 
 .hero-kicker {
@@ -44,15 +58,16 @@
 }
 
 .chords-hero-summary {
+  grid-area: summary;
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
   justify-content: flex-end;
+  align-self: center;
 }
 
 .summary-chip {
-  min-width: 140px;
-  padding: 0.85rem 1rem;
+  width: 100%;
+  min-width: 0;
+  padding: 0.8rem 0.95rem;
   border-radius: 16px;
   background: rgba(251, 191, 36, 0.08);
   border: 1px solid rgba(251, 191, 36, 0.18);
@@ -76,7 +91,7 @@
 
 .summary-chip strong {
   color: var(--text-strong);
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .chords-workbench {
@@ -115,6 +130,7 @@
   margin: 0;
   color: var(--text-muted);
   line-height: 1.6;
+  font-size: 1.5rem;
 }
 
 /* Root Note Selector */
@@ -209,21 +225,28 @@
 
 /* Selected Chord Display */
 .selected-chord-display {
+  grid-area: selected;
+  grid-column: auto;
   background: var(--surface-1);
   border-radius: 20px;
-  padding: 1.1rem 1.2rem;
+  padding: 0.9rem 1.05rem;
   border: 1px solid rgba(251, 191, 36, 0.2);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   min-width: 0;
+  width: 100%;
+  max-width: 540px;
+  justify-self: center;
 }
 
 .selected-chord-name {
-  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-size: clamp(1.7rem, 2.2vw, 2.25rem);
   font-weight: 700;
   color: var(--accent);
+  line-height: 1;
+  flex: 0 0 auto;
 }
 
 .selected-chord-copy {
@@ -231,19 +254,25 @@
   flex-direction: column;
   gap: 0.4rem;
   align-items: flex-end;
+  min-width: 0;
+  margin-left: auto;
+  text-align: right;
+}
+
+.selected-chord-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
 }
 
 .selected-chord-notes {
-  font-size: 14px;
+  font-size: 0.88rem;
   color: var(--text-muted);
-}
-
-.selected-chord-variation-count {
-  font-size: 13px;
-  color: var(--text-subtle);
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
+  text-align: right;
+  text-wrap: pretty;
+  white-space: nowrap;
 }
 
 /* Chord Variations Panel */
@@ -282,6 +311,55 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
   min-width: 0;
+}
+
+.piano-chord-panel {
+  background: var(--surface-1);
+  border-radius: 20px;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--border-soft);
+  min-width: 0;
+}
+
+.piano-chord-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 16px;
+}
+
+.piano-chord-panel-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-strong);
+  margin: 0;
+}
+
+.piano-chord-panel-body {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.piano-chord-preview {
+  display: inline-block;
+  padding: 0.6rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 248, 255, 0.95));
+  border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.piano-chord-notes {
+  min-width: min(360px, 100%);
+  flex: 1;
+  color: var(--text-muted);
+}
+
+.piano-chord-notes p {
+  margin: 0.4rem 0 0;
+  line-height: 1.6;
 }
 
 .chord-variations-list::-webkit-scrollbar {
@@ -433,12 +511,21 @@
   }
 
   .chords-hero {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 420px);
+    grid-template-areas:
+      "copy summary"
+      "selected selected";
     align-items: start;
   }
 
   .chords-hero-summary {
     justify-content: flex-start;
+  }
+
+  .selected-chord-display {
+    grid-column: 1 / -1;
+    max-width: 100%;
+    justify-self: stretch;
   }
 
   .chords-hero,
@@ -464,7 +551,10 @@
     width: 100%;
   }
 
-  .chords-hero-copy,
+  .chords-hero-copy{
+    min-width: 0;
+  }
+  
   .chords-hero-summary,
   .selector-panel,
   .selected-chord-display,
@@ -571,12 +661,19 @@
   }
 
   .selected-chord-display {
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
   }
 
   .selected-chord-copy {
     align-items: flex-start;
+    margin-left: 0;
+  }
+
+  .selected-chord-label,
+  .selected-chord-notes {
+    text-align: left;
   }
 
   .selector-panel,
