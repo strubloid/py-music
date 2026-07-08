@@ -131,9 +131,9 @@ const LoginModal = () => {
             <div className="form-group">
               <Mail size={16} className="form-icon" />
               <input
-                type="email"
-                placeholder="Email"
-                autoComplete="email"
+                type="text"
+                placeholder={mode === 'login' ? 'Email or username' : 'Email'}
+                autoComplete={mode === 'login' ? 'username' : 'email'}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

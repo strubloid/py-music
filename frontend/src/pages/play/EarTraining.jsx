@@ -101,7 +101,7 @@ const buildStimulus = (challenge) => {
 };
 
 const EarTraining = () => {
-    const { isLoggedIn, updateUserProgress } = useAuth();
+    const { user, isLoggedIn, updateUserProgress } = useAuth();
     const [challenge, setChallenge] = useState(null);
     const [loading, setLoading] = useState(true);
     const [loadingNext, setLoadingNext] = useState(false);
@@ -116,7 +116,11 @@ const EarTraining = () => {
     const [playing, setPlaying] = useState(false);
     const [stimulus, setStimulus] = useState(null);
     const [audioReady, setAudioReady] = useState(false);
-    const [selectedInstrument, setSelectedInstrument] = useState(EAR_TRAINING_INSTRUMENTS[0].id);
+    const [selectedInstrument, setSelectedInstrument] = useState(() => {
+        const pref = user?.instrument_preference;
+        if (pref && EAR_TRAINING_INSTRUMENTS.some(i => i.id === pref)) return pref;
+        return EAR_TRAINING_INSTRUMENTS[0].id;
+    });
     const [loadingInstrumentId, setLoadingInstrumentId] = useState(null);
     const [loadedInstrumentIds, setLoadedInstrumentIds] = useState([]);
     const [playbackMode, setPlaybackMode] = useState("melodic");

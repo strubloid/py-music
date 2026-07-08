@@ -30,8 +30,8 @@ api.interceptors.request.use((config) => {
 
 // ─── Auth ──────────────────────────────────────────────────────────────────────
 
-export const login = (email, password) =>
-  api.post('/api/auth/login', { email, password });
+export const login = (loginId, password) =>
+  api.post('/api/auth/login', { login: loginId, password });
 
 export const register = (username, email, password) =>
   api.post('/api/auth/register', { username, email, password });
@@ -41,6 +41,9 @@ export const logout = () =>
 
 export const getMe = () =>
   api.get('/api/auth/me');
+
+export const updatePreferences = (prefs) =>
+  api.patch('/api/me/preferences', prefs);
 
 // ─── Progressions ───────────────────────────────────────────────────────────────
 

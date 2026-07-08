@@ -1,14 +1,9 @@
 /* Chord Variation Picker Overlay */
 .chord-variation-picker-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  min-width: 100vw;
-  min-height: 100vh;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(5px);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -29,22 +24,19 @@
 
 /* Main Picker Container */
 .chord-variation-picker {
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  background: var(--bg-2);
+  border: 1px solid rgba(251, 191, 36, 0.3);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   width: 100%;
   max-width: 900px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   animation: slideUp 0.3s ease-out;
   overflow: hidden;
   position: relative;
   box-sizing: border-box;
-}
-
-.chord-variation-picker:hover {
-  transform: none;
 }
 
 @keyframes slideUp {
@@ -61,49 +53,49 @@
 /* Header */
 .picker-header {
   padding: 20px 24px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .picker-header h3 {
   margin: 0;
   font-size: 1.5rem;
-  color: #fff;
-  font-weight: 600;
+  font-weight: 700;
+  background: linear-gradient(to right, #fbbf24, #f97316);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .close-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  font-size: 24px;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+  width: 36px;
+  height: 36px;
+  font-size: 1.5rem;
   line-height: 1;
-  padding: 0;
 }
 
 .close-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
+  color: #fff;
 }
 
 /* Subtitle */
 .picker-subtitle {
   padding: 12px 24px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #9ca3af;
   font-size: 0.9rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Variations Grid */
@@ -120,11 +112,11 @@
 /* Individual Variation Item */
 .variation-item {
   background: rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 12px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.18s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -135,22 +127,20 @@
 }
 
 .variation-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  background: rgba(251, 191, 36, 0.08);
+  border-color: rgba(251, 191, 36, 0.3);
+  transform: translateY(-2px);
 }
 
 .variation-item.selected {
-  background: linear-gradient(135deg, #26de81, #20bf6b);
-  border-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 0 3px rgba(38, 222, 129, 0.4), 0 8px 20px rgba(0, 0, 0, 0.3);
+  background: rgba(251, 191, 36, 0.15);
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1), 0 4px 18px rgba(251, 191, 36, 0.2);
   transform: scale(1.02);
 }
 
 .variation-item.selected:hover {
-  transform: scale(1.02) translateY(-3px);
-  box-shadow: 0 0 0 3px rgba(38, 222, 129, 0.5), 0 12px 28px rgba(0, 0, 0, 0.4);
+  transform: scale(1.02) translateY(-2px);
 }
 
 /* Variation Number Badge */
@@ -168,7 +158,7 @@
 }
 
 .variation-item.selected .variation-number {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(251, 191, 36, 0.3);
 }
 
 /* Mini Chord Diagram */
@@ -187,7 +177,7 @@
 
 /* Variation Position Text */
 .variation-position {
-  color: #fff;
+  color: #9ca3af;
   font-size: 0.8rem;
   text-align: center;
   font-weight: 500;
@@ -195,6 +185,7 @@
 }
 
 .variation-item.selected .variation-position {
+  color: #fff;
   font-weight: 600;
 }
 
@@ -202,13 +193,13 @@
 .picker-footer {
   padding: 16px 24px;
   background: rgba(0, 0, 0, 0.2);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   text-align: center;
 }
 
 .picker-footer p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.7);
+  color: #6b7280;
   font-size: 0.9rem;
 }
 
@@ -229,6 +220,16 @@
 
 .variations-grid::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chord-variation-picker-overlay,
+  .chord-variation-picker {
+    animation: none;
+  }
+  .variation-item {
+    transition: none;
+  }
 }
 
 /* Mobile Responsive */

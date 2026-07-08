@@ -153,7 +153,7 @@ const ChordVariationPicker = ({ chordName, currentVariationIndex, onSelectVariat
           {variations.map((variation, index) => renderMiniChord(variation, index))}
         </div>
         <div className="picker-footer">
-          <p>💡 Your selection will be remembered for next time</p>
+          <p>Your selection will be remembered for next time</p>
         </div>
       </div>
     </div>

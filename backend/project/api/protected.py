@@ -152,3 +152,25 @@ def award_xp():
         db.session.commit()
 
     return jsonify({'xp': current_user.xp, 'level': current_user.level}), 200
+
+
+@api_bp.route('/me/preferences', methods=['PATCH'])
+@login_required
+def update_preferences():
+    """Update user preferences like instrument_preference."""
+    data = request.get_json()
+
+    if 'instrument_preference' in data:
+        val = data['instrument_preference']
+        if val not in ('guitar', 'piano', 'both'):
+            return jsonify({'error': 'instrument_preference must be "guitar", "piano", or "both"'}), 400
+        current_user.instrument_preference = val
+
+    if 'skill_level' in data:
+        val = data['skill_level']
+        if val not in ('beginner', 'intermediate', 'advanced'):
+            return jsonify({'error': 'skill_level must be "beginner", "intermediate", or "advanced"'}), 400
+        current_user.skill_level = val
+
+    db.session.commit()
+    return jsonify({'user': current_user.to_dict()}), 200

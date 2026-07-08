@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 
 const ChordDisplayContext = createContext();
 
@@ -11,13 +12,18 @@ export const useChordDisplay = () => {
 };
 
 export const ChordDisplayProvider = ({ children }) => {
-  // Default to guitar, but load from localStorage if available
-  const [displayMode, setDisplayMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('chordDisplayMode') || 'guitar';
+  const { user } = useAuth();
+
+  const getDefaultInstrument = () => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('chordDisplayMode') : null;
+    if (saved) return saved;
+    if (user?.instrument_preference && user.instrument_preference !== 'both') {
+      return user.instrument_preference;
     }
     return 'guitar';
-  });
+  };
+
+  const [displayMode, setDisplayMode] = useState(getDefaultInstrument);
 
   // Show chord diagrams vs text - default to true (show diagrams)
   const [showChordDiagrams, setShowChordDiagrams] = useState(() => {

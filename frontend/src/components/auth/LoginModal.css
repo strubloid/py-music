@@ -11,7 +11,7 @@
 }
 
 .login-modal {
-  background: rgba(16, 18, 42, 0.98);
+  background: var(--bg-2);
   border: 1px solid var(--border-accent);
   border-radius: 16px;
   padding: 2rem;
@@ -58,7 +58,7 @@
 }
 
 .login-reason {
-  color: #a5b4fc;
+  color: var(--text-muted);
   font-size: 0.875rem;
   margin: 0;
 }
@@ -127,7 +127,7 @@
     background-color: transparent !important;
     color: #fff !important;
     -webkit-text-fill-color: #fff !important;
-    box-shadow: inset 0 0 0 100px rgba(16, 18, 42, 0.98) !important;
+    box-shadow: inset 0 0 0 100px var(--bg-2) !important;
   }
 }
 
@@ -137,8 +137,8 @@
 .form-group input:-webkit-autofill:active {
   animation: lock-autofill-login 0.1s step-end infinite !important;
   -webkit-animation: lock-autofill-login 0.1s step-end infinite !important;
-  -webkit-box-shadow: 0 0 0 100px rgba(16, 18, 42, 0.98) inset !important;
-  box-shadow: inset 0 0 0 100px rgba(16, 18, 42, 0.98) !important;
+  -webkit-box-shadow: 0 0 0 100px var(--bg-2) inset !important;
+  box-shadow: inset 0 0 0 100px var(--bg-2) !important;
   -webkit-text-fill-color: #fff !important;
   color: #fff !important;
   background-color: transparent !important;
@@ -161,30 +161,37 @@
 }
 
 .submit-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, var(--accent), var(--accent-warm));
+  padding: 0.75rem 1rem;
+  background: var(--accent);
   color: #000;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(1rem, 2.5vw, 1.125rem);
+  font-weight: 600;
   border: none;
   border-radius: 8px;
-  padding: 0.875rem 1.5rem;
-  font-size: 0.9375rem;
-  font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
+  min-height: 44px;
+  transition: background 0.15s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
   margin-top: 0.25rem;
 }
 
 .submit-btn:hover:not(:disabled) {
-  opacity: 0.9;
-  transform: translateY(-1px);
+  background: var(--accent-strong);
+  transform: scale(1.05);
+}
+
+.submit-btn:active {
+  transform: scale(0.98);
 }
 
 .submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 .modal-footer {
@@ -229,7 +236,7 @@
 
 .divider span {
   position: relative;
-  background: rgba(16, 18, 42, 0.98);
+  background: var(--bg-2);
   padding: 0 0.75rem;
   color: var(--text-subtle);
   font-size: 0.8125rem;
@@ -237,18 +244,25 @@
 
 .guest-btn {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
   border-radius: 8px;
-  color: #d1d5db;
-  padding: 0.75rem;
-  font-size: 0.9375rem;
   cursor: pointer;
-  transition: background 0.2s;
+  min-height: 44px;
+  transition: background 0.15s ease;
 }
 
 .guest-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .guest-hint {
@@ -262,15 +276,16 @@
 .forgot-link {
   background: none;
   border: none;
-  color: #a5b4fc;
+  color: var(--accent);
   cursor: pointer;
   font-size: 0.8125rem;
   padding: 0;
   text-align: center;
   margin-top: -0.25rem;
+  transition: opacity 0.15s ease;
 }
 .forgot-link:hover {
-  color: var(--accent);
+  opacity: 0.8;
   text-decoration: underline;
 }
 
@@ -286,7 +301,7 @@
   color: #4ade80;
 }
 .reset-sent-message {
-  color: #d1d5db;
+  color: var(--text-muted);
   font-size: 0.9375rem;
   line-height: 1.5;
   margin: 0;

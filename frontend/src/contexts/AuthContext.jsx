@@ -51,8 +51,8 @@ export const AuthProvider = ({ children }) => {
     checkSession();
   }, []);
 
-  const login = useCallback(async (email, password) => {
-    const res = await api.post('/api/auth/login', { email, password });
+  const login = useCallback(async (loginId, password) => {
+    const res = await api.post('/api/auth/login', { login: loginId, password });
     setUser(res.data.user);
     setShowLoginModal(false);
     localStorage.removeItem('guestUser');
@@ -126,6 +126,14 @@ export const AuthProvider = ({ children }) => {
     return res.data.user;
   }, []);
 
+  const updatePreferences = useCallback(async (prefs) => {
+    const res = await api.patch('/api/me/preferences', prefs);
+    if (res.data.user) {
+      setUser(res.data.user);
+    }
+    return res.data.user;
+  }, []);
+
   const closeLoginModal = useCallback(() => {
     // If user isn't logged in, become a guest so the app has a usable state
     if (!isLoggedIn && !user) {
@@ -148,6 +156,7 @@ export const AuthProvider = ({ children }) => {
       continueAsGuest,
       updateUserProgress,
       refreshUser,
+      updatePreferences,
       showLoginModal,
       loginReason,
       promptLogin,

@@ -1,10 +1,25 @@
 import React from 'react';
-import { Settings, User, Mail, Shield } from 'lucide-react';
+import { Settings, User, Mail, Shield, Music } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import './Settings.css';
 
+const INSTRUMENTS = [
+  { id: 'guitar', label: 'Guitar' },
+  { id: 'piano', label: 'Piano' },
+  { id: 'both', label: 'Both' },
+];
+
 const SettingsPage = () => {
-  const { user } = useAuth();
+  const { user, updatePreferences } = useAuth();
+
+  const handleInstrumentChange = async (e) => {
+    const val = e.target.value;
+    try {
+      await updatePreferences({ instrument_preference: val });
+    } catch {
+      // silently fail — backend will validate
+    }
+  };
 
   return (
     <div className="settings-page">
@@ -38,6 +53,32 @@ const SettingsPage = () => {
             {user?.id ? 'Signed in' : 'Guest'}
           </span>
         </div>
+      </div>
+
+      <div className="settings-group">
+        <h3>Defaults</h3>
+        <div className="setting-row">
+          <span className="setting-label">
+            <Music size={16} />
+            Instrument
+          </span>
+          <select
+            className="setting-select"
+            value={user?.instrument_preference || ''}
+            onChange={handleInstrumentChange}
+            disabled={!user?.id}
+          >
+            <option value="" disabled>Select default instrument</option>
+            {INSTRUMENTS.map((inst) => (
+              <option key={inst.id} value={inst.id}>{inst.label}</option>
+            ))}
+          </select>
+        </div>
+        <p className="setting-hint">
+          {user?.id
+            ? 'Your default instrument is used in ear training and chord diagrams.'
+            : 'Sign in to set your default instrument preference.'}
+        </p>
       </div>
 
       <div className="settings-group">

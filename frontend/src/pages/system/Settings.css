@@ -74,6 +74,32 @@
   font-size: 0.875rem;
 }
 
+.setting-select {
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  color: var(--text-strong);
+  padding: 0.375rem 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.setting-select:focus {
+  border-color: var(--accent);
+}
+
+.setting-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.setting-hint {
+  color: var(--text-subtle);
+  font-size: 0.8125rem;
+  margin: -0.25rem 0 0;
+}
+
 .more-soon {
   color: var(--text-subtle);
   font-size: 0.875rem;

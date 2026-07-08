@@ -36,7 +36,7 @@ def load_user(user_id):
 @limiter.limit("3 per minute", override_defaults=False)
 def register():
     data = request.get_json()
-    username = data.get('username', '').strip()
+    username = data.get('username', '').strip().lower()
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
 
@@ -88,24 +88,28 @@ def register():
 @limiter.limit("5 per minute", override_defaults=False)
 def login():
     data = request.get_json()
-    email = data.get('email', '').strip().lower()
+    login_id = data.get('login', '').strip()
     password = data.get('password', '')
 
-    if not email or not password:
-        log_auth_event('login', email, False, details='Missing credentials')
-        return jsonify({'error': 'Email and password are required'}), 400
+    if not login_id or not password:
+        log_auth_event('login', login_id, False, details='Missing credentials')
+        return jsonify({'error': 'Email/username and password are required'}), 400
 
     # Account lockout check
-    if is_account_locked(email):
-        log_auth_event('lockout', email, False, details='Account temporarily locked')
+    if is_account_locked(login_id.lower()):
+        log_auth_event('lockout', login_id, False, details='Account temporarily locked')
         return jsonify({'error': 'Account temporarily locked due to too many failed attempts. Try again in 15 minutes.'}), 429
 
-    user = User.query.filter_by(email=email).first()
+    # Determine if login_id is an email or username
+    if '@' in login_id:
+        user = User.query.filter_by(email=login_id.lower()).first()
+    else:
+        user = User.query.filter_by(username=login_id).first()
 
     if not user or not user.check_password(password):
-        record_failed_attempt(email)
-        log_auth_event('login', email, False, details='Invalid credentials')
-        return jsonify({'error': 'Invalid email or password'}), 401
+        record_failed_attempt(login_id.lower())
+        log_auth_event('login', login_id, False, details='Invalid credentials')
+        return jsonify({'error': 'Invalid email/username or password'}), 401
 
     # Successful login — clear any previous lockout state
     user.last_login = datetime.utcnow()
@@ -113,7 +117,7 @@ def login():
 
     login_user(user)
     session.permanent = True
-    log_auth_event('login', email, True)
+    log_auth_event('login', login_id, True)
     return jsonify({'user': user.to_dict()}), 200
 
 

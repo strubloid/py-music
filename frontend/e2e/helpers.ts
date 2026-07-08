@@ -23,23 +23,36 @@ export const createUser = async (page: Page, suffix: string) => {
   return { username, email, password };
 };
 
-const registerWithRetry = async (page: Page) => {
+const registerWithRetry = async (page: Page): Promise<boolean> => {
   for (let attempt = 0; attempt < 5; attempt++) {
-    const res = await page.request.post('/api/auth/register', { data: SHARED_USER });
+    // Use the UI registration form instead of direct API call
+    // to ensure session cookies are properly set in the browser context.
+    await page.goto('/');
+    await page.getByRole('button', { name: /sign in \/ register/i }).click();
+    await page.getByRole('button', { name: /sign up/i }).click();
+    await page.getByPlaceholder('Username').fill(SHARED_USER.username);
+    await page.getByPlaceholder(/email/i).fill(SHARED_USER.email);
+    await page.getByPlaceholder('Password').fill(SHARED_USER.password);
+
+    const resPromise = page.waitForResponse(
+      (r) => r.url().includes('/api/auth/register') && r.request().method() === 'POST',
+    );
+    await page.getByRole('button', { name: /create account/i }).click();
+    const res = await resPromise;
+
     if (res.status() === 429) {
-      await page.waitForTimeout(2000 * (attempt + 1)); // backoff: 2s, 4s, 6s, 8s
+      await page.waitForTimeout(2000 * (attempt + 1));
       continue;
     }
-    if (![201, 409].includes(res.status())) {
-      throw new Error(`Unexpected register status: ${res.status()}`);
-    }
-    return res;
+    if (res.status() === 201) return true;
+    if (res.status() === 409) return false; // already exists
+    throw new Error(`Unexpected register status: ${res.status()}`);
   }
   throw new Error('Register rate limited after 5 retries');
 };
 
 const loginViaForm = async (page: Page) => {
-  await page.getByPlaceholder('Email').fill(SHARED_USER.email);
+  await page.getByPlaceholder(/email/i).fill(SHARED_USER.email);
   await page.getByPlaceholder('Password').fill(SHARED_USER.password);
   const p = page.waitForResponse(
     (r) => r.url().includes('/api/auth/login') && r.request().method() === 'POST',
@@ -51,18 +64,23 @@ const loginViaForm = async (page: Page) => {
 export const loginSharedUser = async (page: Page) => {
   await page.goto('/');
   await page.getByRole('button', { name: /sign in \/ register/i }).click();
-  let loginRes = await loginViaForm(page);
+  const loginRes = await loginViaForm(page);
 
   if (!loginRes.ok()) {
-    await registerWithRetry(page);
-    // Session might be set (201). Reload so React picks it up, then login.
-    await page.goto('/');
-    await page.getByRole('button', { name: /sign in \/ register/i }).click();
-    loginRes = await loginViaForm(page);
-    if (!loginRes.ok()) throw new Error(`Login failed: ${await loginRes.text()}`);
+    // User doesn't exist yet — register via UI (logs in automatically on success)
+    const registered = await registerWithRetry(page);
+    if (!registered) {
+      // User already existed (409) — log in via form
+      await page.goto('/');
+      await page.getByRole('button', { name: /sign in \/ register/i }).click();
+      await loginViaForm(page);
+    }
   }
 
-  // Logged in (level 1). Award XP via page-context fetch (handles CSRF natively).
+  // Wait for login to settle in the UI
+  await expect(page.locator('.badge-trigger')).toBeVisible();
+
+  // Award XP via page-context fetch (handles CSRF natively).
   await page.evaluate(async (amount) => {
     const g = (n: string) => {
       const m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)'));
@@ -76,7 +94,7 @@ export const loginSharedUser = async (page: Page) => {
     });
   }, 250);
 
-  // Reload once to pick up level 3 in React state
+  // Reload to pick up level 3 in React state
   await page.goto('/');
   await expect(page.locator('.badge-trigger')).toBeVisible();
   return SHARED_USER;
