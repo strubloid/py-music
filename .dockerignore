@@ -6,7 +6,6 @@ __pycache__/
 .envrc
 node_modules/
 frontend/node_modules/
-frontend/src/
 .venv/
 venv/
 env/
