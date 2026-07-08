@@ -1,7 +1,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.72);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -11,8 +11,8 @@
 }
 
 .login-modal {
-  background: #1e1b4b;
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  background: rgba(16, 18, 42, 0.98);
+  border: 1px solid var(--border-accent);
   border-radius: 16px;
   padding: 2rem;
   width: 100%;
@@ -27,7 +27,7 @@
   right: 1rem;
   background: transparent;
   border: none;
-  color: #9ca3af;
+  color: var(--text-muted);
   cursor: pointer;
   padding: 0.25rem;
   display: flex;
@@ -38,7 +38,7 @@
 }
 
 .modal-close:hover {
-  color: #fff;
+  color: var(--text-strong);
 }
 
 .modal-header {
@@ -49,7 +49,7 @@
 .modal-header h2 {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(to right, #fbbf24, #f97316);
+  background: linear-gradient(to right, var(--accent), var(--accent-warm));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 0.5rem;
@@ -70,19 +70,19 @@
 .form-group {
   display: flex;
   align-items: center;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
   border-radius: 8px;
   padding: 0 1rem;
   transition: border-color 0.2s;
 }
 
 .form-group:focus-within {
-  border-color: #fbbf24;
+  border-color: var(--accent);
 }
 
 .form-icon {
-  color: #9ca3af;
+  color: var(--text-muted);
   flex-shrink: 0;
 }
 
@@ -91,7 +91,7 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #fff;
+  color: var(--text-strong);
   padding: 0.75rem 0.5rem;
   font-size: 0.9375rem;
   -webkit-text-fill-color: #fff;
@@ -101,17 +101,17 @@
 /* Block browser autofill yellow — apply dark bg via box-shadow trick */
 .form-group input:-webkit-autofill,
 .form-group input:focus:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 100px #1e1b4b inset !important;
+  -webkit-box-shadow: 0 0 0 100px rgba(16, 18, 42, 0.98) inset !important;
   -webkit-text-fill-color: #fff !important;
   background-color: transparent !important;
 }
 
 .form-group input::placeholder {
-  color: #6b7280;
+  color: var(--text-subtle);
 }
 
 .form-error {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.18);
   border: 1px solid rgba(239, 68, 68, 0.5);
   border-radius: 6px;
   padding: 0.625rem 0.875rem;
@@ -124,7 +124,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #fbbf24, #f97316);
+  background: linear-gradient(135deg, var(--accent), var(--accent-warm));
   color: #000;
   border: none;
   border-radius: 8px;
@@ -152,7 +152,7 @@
 }
 
 .modal-footer p {
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 0.875rem;
   margin: 0;
 }
@@ -160,7 +160,7 @@
 .modal-footer button {
   background: none;
   border: none;
-  color: #fbbf24;
+  color: var(--accent);
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 500;
@@ -183,14 +183,14 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-soft);
 }
 
 .divider span {
   position: relative;
-  background: #1e1b4b;
+  background: rgba(16, 18, 42, 0.98);
   padding: 0 0.75rem;
-  color: #6b7280;
+  color: var(--text-subtle);
   font-size: 0.8125rem;
 }
 
@@ -211,7 +211,7 @@
 }
 
 .guest-hint {
-  color: #6b7280 !important;
+  color: var(--text-subtle) !important;
   font-size: 0.75rem !important;
   margin-top: 0.5rem !important;
 }
@@ -229,7 +229,7 @@
   margin-top: -0.25rem;
 }
 .forgot-link:hover {
-  color: #fbbf24;
+  color: var(--accent);
   text-decoration: underline;
 }
 

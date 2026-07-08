@@ -1,11 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Zap, ListMusic, BookOpen } from 'lucide-react';
+import { Zap, ListMusic, BookOpen, ArrowRight, Sparkles, Flame, Music2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn, promptLogin } = useAuth();
   const navigate = useNavigate();
 
   const getGreeting = () => {
@@ -17,36 +17,90 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard">
-      <div className="dashboard-hero">
-        <h1 className="greeting">
-          {getGreeting()}{user ? `, ${user.username}` : ''} 👋
-        </h1>
-        <p className="hero-sub">
-          {isLoggedIn
-            ? `Level ${user.level} · ${user.xp} XP`
-            : 'Sign up to save your progress and earn XP'}
-        </p>
-      </div>
+      <section className="dashboard-hero">
+        <div className="hero-copy">
+          <div className="hero-pill">
+            <Sparkles size={14} />
+            <span>The practice room</span>
+          </div>
+          <h1 className="greeting">
+            {getGreeting()}{user ? `, ${user.username}` : ''}
+          </h1>
+          <p className="hero-sub">
+            Explore scales, build progressions, and keep the learning loop moving with immediate feedback.
+          </p>
 
-      <div className="dashboard-grid">
-        <button className="dash-card primary" onClick={() => navigate('/learn/scales')}>
-          <BookOpen size={28} className="card-icon" />
-          <h2>Explore Scales</h2>
-          <p>Discover scales, chords, and theory for any key</p>
-        </button>
+          <div className="hero-actions">
+            <button className="hero-action primary" onClick={() => navigate('/learn/scales')}>
+              <BookOpen size={18} />
+              <span>Explore scales</span>
+              <ArrowRight size={16} />
+            </button>
+            <button className="hero-action secondary" onClick={() => navigate('/create/my-songs')}>
+              <Music2 size={18} />
+              <span>Open my songs</span>
+            </button>
+          </div>
+        </div>
 
-        <button className="dash-card" onClick={() => navigate('/create/progressions')}>
-          <ListMusic size={28} className="card-icon" />
-          <h2>Build Progressions</h2>
-          <p>Create and save chord progressions</p>
-        </button>
+        <div className="hero-status">
+          <div className="status-tile accent">
+            <span className="status-label">Level</span>
+            <strong>{isLoggedIn ? user.level : 1}</strong>
+            <span className="status-note">Keep building momentum</span>
+          </div>
+          <div className="status-tile">
+            <span className="status-label">XP</span>
+            <strong>{isLoggedIn ? user.xp : 0}</strong>
+            <span className="status-note">Progress that sticks</span>
+          </div>
+          <div className="status-tile">
+            <span className="status-label">Mode</span>
+            <strong>{isLoggedIn ? 'Synced' : 'Guest'}</strong>
+            <span className="status-note">{isLoggedIn ? 'Saved to your account' : 'Local on this device'}</span>
+          </div>
+        </div>
+      </section>
 
-        <button className="dash-card accent" onClick={() => navigate('/play/daily')}>
-          <Zap size={28} className="card-icon" />
-          <h2>Challenges</h2>
-          <p>Keep practicing with random questions and XP rewards</p>
-        </button>
-      </div>
+      <section className="dashboard-section">
+        <div className="section-copy">
+          <h2>What do you want to do next?</h2>
+          <p>Jump into a focused practice loop or continue a creative task.</p>
+        </div>
+
+        <div className="dashboard-grid">
+          <button className="dash-card featured" onClick={() => navigate('/learn/scales')}>
+            <div className="card-icon-wrap">
+              <BookOpen size={22} className="card-icon" />
+            </div>
+            <div className="card-copy">
+              <h3>Explore scales</h3>
+              <p>See notes, shapes, and chord context in every key.</p>
+            </div>
+            <span className="card-cta">
+              Start learning <ArrowRight size={14} />
+            </span>
+          </button>
+
+          <button className="dash-card" onClick={() => navigate('/create/progressions')}>
+            <ListMusic size={22} className="card-icon" />
+            <h3>Build progressions</h3>
+            <p>Create and save chord loops for songwriting.</p>
+          </button>
+
+          <button className="dash-card" onClick={() => navigate('/play/daily')}>
+            <Zap size={22} className="card-icon" />
+            <h3>Take a challenge</h3>
+            <p>Practice with quick prompts and earn XP.</p>
+          </button>
+
+          <button className="dash-card subtle" onClick={() => promptLogin('save')}>
+            <Flame size={22} className="card-icon" />
+            <h3>{isLoggedIn ? 'Keep your streak' : 'Sign in to save'}</h3>
+            <p>{isLoggedIn ? 'Return tomorrow and keep momentum alive.' : 'Unlock synced progress and saved work.'}</p>
+          </button>
+        </div>
+      </section>
     </div>
   );
 };

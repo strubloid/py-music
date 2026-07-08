@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-08T00:00:00.000Z",
+  "title": "Design System: Strubloid Music Theory",
+  "extensions": {
+    "colorMeta": {
+      "gold": { "role": "primary", "displayName": "Gold", "canonical": "oklch(0.82 0.15 85)", "tonalRamp": ["oklch(0.15 0.02 85)", "oklch(0.28 0.05 85)", "oklch(0.40 0.08 85)", "oklch(0.53 0.11 85)", "oklch(0.65 0.14 85)", "oklch(0.78 0.15 85)", "oklch(0.88 0.10 85)", "oklch(0.95 0.04 85)"] },
+      "brand-purple": { "role": "accent", "displayName": "Brand Purple", "canonical": "oklch(0.50 0.22 305)", "tonalRamp": ["oklch(0.10 0.04 305)", "oklch(0.22 0.09 305)", "oklch(0.34 0.15 305)", "oklch(0.45 0.21 305)", "oklch(0.55 0.24 305)", "oklch(0.65 0.20 305)", "oklch(0.78 0.12 305)", "oklch(0.92 0.04 305)"] },
+      "brand-blue": { "role": "background", "displayName": "Brand Navy", "canonical": "oklch(0.35 0.12 265)", "tonalRamp": ["oklch(0.08 0.02 265)", "oklch(0.18 0.05 265)", "oklch(0.28 0.09 265)", "oklch(0.38 0.12 265)", "oklch(0.48 0.14 265)", "oklch(0.60 0.12 265)", "oklch(0.75 0.07 265)", "oklch(0.92 0.02 265)"] },
+      "blue-note": { "role": "secondary", "displayName": "Blue Note", "canonical": "oklch(0.55 0.18 260)", "tonalRamp": ["oklch(0.10 0.04 260)", "oklch(0.22 0.09 260)", "oklch(0.34 0.14 260)", "oklch(0.45 0.18 260)", "oklch(0.55 0.18 260)", "oklch(0.66 0.14 260)", "oklch(0.78 0.08 260)", "oklch(0.92 0.03 260)"] },
+      "danger": { "role": "error", "displayName": "Danger Red", "canonical": "oklch(0.55 0.20 25)", "tonalRamp": ["oklch(0.12 0.05 25)", "oklch(0.25 0.10 25)", "oklch(0.37 0.15 25)", "oklch(0.48 0.19 25)", "oklch(0.57 0.21 25)", "oklch(0.67 0.16 25)", "oklch(0.78 0.10 25)", "oklch(0.92 0.03 25)"] },
+      "ink-primary": { "role": "text", "displayName": "White Text", "canonical": "oklch(1.0 0 0)", "tonalRamp": [] },
+      "ink-secondary": { "role": "text", "displayName": "Dim Text", "canonical": "oklch(0.65 0.01 250)", "tonalRamp": [] },
+      "ink-muted": { "role": "text", "displayName": "Muted Text", "canonical": "oklch(0.50 0.01 250)", "tonalRamp": [] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page titles and greetings." },
+      "headline": { "displayName": "Headline", "purpose": "Section headings." },
+      "title": { "displayName": "Title", "purpose": "Card titles and button text." },
+      "body": { "displayName": "Body", "purpose": "Paragraphs and descriptions." },
+      "label": { "displayName": "Label", "purpose": "Section nav headers and small captions." }
+    },
+    "shadows": [
+      { "name": "modal", "value": "0 25px 50px -12px rgba(0, 0, 0, 0.5)", "purpose": "Modal dialog separation." },
+      { "name": "dropdown", "value": "0 10px 40px rgba(0, 0, 0, 0.4)", "purpose": "Dropdown and popover floating surfaces." },
+      { "name": "selected-glow", "value": "0 0 0 3px rgba(251, 191, 36, 0.1), 0 4px 18px rgba(251, 191, 36, 0.2)", "purpose": "Gold glow on active mode pills." }
+    ],
+    "motion": [
+      { "name": "ease-hover", "value": "cubic-bezier(0.34, 1.56, 0.64, 1)", "purpose": "Playful overshoot for hover scale transforms." },
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Default easing for state transitions." },
+      { "name": "duration-instant", "value": "0.15s", "purpose": "Hover state transitions." },
+      { "name": "duration-standard", "value": "0.25s", "purpose": "Layout and panel transitions." },
+      { "name": "duration-slow", "value": "0.5s", "purpose": "XP ring and progress bar transitions." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Gold primary call-to-action. Used for key actions (submit, save, confirm).",
+      "html": "<button class=\"ds-btn-primary\">Explore Scales</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; background: #fbbf24; color: #000; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 1rem; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; min-height: 44px; transition: background 0.15s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1); } .ds-btn-primary:hover { background: #f59e0b; transform: scale(1.05); } .ds-btn-primary:active { transform: scale(0.98); } .ds-btn-primary:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Glass secondary action. For less prominent controls.",
+      "html": "<button class=\"ds-btn-secondary\">Cancel</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.1); color: #fff; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 1rem; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; min-height: 44px; transition: background 0.15s ease; } .ds-btn-secondary:hover { background: rgba(255, 255, 255, 0.2); } .ds-btn-secondary:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.5); outline-offset: 2px; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Destructive action button (delete, remove, sign out).",
+      "html": "<button class=\"ds-btn-danger\">Delete</button>",
+      "css": ".ds-btn-danger { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; background: #dc2626; color: #fff; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 1rem; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; min-height: 44px; transition: background 0.15s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1); } .ds-btn-danger:hover { background: #b91c1c; transform: scale(1.05); } .ds-btn-danger:active { transform: scale(0.98); } .ds-btn-danger:focus-visible { outline: 2px solid #dc2626; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Border-only tertiary action. For dismiss or less important controls.",
+      "html": "<button class=\"ds-btn-ghost\">Skip</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; background: transparent; color: #d1d5db; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 1rem; font-weight: 600; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; cursor: pointer; min-height: 44px; transition: background 0.15s ease, color 0.15s ease; } .ds-btn-ghost:hover { background: rgba(255, 255, 255, 0.1); color: #fff; } .ds-btn-ghost:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.5); outline-offset: 2px; }"
+    },
+    {
+      "name": "Default Card",
+      "kind": "card",
+      "refersTo": "card-default",
+      "description": "Standard glass container for content sections.",
+      "html": "<div class=\"ds-card\"><h3 style=\"margin: 0 0 0.5rem; font-size: 1.125rem; font-weight: 600; color: #fff;\">Card Title</h3><p style=\"margin: 0; font-size: 0.875rem; color: #9ca3af; line-height: 1.5;\">Content description goes here.</p></div>",
+      "css": ".ds-card { background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 12px; padding: 1.1rem; border: 1px solid rgba(255, 255, 255, 0.08); }"
+    },
+    {
+      "name": "Primary Card",
+      "kind": "card",
+      "refersTo": "card-primary",
+      "description": "Gold-accented card for featured or primary content.",
+      "html": "<div class=\"ds-card-primary\"><h3 style=\"margin: 0 0 0.5rem; font-size: 1.125rem; font-weight: 600; color: #fff;\">Featured</h3><p style=\"margin: 0; font-size: 0.875rem; color: #9ca3af; line-height: 1.5;\">Gold-accented card content.</p></div>",
+      "css": ".ds-card-primary { background: rgba(251, 191, 36, 0.08); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 12px; padding: 1.1rem; border: 1px solid rgba(251, 191, 36, 0.2); }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Standard text input with dark glass style and gold focus.",
+      "html": "<div style=\"display: flex; align-items: center; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 0 1rem; transition: border-color 0.2s;\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#9ca3af\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"flex-shrink: 0;\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.35-4.35\"/></svg><input type=\"text\" placeholder=\"Search scales...\" class=\"ds-input\" style=\"flex: 1; background: transparent; border: none; outline: none; color: #fff; padding: 0.75rem 0.5rem; font-size: 0.9375rem; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\" /></div>",
+      "css": ".ds-input::placeholder { color: #6b7280; } .ds-input:focus { outline: none; } div:focus-within { border-color: #fbbf24 !important; }"
+    },
+    {
+      "name": "Mode Pill",
+      "kind": "chip",
+      "refersTo": "mode-pill",
+      "description": "Selectable pill for scale modes. Active = gold glow.",
+      "html": "<div style=\"display: flex; gap: 0.5rem; flex-wrap: wrap;\"><button class=\"ds-pill ds-pill-active\">Major</button><button class=\"ds-pill\">Minor</button><button class=\"ds-pill\">Dorian</button></div>",
+      "css": ".ds-pill { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.1rem; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 999px; color: #9ca3af; font-size: 0.85rem; font-weight: 600; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; cursor: pointer; transition: all 0.18s ease; white-space: nowrap; } .ds-pill:hover { background: rgba(251, 191, 36, 0.08); border-color: rgba(251, 191, 36, 0.3); color: #e5e7eb; transform: translateY(-1px); } .ds-pill-active { background: linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(249, 115, 22, 0.18)); border-color: rgba(251, 191, 36, 0.7); color: #fbbf24; font-weight: 700; box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1), 0 4px 18px rgba(251, 191, 36, 0.2); transform: scale(1.05); }"
+    },
+    {
+      "name": "User Badge",
+      "kind": "custom",
+      "refersTo": "user-badge",
+      "description": "Avatar + XP ring + level display in sidebar header.",
+      "html": "<div style=\"display: flex; align-items: center; gap: 0.5rem; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 9999px; padding: 0.375rem 0.75rem 0.375rem 0.5rem;\"><div style=\"width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #fbbf24, #f97316); display: flex; align-items: center; justify-content: center; color: #000; font-size: 0.875rem; font-weight: 700; flex-shrink: 0;\">U</div><div style=\"display: flex; flex-direction: column;\"><span style=\"font-size: 0.8125rem; font-weight: 600; color: #fff; line-height: 1.2;\">Username</span><span style=\"font-size: 0.6875rem; color: #fbbf24; line-height: 1.2;\">Lv. 3</span></div><svg width=\"36\" height=\"36\" viewBox=\"0 0 36 36\" style=\"transform: rotate(-90deg);\"><circle cx=\"18\" cy=\"18\" r=\"15.5\" fill=\"none\" stroke=\"rgba(255,255,255,0.1)\" stroke-width=\"3\"/><circle cx=\"18\" cy=\"18\" r=\"15.5\" fill=\"none\" stroke=\"#fbbf24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-dasharray=\"60, 100\"/></svg></div>",
+      "css": ""
+    }
+  ],
+  "narrative": {
+    "northStar": "The Practice Room",
+    "overview": "Strubloid is a dark, warm environment that puts the instrument between the user and the theory. The interface steps back — deep indigo gradients, translucent glass surfaces, and a single gold accent — so the fretboard, keyboard, and notes are what demand attention. It's a practice room at golden hour: focused, warm, without distraction.\n\nThe system uses layered glass for depth: semi-transparent surfaces floated over a rich gradient background, with backdrop-filter blur creating the illusion of physical depth. Gold (#fbbf24) is the one voice for interactive intent — buttons, active navigation, highlights, and progress. Everything else is quiet support: muted gray text, subtle borders, low-contrast section dividers.\n\nThis is explicitly not a corporate dashboard or a sterile productivity tool. The warmth of the gold accent, the depth of the purple-indigo gradient, and the playful scale transforms on buttons and cards keep the energy musical and inviting.",
+    "keyCharacteristics": [
+      "Dark gradient background (blue → purple → indigo) as the anchor atmosphere",
+      "Single gold accent for all interactive states — one voice, not a rainbow",
+      "Glass surfaces with backdrop-filter blur for card/panel depth",
+      "Sans-serif only (Inter), weight-driven hierarchy, no decorative typography",
+      "Playful hover states: lift, scale, glow — feedback that feels responsive, not mechanical",
+      "Responsive to 320px with a bottom-nav mobile layout"
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Gold is the only interactive accent. Active nav items, primary buttons, selected pills, highlighted scale degrees — all use the same gold. Diluting interactive states across multiple colors erodes the user's learned mapping. Gold's rarity (≤15% of any given screen) is the point.", "section": "colors" },
+      { "name": "The Glass Depth Rule", "body": "Depth comes from opacity, not from shadow. Closer surfaces have higher opacity and stronger blur. The gradient background sits at full opacity; cards sit at 0.2–0.35 opacity with 8–12px blur; modals use 0.7 overlay with 4px blur. No box-shadow substitutes for this hierarchy.", "section": "colors" },
+      { "name": "The Single Family Rule", "body": "Inter everywhere. No second font. Weight and size do all the work of hierarchy — no serif/sans pairing, no display font, no decorative typography. This keeps the focus on the music notation and instruments, not on typographic flourish.", "section": "typography" },
+      { "name": "The No-Shadow Default Rule", "body": "Containers do not cast shadows at rest. Their depth is implicit from opacity layering. Shadows are reserved for floating overlays (modals, dropdowns, tooltips) that need to be visually pulled out of the glass stack.", "section": "elevation" }
+    ],
+    "dos": [
+      "Use gold (#fbbf24) for all interactive highlights — it's the one voice across buttons, nav, pills, and progress.",
+      "Use the layered glass system for depth — opacity + blur, not drop shadows.",
+      "Keep body text at ink-primary (#ffffff) or ink-secondary (#9ca3af) with verified WCAG AA contrast on the dark gradient background.",
+      "Use playful micro-interactions: scale transforms on buttons, lift on cards, glow on active pills.",
+      "Use text-wrap: balance on headings and text-wrap: pretty on long body text.",
+      "Make interactive instruments (fretboard, keyboard) the hero — chrome and decoration step back."
+    ],
+    "donts": [
+      "Don't use gradient text for decorative purposes (the logo is the one exception). Use a single solid color for emphasis via weight or size.",
+      "Don't use box-shadows as a general depth mechanism. Depth belongs to the glass layering system.",
+      "Don't treat the sidebar section labels (Learn, Play, Create, System) as a required pattern for every page — they're navigation structure, not a content kicker. Avoid adding similar eyebrow labels above page sections.",
+      "Don't use side-stripe borders (border-left greater than 1px as a colored accent on cards or callouts). Use full borders, background tints, or nothing.",
+      "Don't default to identical card grids (same-sized cards with icon + heading + text) without considering whether the content would be better served by varied layouts.",
+      "Don't default to glassmorphism without purpose — the glass layering system is for containers and panels, not for decorative card effects.",
+      "Don't let text overflow its container. Test headings at every breakpoint.",
+      "Don't animate CSS layout properties. Use transform and opacity only.",
+      "Don't forget reduced motion: every animation needs a prefers-reduced-motion fallback."
+    ]
+  }
+}

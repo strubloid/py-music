@@ -2,10 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: dark;
+  --bg-0: #050816;
+  --bg-1: #0b1022;
+  --bg-2: #1e1b4b;
+  --surface-0: rgba(0, 0, 0, 0.2);
+  --surface-1: rgba(0, 0, 0, 0.35);
+  --surface-2: rgba(255, 255, 255, 0.04);
+  --border-soft: rgba(255, 255, 255, 0.08);
+  --border-accent: rgba(251, 191, 36, 0.22);
+  --text-strong: #ffffff;
+  --text-muted: #9ca3af;
+  --text-subtle: #6b7280;
+  --accent: #fbbf24;
+  --accent-strong: #f59e0b;
+  --accent-warm: #f97316;
+  --danger: #dc2626;
+  --focus-ring: rgba(251, 191, 36, 0.35);
+}
+
+html {
+  min-height: 100%;
+  background: var(--bg-0);
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background:
+    radial-gradient(circle at top, rgba(124, 58, 237, 0.18), transparent 32%),
+    radial-gradient(circle at 20% 20%, rgba(251, 191, 36, 0.1), transparent 24%),
+    linear-gradient(135deg, var(--bg-0) 0%, var(--bg-1) 48%, var(--bg-2) 100%);
+  background-attachment: fixed;
+  color: var(--text-strong);
   min-height: 100vh;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
 }
 
 .piano-key {
@@ -22,4 +70,15 @@ body {
 
 .fret-dot:hover {
   transform: scale(1.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
