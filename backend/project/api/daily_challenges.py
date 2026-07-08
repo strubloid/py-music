@@ -18,6 +18,7 @@ from flask import Blueprint, request, jsonify
 from flask_login import current_user, login_required
 
 from ..daily_challenge_explanations import build_daily_challenge_explanation
+from ..game_system import calculate_level_from_xp
 from backend.project.models import db
 from backend.project.models.user import DailyChallenge, ChallengeAttempt
 
@@ -680,7 +681,14 @@ def complete_challenge(challenge_id):
         })
 
     today = datetime.utcnow().strftime('%Y-%m-%d')
-    xp_award = challenge.xp_reward
+    data = request.get_json(silent=True) or {}
+    requested_xp_award = data.get('xp_award')
+    try:
+        requested_xp_award = int(requested_xp_award) if requested_xp_award is not None else None
+    except (TypeError, ValueError):
+        requested_xp_award = None
+
+    xp_award = requested_xp_award if requested_xp_award and requested_xp_award > 0 else challenge.xp_reward
 
     # One reward per challenge: completed challenges are filtered out of the list,
     # so a visible challenge should pay its own reward exactly once.
@@ -713,7 +721,7 @@ def complete_challenge(challenge_id):
 
     # Award XP
     current_user.xp = (current_user.xp or 0) + xp_award
-    current_user.level = (current_user.xp // 500) + 1
+    current_user.level = calculate_level_from_xp(current_user.xp)
     db.session.commit()
 
     return jsonify({

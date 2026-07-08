@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { CheckCircle, Flame, Play, RefreshCw, Train, Trophy, Volume2, Waves, XCircle } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useGameProgress } from "../../contexts/GameProgressContext.jsx";
 import { createEarTrainingAudioEngine, EAR_TRAINING_INSTRUMENTS } from "../../audio/earTrainingAudio.jsx";
 import { completeDailyChallenge, getDailyChallenges, getUserStreak } from "../../services/api";
+import { calculateQuestionXp, getPowerById, getQuestionDirection } from "../../game/gameSystem.tsx";
 import "./EarTraining.css";
 
 const FETCH_LIMIT = 16;
@@ -117,10 +119,22 @@ const EarTraining = () => {
     const [loadingInstrumentId, setLoadingInstrumentId] = useState(null);
     const [loadedInstrumentIds, setLoadedInstrumentIds] = useState([]);
     const [playbackMode, setPlaybackMode] = useState("melodic");
+    const [replayCount, setReplayCount] = useState(0);
+    const [hiddenOptionIndexes, setHiddenOptionIndexes] = useState([]);
+    const [questionPowersUsed, setQuestionPowersUsed] = useState([]);
+    const [slowPlaybackActive, setSlowPlaybackActive] = useState(false);
+    const [rootAnchorActive, setRootAnchorActive] = useState(false);
+    const [revealDirectionActive, setRevealDirectionActive] = useState(false);
+    const [compareModeActive, setCompareModeActive] = useState(false);
+    const [compareReady, setCompareReady] = useState(false);
+    const [questionStartedAt, setQuestionStartedAt] = useState(Date.now());
+    const [maxCombo, setMaxCombo] = useState(0);
+    const [sessionStats, setSessionStats] = useState({ answered: 0, correct: 0, totalXp: 0 });
     const advanceTimerRef = useRef(null);
     const playbackTimerRef = useRef(null);
     const lastPlayedChallengeIdRef = useRef(null);
     const audioEngineRef = useRef(null);
+    const { unlockedPowers, consumeFocus, recordChallengeResult, levelMeta, progressState } = useGameProgress();
 
     if (!audioEngineRef.current) {
         audioEngineRef.current = createEarTrainingAudioEngine({
@@ -142,7 +156,7 @@ const EarTraining = () => {
     }, []);
 
     const playChallenge = useCallback(
-        async (instrumentId = selectedInstrument) => {
+        async (instrumentId = selectedInstrument, options = {}) => {
             if (!challenge || playing) return;
 
             clearScheduledAudio();
@@ -161,6 +175,8 @@ const EarTraining = () => {
                     mode: playbackMode,
                     rootToneNote: nextStimulus.rootToneNote,
                     targetToneNote: nextStimulus.targetToneNote,
+                    timingScale: options.timingScale || (slowPlaybackActive ? 1.45 : 1),
+                    includeRootAnchor: options.includeRootAnchor || rootAnchorActive,
                 });
 
                 if (playbackTimerRef.current) window.clearTimeout(playbackTimerRef.current);
@@ -170,7 +186,7 @@ const EarTraining = () => {
                 setError("Unable to start audio. Check your browser sound settings.");
             }
         },
-        [challenge, clearScheduledAudio, playbackMode, playing, selectedInstrument],
+        [challenge, clearScheduledAudio, playbackMode, playing, rootAnchorActive, selectedInstrument, slowPlaybackActive],
     );
 
     const loadChallenge = useCallback(async ({ replace = false, excludeIds = [] } = {}) => {
@@ -204,6 +220,15 @@ const EarTraining = () => {
             setXpAwarded(0);
             setStimulus(null);
             setSubmitting(false);
+            setReplayCount(0);
+            setHiddenOptionIndexes([]);
+            setQuestionPowersUsed([]);
+            setSlowPlaybackActive(false);
+            setRootAnchorActive(false);
+            setRevealDirectionActive(false);
+            setCompareModeActive(false);
+            setCompareReady(false);
+            setQuestionStartedAt(Date.now());
             setLoading(false);
             return { nextChallenge };
         } catch {
@@ -257,6 +282,22 @@ const EarTraining = () => {
             if (!challenge || submitting || result) return;
 
             const isCorrect = idx === challenge.correct_index;
+            const answerDurationMs = Date.now() - questionStartedAt;
+            const isFastAnswer = answerDurationMs <= 7000;
+            const penalties = Math.max(0, replayCount - 1) * 2
+                + (questionPowersUsed.includes('slow_down') ? 8 : 0)
+                + (questionPowersUsed.includes('remove_one_option') ? 10 : 0)
+                + (questionPowersUsed.includes('root_note_anchor') ? 6 : 0)
+                + (questionPowersUsed.includes('compare_mode') ? 12 : 0)
+                + (questionPowersUsed.includes('reveal_direction') ? 10 : 0);
+            const awardedXp = calculateQuestionXp({
+                baseXp: challenge.xp_reward,
+                isCorrect,
+                isFirstTry: true,
+                isFastAnswer,
+                combo,
+                penalties,
+            });
             setSelectedIdx(idx);
             setSubmitting(true);
 
@@ -270,11 +311,13 @@ const EarTraining = () => {
             try {
                 if (isCorrect) {
                     setResult({ correct: true });
-                    setCombo((current) => current + 1);
+                    const nextCombo = combo + 1;
+                    setCombo(nextCombo);
+                    setMaxCombo((current) => Math.max(current, nextCombo));
                     rememberCompletedChallengeId(challenge.id);
 
                     if (isLoggedIn) {
-                        const response = await completeDailyChallenge(challenge.id);
+                        const response = await completeDailyChallenge(challenge.id, { xp_award: awardedXp });
                         updateUserProgress({ xp: response.data.xp, level: response.data.level });
                         setXpAwarded(response.data.xp_awarded);
 
@@ -283,12 +326,49 @@ const EarTraining = () => {
                         setCompletedToday(streakRes.data.completed_today);
                     }
 
+                    setSessionStats((current) => ({
+                        answered: current.answered + 1,
+                        correct: current.correct + 1,
+                        totalXp: current.totalXp + awardedXp,
+                    }));
+                    recordChallengeResult({
+                        challengeId: `${challenge.id}`,
+                        mode: 'practice',
+                        score: 1,
+                        accuracy: 1,
+                        xpEarned: awardedXp,
+                        maxCombo: Math.max(maxCombo, nextCombo),
+                        powersUsed: questionPowersUsed,
+                        hadMistake: false,
+                        completedAt: new Date().toISOString(),
+                    });
+                    if (compareModeActive) setCompareReady(true);
+
                     queueNext();
                 } else {
                     setResult({ correct: false });
-                    setCombo(0);
+                    const preservesCombo = questionPowersUsed.includes('second_chance') || questionPowersUsed.includes('freeze_combo');
+                    if (!preservesCombo) {
+                        setCombo(0);
+                    }
                     setXpAwarded(0);
                     rememberCompletedChallengeId(challenge.id);
+                    setSessionStats((current) => ({
+                        ...current,
+                        answered: current.answered + 1,
+                    }));
+                    recordChallengeResult({
+                        challengeId: `${challenge.id}`,
+                        mode: 'practice',
+                        score: 0,
+                        accuracy: 0,
+                        xpEarned: 0,
+                        maxCombo,
+                        powersUsed: questionPowersUsed,
+                        hadMistake: true,
+                        completedAt: new Date().toISOString(),
+                    });
+                    if (compareModeActive) setCompareReady(true);
                     queueNext();
                 }
             } catch (err) {
@@ -304,8 +384,60 @@ const EarTraining = () => {
                 setSubmitting(false);
             }
         },
-        [challenge, isLoggedIn, loadChallenge, result, submitting, updateUserProgress],
+        [challenge, combo, compareModeActive, isLoggedIn, loadChallenge, maxCombo, questionPowersUsed, questionStartedAt, recordChallengeResult, replayCount, result, submitting, updateUserProgress],
     );
+
+    const usePower = useCallback((powerId) => {
+        const power = getPowerById(powerId);
+        if (!power || result) return;
+        if (questionPowersUsed.includes(powerId)) return;
+        if (power.focusCost && !consumeFocus(power.focusCost)) return;
+
+        if (powerId === 'remove_one_option') {
+            const wrongIndexes = challenge.options
+                .map((_, index) => index)
+                .filter((index) => index !== challenge.correct_index && !hiddenOptionIndexes.includes(index));
+            if (wrongIndexes.length > 0) {
+                setHiddenOptionIndexes((current) => [...current, wrongIndexes[0]]);
+            }
+        }
+
+        if (powerId === 'slow_down') setSlowPlaybackActive(true);
+        if (powerId === 'root_note_anchor') setRootAnchorActive(true);
+        if (powerId === 'reveal_direction') setRevealDirectionActive(true);
+        if (powerId === 'compare_mode') setCompareModeActive(true);
+
+        setQuestionPowersUsed((current) => [...current, powerId]);
+    }, [challenge, consumeFocus, hiddenOptionIndexes, questionPowersUsed, result]);
+
+    const handleReplay = useCallback(() => {
+        setReplayCount((current) => current + 1);
+        playChallenge().catch(() => {});
+    }, [playChallenge]);
+
+    const handleRootAnchorReplay = useCallback(() => {
+        usePower('root_note_anchor');
+        setReplayCount((current) => current + 1);
+        playChallenge(selectedInstrument, { includeRootAnchor: true }).catch(() => {});
+    }, [playChallenge, selectedInstrument, usePower]);
+
+    const handleSlowReplay = useCallback(() => {
+        usePower('slow_down');
+        setReplayCount((current) => current + 1);
+        playChallenge(selectedInstrument, { timingScale: 1.45 }).catch(() => {});
+    }, [playChallenge, selectedInstrument, usePower]);
+
+    const handleComparePlayback = useCallback(async () => {
+        if (!stimulus || selectedIdx === null || !challenge?.options[selectedIdx]) return;
+        const selectedSemitones = INTERVAL_TO_SEMITONES[challenge.options[selectedIdx]] || stimulus.semitones;
+        const selectedToneNote = midiToToneNote(stimulus.rootMidi + selectedSemitones);
+        await audioEngineRef.current.playComparison({
+            instrumentId: selectedInstrument,
+            rootToneNote: stimulus.rootToneNote,
+            originalToneNote: stimulus.targetToneNote,
+            selectedToneNote,
+        });
+    }, [challenge, selectedIdx, selectedInstrument, stimulus]);
 
     const handleInstrumentSelect = useCallback(
         (instrumentId) => {
@@ -322,6 +454,7 @@ const EarTraining = () => {
     const currentStimulus = stimulus || (challenge ? buildStimulus(challenge) : null);
     const selectedInstrumentMeta = EAR_TRAINING_INSTRUMENTS.find((item) => item.id === selectedInstrument);
     const instrumentReady = loadedInstrumentIds.includes(selectedInstrument);
+    const directionHint = revealDirectionActive ? getQuestionDirection(currentStimulus) : null;
 
     if (loading) {
         return (
@@ -422,15 +555,20 @@ const EarTraining = () => {
                                       : "Tap play to unlock"}
                             </strong>
                         </div>
+                        <div>
+                            <span>Focus</span>
+                            <strong>{progressState.focusPoints}</strong>
+                        </div>
                     </div>
+                    {directionHint && <div className="ear-result result-correct">Direction hint: {directionHint}</div>}
                     <div className="ear-audio-panel">
                         <button type="button" className="ear-play-button" onClick={() => playChallenge()} disabled={loadingNext || playing}>
                             <Play size={18} />
                             {playing ? "Playing..." : instrumentReady ? "Play interval" : `Load ${selectedInstrumentMeta?.label?.toLowerCase() || "instrument"}`}
                         </button>
-                        <button type="button" className="ear-action-button" onClick={() => playChallenge()} disabled={loadingNext || playing}>
+                        <button type="button" className="ear-action-button" onClick={handleReplay} disabled={loadingNext || playing}>
                             <Volume2 size={16} />
-                            Replay
+                            Replay {replayCount > 1 ? `(-${Math.max(0, replayCount - 1) * 2} XP)` : ''}
                         </button>
                         <button type="button" className="ear-action-button" onClick={() => setPlaybackMode((current) => (current === "melodic" ? "harmonic" : "melodic"))} disabled={loadingNext || playing}>
                             <Waves size={16} />
@@ -441,13 +579,39 @@ const EarTraining = () => {
                             Skip
                         </button>
                     </div>
+                    <div className="ear-powers">
+                        {unlockedPowers.map((power) => (
+                            <button
+                                key={power.id}
+                                type="button"
+                                className={`ear-power-button ${questionPowersUsed.includes(power.id) ? 'used' : ''}`}
+                                onClick={() => {
+                                    if (power.id === 'slow_down') {
+                                        handleSlowReplay();
+                                        return;
+                                    }
+                                    if (power.id === 'root_note_anchor') {
+                                        handleRootAnchorReplay();
+                                        return;
+                                    }
+                                    usePower(power.id);
+                                }}
+                                disabled={!!result || questionPowersUsed.includes(power.id) || playing}
+                            >
+                                <span>{power.name}</span>
+                                <small>
+                                    {power.focusCost ? `${power.focusCost} focus` : `-${power.xpPenalty} XP`}
+                                </small>
+                            </button>
+                        ))}
+                    </div>
                     {error && <div className="ear-error">{error}</div>}
                     {result && (
                         <div className={`ear-result ${result.correct ? "result-correct" : "result-incorrect"}`}>
                             {result.correct ? (
                                 <>
                                     <CheckCircle size={16} />
-                                    Correct. {xpAwarded ? `+${xpAwarded} XP.` : "No XP awarded yet."}
+                                    Correct. {xpAwarded ? `+${xpAwarded} XP.` : "No XP awarded yet."} Combo {combo}.
                                 </>
                             ) : (
                                 <>
@@ -472,6 +636,11 @@ const EarTraining = () => {
                                 <strong>{stimulus.semitones} semitones</strong>
                             </div>
                         </div>
+                    )}
+                    {result && compareReady && selectedIdx !== null && (
+                        <button type="button" className="ear-action-button ear-compare-button" onClick={() => handleComparePlayback()}>
+                            Compare your answer
+                        </button>
                     )}
                 </section>
 
@@ -498,12 +667,22 @@ const EarTraining = () => {
                                 <strong>{completedToday ? "Done" : "Ready"}</strong>
                             </div>
                         </div>
+                        <div className="ear-stat">
+                            <Trophy size={16} />
+                            <div>
+                                <span>Title</span>
+                                <strong>{levelMeta.title}</strong>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="ear-card">
                         <h3>Pick one</h3>
                         <div className="ear-options">
                             {challenge.options.map((option, idx) => {
+                                if (hiddenOptionIndexes.includes(idx)) {
+                                    return null;
+                                }
                                 const isSelected = selectedIdx === idx;
                                 const isCorrect = result && idx === challenge.correct_index;
                                 const isWrong = result && isSelected && !isCorrect;

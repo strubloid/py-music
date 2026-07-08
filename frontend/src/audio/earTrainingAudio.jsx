@@ -124,22 +124,45 @@ export const createEarTrainingAudioEngine = ({ onStateChange } = {}) => {
     }
   };
 
-  const playInterval = async ({ instrumentId, mode, rootToneNote, targetToneNote }) => {
+  const playInterval = async ({ instrumentId, mode, rootToneNote, targetToneNote, timingScale = 1, includeRootAnchor = false }) => {
     const instrument = await loadInstrument(instrumentId);
     const startTime = context.currentTime + PRE_ROLL_SECONDS;
+    const baseDuration = 0.46 * timingScale;
+    const targetDuration = 0.62 * timingScale;
+    const noteGap = 0.55 * timingScale;
 
     instrument.stop();
 
     if (mode === 'harmonic') {
-      instrument.start({ note: rootToneNote, time: startTime, duration: 0.95, velocity: 112 });
-      instrument.start({ note: targetToneNote, time: startTime, duration: 0.95, velocity: 112 });
-      return { durationMs: 1000 };
+      instrument.start({ note: rootToneNote, time: startTime, duration: 0.95 * timingScale, velocity: 112 });
+      instrument.start({ note: targetToneNote, time: startTime, duration: 0.95 * timingScale, velocity: 112 });
+      return { durationMs: Math.round(1000 * timingScale) };
     }
 
-    instrument.start({ note: rootToneNote, time: startTime, duration: 0.46, velocity: 110 });
-    instrument.start({ note: targetToneNote, time: startTime + 0.55, duration: 0.62, velocity: 116 });
+    instrument.start({ note: rootToneNote, time: startTime, duration: baseDuration, velocity: 110 });
 
-    return { durationMs: 1300 };
+    if (includeRootAnchor) {
+      instrument.start({ note: rootToneNote, time: startTime + noteGap, duration: baseDuration, velocity: 105 });
+      instrument.start({ note: targetToneNote, time: startTime + (noteGap * 2), duration: targetDuration, velocity: 116 });
+      return { durationMs: Math.round((1300 * timingScale) + (noteGap * 1000)) };
+    }
+
+    instrument.start({ note: targetToneNote, time: startTime + noteGap, duration: targetDuration, velocity: 116 });
+
+    return { durationMs: Math.round(1300 * timingScale) };
+  };
+
+  const playComparison = async ({ instrumentId, rootToneNote, originalToneNote, selectedToneNote }) => {
+    const instrument = await loadInstrument(instrumentId);
+    const startTime = context.currentTime + PRE_ROLL_SECONDS;
+
+    instrument.stop();
+    instrument.start({ note: rootToneNote, time: startTime, duration: 0.36, velocity: 106 });
+    instrument.start({ note: originalToneNote, time: startTime + 0.46, duration: 0.5, velocity: 116 });
+    instrument.start({ note: rootToneNote, time: startTime + 1.18, duration: 0.36, velocity: 106 });
+    instrument.start({ note: selectedToneNote, time: startTime + 1.64, duration: 0.5, velocity: 108 });
+
+    return { durationMs: 2400 };
   };
 
   const stop = () => {
@@ -180,6 +203,7 @@ export const createEarTrainingAudioEngine = ({ onStateChange } = {}) => {
     loadInstrument,
     preloadInstrument,
     playInterval,
+    playComparison,
     stop,
     dispose,
   };

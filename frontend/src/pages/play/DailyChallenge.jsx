@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Zap, Flame, RefreshCw, CheckCircle, Loader } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useGameProgress } from '../../contexts/GameProgressContext.jsx';
 import {
+  awardXp,
   getDailyChallenges,
   completeDailyChallenge,
   seedChallenges,
   getUserStreak,
 } from '../../services/api';
+import { calculateChallengeBonuses, calculateQuestionXp, getPowerById } from '../../game/gameSystem.tsx';
 import './DailyChallenge.css';
 
 const INITIAL_LIMIT = 1;
@@ -40,8 +43,17 @@ const DailyChallenge = () => {
   const [completing, setCompleting] = useState({}); // { [challengeId]: bool }
   const [results, setResults] = useState({}); // { [challengeId]: { correct: bool, xpAwarded: int } }
   const [totalRemaining, setTotalRemaining] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [maxCombo, setMaxCombo] = useState(0);
+  const [dailySummary, setDailySummary] = useState(null);
+  const [hiddenOptionIndexes, setHiddenOptionIndexes] = useState([]);
+  const [questionPowersUsed, setQuestionPowersUsed] = useState([]);
+  const [dailyBonusClaimed, setDailyBonusClaimed] = useState(false);
   const seenChallengeIdsRef = useRef([]);
   const advanceTimerRef = useRef(null);
+  const questionStartedAtRef = useRef(Date.now());
+  const sessionStatsRef = useRef({ answered: 0, correct: 0, totalXp: 0, powersUsed: [] });
+  const { unlockedPowers, consumeFocus, recordChallengeResult, addBonusXp, levelMeta, progressState } = useGameProgress();
 
   const rememberSeenChallenges = useCallback((nextChallenges) => {
     const ids = new Set(seenChallengeIdsRef.current);
@@ -118,6 +130,12 @@ const DailyChallenge = () => {
       setCompletedToday(streakRes.data.completed_today);
       setCompleting({});
       setResults({});
+      setCombo(0);
+      setMaxCombo(0);
+      setDailySummary(null);
+      setHiddenOptionIndexes([]);
+      setQuestionPowersUsed([]);
+      sessionStatsRef.current = { answered: 0, correct: 0, totalXp: 0, powersUsed: [] };
       window.dispatchEvent(new Event('streak:updated'));
     } catch (err) {
       setError('Failed to load challenges. Try reloading.');
@@ -130,6 +148,12 @@ const DailyChallenge = () => {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    questionStartedAtRef.current = Date.now();
+    setHiddenOptionIndexes([]);
+    setQuestionPowersUsed([]);
+  }, [activeIndex]);
+
   useEffect(() => () => {
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
   }, []);
@@ -141,6 +165,16 @@ const DailyChallenge = () => {
     if (completing[challengeId] || results[challengeId]) return;
 
     const isCorrect = selectedIdx === correctIdx;
+    const isFastAnswer = Date.now() - questionStartedAtRef.current <= 7000;
+    const penalties = (questionPowersUsed.includes('remove_one_option') ? 10 : 0);
+    const awardedXp = calculateQuestionXp({
+      baseXp: activeChallenge?.xp_reward || 10,
+      isCorrect,
+      isFirstTry: true,
+      isFastAnswer,
+      combo,
+      penalties,
+    });
     setCompleting((prev) => ({ ...prev, [challengeId]: true }));
 
     const queueNextChallenge = () => {
@@ -157,8 +191,11 @@ const DailyChallenge = () => {
 
     try {
       if (isCorrect) {
+        const nextCombo = combo + 1;
+        setCombo(nextCombo);
+        setMaxCombo((current) => Math.max(current, nextCombo));
         if (isLoggedIn) {
-          const res = await completeDailyChallenge(challengeId);
+          const res = await completeDailyChallenge(challengeId, { xp_award: awardedXp });
           updateUserProgress({ xp: res.data.xp, level: res.data.level });
           rememberCompletedChallengeId(challengeId);
           setResults((prev) => ({
@@ -172,6 +209,51 @@ const DailyChallenge = () => {
           const streakRes = await getUserStreak();
           setStreak(streakRes.data.streak);
           setCompletedToday(streakRes.data.completed_today);
+
+          if (!dailyBonusClaimed) {
+            const bonuses = calculateChallengeBonuses({ answeredCorrectly: 1, totalQuestions: 1, maxCombo: nextCombo, isDaily: true });
+            const bonusTotal = bonuses.completionXp + bonuses.perfectXp + bonuses.dailyXp + (streakRes.data.streak >= 3 ? 20 : 0);
+            if (bonusTotal > 0) {
+              await awardXp(bonusTotal);
+              await addBonusXp(bonusTotal);
+            }
+            setDailyBonusClaimed(true);
+            setDailySummary({
+              score: 1,
+              accuracy: 1,
+              xpEarned: awardedXp + bonusTotal,
+              combo: nextCombo,
+              powersUsed: questionPowersUsed,
+              streak: streakRes.data.streak,
+            });
+          } else {
+            setDailySummary({
+              score: 1,
+              accuracy: 1,
+              xpEarned: awardedXp,
+              combo: nextCombo,
+              powersUsed: questionPowersUsed,
+              streak: streakRes.data.streak,
+            });
+          }
+
+          sessionStatsRef.current = {
+            answered: sessionStatsRef.current.answered + 1,
+            correct: sessionStatsRef.current.correct + 1,
+            totalXp: sessionStatsRef.current.totalXp + awardedXp,
+            powersUsed: [...sessionStatsRef.current.powersUsed, ...questionPowersUsed],
+          };
+          recordChallengeResult({
+            challengeId: `${challengeId}`,
+            mode: 'daily',
+            score: 1,
+            accuracy: 1,
+            xpEarned: awardedXp,
+            maxCombo: Math.max(maxCombo, nextCombo),
+            powersUsed: questionPowersUsed,
+            streakDays: streakRes.data.streak,
+            completedAt: new Date().toISOString(),
+          });
           window.dispatchEvent(new Event('streak:updated'));
           queueNextChallenge();
         } else {
@@ -179,12 +261,32 @@ const DailyChallenge = () => {
             ...prev,
             [challengeId]: {
               correct: true,
-              xpAwarded: 0,
+              xpAwarded: awardedXp,
             },
           }));
+          sessionStatsRef.current = {
+            answered: sessionStatsRef.current.answered + 1,
+            correct: sessionStatsRef.current.correct + 1,
+            totalXp: sessionStatsRef.current.totalXp + awardedXp,
+            powersUsed: [...sessionStatsRef.current.powersUsed, ...questionPowersUsed],
+          };
+          setDailySummary({ score: 1, accuracy: 1, xpEarned: awardedXp, combo: nextCombo, powersUsed: questionPowersUsed, streak });
+          recordChallengeResult({
+            challengeId: `${challengeId}`,
+            mode: 'daily',
+            score: 1,
+            accuracy: 1,
+            xpEarned: awardedXp,
+            maxCombo: Math.max(maxCombo, nextCombo),
+            powersUsed: questionPowersUsed,
+            streakDays: streak,
+            completedAt: new Date().toISOString(),
+          });
           queueNextChallenge();
         }
       } else {
+        const preservesCombo = questionPowersUsed.includes('second_chance') || questionPowersUsed.includes('freeze_combo');
+        if (!preservesCombo) setCombo(0);
         setResults((prev) => ({
           ...prev,
           [challengeId]: {
@@ -192,6 +294,11 @@ const DailyChallenge = () => {
             xpAwarded: 0,
           },
         }));
+        sessionStatsRef.current = {
+          ...sessionStatsRef.current,
+          answered: sessionStatsRef.current.answered + 1,
+        };
+        setDailySummary({ score: 0, accuracy: 0, xpEarned: 0, combo, powersUsed: questionPowersUsed, streak });
         rememberCompletedChallengeId(challengeId);
         queueNextChallenge();
       }
@@ -211,6 +318,19 @@ const DailyChallenge = () => {
     } finally {
       setCompleting((prev) => ({ ...prev, [challengeId]: false }));
     }
+  };
+
+  const usePower = (powerId) => {
+    const power = getPowerById(powerId);
+    if (!power || !activeChallenge || results[activeChallenge.id] || questionPowersUsed.includes(powerId)) return;
+    if (power.focusCost && !consumeFocus(power.focusCost)) return;
+    if (powerId === 'remove_one_option') {
+      const wrongIndexes = activeChallenge.options.map((_, index) => index).filter((index) => index !== activeChallenge.correct_index && !hiddenOptionIndexes.includes(index));
+      if (wrongIndexes.length > 0) {
+        setHiddenOptionIndexes((current) => [...current, wrongIndexes[0]]);
+      }
+    }
+    setQuestionPowersUsed((current) => [...current, powerId]);
   };
 
   const handleLoadMore = async () => {
@@ -295,9 +415,15 @@ const DailyChallenge = () => {
         )}
       </div>
 
-      {error && <div className="daily-error">{error}</div>}
+        {error && <div className="daily-error">{error}</div>}
 
-      {!activeChallenge ? (
+        <div className="daily-game-strip">
+          <div className="daily-strip-item"><span>Title</span><strong>{levelMeta.title}</strong></div>
+          <div className="daily-strip-item"><span>Combo</span><strong>{combo}</strong></div>
+          <div className="daily-strip-item"><span>Focus</span><strong>{progressState.focusPoints}</strong></div>
+        </div>
+
+        {!activeChallenge ? (
         <div className="daily-empty">
           <CheckCircle size={48} className="empty-icon" />
           <h2>All challenges completed!</h2>
@@ -330,8 +456,18 @@ const DailyChallenge = () => {
                 </div>
               )}
 
+              <div className="daily-powers">
+                {unlockedPowers.filter((power) => ['remove_one_option', 'second_chance', 'freeze_combo'].includes(power.id)).map((power) => (
+                  <button key={power.id} type="button" className={`daily-power ${questionPowersUsed.includes(power.id) ? 'used' : ''}`} onClick={() => usePower(power.id)} disabled={questionPowersUsed.includes(power.id) || !!activeResult}>
+                    <span>{power.name}</span>
+                    <small>{power.focusCost ? `${power.focusCost} focus` : `-${power.xpPenalty} XP`}</small>
+                  </button>
+                ))}
+              </div>
+
               <div className="challenge-options">
                 {activeChallenge.options.map((opt, i) => {
+                  if (hiddenOptionIndexes.includes(i)) return null;
                   let optClass = 'challenge-option';
                   if (activeResult) {
                     if (i === activeChallenge.correct_index) optClass += ' correct';
@@ -361,6 +497,21 @@ const DailyChallenge = () => {
                       : <>🎉 Nice hit! <strong>Sign in to save XP</strong></>
                     : <>🎯 Off beat — the answer was <strong>{activeChallenge.options[activeChallenge.correct_index]}</strong></>
                   }
+                </div>
+              )}
+
+              {dailySummary && (
+                <div className="daily-summary-card">
+                  <h4>Daily Summary</h4>
+                  <p>
+                    {dailySummary.score ? `Daily Complete! You earned ${dailySummary.xpEarned} XP` : 'Daily challenge missed this round'}
+                    {dailySummary.streak ? ` and kept your ${dailySummary.streak}-day streak.` : '.'}
+                  </p>
+                  <div className="daily-summary-grid">
+                    <div><span>Accuracy</span><strong>{Math.round((dailySummary.accuracy || 0) * 100)}%</strong></div>
+                    <div><span>Combo</span><strong>{dailySummary.combo}</strong></div>
+                    <div><span>Powers</span><strong>{dailySummary.powersUsed.length}</strong></div>
+                  </div>
                 </div>
               )}
             </div>

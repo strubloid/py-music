@@ -2,10 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Zap, ListMusic, BookOpen, ArrowRight, Sparkles, Flame, Music2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useGameProgress } from '../contexts/GameProgressContext.jsx';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const { user, isLoggedIn, promptLogin } = useAuth();
+  const { levelMeta, progressState } = useGameProgress();
   const navigate = useNavigate();
 
   const getGreeting = () => {
@@ -47,7 +49,7 @@ const Dashboard = () => {
           <div className="status-tile accent">
             <span className="status-label">Level</span>
             <strong>{isLoggedIn ? user.level : 1}</strong>
-            <span className="status-note">Keep building momentum</span>
+            <span className="status-note">{levelMeta.title}</span>
           </div>
           <div className="status-tile">
             <span className="status-label">XP</span>
@@ -57,7 +59,7 @@ const Dashboard = () => {
           <div className="status-tile">
             <span className="status-label">Mode</span>
             <strong>{isLoggedIn ? 'Synced' : 'Guest'}</strong>
-            <span className="status-note">{isLoggedIn ? 'Saved to your account' : 'Local on this device'}</span>
+            <span className="status-note">{progressState.focusPoints} focus ready</span>
           </div>
         </div>
       </section>
@@ -92,6 +94,12 @@ const Dashboard = () => {
             <Zap size={22} className="card-icon" />
             <h3>Take a challenge</h3>
             <p>Practice with quick prompts and earn XP.</p>
+          </button>
+
+          <button className="dash-card" onClick={() => navigate('/play/ear-training')}>
+            <Flame size={22} className="card-icon" />
+            <h3>Ear training run</h3>
+            <p>Use powers, protect combo, and sharpen interval recognition.</p>
           </button>
 
           <button className="dash-card subtle" onClick={() => promptLogin('save')}>

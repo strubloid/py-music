@@ -86,8 +86,8 @@ export const getDailyChallenges = (limit = 10, offset = 0, options = {}) => {
   return api.get(`/api/daily-challenges?${params.toString()}`);
 };
 
-export const completeDailyChallenge = (challengeId) =>
-  api.post(`/api/daily-challenge/${challengeId}/complete`);
+export const completeDailyChallenge = (challengeId, payload = {}) =>
+  api.post(`/api/daily-challenge/${challengeId}/complete`, payload);
 
 export const seedChallenges = () =>
   api.post('/api/daily-challenge/seed');

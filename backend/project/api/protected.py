@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from backend.project.models import db
 from backend.project.models.user import Progression, Favorite
+from backend.project.game_system import calculate_level_from_xp
 
 # Protected API blueprint
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -45,6 +46,7 @@ def create_progression():
 
     # Award XP
     current_user.xp = (current_user.xp or 0) + 10
+    current_user.level = calculate_level_from_xp(current_user.xp)
     db.session.commit()
 
     return jsonify({'progression': progression.to_dict()}), 201
@@ -146,8 +148,7 @@ def award_xp():
 
     if amount > 0:
         current_user.xp = (current_user.xp or 0) + amount
-        # Level up every 500 XP
-        current_user.level = (current_user.xp // 500) + 1
+        current_user.level = calculate_level_from_xp(current_user.xp)
         db.session.commit()
 
     return jsonify({'xp': current_user.xp, 'level': current_user.level}), 200

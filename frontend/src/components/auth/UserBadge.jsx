@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { LogOut, User, ChevronDown, Music, Flame } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useGameProgress } from '../../contexts/GameProgressContext.jsx';
 import { getUserStreak } from '../../services/api';
 import './UserBadge.css';
 
@@ -35,6 +36,7 @@ const updateGuestStreak = () => {
 
 const UserBadge = ({ collapsed = false }) => {
   const { user, logout, isLoggedIn, isGuest, promptLogin } = useAuth();
+  const { levelMeta, progressState } = useGameProgress();
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -89,10 +91,9 @@ const UserBadge = ({ collapsed = false }) => {
 
   if (!user) return null;
 
-  const xpInLevel = user.xp % XP_PER_LEVEL;
-  const xpProgress = (xpInLevel / XP_PER_LEVEL) * 100;
-  const level = user.level || 1;
-  const nextLevelXp = XP_PER_LEVEL * level;
+  const xpProgress = levelMeta.progressInLevel;
+  const level = levelMeta.level || user.level || 1;
+  const nextLevelXp = levelMeta.nextLevelXp;
 
   return (
     <div className={`user-badge ${collapsed ? 'collapsed' : ''}`} ref={ref}>
@@ -108,7 +109,7 @@ const UserBadge = ({ collapsed = false }) => {
           <>
             <div className="badge-info">
               <span className="badge-name">{user.username}</span>
-              <span className="badge-level">Lv. {level}</span>
+              <span className="badge-level">Lv. {level} · {levelMeta.title}</span>
             </div>
             <div className="badge-xp-ring">
               <svg viewBox="0 0 36 36">
@@ -146,9 +147,14 @@ const UserBadge = ({ collapsed = false }) => {
             </div>
             <div className="stat-item">
               <Music size={14} className="stat-icon songs-icon" />
-              <span className="stat-label">Songs</span>
-              <span className="stat-value">{songCount}</span>
+              <span className="stat-label">Focus</span>
+              <span className="stat-value">{progressState.focusPoints}</span>
             </div>
+          </div>
+
+          <div className="badge-meta-row">
+            <span>{progressState.badges.length} badges</span>
+            <span>{songCount} songs</span>
           </div>
 
           {isGuest ? (
