@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true, // Allow external connections
-    open: true, // Automatically open browser
+    open: process.env.VITE_OPEN === '1',
     hmr: {
       overlay: true, // Show errors as overlay
     },
