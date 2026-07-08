@@ -26,6 +26,18 @@ const createBrowserAudioContext = () => {
   return new AudioContextClass();
 };
 
+const addReverbIfSupported = (context, instrument, mix) => {
+  try {
+    if (typeof window.AudioWorkletNode === 'undefined') {
+      return;
+    }
+
+    instrument.output.addEffect('reverb', Reverb(context), mix);
+  } catch {
+    // Mobile/browser fallback: dry instrument playback is better than total audio failure.
+  }
+};
+
 const buildInstrument = (context, loader, instrumentId, onLoadProgress) => {
   if (instrumentId === 'guitar') {
     const guitar = Soundfont(context, {
@@ -37,24 +49,39 @@ const buildInstrument = (context, loader, instrumentId, onLoadProgress) => {
       onLoadProgress,
     });
 
-    guitar.output.addEffect('reverb', Reverb(context), 0.08);
+    addReverbIfSupported(context, guitar, 0.08);
     return guitar;
   }
 
-  const piano = SplendidGrandPiano(context, {
-    loader,
-    volume: 104,
-    velocity: 104,
-    decayTime: 0.9,
-    notesToLoad: {
-      notes: PIANO_NOTES_TO_LOAD,
-      velocityRange: [1, 127],
-    },
-    onLoadProgress,
-  });
+  try {
+    const piano = SplendidGrandPiano(context, {
+      loader,
+      volume: 104,
+      velocity: 104,
+      decayTime: 0.9,
+      formats: ['m4a', 'ogg'],
+      notesToLoad: {
+        notes: PIANO_NOTES_TO_LOAD,
+        velocityRange: [1, 127],
+      },
+      onLoadProgress,
+    });
 
-  piano.output.addEffect('reverb', Reverb(context), 0.14);
-  return piano;
+    addReverbIfSupported(context, piano, 0.14);
+    return piano;
+  } catch {
+    const fallbackPiano = Soundfont(context, {
+      instrument: 'acoustic_grand_piano',
+      kit: 'FluidR3_GM',
+      loader,
+      volume: 106,
+      velocity: 106,
+      onLoadProgress,
+    });
+
+    addReverbIfSupported(context, fallbackPiano, 0.1);
+    return fallbackPiano;
+  }
 };
 
 export const createEarTrainingAudioEngine = ({ onStateChange } = {}) => {
