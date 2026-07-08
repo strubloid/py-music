@@ -1,4 +1,5 @@
 import { Reverb, SampleLoader, Soundfont, SplendidGrandPiano } from 'smplr';
+import * as Tone from 'tone';
 
 const PRE_ROLL_SECONDS = 0.08;
 const PIANO_NOTES_TO_LOAD = [48, 52, 55, 60, 64, 67, 72, 76, 79, 84];
@@ -34,11 +35,11 @@ const addReverbIfSupported = (context, instrument, mix) => {
 
     instrument.output.addEffect('reverb', Reverb(context), mix);
   } catch {
-    // Mobile/browser fallback: dry instrument playback is better than total audio failure.
+    // Dry playback fallback.
   }
 };
 
-const buildInstrument = (context, loader, instrumentId, onLoadProgress) => {
+const createSampledInstrument = (context, loader, instrumentId, onLoadProgress) => {
   if (instrumentId === 'guitar') {
     const guitar = Soundfont(context, {
       instrument: 'acoustic_guitar_steel',
@@ -53,48 +54,125 @@ const buildInstrument = (context, loader, instrumentId, onLoadProgress) => {
     return guitar;
   }
 
-  try {
-    const piano = SplendidGrandPiano(context, {
-      loader,
-      volume: 104,
-      velocity: 104,
-      decayTime: 0.9,
-      formats: ['m4a', 'ogg'],
-      notesToLoad: {
-        notes: PIANO_NOTES_TO_LOAD,
-        velocityRange: [1, 127],
+  const piano = SplendidGrandPiano(context, {
+    loader,
+    volume: 104,
+    velocity: 104,
+    decayTime: 0.9,
+    formats: ['m4a', 'ogg'],
+    notesToLoad: {
+      notes: PIANO_NOTES_TO_LOAD,
+      velocityRange: [1, 127],
+    },
+    onLoadProgress,
+  });
+
+  addReverbIfSupported(context, piano, 0.14);
+  return piano;
+};
+
+const createLocalToneInstrument = (instrumentId) => {
+  if (instrumentId === 'guitar') {
+    const synth = new Tone.PolySynth(Tone.Synth, {
+      volume: -10,
+      oscillator: { type: 'triangle3' },
+      envelope: {
+        attack: 0.001,
+        decay: 0.18,
+        sustain: 0.02,
+        release: 0.28,
       },
-      onLoadProgress,
     });
+    const highpass = new Tone.Filter(180, 'highpass');
+    const lowpass = new Tone.Filter(2200, 'lowpass');
+    const output = new Tone.Gain(0.82);
+    synth.chain(highpass, lowpass, output, Tone.Destination);
 
-    addReverbIfSupported(context, piano, 0.14);
-    return piano;
-  } catch {
-    const fallbackPiano = Soundfont(context, {
-      instrument: 'acoustic_grand_piano',
-      kit: 'FluidR3_GM',
-      loader,
-      volume: 106,
-      velocity: 106,
-      onLoadProgress,
-    });
-
-    addReverbIfSupported(context, fallbackPiano, 0.1);
-    return fallbackPiano;
+    return {
+      engine: 'local',
+      ready: Promise.resolve(),
+      start: ({ note, time, duration, velocity }) => {
+        synth.triggerAttackRelease(note, duration, time, velocity / 127);
+      },
+      stop: () => {
+        synth.releaseAll();
+      },
+      dispose: () => {
+        synth.dispose();
+        highpass.dispose();
+        lowpass.dispose();
+        output.dispose();
+      },
+    };
   }
+
+  const synth = new Tone.PolySynth(Tone.FMSynth, {
+    volume: -8,
+    harmonicity: 2.2,
+    modulationIndex: 8,
+    oscillator: { type: 'triangle' },
+    envelope: {
+      attack: 0.003,
+      decay: 0.24,
+      sustain: 0.18,
+      release: 0.9,
+    },
+    modulation: { type: 'sine' },
+    modulationEnvelope: {
+      attack: 0.002,
+      decay: 0.18,
+      sustain: 0.1,
+      release: 0.5,
+    },
+  });
+  const lowpass = new Tone.Filter(3200, 'lowpass');
+  const output = new Tone.Gain(0.9);
+  synth.chain(lowpass, output, Tone.Destination);
+
+  return {
+    engine: 'local',
+    ready: Promise.resolve(),
+    start: ({ note, time, duration, velocity }) => {
+      synth.triggerAttackRelease(note, duration, time, velocity / 127);
+    },
+    stop: () => {
+      synth.releaseAll();
+    },
+    dispose: () => {
+      synth.dispose();
+      lowpass.dispose();
+      output.dispose();
+    },
+  };
+};
+
+const shouldFallbackToLocal = (error) => {
+  const message = `${error?.message || error || ''}`.toLowerCase();
+
+  return (
+    message.includes('content security policy')
+    || message.includes('connect-src')
+    || message.includes('refused to connect')
+    || message.includes('failed to fetch')
+    || message.includes('networkerror')
+    || message.includes('unable to load a worklet')
+    || message.includes('audioworklet')
+    || message.includes('aborterror')
+  );
 };
 
 export const createEarTrainingAudioEngine = ({ onStateChange } = {}) => {
-  let context = null;
-  let loader = null;
+  let browserContext = null;
+  let sampleLoader = null;
   let loadingInstrumentId = null;
   let instruments = {};
   let loadedInstrumentIds = [];
   let loadProgressByInstrument = {};
+  let sampledAudioBlocked = false;
 
   const emitState = () => {
     onStateChange?.({
-      audioReady: Boolean(context),
+      audioReady: Boolean(browserContext) || Tone.context.state === 'running',
       loadingInstrumentId,
       loadedInstrumentIds,
       loadProgressByInstrument,
@@ -102,17 +180,39 @@ export const createEarTrainingAudioEngine = ({ onStateChange } = {}) => {
   };
 
   const ensureContext = async () => {
-    if (!context) {
-      context = createBrowserAudioContext();
-      loader = SampleLoader(context);
+    await Tone.start();
+
+    if (Tone.context.state === 'suspended') {
+      await Tone.context.resume();
+    }
+
+    if (!browserContext) {
+      browserContext = createBrowserAudioContext();
+      sampleLoader = SampleLoader(browserContext);
+    }
+
+    if (browserContext.state === 'suspended') {
+      await browserContext.resume();
+    }
+
+    emitState();
+    return browserContext;
+  };
+
+  const loadSampledInstrument = async (instrumentId) => {
+    const instrument = createSampledInstrument(browserContext, sampleLoader, instrumentId, (progress) => {
+      loadProgressByInstrument = {
+        ...loadProgressByInstrument,
+        [instrumentId]: progress,
+      };
       emitState();
-    }
+    });
 
-    if (context.state === 'suspended') {
-      await context.resume();
-    }
-
-    return context;
+    await instrument.ready;
+    return {
+      ...instrument,
+      engine: 'sampled',
+    };
   };
 
   const loadInstrument = async (instrumentId) => {
@@ -125,21 +225,28 @@ export const createEarTrainingAudioEngine = ({ onStateChange } = {}) => {
     loadingInstrumentId = instrumentId;
     emitState();
 
-    const instrument = buildInstrument(context, loader, instrumentId, (progress) => {
-      loadProgressByInstrument = {
-        ...loadProgressByInstrument,
-        [instrumentId]: progress,
-      };
-      emitState();
-    });
-
-    instruments = {
-      ...instruments,
-      [instrumentId]: instrument,
-    };
-
     try {
-      await instrument.ready;
+      let instrument;
+
+      if (!sampledAudioBlocked) {
+        try {
+          instrument = await loadSampledInstrument(instrumentId);
+        } catch (error) {
+          if (!shouldFallbackToLocal(error)) {
+            throw error;
+          }
+
+          sampledAudioBlocked = true;
+          instrument = createLocalToneInstrument(instrumentId);
+        }
+      } else {
+        instrument = createLocalToneInstrument(instrumentId);
+      }
+
+      instruments = {
+        ...instruments,
+        [instrumentId]: instrument,
+      };
       loadedInstrumentIds = Array.from(new Set([...loadedInstrumentIds, instrumentId]));
       return instrument;
     } finally {
@@ -150,7 +257,9 @@ export const createEarTrainingAudioEngine = ({ onStateChange } = {}) => {
 
   const playInterval = async ({ instrumentId, mode, rootToneNote, targetToneNote }) => {
     const instrument = await loadInstrument(instrumentId);
-    const startTime = context.currentTime + PRE_ROLL_SECONDS;
+    const startTime = instrument.engine === 'sampled'
+      ? browserContext.currentTime + PRE_ROLL_SECONDS
+      : Tone.now() + PRE_ROLL_SECONDS;
 
     instrument.stop();
 
@@ -162,7 +271,6 @@ export const createEarTrainingAudioEngine = ({ onStateChange } = {}) => {
 
     instrument.start({ note: rootToneNote, time: startTime, duration: 0.46, velocity: 110 });
     instrument.start({ note: targetToneNote, time: startTime + 0.55, duration: 0.62, velocity: 116 });
-
     return { durationMs: 1300 };
   };
 
@@ -190,12 +298,13 @@ export const createEarTrainingAudioEngine = ({ onStateChange } = {}) => {
     loadProgressByInstrument = {};
     loadingInstrumentId = null;
 
-    if (context && context.state !== 'closed') {
-      context.close().catch(() => {});
+    if (browserContext && browserContext.state !== 'closed') {
+      browserContext.close().catch(() => {});
     }
 
-    context = null;
-    loader = null;
+    browserContext = null;
+    sampleLoader = null;
+    sampledAudioBlocked = false;
     emitState();
   };
 
