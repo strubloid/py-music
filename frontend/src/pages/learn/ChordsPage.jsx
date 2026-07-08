@@ -243,107 +243,124 @@ const ChordsPage = () => {
 
   return (
     <div className="chords-page">
-      <div className="chords-page-header">
-        <h1>Guitar Chords</h1>
-        <p className="chords-page-subtitle">Browse all chord shapes and CAGED variations</p>
-      </div>
-
-      {/* Root Note Selector */}
-      <div className="root-note-selector">
-        <div className="selector-label">Root Note</div>
-        <div className="root-note-buttons">
-          {ROOT_NOTES.map(root => (
-            <button
-              key={root}
-              className={`root-note-btn ${selectedRoot === root ? 'active' : ''}`}
-              onClick={() => handleChordClick(root, selectedType)}
-            >
-              {root}
-            </button>
-          ))}
+      <header className="chords-hero">
+        <div className="chords-hero-copy">
+          <p className="hero-kicker">Chord atlas</p>
+          <h1>Guitar Chords</h1>
+          <p className="chords-page-subtitle">Browse chord shapes as a living workbench, not a flat grid.</p>
         </div>
-      </div>
-
-      {/* Chord Type Selector */}
-      <div className="chord-type-selector">
-        <div className="selector-label">Chord Type</div>
-        <div className="chord-type-buttons">
-          {CHORD_TYPES.map(type => (
-            <button
-              key={type.id}
-              className={`chord-type-btn ${selectedType === type.id ? 'active' : ''}`}
-              onClick={() => handleTypeClick(type)}
-            >
-              {type.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Selected Chord Display */}
-      <div className="selected-chord-display">
-        <div className="selected-chord-name">{currentChordName}</div>
-        {pianoNotes.length > 0 && (
-          <div className="selected-chord-notes">
-            Notes: {pianoNotes.join(' - ')}
+        <div className="chords-hero-summary">
+          <div className="summary-chip">
+            <span className="summary-chip-label">Current chord</span>
+            <strong>{currentChordName}</strong>
           </div>
-        )}
-        <div className="selected-chord-variation-count">
-          {hasMultipleVariations
-            ? `${chordVariations.length} CAGED variations`
-            : '1 variation'}
-        </div>
-      </div>
-
-      {/* Chord Variations Panel */}
-      {hasVariations && (
-        <div className="chord-variations-panel">
-          <div className="variations-panel-header">
-            <h2>All CAGED Variations</h2>
-            <span className="variations-hint">Click any shape to see finger positions</span>
-          </div>
-          <div className="chord-variations-list">
-            {chordVariations.map((variation, index) => (
-              <ChordVariationDiagram
-                key={`${currentChordName}-${index}`}
-                variation={variation}
-                chordName={currentChordName}
-                size="large"
-              />
-            ))}
+          <div className="summary-chip muted">
+            <span className="summary-chip-label">Variations</span>
+            <strong>{hasMultipleVariations ? chordVariations.length : 1}</strong>
           </div>
         </div>
-      )}
+      </header>
 
-      {/* Quick Reference Grid - All chords for selected root */}
-      <div className="chord-quick-reference">
-        <div className="quick-reference-header">
-          <h2>All {selectedRoot} Chords</h2>
-        </div>
-        <div className="chord-type-sections">
-          {CHORD_TYPES.map(type => {
-            const chordName = getChordName(selectedRoot, type)
-            const variations = chordDataService.getGuitarChordVariations(chordName)
-            const isSelected = selectedChord === chordName
+      <div className="chords-workbench">
+        <aside className="chords-rail">
+          <section className="selector-panel">
+            <div className="selector-label">Root note</div>
+            <div className="root-note-buttons">
+              {ROOT_NOTES.map(root => (
+                <button
+                  key={root}
+                  className={`root-note-btn ${selectedRoot === root ? 'active' : ''}`}
+                  onClick={() => handleChordClick(root, selectedType)}
+                >
+                  {root}
+                </button>
+              ))}
+            </div>
+          </section>
 
-            return (
-              <div
-                key={type.id}
-                className={`chord-type-section ${isSelected ? 'selected' : ''}`}
-                onClick={() => handleChordClick(selectedRoot, type)}
-              >
-                <div className="chord-type-section-header">
-                  <span className="chord-type-label">{type.label}</span>
-                  <span className="chord-type-symbol">{type.symbol || '(none)'}</span>
-                </div>
-                <div className="chord-type-section-name">{chordName}</div>
-                <div className="chord-type-section-count">
-                  {variations.length} shape{variations.length !== 1 ? 's' : ''}
-                </div>
+          <section className="selector-panel">
+            <div className="selector-label">Chord type</div>
+            <div className="chord-type-buttons">
+              {CHORD_TYPES.map(type => (
+                <button
+                  key={type.id}
+                  className={`chord-type-btn ${selectedType === type.id ? 'active' : ''}`}
+                  onClick={() => handleTypeClick(type)}
+                >
+                  {type.label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="selector-panel selector-panel-note">
+            <div className="selector-label">Notes</div>
+            <p>{pianoNotes.length > 0 ? pianoNotes.join(' - ') : 'Select a chord to load its tones.'}</p>
+          </section>
+        </aside>
+
+        <main className="chords-lab">
+          <div className="selected-chord-display">
+            <div className="selected-chord-name">{currentChordName}</div>
+            <div className="selected-chord-copy">
+              {pianoNotes.length > 0 && <div className="selected-chord-notes">Notes: {pianoNotes.join(' - ')}</div>}
+              <div className="selected-chord-variation-count">
+                {hasMultipleVariations
+                  ? `${chordVariations.length} CAGED variations`
+                  : '1 variation'}
               </div>
-            )
-          })}
-        </div>
+            </div>
+          </div>
+
+          {hasVariations && (
+            <div className="chord-variations-panel">
+              <div className="variations-panel-header">
+                <h2>All CAGED variations</h2>
+                <span className="variations-hint">Click any shape to see finger positions</span>
+              </div>
+              <div className="chord-variations-list">
+                {chordVariations.map((variation, index) => (
+                  <ChordVariationDiagram
+                    key={`${currentChordName}-${index}`}
+                    variation={variation}
+                    chordName={currentChordName}
+                    size="large"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="chord-quick-reference">
+            <div className="quick-reference-header">
+              <h2>All {selectedRoot} chords</h2>
+            </div>
+            <div className="chord-type-sections">
+              {CHORD_TYPES.map(type => {
+                const chordName = getChordName(selectedRoot, type)
+                const variations = chordDataService.getGuitarChordVariations(chordName)
+                const isSelected = selectedChord === chordName
+
+                return (
+                  <div
+                    key={type.id}
+                    className={`chord-type-section ${isSelected ? 'selected' : ''}`}
+                    onClick={() => handleChordClick(selectedRoot, type)}
+                  >
+                    <div className="chord-type-section-header">
+                      <span className="chord-type-label">{type.label}</span>
+                      <span className="chord-type-symbol">{type.symbol || '(none)'}</span>
+                    </div>
+                    <div className="chord-type-section-name">{chordName}</div>
+                    <div className="chord-type-section-count">
+                      {variations.length} shape{variations.length !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   )

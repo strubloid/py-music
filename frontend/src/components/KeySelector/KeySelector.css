@@ -9,19 +9,19 @@
 
 .key-selector-section {
   flex: 1;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 10px;
-  padding: 0.45rem 0.6rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 0.55rem 0.65rem;
 }
 
 .interval-selector-section {
   flex-shrink: 0;
   min-width: 200px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 10px;
-  padding: 0.45rem 0.6rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 0.55rem 0.65rem;
 }
 
 .keys-grid {
@@ -39,13 +39,13 @@
 
 /* Sharp key styling for buttons */
 .sharp-key {
-  background: #374151 !important; /* gray-800 */
-  color: #fef3c7 !important; /* yellow-200 */
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-strong) !important;
 }
 
 .sharp-key.selected {
-  background: #fbbf24 !important;
-  color: black !important;
+  background: var(--accent) !important;
+  color: #111827 !important;
 }
 
 /* Mobile */
