@@ -434,6 +434,29 @@
     padding: 0.85rem 0.75rem;
   }
 
+  .chords-hero {
+    padding: 0.9rem;
+    gap: 0.75rem;
+  }
+
+  .chords-hero-copy h1 {
+    font-size: 1.65rem;
+  }
+
+  .summary-chip {
+    min-width: 0;
+    flex: 1 1 120px;
+  }
+
+  .root-note-btn {
+    width: 42px;
+    height: 42px;
+  }
+
+  .chord-type-btn {
+    padding: 0.65rem 0.85rem;
+  }
+
   .selected-chord-display {
     flex-direction: column;
     align-items: flex-start;
@@ -448,5 +471,20 @@
   .chord-quick-reference,
   .chords-hero {
     border-radius: 16px;
+  }
+
+  .chord-type-sections {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .chord-type-sections {
+    grid-template-columns: 1fr;
+  }
+
+  .root-note-buttons,
+  .chord-type-buttons {
+    gap: 0.45rem;
   }
 }

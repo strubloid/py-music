@@ -654,18 +654,160 @@
   .line-chord-bank {
     flex-direction: column;
   }
+
+  .song-key-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .song-editor-topbar {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .song-editor-actions {
+    width: 100%;
+  }
+
+  .song-editor-actions .ghost-btn,
+  .song-editor-actions .save-song-btn {
+    flex: 1 1 auto;
+  }
 }
 
 @media (max-width: 620px) {
+  .mysongs-page {
+    padding: 0.85rem 0.75rem 1rem;
+    gap: 0.9rem;
+  }
+
+  .mysongs-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 18px;
+  }
+
+  .mysongs-hero h1 {
+    font-size: clamp(1.9rem, 10vw, 2.7rem);
+    line-height: 1;
+  }
+
+  .new-song-btn,
+  .save-song-btn,
+  .add-line-wide,
+  .empty-library button {
+    width: 100%;
+  }
+
+  .song-editor-topbar,
+  .song-key-panel,
+  .song-line-card,
+  .empty-library,
+  .library-song-card,
+  .writer-help-card {
+    border-radius: 16px;
+  }
+
+  .song-title-input {
+    font-size: 1.4rem;
+  }
+
+  .song-editor-actions,
+  .library-card-actions,
+  .quick-add-row,
+  .song-card-topline,
+  .song-stats-row {
+    width: 100%;
+  }
+
+  .song-editor-actions,
+  .library-card-actions {
+    gap: 0.5rem;
+  }
+
+  .library-card-actions {
+    flex-direction: column;
+  }
+
+  .library-song-card {
+    padding: 0.9rem;
+  }
+
   .songs-library-grid {
     grid-template-columns: 1fr;
   }
 
   .root-note-chip {
-    width: 38px;
+    width: 40px;
+  }
+
+  .quick-add-row {
+    justify-content: flex-start;
+  }
+
+  .custom-chord-input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .line-chord-bank,
+  .quick-add-row,
+  .picker-grid {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .word-sheet-row {
+    padding: 0.7rem;
+    gap: 0.5rem;
+  }
+
+  .word-cell-btn {
+    align-items: center;
+    min-width: 0;
+  }
+
+  .word-text {
+    font-size: 0.98rem;
+  }
+
+  .word-chord-mark {
+    font-size: 0.78rem;
+  }
+
+  .picker-header {
+    align-items: center;
   }
 
   .word-sheet-row {
     padding: 0.8rem;
+  }
+
+  .chord-picker-overlay {
+    padding: 0.75rem;
+  }
+
+  .word-chord-picker {
+    border-radius: 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .mysongs-hero h1 {
+    font-size: 2.15rem;
+  }
+
+  .song-card-topline,
+  .song-stats-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mini-sheet-preview {
+    padding: 0.6rem;
+  }
+
+  .panel-eyebrow,
+  .bank-label {
+    font-size: 0.62rem;
   }
 }

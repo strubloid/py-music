@@ -6,6 +6,8 @@
   padding: 1.25rem 1.5rem 1.5rem;
   width: 100%;
   min-height: calc(100vh - 60px);
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .scales-workbench {
@@ -13,6 +15,7 @@
   grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
   gap: 1rem;
   align-items: start;
+  min-width: 0;
 }
 
 .scales-rail {
@@ -21,12 +24,14 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-width: 0;
 }
 
 .scales-canvas {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-width: 0;
 }
 
 /* ── TOP BAR ─────────────────────────────────────── */
@@ -40,18 +45,21 @@
   border: 1px solid var(--border-soft);
   border-radius: 22px;
   padding: 1rem 1.1rem;
+  min-width: 0;
 }
 
 .topbar-left {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  min-width: 0;
 }
 
 .topbar-left > div {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  min-width: 0;
 }
 
 .topbar-left h1 {
@@ -78,6 +86,7 @@
   display: flex;
   align-items: center;
   gap: 0.85rem;
+  min-width: 0;
 }
 
 .hero-name {
@@ -88,6 +97,7 @@
   background: rgba(251, 191, 36, 0.1);
   border: 1px solid rgba(251, 191, 36, 0.3);
   border-radius: 8px;
+  min-width: 0;
 }
 
 .hero-key {
@@ -139,6 +149,7 @@
   overscroll-behavior-x: contain;
   overscroll-behavior-y: contain;
   touch-action: pan-x;
+  min-width: 0;
 }
 
 .modes-pill-row::-webkit-scrollbar { height: 6px; }
@@ -150,6 +161,7 @@
   border: 1px solid var(--border-soft);
   border-radius: 20px;
   padding: 1rem;
+  min-width: 0;
 }
 
 .rail-label {
@@ -224,6 +236,7 @@
   white-space: nowrap;
   flex-shrink: 0;
   scroll-snap-align: start;
+  min-width: 0;
 }
 
 .mode-pill:hover {
@@ -310,6 +323,7 @@
   border: 1px solid rgba(147, 197, 253, 0.2);
   border-radius: 10px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .range-bar-label {
@@ -455,6 +469,7 @@
   border: 1px solid var(--border-soft);
   border-radius: 20px;
   padding: 1rem;
+  min-width: 0;
 }
 
 .section-head {
@@ -479,6 +494,7 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0.4rem;
+  min-width: 0;
 }
 
 .degree-card {
@@ -492,6 +508,7 @@
   gap: 0.32rem;
   transition: border-color 0.15s, transform 0.15s;
   min-width: 0;
+  width: 100%;
 }
 
 .degree-card:hover {
@@ -509,6 +526,7 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
+  width: 100%;
 }
 
 .degree-roman {
@@ -541,6 +559,9 @@
   padding: 0.2rem 0.5rem;
   line-height: 1.2;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .degree-fn {
@@ -550,6 +571,7 @@
   letter-spacing: 0.08em;
   line-height: 1.1;
   text-align: center;
+  width: 100%;
 }
 
 .degree-card.root .degree-chord-pill {
@@ -640,7 +662,19 @@
     --gf-fret-width: clamp(1.9rem, 5.6vw, 2.45rem);
   }
   .topbar-right {
-    justify-content: space-between;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .scales-topbar,
+  .scales-workbench,
+  .scales-canvas,
+  .scales-rail,
+  .theory-row,
+  .instrument-card,
+  .rail-panel {
+    min-width: 0;
+    max-width: 100%;
   }
   .degrees-grid {
     grid-template-columns: repeat(7, 1fr);
@@ -662,14 +696,95 @@
 
 @media (max-width: 640px) {
   .scales-page { padding: 0.85rem 0.75rem; }
-  .scales-topbar { grid-template-columns: 1fr; }
+  .scales-topbar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    grid-template-columns: none;
+    padding: 0.85rem;
+    width: 100%;
+  }
   .topbar-left h1 { font-size: 1.1rem; }
   .hero-name { padding: 0.35rem 0.7rem; }
   .hero-key { font-size: 1.05rem; }
   .hero-mode-name { font-size: 0.8rem; }
-  .degrees-grid { grid-template-columns: repeat(4, 1fr); }
+  .degrees-grid { grid-template-columns: 1fr; }
   .mode-pill { padding: 0.5rem 0.85rem; font-size: 0.8rem; }
   .tip-card { flex-direction: column; gap: 0.5rem; }
+
+  .modes-pill-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+    overflow: visible;
+    padding: 0;
+    touch-action: auto;
+    scroll-snap-type: none;
+  }
+
+  .rail-panel-modes .modes-pill-row {
+    margin: 0;
+  }
+
+  .mode-pill {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .topbar-right,
+  .hero-name,
+  .streak-pill {
+    width: 100%;
+  }
+
+  .hero-name,
+  .streak-pill {
+    justify-content: space-between;
+  }
+
+  .topbar-left,
+  .topbar-right,
+  .hero-name,
+  .streak-pill,
+  .scales-workbench,
+  .scales-canvas,
+  .rail-panel,
+  .theory-row,
+  .instrument-card {
+    width: 100%;
+  }
+
+  .topbar-left,
+  .topbar-right {
+    align-items: stretch;
+  }
+
+  .topbar-left h1,
+  .topbar-copy,
+  .hero-key,
+  .hero-mode-name,
+  .status-note {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .degree-card {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .degree-top {
+    justify-content: flex-start;
+  }
+
+  .degree-fn,
+  .degree-chord-pill {
+    text-align: left;
+  }
+
+  .mode-pill-dot {
+    margin-left: auto;
+  }
 
   /* Range bar goes vertical on tiny screens */
   .range-bar {
@@ -693,5 +808,23 @@
   .rail-panel {
     padding: 0.85rem;
     border-radius: 16px;
+  }
+
+  .degree-note {
+    font-size: clamp(1.35rem, 7vw, 1.7rem);
+  }
+}
+
+@media (max-width: 420px) {
+  .degrees-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modes-pill-row {
+    grid-template-columns: 1fr;
+  }
+
+  .degree-card {
+    padding: 0.75rem 0.55rem 0.65rem;
   }
 }
