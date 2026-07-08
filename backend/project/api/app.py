@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_from_directory, send_file, session, current_app
+from flask import Flask, jsonify, request, send_from_directory, send_file, session, current_app, Response
 from flask_cors import CORS
 from dotenv import load_dotenv
 from werkzeug.exceptions import HTTPException
@@ -14,6 +14,7 @@ sys.path.insert(0, str(project_root))
 from backend.project.extensions import limiter, generate_csrf_token, validate_csrf_token
 
 import threading
+import requests
 
 from backend.project.music.chords.intervals.Major import MajorInterval
 from backend.project.music.chords.intervals.Minor import MinorInterval
@@ -35,6 +36,8 @@ load_dotenv()
 # file 404 before the catch-all route can serve index.html.
 frontend_dist = project_root / 'frontend' / 'dist'
 app = Flask(__name__, static_folder=None)
+PIANO_SAMPLE_REMOTE_BASE = 'https://smpldsnds.github.io/sfzinstruments-splendid-grand-piano/samples'
+SOUNDFONT_REMOTE_BASE = 'https://gleitz.github.io/midi-js-soundfonts'
 
 # ─── Security Configuration ────────────────────────────────────────────────────
 
@@ -187,6 +190,47 @@ def csp_violation():
     from backend.project.error_logger import log_error
     log_error('CSP', 'Content Security Policy violation', details=str(report))
     return '', 204
+
+
+@app.route('/api/audio-proxy/piano/<path:asset_path>', methods=['GET'])
+def proxy_piano_asset(asset_path):
+    """Serve whitelisted piano sample assets from a same-origin endpoint."""
+    safe_path = asset_path.strip('/')
+    if not safe_path or '..' in safe_path:
+        return jsonify({'error': 'Invalid asset path'}), 400
+    if not (safe_path.endswith('.ogg') or safe_path.endswith('.m4a')):
+        return jsonify({'error': 'Unsupported asset type'}), 400
+
+    remote_url = f'{PIANO_SAMPLE_REMOTE_BASE}/{safe_path}'
+    return _proxy_remote_audio_asset(remote_url)
+
+
+@app.route('/api/audio-proxy/soundfont/<kit>/<instrument>.js', methods=['GET'])
+def proxy_soundfont_asset(kit, instrument):
+    """Serve whitelisted soundfont JS payloads from a same-origin endpoint."""
+    allowed_kits = {'FluidR3_GM'}
+    allowed_instruments = {'acoustic_guitar_steel'}
+
+    if kit not in allowed_kits or instrument not in allowed_instruments:
+        return jsonify({'error': 'Unsupported soundfont asset'}), 400
+
+    remote_url = f'{SOUNDFONT_REMOTE_BASE}/{kit}/{instrument}-ogg.js'
+    return _proxy_remote_audio_asset(remote_url)
+
+
+def _proxy_remote_audio_asset(remote_url):
+    try:
+        upstream = requests.get(remote_url, timeout=15)
+        upstream.raise_for_status()
+    except requests.RequestException:
+        return jsonify({'error': 'Failed to load audio asset'}), 502
+
+    response = Response(upstream.content, status=upstream.status_code)
+    content_type = upstream.headers.get('Content-Type')
+    if content_type:
+        response.headers['Content-Type'] = content_type
+    response.headers['Cache-Control'] = 'public, max-age=86400'
+    return response
 
 
 # ─── Content-Type Enforcement ──────────────────────────────────────────────────
