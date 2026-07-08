@@ -1,14 +1,45 @@
 import React from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, User, Mail, Shield } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import './Settings.css';
 
 const SettingsPage = () => {
+  const { user } = useAuth();
+
   return (
     <div className="settings-page">
       <div className="settings-header">
         <Settings className="page-icon" size={24} />
         <h1>Settings</h1>
       </div>
+
+      <div className="settings-group">
+        <h3>Account</h3>
+        <div className="setting-row">
+          <span className="setting-label">
+            <User size={16} />
+            Username
+          </span>
+          <span className="setting-val">{user?.username || '—'}</span>
+        </div>
+        <div className="setting-row">
+          <span className="setting-label">
+            <Mail size={16} />
+            Email
+          </span>
+          <span className="setting-val">{user?.email || '—'}</span>
+        </div>
+        <div className="setting-row">
+          <span className="setting-label">
+            <Shield size={16} />
+            Account type
+          </span>
+          <span className="setting-val">
+            {user?.id ? 'Signed in' : 'Guest'}
+          </span>
+        </div>
+      </div>
+
       <div className="settings-group">
         <h3>Display</h3>
         <div className="setting-row">
