@@ -41,6 +41,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+body.modal-open {
+  overflow: hidden;
+  position: relative;
+}
+
 #root {
   min-height: 100vh;
 }

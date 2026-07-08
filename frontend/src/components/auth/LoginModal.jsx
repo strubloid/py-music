@@ -28,6 +28,16 @@ const LoginModal = () => {
     }
   }, [showLoginModal]);
 
+  // Lock body scroll when modal is open (prevents password manager autofill scroll jumps)
+  React.useEffect(() => {
+    if (showLoginModal) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+    return () => document.body.classList.remove('modal-open');
+  }, [showLoginModal]);
+
   if (authLoading) return null;
   if (!showLoginModal) return null;
   if (isLoggedIn) return null;
@@ -109,6 +119,7 @@ const LoginModal = () => {
                 <input
                   type="text"
                   placeholder="Username"
+                  autoComplete="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
@@ -122,6 +133,7 @@ const LoginModal = () => {
               <input
                 type="email"
                 placeholder="Email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -134,6 +146,7 @@ const LoginModal = () => {
                 <input
                   type="password"
                   placeholder="Password"
+                  autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
