@@ -146,8 +146,23 @@ def _send_email(to_email, subject, body):
       SMTP_PASSWORD
       SMTP_FROM_EMAIL (defaults to SMTP_USERNAME)
 
+    Set DEV_EMAIL_CONSOLE=true to print to stdout instead of sending
+    (useful for local development).
+
     Returns True on success, raises on failure.
     """
+    # Dev fallback — print to console instead of sending
+    if os.getenv('DEV_EMAIL_CONSOLE', '').lower() in ('1', 'true', 'yes'):
+        print()
+        print("=" * 60)
+        print(f"DEV EMAIL TO:       {to_email}")
+        print(f"SUBJECT:            {subject}")
+        print(f"BODY:")
+        print(body)
+        print("=" * 60)
+        print()
+        return True
+
     smtp_host = os.getenv('SMTP_HOST', 'smtp.gmail.com')
     smtp_port = int(os.getenv('SMTP_PORT', '587'))
     smtp_user = os.getenv('SMTP_USERNAME', '')
@@ -227,7 +242,7 @@ def forgot_password():
         print(f"⚠️  Failed to send reset email to {email}: {e}")
         log_auth_event('forgot_password', email, False, details='SMTP send failed')
         # Don't expose SMTP failure details to the client
-        return jsonify({'message': 'Failed to send reset email. Please contact support.'}), 500
+        return jsonify({'error': 'Failed to send reset email. Please contact support.'}), 500
 
     return jsonify({'message': 'If that email is registered, you will receive a password reset link.'}), 200
 
