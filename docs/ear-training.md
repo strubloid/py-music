@@ -65,6 +65,16 @@ Good options:
 - Web Audio API
 - Tone.js
 
+Tone.js is especially interesting here because it wraps the Web Audio API with music-first primitives.
+
+What matters for ear training:
+
+- `Tone.start()` must be called from a user gesture before audio will play
+- `Tone.Synth` is good for simple tones, but a plain sine wave is too abstract for ear training
+- `Tone.PolySynth` is the right fit for playing chords and voicings
+- `Tone.Sampler` is the right fit for piano, guitar, bass, or other instrument timbres when you want the sound to feel identifiable
+- `Tone.Sampler` can pitch-shift mapped samples to fill in missing notes, which makes a small sample set much more usable
+
 Why this is the best default:
 
 - no server-side audio hosting required
@@ -96,6 +106,7 @@ Options found in research:
 
 Practical guidance:
 
+- Prefer Tone.js `Sampler` first if you want instrument-like playback without building your own sample loader.
 - `soundfont-player` works conceptually, but because it is archived, it should not be the long-term first choice
 - `smplr` looks like the cleaner newer alternative for sampled instruments
 - WebAudioFont can be useful if you want a broad instrument set with minimal backend work
@@ -123,11 +134,24 @@ This option is useful when you want specific timbres or special sounds, but it n
 
 Use a layered strategy:
 
-1. Browser synthesis for the core engine
-2. Sampled instruments for realism when needed
+1. Tone.js `Sampler` for the core instrument voice
+2. Tone.js `PolySynth` for harmonic drills and simple chord playback
+3. Sampled instruments for realism when needed
 3. Public CC sample libraries only for special cases
 
 That gives you the best balance of reliability, speed, and sound quality.
+
+### Why the current sine-wave prototype is not enough
+
+The current ear-training page proves the interaction loop, but it does not sound like a piano, guitar, or other recognizable instrument.
+
+For actual interval recognition, timbre matters:
+
+- a piano attack makes pitch separation easier to hear
+- guitar-like or plucked tones help some users recognize intervals faster
+- a sample-based instrument will feel much closer to the eventual learning target than a bare oscillator
+
+So the next implementation step should migrate the playback engine from raw Web Audio oscillator tones to a Tone.js instrument layer.
 
 ## Ear-training exercise types that make sense here
 
@@ -287,31 +311,125 @@ Ear training should behave the same way, but with audio before the answer.
 
 ## Recommended package options
 
-### For synthesis and scheduling
+### Best packages to try
+
+#### Core audio engine
 
 1. Tone.js
-   - best fit if you want an easy browser music engine
-   - good for synth notes, sequencing, and timing
-   - MIT licensed
+   - best all-around browser music engine
+   - strong for scheduling, timing, envelopes, transport, and synth playback
+   - has `Tone.start()`, `Tone.Transport`, `Tone.PolySynth`, `Tone.Player`, and `Tone.Sampler`
+   - best choice when you want a real ear-training engine instead of raw oscillator beeps
 
 2. Web Audio API directly
-   - best if you want zero extra dependency
-   - more work to build the abstractions yourself
-   - best when you want precise control and minimal bundle impact
+   - zero dependency path
+   - best if you want maximum control and minimum bundle size
+   - more work to build note scheduling, voices, envelopes, caching, and sample loading yourself
 
-### For sampled playback
+3. howler.js
+   - good for robust playback of prerecorded audio assets
+   - useful for sample triggering and fallback playback
+   - not the best fit for pitch-accurate interval generation by itself
 
-1. smplr
-   - newer sampled instrument approach
-   - cleaner direction than archived loader packages
+#### Sample/instrument layer
 
-2. WebAudioFont
-   - wide GM-style instrument coverage
-   - useful if you want many instruments quickly
+4. smplr
+   - very strong option for sampled piano and soundfont-style playback
+   - ships `SplendidGrandPiano`, `Soundfont`, `Sampler`, and sequencer helpers
+   - good if you want realistic piano immediately, plus easy access to General MIDI instruments including guitars
 
-3. soundfont-player
-   - works conceptually and is lightweight
-   - but the package is archived, so I would treat it as legacy-only
+5. soundfont-player
+   - lightweight soundfont loader/player
+   - archived, so treat as legacy-only
+   - still useful as a reference for the soundfont-loading model
+
+6. WebAudioFont / General MIDI soundfont packs
+   - good if you want a large instrument catalog quickly
+   - works well for acoustic guitar, piano, bass, and other GM-style timbres
+   - quality depends heavily on the source pack
+
+7. MIDI.js
+   - old but still documented as a browser MIDI + soundfont playback path
+   - supports soundfonts for guitar, bass, drums, and more
+   - archived; do not build a new long-term dependency on it
+
+#### Sound asset sources
+
+8. `gleitz/midi-js-soundfonts`
+   - pre-rendered General MIDI soundfonts
+   - includes `FluidR3_GM`, `MusyngKite`, and `FatBoy`
+   - useful when you want ready-made acoustic guitar and piano instruments without building a sample pipeline
+
+9. Freesound
+   - useful for CC-licensed recorded samples
+   - good for special timbres or custom guitar phrases
+
+10. Your own curated samples
+   - best when you want consistent piano or guitar tone across drills
+   - most work up front, but highest control over sound quality
+
+### Best fit for this repo
+
+For ear training, the strongest stack is:
+
+1. Tone.js for audio start, scheduling, and timing
+2. `Tone.Sampler` or `smplr` for realistic piano and guitar timbres
+3. a small curated sample set or soundfont pack for fallback and coverage
+
+That gives the app:
+
+- recognizable instrument sound instead of a plain sine wave
+- good interval clarity
+- consistent playback on repeat
+- simple transposition into any key
+- no dependency on a remote API at answer time
+
+### What to install first
+
+Recommended baseline install:
+
+```bash
+cd frontend && npm install tone smplr
+```
+
+Optional additions:
+
+```bash
+cd frontend && npm install howler
+```
+
+Do not treat these as primary new dependencies unless needed:
+
+- `soundfont-player` is archived
+- `MIDI.js` is archived
+
+### What to use for piano and acoustic guitar specifically
+
+#### Piano
+
+- `smplr` `SplendidGrandPiano` is the fastest path to a believable piano
+- `Tone.Sampler` is the most flexible path if you want to control the sample source yourself
+- General MIDI soundfonts work as a fallback, but sampled piano is usually clearer for ear training
+
+#### Acoustic guitar
+
+- use a sampled acoustic guitar set, not a pure sine or synth patch
+- prefer `Tone.Sampler` or `smplr` `Soundfont` with a guitar instrument like `acoustic_guitar_nylon` or `acoustic_guitar_steel`
+- if you want better realism, use a small custom guitar sample pack with a few velocity layers
+
+### Why this matters for interval training
+
+Intervals are easier to identify when the timbre has a natural attack and decay.
+
+- piano gives a sharp transient that makes pitch jumps easier to hear
+- acoustic guitar gives a plucked transient that also helps interval separation
+- a plain oscillator is technically correct but musically too abstract for good training
+
+### What not to depend on
+
+- avoid remote sound APIs for the core drill engine
+- avoid archived libraries as the main path unless you need them temporarily
+- avoid building the first version around generated sine waves only
 
 ## Where to get the actual sounds
 
@@ -331,11 +449,12 @@ That means the app can always create the sounds even if the user is offline afte
 
 ### MVP
 
-- use Tone.js or Web Audio API
+- use Tone.js, preferably `Sampler` for instrument-like playback and `PolySynth` for chords
 - implement interval, chord, and progression drills
 - keep the UI simple
 - use the existing XP/streak system
 - keep the ear training page separate from the daily challenge page, but share the same reward model
+- ship one good piano voice first, then add acoustic guitar as a second voice
 
 ### v2
 
@@ -361,6 +480,10 @@ That means the app can always create the sounds even if the user is offline afte
 - keep the page visually consistent with `DailyChallenge.jsx`
 - add a sound play button, replay button, and answer set
 - show XP or mastery state in the header
+- switch playback from sine-wave oscillators to Tone.js instruments so the user hears something closer to a piano or guitar
+- load a small sampled piano or guitar set through `Tone.Sampler` for interval drills
+- use `Tone.PolySynth` for chord and progression drills
+- prefer a small set of high-quality notes over a huge low-quality library
 
 ### Backend
 
