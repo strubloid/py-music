@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify
 from flask_login import current_user, login_required
 
+from backend.project.extensions import limiter
 from ..daily_challenge_explanations import build_daily_challenge_explanation
 from ..game_system import calculate_level_from_xp
 from backend.project.models import db
@@ -748,6 +749,7 @@ def seed():
 
 
 @daily_bp.route('/user/streak', methods=['GET'])
+@limiter.exempt
 def get_streak():
     """Get the user's current daily streak."""
     if not current_user.is_authenticated:

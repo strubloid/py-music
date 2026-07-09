@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_from_directory, send_file, session, current_app, Response
+from flask import Flask, jsonify, request, send_from_directory, send_file, session, current_app
 from flask_cors import CORS
 from dotenv import load_dotenv
 from werkzeug.exceptions import HTTPException
@@ -39,6 +39,9 @@ frontend_dist = project_root / 'frontend' / 'dist'
 app = Flask(__name__, static_folder=None)
 PIANO_SAMPLE_REMOTE_BASE = 'https://smpldsnds.github.io/sfzinstruments-splendid-grand-piano/samples'
 SOUNDFONT_REMOTE_BASE = 'https://gleitz.github.io/midi-js-soundfonts'
+AUDIO_CACHE_DIR = project_root / 'backend' / 'project' / 'audio_assets'
+_audio_cache_locks = {}
+_audio_cache_locks_guard = threading.Lock()
 
 # ─── Security Configuration ────────────────────────────────────────────────────
 
@@ -205,7 +208,8 @@ def proxy_piano_asset(asset_path):
 
     encoded_path = '/'.join(quote(segment, safe='') for segment in safe_path.split('/'))
     remote_url = f'{PIANO_SAMPLE_REMOTE_BASE}/{encoded_path}'
-    return _proxy_remote_audio_asset(remote_url)
+    cache_path = AUDIO_CACHE_DIR / 'piano' / Path(safe_path)
+    return _proxy_remote_audio_asset(remote_url, cache_path)
 
 
 @app.route('/api/audio-proxy/soundfont/<kit>/<instrument>', methods=['GET'])
@@ -219,22 +223,51 @@ def proxy_soundfont_asset(kit, instrument):
         return jsonify({'error': 'Unsupported soundfont asset'}), 400
 
     remote_url = f'{SOUNDFONT_REMOTE_BASE}/{kit}/{instrument}-ogg.js'
-    return _proxy_remote_audio_asset(remote_url)
+    cache_path = AUDIO_CACHE_DIR / 'soundfont' / kit / f'{instrument}-ogg.js'
+    return _proxy_remote_audio_asset(remote_url, cache_path)
 
 
-def _proxy_remote_audio_asset(remote_url):
-    try:
-        upstream = requests.get(remote_url, timeout=15)
-        upstream.raise_for_status()
-    except requests.RequestException:
-        return jsonify({'error': 'Failed to load audio asset'}), 502
+def _proxy_remote_audio_asset(remote_url, cache_path):
+    cache_path = Path(cache_path)
 
-    response = Response(upstream.content, status=upstream.status_code)
-    content_type = upstream.headers.get('Content-Type')
-    if content_type:
-        response.headers['Content-Type'] = content_type
-    response.headers['Cache-Control'] = 'public, max-age=86400'
-    return response
+    if cache_path.exists() and cache_path.is_file():
+        return send_file(cache_path, conditional=True, max_age=31536000)
+
+    lock = _get_audio_cache_lock(cache_path)
+    with lock:
+        if cache_path.exists() and cache_path.is_file():
+            return send_file(cache_path, conditional=True, max_age=31536000)
+
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+
+        try:
+            upstream = requests.get(remote_url, timeout=15)
+            upstream.raise_for_status()
+        except requests.RequestException:
+            if cache_path.exists() and cache_path.is_file():
+                return send_file(cache_path, conditional=True, max_age=31536000)
+            return jsonify({'error': 'Failed to load audio asset'}), 502
+
+        temp_path = cache_path.with_suffix(f'{cache_path.suffix}.tmp')
+        try:
+            temp_path.write_bytes(upstream.content)
+            temp_path.replace(cache_path)
+        finally:
+            if temp_path.exists():
+                temp_path.unlink()
+
+    return send_file(cache_path, conditional=True, max_age=31536000)
+
+
+def _get_audio_cache_lock(cache_path):
+    cache_key = str(cache_path)
+
+    with _audio_cache_locks_guard:
+        lock = _audio_cache_locks.get(cache_key)
+        if lock is None:
+            lock = threading.Lock()
+            _audio_cache_locks[cache_key] = lock
+        return lock
 
 
 # ─── Content-Type Enforcement ──────────────────────────────────────────────────
@@ -279,7 +312,8 @@ def _init_db_background():
         print(f"⚠️  Migration failed (will retry on seed): {e}")
     db_ready = True
 
-threading.Thread(target=_init_db_background, daemon=True).start()
+if os.getenv('PYMUSIC_DISABLE_BACKGROUND_INIT') != '1':
+    threading.Thread(target=_init_db_background, daemon=True).start()
 
 from backend.project.auth import auth_bp, login_manager
 login_manager.init_app(app)
@@ -315,7 +349,8 @@ def _init_llm_background():
         print(f"⚠️  LLM initialization failed: {e}. Using simplified mode.")
         llm_ready = True  # mark done so health check reflects failure too
 
-threading.Thread(target=_init_llm_background, daemon=True).start()
+if os.getenv('PYMUSIC_DISABLE_BACKGROUND_INIT') != '1':
+    threading.Thread(target=_init_llm_background, daemon=True).start()
 
 # Available interval types — all 7 diatonic modes.
 # 'major' and 'minor' are removed (aliases for ionian/aeolian; use those instead).

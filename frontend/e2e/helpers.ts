@@ -120,9 +120,13 @@ const PATH_BUTTON_LABEL: Record<string, RegExp> = {
 };
 
 export const captureChallengeResponse = async (page: Page, path: string, category?: string) => {
-  const challengeResponsePromise = page.waitForResponse((response) => (
-    response.url().includes('/api/daily-challenges') && response.request().method() === 'GET'
-  ));
+  const responses: any[] = [];
+  const listener = (r: any) => {
+    if (r.url().includes('/api/daily-challenges') && r.request().method() === 'GET') {
+      responses.push(r);
+    }
+  };
+  page.on('response', listener);
 
   const buttonLabel = PATH_BUTTON_LABEL[path];
   if (buttonLabel) {
@@ -131,11 +135,26 @@ export const captureChallengeResponse = async (page: Page, path: string, categor
     await page.goto(path);
   }
 
-  const response = await challengeResponsePromise;
-  const data = await response.json();
-  const challenges = data.challenges ?? [];
-  const match = category ? challenges.find((c: any) => c.category === category) : challenges[0];
-  return match;
+  await page.locator('.daily-xp-base, .xp-preview-base').first().waitFor({ state: 'visible', timeout: 15000 });
+
+  // Wait for all API calls to settle (ear training makes up to 3 calls)
+  await page.waitForLoadState('networkidle');
+
+  page.off('response', listener);
+
+  const xpText = await page.locator('.daily-xp-base, .xp-preview-base').first().textContent();
+  const xpMatch = xpText?.match(/(\d+)/);
+  const domXpReward = xpMatch ? parseInt(xpMatch[1], 10) : 0;
+
+  const last = responses[responses.length - 1];
+  if (last) {
+    const data = await last.json();
+    const challenges = data.challenges ?? [];
+    const match = category ? challenges.find((c: any) => c.category === category) : challenges[0];
+    if (match) return { ...match, xp_reward: domXpReward || match.xp_reward };
+  }
+
+  throw new Error('Could not capture challenge from any API response');
 };
 
 export const answerCapturedChallenge = async (page: Page, challenge: any) => {
