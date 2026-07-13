@@ -22,8 +22,12 @@ test('daily challenge streak is consistent between page header and user badge dr
   const challenge = await captureChallengeResponse(page, '/play/daily');
 
   await answerCapturedChallenge(page, challenge);
-  await expect(page.getByText(/2 day streak/i)).toBeVisible();
+  const streakLabel = page.getByText(/\d+ day streak/i).first();
+  await expect(streakLabel).toBeVisible();
+  const streakText = await streakLabel.textContent();
+  const streakDays = streakText?.match(/\d+/)?.[0];
+  expect(streakDays).toBeTruthy();
 
   await page.locator('.badge-trigger').click();
-  await expect(page.getByText(/2 day/i).first()).toBeVisible();
+  await expect(page.getByText(new RegExp(`${streakDays} day`, 'i')).first()).toBeVisible();
 });

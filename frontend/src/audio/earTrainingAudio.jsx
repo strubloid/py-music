@@ -152,6 +152,56 @@ export const createEarTrainingAudioEngine = ({ onStateChange } = {}) => {
     return { durationMs: Math.round(1300 * timingScale) };
   };
 
+  const playNoteSequence = async ({ instrumentId, notes, timingScale = 1 }) => {
+    const instrument = await loadInstrument(instrumentId);
+    const startTime = context.currentTime + PRE_ROLL_SECONDS;
+    const gap = 0.48 * timingScale;
+
+    instrument.stop();
+    notes.forEach((note, index) => {
+      instrument.start({
+        note,
+        time: startTime + (index * gap),
+        duration: 0.42 * timingScale,
+        velocity: index === notes.length - 1 ? 116 : 108,
+      });
+    });
+
+    return { durationMs: Math.round((notes.length * gap + 0.35) * 1000) };
+  };
+
+  const playChord = async ({ instrumentId, notes, timingScale = 1 }) => {
+    const instrument = await loadInstrument(instrumentId);
+    const startTime = context.currentTime + PRE_ROLL_SECONDS;
+
+    instrument.stop();
+    notes.forEach((note) => {
+      instrument.start({ note, time: startTime, duration: 1.2 * timingScale, velocity: 110 });
+    });
+
+    return { durationMs: Math.round(1400 * timingScale) };
+  };
+
+  const playChordSequence = async ({ instrumentId, chords, timingScale = 1 }) => {
+    const instrument = await loadInstrument(instrumentId);
+    const startTime = context.currentTime + PRE_ROLL_SECONDS;
+    const gap = 1.08 * timingScale;
+
+    instrument.stop();
+    chords.forEach((chord, chordIndex) => {
+      chord.forEach((note) => {
+        instrument.start({
+          note,
+          time: startTime + (chordIndex * gap),
+          duration: 0.9 * timingScale,
+          velocity: 110,
+        });
+      });
+    });
+
+    return { durationMs: Math.round((chords.length * gap + 0.3) * 1000) };
+  };
+
   const playComparison = async ({ instrumentId, rootToneNote, originalToneNote, selectedToneNote }) => {
     const instrument = await loadInstrument(instrumentId);
     const startTime = context.currentTime + PRE_ROLL_SECONDS;
@@ -203,6 +253,9 @@ export const createEarTrainingAudioEngine = ({ onStateChange } = {}) => {
     loadInstrument,
     preloadInstrument,
     playInterval,
+    playNoteSequence,
+    playChord,
+    playChordSequence,
     playComparison,
     stop,
     dispose,

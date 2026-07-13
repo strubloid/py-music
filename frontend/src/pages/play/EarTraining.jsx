@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { CheckCircle, Flame, Play, RefreshCw, Train, Trophy, Volume2, Waves, XCircle } from "lucide-react";
+import { CheckCircle, Flame, Play, RefreshCw, Target, Train, Trophy, Volume2, Waves, XCircle } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useGameProgress } from "../../contexts/GameProgressContext.jsx";
 import StreakBadge from '../../components/game/StreakBadge.jsx';
@@ -79,6 +79,39 @@ const midiToToneNote = (midi) => {
 const buildDiffStars = (difficulty = 1) => "★".repeat(difficulty) + "☆".repeat(Math.max(0, 5 - difficulty));
 
 const buildStimulus = (challenge) => {
+    const exercise = challenge?.exercise;
+    if (exercise?.notes) {
+        const noteMidis = exercise.notes.map((toneNote) => {
+            const match = toneNote.match(/^([A-G]#?)(-?\d+)$/);
+            return match ? noteToMidi(match[1], Number(match[2])) : 60;
+        });
+        return {
+            type: exercise.type,
+            notes: exercise.notes,
+            chords: exercise.chords || [],
+            from: exercise.notes[0]?.replace(/-?\d+$/, '') || 'Root',
+            to: exercise.notes.at(-1)?.replace(/-?\d+$/, '') || 'Target',
+            baseOctave: Math.floor(noteMidis[0] / 12) - 1,
+            rootMidi: noteMidis[0],
+            targetMidi: noteMidis.at(-1),
+            semitones: Math.abs(noteMidis.at(-1) - noteMidis[0]),
+            rootToneNote: exercise.notes[0],
+            targetToneNote: exercise.notes.at(-1),
+        };
+    }
+
+    if (exercise?.chords) {
+        return {
+            type: exercise.type,
+            notes: [],
+            chords: exercise.chords,
+            from: 'Chord',
+            to: exercise.chords.length > 1 ? 'Chord' : 'Quality',
+            baseOctave: 3,
+            semitones: 0,
+        };
+    }
+
     const parsed = parseIntervalQuestion(challenge?.question || "");
     const correctOption = challenge?.options?.[challenge?.correct_index];
     const semitones = parsed?.semitones || INTERVAL_TO_SEMITONES[correctOption] || 4;
@@ -186,17 +219,41 @@ const EarTraining = () => {
                 lastPlayedChallengeIdRef.current = challenge.id;
                 setStimulus(nextStimulus);
 
-                const { durationMs } = await audioEngineRef.current.playInterval({
-                    instrumentId,
-                    mode: playbackMode,
-                    rootToneNote: nextStimulus.rootToneNote,
-                    targetToneNote: nextStimulus.targetToneNote,
-                    timingScale: options.timingScale || (slowPlaybackActive ? 1.45 : 1),
-                    includeRootAnchor: options.includeRootAnchor || rootAnchorActive,
-                });
+                const timingScale = options.timingScale || (slowPlaybackActive ? 1.45 : 1);
+                const exercise = challenge.exercise;
+                let playback;
+
+                if (exercise?.type === 'chord_quality') {
+                    playback = await audioEngineRef.current.playChord({
+                        instrumentId,
+                        notes: exercise.chords[0],
+                        timingScale,
+                    });
+                } else if (exercise?.type === 'chord_movement') {
+                    playback = await audioEngineRef.current.playChordSequence({
+                        instrumentId,
+                        chords: exercise.chords,
+                        timingScale,
+                    });
+                } else if (exercise?.type === 'shape' || exercise?.type === 'direction') {
+                    playback = await audioEngineRef.current.playNoteSequence({
+                        instrumentId,
+                        notes: exercise.notes,
+                        timingScale,
+                    });
+                } else {
+                    playback = await audioEngineRef.current.playInterval({
+                        instrumentId,
+                        mode: playbackMode,
+                        rootToneNote: nextStimulus.rootToneNote,
+                        targetToneNote: nextStimulus.targetToneNote,
+                        timingScale,
+                        includeRootAnchor: options.includeRootAnchor || rootAnchorActive,
+                    });
+                }
 
                 if (playbackTimerRef.current) window.clearTimeout(playbackTimerRef.current);
-                playbackTimerRef.current = window.setTimeout(() => setPlaying(false), durationMs);
+                playbackTimerRef.current = window.setTimeout(() => setPlaying(false), playback.durationMs);
             } catch {
                 setPlaying(false);
                 setError("Unable to start audio. Check your browser sound settings.");
@@ -358,7 +415,7 @@ const EarTraining = () => {
                     }));
                     recordChallengeResult({
                         challengeId: `${challenge.id}`,
-                        mode: 'practice',
+                        mode: challenge.exercise?.type || 'interval',
                         score: 1,
                         accuracy: 1,
                         xpEarned: awardedXp,
@@ -385,7 +442,7 @@ const EarTraining = () => {
                     }));
                     recordChallengeResult({
                         challengeId: `${challenge.id}`,
-                        mode: 'practice',
+                        mode: challenge.exercise?.type || 'interval',
                         score: 0,
                         accuracy: 0,
                         xpEarned: 0,
@@ -486,10 +543,35 @@ const EarTraining = () => {
     const activeLabel = challenge?.title || "Interval Recognition";
     const correctOption = challenge?.options[challenge?.correct_index];
     const currentStimulus = stimulus || (challenge ? buildStimulus(challenge) : null);
+    const exerciseType = challenge?.exercise?.type || 'interval';
+    const isIntervalExercise = exerciseType === 'interval';
+    const playbackNoun = exerciseType === 'chord_quality'
+        ? 'chord'
+        : exerciseType === 'chord_movement'
+          ? 'chord pair'
+          : exerciseType === 'shape'
+            ? 'phrase'
+            : 'notes';
+    const playbackDescription = exerciseType === 'chord_quality'
+        ? 'One voiced chord'
+        : exerciseType === 'chord_movement'
+          ? 'Two voiced chords'
+          : exerciseType === 'shape'
+            ? 'Three-note melody'
+            : exerciseType === 'direction'
+              ? 'Two-note direction call'
+              : playbackMode === 'harmonic' ? 'One harmonic hit' : 'Two-note melodic interval';
     const selectedInstrumentMeta = EAR_TRAINING_INSTRUMENTS.find((item) => item.id === selectedInstrument);
     const instrumentReady = loadedInstrumentIds.includes(selectedInstrument);
     const directionHint = revealDirectionActive ? getQuestionDirection(currentStimulus) : null;
     const xpPreview = calculateXpPreview({ baseXp: challenge?.xp_reward || 0, replayCount, powerIds: questionPowersUsed });
+    const earAccuracy = sessionStats.answered ? Math.round((sessionStats.correct / sessionStats.answered) * 100) : 0;
+    const intervalDirection = isIntervalExercise && currentStimulus ? getQuestionDirection(currentStimulus) : 'Ready';
+    const visualSteps = Math.min(8, Math.max(2, Math.ceil((currentStimulus?.semitones || 4) / 2)));
+    const nextEarRecommendation = combo >= 3 ? 'Trust the first impression on the next listen.' : 'Replay once, then answer from memory.';
+    const availablePowers = unlockedPowers.filter((power) => (
+        isIntervalExercise || !['root_note_anchor', 'reveal_direction', 'compare_mode'].includes(power.id)
+    ));
 
     if (loading) {
         return (
@@ -530,9 +612,20 @@ const EarTraining = () => {
                 <Train className="ear-icon" size={28} />
                 <div>
                     <h1>Ear Training</h1>
-                    <p className="ear-subtitle">Hear it, identify it, move on.</p>
+                    <p className="ear-subtitle">Listening arena: hear it, name it, prove it.</p>
                 </div>
                 <StreakBadge streak={streak} />
+            </div>
+
+            <div className="ear-run-header">
+                <div className="ear-run-stat"><Trophy size={16} /><span>Title</span><strong>{levelMeta.title}</strong></div>
+                <div className="ear-run-stat combo"><Flame size={16} /><span>Combo</span><strong>{combo}x</strong></div>
+                <div className="ear-run-stat"><Target size={16} /><span>Ear accuracy</span><strong>{earAccuracy}%</strong></div>
+                <div className="ear-score-rail" aria-label="Ear training current reward">
+                    <div><span>Current reward</span><strong>{xpPreview.previewXp} XP</strong></div>
+                    <div className="ear-score-track"><span style={{ width: `${Math.max(6, Math.min(100, (xpPreview.previewXp / Math.max(1, xpPreview.baseXp)) * 100))}%` }} /></div>
+                    <small>{xpPreview.penalties > 0 ? `${xpPreview.penalties} XP spent on tools` : 'Full reward available'}</small>
+                </div>
             </div>
 
             <div className="ear-layout">
@@ -540,14 +633,28 @@ const EarTraining = () => {
                     <div className="ear-card-meta">
                         <span className="ear-tag">{activeLabel}</span>
                         <span className="ear-tag">{selectedInstrumentMeta?.label}</span>
-                        <span className="ear-tag">{playbackMode === "harmonic" ? "Harmonic replay" : "Melodic replay"}</span>
+                        <span className="ear-tag">{isIntervalExercise ? (playbackMode === "harmonic" ? "Harmonic replay" : "Melodic replay") : playbackDescription}</span>
                         <span className="ear-xp">+{xpPreview.previewXp} XP</span>
                     </div>
-                    <h2>Identify the interval by ear.</h2>{" "}
-                    <p className="ear-copy">
-                        Here you will need to listen some sounds, so get confortable with the chair, get the headphones working and focus on the sound. You will hear a note and after you will need to get the right one,
-                        so keep your cool and focus into the sound, get schwifty!
-                    </p>
+                    <h2>{activeLabel}</h2>
+                    <p className="ear-copy">{challenge.question} Replay is allowed, but every tool changes the score.</p>
+                    <div className="ear-listening-stage">
+                        <div className="ear-bridge" aria-hidden="true">
+                            <span className="ear-bridge-node root">{exerciseType.startsWith('chord') ? '♪' : currentStimulus ? currentStimulus.from : 'Root'}</span>
+                            <div className="ear-bridge-steps">
+                                {Array.from({ length: visualSteps }).map((_, index) => <i key={index} className={playing ? 'active' : ''} />)}
+                            </div>
+                            <span className="ear-bridge-node target">{exerciseType.startsWith('chord') ? '♫' : '?'}</span>
+                        </div>
+                        <button type="button" className="ear-play-button ear-play-hero" onClick={() => playChallenge()} disabled={loadingNext || playing}>
+                            <Play size={26} />
+                            <span>{playing ? "Playing..." : instrumentReady ? `Play ${playbackNoun}` : `Load ${selectedInstrumentMeta?.label?.toLowerCase() || "instrument"}`}</span>
+                        </button>
+                        <div className="ear-stage-meta">
+                            <span>{playbackDescription}</span>
+                            <strong>{directionHint || intervalDirection}</strong>
+                        </div>
+                    </div>
                     <div className="ear-instrument-container">
                         <div className="ear-instrument-switcher" role="group" aria-label="Choose playback instrument">
                             {EAR_TRAINING_INSTRUMENTS.map((instrument) => (
@@ -597,25 +704,21 @@ const EarTraining = () => {
                     {directionHint && <div className="ear-result result-correct">Direction hint: {directionHint}</div>}
                     {feedbackBurst && <div className={`ear-feedback-burst ${feedbackBurst.tone}`}>{feedbackBurst.label}</div>}
                     <div className="ear-audio-panel">
-                        <button type="button" className="ear-play-button" onClick={() => playChallenge()} disabled={loadingNext || playing}>
-                            <Play size={18} />
-                            {playing ? "Playing..." : instrumentReady ? "Play interval" : `Load ${selectedInstrumentMeta?.label?.toLowerCase() || "instrument"}`}
-                        </button>
                         <button type="button" className="ear-action-button" onClick={handleReplay} disabled={loadingNext || playing}>
                             <Volume2 size={16} />
                             Replay {replayCount > 1 ? `(-${Math.max(0, replayCount - 1) * 2} XP)` : ''}
                         </button>
-                        <button type="button" className="ear-action-button" onClick={() => setPlaybackMode((current) => (current === "melodic" ? "harmonic" : "melodic"))} disabled={loadingNext || playing}>
+                        {isIntervalExercise && <button type="button" className="ear-action-button" onClick={() => setPlaybackMode((current) => (current === "melodic" ? "harmonic" : "melodic"))} disabled={loadingNext || playing}>
                             <Waves size={16} />
-                            {playbackMode === "melodic" ? "Switch to harmonic" : "Switch to melodic"}
-                        </button>
+                            {playbackMode === "melodic" ? "Hear together" : "Hear in sequence"}
+                        </button>}
                         <button type="button" className="ear-action-button" onClick={() => loadChallenge({ replace: true, excludeIds: [challenge.id] })} disabled={loadingNext}>
                             <RefreshCw size={16} className={loadingNext ? "spin" : ""} />
                             Skip
                         </button>
                     </div>
-                    <div className="ear-powers">
-                        {unlockedPowers.map((power) => (
+                    <div className="ear-powers" aria-label="Listening tools">
+                        {availablePowers.map((power) => (
                             <button
                                 key={power.id}
                                 type="button"
@@ -633,6 +736,7 @@ const EarTraining = () => {
                                 }}
                                 disabled={!!result || questionPowersUsed.includes(power.id) || playing}
                             >
+                                <strong className="ear-power-icon">{power.xpPenalty ? 'Pedal' : 'Focus'}</strong>
                                 <span>{power.name}</span>
                                 <small>
                                     {power.focusCost ? `${power.focusCost} focus` : `-${power.xpPenalty} XP`}
@@ -646,7 +750,7 @@ const EarTraining = () => {
                             {result.correct ? (
                                 <>
                                     <CheckCircle size={16} />
-                                    Correct. {xpAwarded ? `+${xpAwarded} XP.` : "No XP awarded yet."} Combo {combo}.
+                                    Correct. Clean hit. {xpAwarded ? `+${xpAwarded} XP.` : "No XP awarded yet."} Combo {combo}.
                                 </>
                             ) : (
                                 <>
@@ -664,7 +768,7 @@ const EarTraining = () => {
                             <strong>= {xpBreakdown.finalXp} XP</strong>
                         </div>
                     )}
-                    {result && stimulus && (
+                    {result && stimulus && !exerciseType.startsWith('chord') && (
                         <div className="ear-info-grid">
                             <div>
                                 <span>Starting note</span>
@@ -680,7 +784,7 @@ const EarTraining = () => {
                             </div>
                         </div>
                     )}
-                    {result && compareReady && selectedIdx !== null && (
+                    {isIntervalExercise && result && compareReady && selectedIdx !== null && (
                         <button type="button" className="ear-action-button ear-compare-button" onClick={() => handleComparePlayback()}>
                             Compare your answer
                         </button>
@@ -741,8 +845,18 @@ const EarTraining = () => {
                     </div>
 
                     <div className="ear-card ear-hint-card">
-                        <h3>How it works</h3>
-                        <p>Switch between piano and guitar, replay the same interval, and compare melodic versus harmonic playback without changing the quiz flow.</p>
+                        <h3>Run Summary</h3>
+                        <div className="ear-summary-grid">
+                            <div><span>Answered</span><strong>{sessionStats.answered}</strong></div>
+                            <div><span>Accuracy</span><strong>{earAccuracy}%</strong></div>
+                            <div><span>XP</span><strong>{sessionStats.totalXp}</strong></div>
+                        </div>
+                        <p>{nextEarRecommendation}</p>
+                    </div>
+
+                    <div className="ear-card ear-hint-card">
+                        <h3>Skill Quest</h3>
+                        <p>{combo >= 3 ? 'Quest active: keep the streak alive for a clean listener badge.' : 'Quest active: identify 3 intervals in a row to light the studio.'}</p>
                     </div>
                 </aside>
             </div>

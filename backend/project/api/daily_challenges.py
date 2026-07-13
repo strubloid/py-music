@@ -86,6 +86,133 @@ INTERVAL_SEMITONES = {
 
 INTERVAL_NAMES_REVERSE = {v: k for k, v in INTERVAL_SEMITONES.items()}
 
+# This catalog is intentionally small for the first listening vocabulary.  The
+# browser receives the tones/voicing it must play, rather than trying to infer a
+# chord from a display-oriented guitar-shape data set.
+EAR_CHORD_QUALITIES = {
+    'Major': [0, 4, 7],
+    'Minor': [0, 3, 7],
+    'Diminished': [0, 3, 6],
+    'Augmented': [0, 4, 8],
+}
+
+
+def _shuffle_options(correct, candidates, rng, count=4):
+    wrong = [item for item in candidates if item != correct]
+    options = [correct] + rng.sample(wrong, min(count - 1, len(wrong)))
+    rng.shuffle(options)
+    return options, options.index(correct)
+
+
+def _tone_name(note_index, octave):
+    return f'{NOTES[note_index % 12]}{octave + (note_index // 12)}'
+
+
+def build_ear_exercise(challenge):
+    """Create a real, deterministic audio exercise for an ear-training card.
+
+    Existing databases already contain interval-only challenge rows. Deriving a
+    payload from the stable challenge id upgrades those rows without a destructive
+    reseed, while the frontend still receives explicit notes/chords to play.
+    """
+    rng = random.Random(challenge.id)
+    drill_type = ('interval', 'direction', 'shape', 'chord_quality', 'chord_movement')[challenge.id % 5]
+    root_index = rng.randrange(len(NOTES))
+    base_octave = 3 + rng.randrange(2)
+
+    if drill_type == 'interval':
+        semitones = rng.choice([3, 4, 5, 7, 8, 9, 12])
+        correct = INTERVAL_NAMES_REVERSE[semitones]
+        options, correct_index = _shuffle_options(correct, list(INTERVAL_SEMITONES), rng)
+        return {
+            'type': drill_type,
+            'title': 'Interval Signal',
+            'question': 'Name the distance between the two notes.',
+            'options': options,
+            'correct_index': correct_index,
+            'notes': [_tone_name(root_index, base_octave), _tone_name(root_index + semitones, base_octave)],
+            'answer_mode': 'interval_name',
+        }
+
+    if drill_type == 'direction':
+        direction = rng.choice(['Ascending', 'Descending'])
+        distance = rng.choice([3, 4, 5, 7])
+        target = root_index + (distance if direction == 'Ascending' else -distance)
+        options = ['Ascending', 'Descending']
+        return {
+            'type': drill_type,
+            'title': 'Direction Call',
+            'question': 'Does the second note travel up or down?',
+            'options': options,
+            'correct_index': options.index(direction),
+            'notes': [_tone_name(root_index, base_octave), _tone_name(target, base_octave)],
+            'answer_mode': 'melodic_direction',
+        }
+
+    if drill_type == 'shape':
+        shape, offsets = rng.choice([
+            ('Ascending', [0, 3, 7]),
+            ('Descending', [7, 3, 0]),
+            ('Arch', [0, 7, 3]),
+            ('Valley', [7, 0, 3]),
+        ])
+        options = ['Ascending', 'Descending', 'Arch', 'Valley']
+        return {
+            'type': drill_type,
+            'title': 'Melody Shape',
+            'question': 'What contour does this three-note phrase trace?',
+            'options': options,
+            'correct_index': options.index(shape),
+            'notes': [_tone_name(root_index + offset, base_octave) for offset in offsets],
+            'answer_mode': 'melodic_contour',
+        }
+
+    quality = rng.choice(list(EAR_CHORD_QUALITIES))
+    chord_notes = [_tone_name(root_index + offset, base_octave) for offset in EAR_CHORD_QUALITIES[quality]]
+    if drill_type == 'chord_quality':
+        options = list(EAR_CHORD_QUALITIES)
+        return {
+            'type': drill_type,
+            'title': 'Chord Colour',
+            'question': 'Which chord quality do you hear?',
+            'options': options,
+            'correct_index': options.index(quality),
+            'chords': [chord_notes],
+            'answer_mode': 'single_chord_quality',
+        }
+
+    movement = rng.choice([3, 4, 5, 7, 9])
+    correct = INTERVAL_NAMES_REVERSE[movement]
+    options, correct_index = _shuffle_options(correct, list(INTERVAL_SEMITONES), rng)
+    second_quality = rng.choice(list(EAR_CHORD_QUALITIES))
+    second_root = root_index + movement
+    second_chord = [_tone_name(second_root + offset, base_octave) for offset in EAR_CHORD_QUALITIES[second_quality]]
+    return {
+        'type': 'chord_movement',
+        'title': 'Chord Journey',
+        'question': 'Name the root movement between these two chords.',
+        'options': options,
+        'correct_index': correct_index,
+        'chords': [chord_notes, second_chord],
+        'answer_mode': 'root_interval_between_chords',
+    }
+
+
+def serialize_challenge(challenge):
+    data = challenge.to_dict()
+    if challenge.category != 'ear_training':
+        return data
+
+    exercise = build_ear_exercise(challenge)
+    data.update({
+        'title': exercise['title'],
+        'question': exercise['question'],
+        'options': exercise['options'],
+        'correct_index': exercise['correct_index'],
+        'exercise': exercise,
+    })
+    return data
+
 
 def _semitone_distance(n1, n2):
     """Return semitone distance (positive) between two note names."""
@@ -653,7 +780,7 @@ def get_daily_challenges():
             .order_by(DailyChallenge.difficulty.asc(), DailyChallenge.id.asc()) \
             .offset(offset).limit(limit).all()
 
-    result = [c.to_dict() for c in challenges]
+    result = [serialize_challenge(c) for c in challenges]
     completed_count = len(completed_ids)
 
     return jsonify({

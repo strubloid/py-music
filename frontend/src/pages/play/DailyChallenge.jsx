@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Zap, RefreshCw, CheckCircle, Loader } from 'lucide-react';
+import { Zap, RefreshCw, CheckCircle, Loader, Flame, Target, Trophy } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGameProgress } from '../../contexts/GameProgressContext.jsx';
 import StreakBadge from '../../components/game/StreakBadge.jsx';
@@ -428,6 +428,64 @@ const DailyChallenge = () => {
 
   const diffStars = (d) => '★'.repeat(d) + '☆'.repeat(5 - d);
 
+  const getCategoryStage = (challenge) => {
+    const category = challenge?.category || 'theory';
+    const option = challenge?.options?.[challenge.correct_index] || 'Listen';
+    const question = challenge?.question || '';
+    const semitoneMatch = question.match(/(\d+)\s*semitones?/i);
+    const semitones = semitoneMatch?.[1] || `${challenge?.difficulty || 1}`;
+
+    if (category === 'intervals' || category === 'ear_training') {
+      return {
+        className: 'stage-interval',
+        label: 'Catch the interval',
+        primary: `Distance: ${semitones} steps`,
+        secondary: 'Name the jump',
+        nodes: ['Root', 'Target'],
+      };
+    }
+
+    if (category === 'chords') {
+      return {
+        className: 'stage-chord',
+        label: 'Stack the chord',
+        primary: `Color: ${option}`,
+        secondary: 'Build the color',
+        nodes: ['1', '3', '5'],
+      };
+    }
+
+    if (category === 'scales') {
+      return {
+        className: 'stage-scale',
+        label: 'Complete the route',
+        primary: `Route: ${option}`,
+        secondary: 'Find the path',
+        nodes: ['I', 'II', 'III', 'IV', 'V'],
+      };
+    }
+
+    return {
+      className: 'stage-theory',
+      label: 'Resolve the clue',
+      primary: `Move: ${option}`,
+      secondary: 'Theory move',
+      nodes: ['Cue', 'Choice'],
+    };
+  };
+
+  const getNextRecommendation = () => {
+    if (!activeChallenge) return 'Next: keep the run warm.';
+    if (activeChallenge.category === 'intervals') return 'Next: try another interval without powers.';
+    if (activeChallenge.category === 'chords') return 'Next: stack one more chord color.';
+    if (activeChallenge.category === 'scales') return 'Next: complete another scale route.';
+    return 'Next: keep the combo moving.';
+  };
+
+  const stage = getCategoryStage(activeChallenge);
+  const answeredCount = sessionStatsRef.current.answered + (activeResult ? 1 : 0);
+  const runProgress = Math.min(100, ((answeredCount || 0) / 5) * 100);
+
   if (loading) {
     return (
       <div className="daily-page">
@@ -456,10 +514,20 @@ const DailyChallenge = () => {
 
         {error && <div className="daily-error">{error}</div>}
 
-        <div className="daily-game-strip">
-          <div className="daily-strip-item"><span>Title</span><strong>{levelMeta.title}</strong></div>
-          <div className="daily-strip-item"><span>Combo</span><strong>{combo}</strong></div>
-          <div className="daily-strip-item"><span>Focus</span><strong>{progressState.focusPoints}</strong></div>
+        <div className="daily-run-header">
+          <div className="daily-run-stat"><Trophy size={16} /><span>Title</span><strong>{levelMeta.title}</strong></div>
+          <div className="daily-run-stat combo"><Flame size={16} /><span>Combo</span><strong>{combo}x</strong></div>
+          <div className="daily-run-stat"><Target size={16} /><span>Focus</span><strong>{progressState.focusPoints}</strong></div>
+          <div className="daily-score-rail" aria-label="Current reward score rail">
+            <div className="daily-score-rail-top"><span>Current reward</span><strong>{xpPreview.previewXp} XP</strong></div>
+            <div className="daily-score-track"><span style={{ width: `${Math.max(6, Math.min(100, (xpPreview.previewXp / Math.max(1, xpPreview.baseXp)) * 100))}%` }} /></div>
+            <small>{xpPreview.penalties > 0 ? `${xpPreview.penalties} XP spent on powers` : 'Full reward available'}</small>
+          </div>
+          <div className="daily-run-progress" aria-label="Run progress">
+            <span>Run progress</span>
+            <strong>{Math.min(5, answeredCount)}/5</strong>
+            <div className="daily-score-track"><span style={{ width: `${Math.max(8, runProgress)}%` }} /></div>
+          </div>
         </div>
 
         {!activeChallenge ? (
@@ -485,6 +553,17 @@ const DailyChallenge = () => {
                 </span>
                 <span className="challenge-xp">+{xpPreview.previewXp} XP</span>
                 <span className="challenge-diff">{diffStars(activeChallenge.difficulty)}</span>
+              </div>
+
+              <div className={`challenge-stage ${stage.className}`}>
+                <div className="challenge-stage-copy">
+                  <span>{stage.label}</span>
+                  <strong>{stage.primary}</strong>
+                  <small>{stage.secondary}</small>
+                </div>
+                <div className="challenge-stage-visual" aria-hidden="true">
+                  {stage.nodes.map((node, index) => <i key={`${node}-${index}`}>{node}</i>)}
+                </div>
               </div>
 
               <div className="daily-xp-preview">
@@ -538,10 +617,10 @@ const DailyChallenge = () => {
                   {activeResult.correct
                     ? isLoggedIn
                       ? (activeResult.xpAwarded > 0
-                        ? <>🎉 Perfect groove! <strong>+{activeResult.xpAwarded} XP</strong></>
-                        : <>🎉 Perfect groove! <strong>Reward already claimed</strong></>)
-                      : <>🎉 Nice hit! <strong>Sign in to save XP</strong></>
-                    : <>🎯 Off beat — the answer was <strong>{activeChallenge.options[activeChallenge.correct_index]}</strong></>
+                        ? <>Clean hit. Perfect groove! <strong>+{activeResult.xpAwarded} XP</strong></>
+                        : <>Clean hit. Perfect groove! <strong>Reward already claimed</strong></>)
+                      : <>Clean hit. Nice hit! <strong>Sign in to save XP</strong></>
+                    : <>Off beat — the answer was <strong>{activeChallenge.options[activeChallenge.correct_index]}</strong></>
                   }
                 </div>
               )}
@@ -566,6 +645,10 @@ const DailyChallenge = () => {
                     <div><span>Accuracy</span><strong>{Math.round((dailySummary.accuracy || 0) * 100)}%</strong></div>
                     <div><span>Combo</span><strong>{dailySummary.combo}</strong></div>
                     <div><span>Powers</span><strong>{dailySummary.powersUsed.length}</strong></div>
+                  </div>
+                  <div className="daily-next-card">
+                    <span>Recommended next move</span>
+                    <strong>{getNextRecommendation()}</strong>
                   </div>
                 </div>
               )}

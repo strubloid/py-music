@@ -59,12 +59,167 @@
   align-items: start;
 }
 
+.ear-run-header {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+
+.ear-run-stat,
+.ear-score-rail {
+  padding: 0.85rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ear-run-stat {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.55rem;
+  align-items: center;
+}
+
+.ear-run-stat svg {
+  grid-row: span 2;
+  color: #fbbf24;
+}
+
+.ear-run-stat.combo {
+  border-color: rgba(251, 191, 36, 0.24);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.ear-run-stat span,
+.ear-score-rail span,
+.ear-summary-grid span {
+  display: block;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ear-run-stat strong,
+.ear-score-rail strong,
+.ear-summary-grid strong {
+  display: block;
+  margin-top: 0.25rem;
+  color: #fff;
+}
+
+.ear-score-rail {
+  border-color: rgba(251, 191, 36, 0.16);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(37, 99, 235, 0.12));
+}
+
+.ear-score-rail > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ear-score-track {
+  height: 0.48rem;
+  margin-top: 0.6rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.ear-score-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #fbbf24, #f97316);
+  transition: width 0.18s ease-out;
+}
+
+.ear-score-rail small {
+  display: block;
+  margin-top: 0.45rem;
+  color: #cbd5e1;
+}
+
 .ear-card {
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   padding: 1.25rem;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.ear-listening-stage {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(251, 191, 36, 0.18);
+  background: radial-gradient(circle at center, rgba(251, 191, 36, 0.12), transparent 34%), linear-gradient(135deg, rgba(15, 23, 42, 0.82), rgba(49, 46, 129, 0.5));
+}
+
+.ear-bridge {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.ear-bridge-node {
+  width: 3.25rem;
+  height: 3.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.36);
+  background: rgba(15, 23, 42, 0.92);
+  color: #fde68a;
+  font-weight: 800;
+}
+
+.ear-bridge-node.target {
+  border-style: dashed;
+}
+
+.ear-bridge-steps {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.35rem;
+  min-height: 0.6rem;
+  padding: 0 0.1rem;
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.25), rgba(251, 191, 36, 0.8)) center / 100% 2px no-repeat;
+}
+
+.ear-bridge-steps i {
+  width: 0.72rem;
+  height: 0.72rem;
+  border-radius: 999px;
+  background: #fbbf24;
+  box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.12);
+  opacity: 0.72;
+}
+
+.ear-bridge-steps i.active {
+  animation: earPulse 0.9s ease-in-out infinite alternate;
+}
+
+.ear-play-hero {
+  width: 100%;
+  min-height: 64px;
+  font-size: 1rem;
+}
+
+.ear-stage-meta {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: #cbd5e1;
+}
+
+.ear-stage-meta strong {
+  color: #fbbf24;
 }
 
 .ear-workbench h2 {
@@ -125,11 +280,29 @@
 .ear-power-button {
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: 14px;
   padding: 0.8rem 0.9rem;
   color: #e5e7eb;
   cursor: pointer;
   text-align: left;
+}
+
+.ear-power-button:hover:not(:disabled) {
+  border-color: rgba(251, 191, 36, 0.35);
+  background: rgba(251, 191, 36, 0.08);
+  transform: translateY(-1px);
+}
+
+.ear-power-icon {
+  display: inline-flex;
+  margin-bottom: 0.45rem;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(251, 191, 36, 0.12);
+  color: #fde68a;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .ear-power-button span,
@@ -449,7 +622,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  border-radius: 8px;
+  border-radius: 14px;
   padding: 0.8rem 0.95rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.06);
@@ -464,6 +637,7 @@
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(251, 191, 36, 0.35);
   color: #fbbf24;
+  transform: translateY(-1px);
 }
 
 .ear-option.correct {
@@ -487,6 +661,25 @@
   margin: 0;
   color: #cbd5e1;
   line-height: 1.55;
+}
+
+.ear-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-bottom: 0.75rem;
+}
+
+.ear-summary-grid div {
+  padding: 0.65rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+@keyframes earPulse {
+  from { transform: scale(0.9); opacity: 0.45; }
+  to { transform: scale(1.15); opacity: 1; }
 }
 
 @keyframes spin {
@@ -529,7 +722,8 @@
 
   .ear-status-card,
   .ear-prompt-strip,
-  .ear-info-grid {
+  .ear-info-grid,
+  .ear-summary-grid {
     grid-template-columns: 1fr;
   }
 
@@ -545,5 +739,25 @@
   .ear-action-button,
   .ear-option {
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ear-bridge-steps i.active,
+  .spin {
+    animation: none;
+  }
+
+  .ear-score-track span,
+  .ear-action-button,
+  .ear-power-button,
+  .ear-option {
+    transition: none;
+  }
+
+  .ear-power-button:hover:not(:disabled),
+  .ear-option:hover:not(:disabled),
+  .ear-play-button:hover:not(:disabled) {
+    transform: none;
   }
 }
