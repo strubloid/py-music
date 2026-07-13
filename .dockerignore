@@ -10,7 +10,8 @@ frontend/node_modules/
 venv/
 env/
 *.db
-data/
+data/*
+!data/chord_inventory.json
 Dockerfile
 README.md
 docs/

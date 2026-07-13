@@ -1,6 +1,7 @@
 import { Reverb, SampleLoader, Soundfont, SplendidGrandPiano } from 'smplr';
 
 const PRE_ROLL_SECONDS = 0.08;
+const SAMPLE_LOAD_TIMEOUT_MS = 8_000;
 const PIANO_NOTES_TO_LOAD = [48, 55, 60, 67, 72];
 const PIANO_PROXY_BASE_URL = '/api/audio-proxy/piano';
 const GUITAR_PROXY_URL = '/api/audio-proxy/soundfont/FluidR3_GM/acoustic_guitar_steel';
@@ -26,6 +27,44 @@ const createBrowserAudioContext = () => {
   }
 
   return new AudioContextClass();
+};
+
+const createFallbackInstrument = (context) => {
+  let voices = [];
+  const stop = () => {
+    voices.forEach(({ oscillator, gain }) => {
+      try { oscillator.stop(); } catch { /* Voice already ended. */ }
+      oscillator.disconnect();
+      gain.disconnect();
+    });
+    voices = [];
+  };
+
+  return {
+    start: ({ note, time, duration = 0.5, velocity = 108 }) => {
+      const midi = Number.isFinite(Number(note)) ? Number(note) : 60;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const level = Math.min(0.22, Math.max(0.04, Number(velocity) / 600));
+      oscillator.type = 'triangle';
+      oscillator.frequency.setValueAtTime(440 * (2 ** ((midi - 69) / 12)), time);
+      gain.gain.setValueAtTime(0.0001, time);
+      gain.gain.exponentialRampToValueAtTime(level, time + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(time);
+      oscillator.stop(time + duration + 0.03);
+      voices.push({ oscillator, gain });
+      oscillator.addEventListener('ended', () => {
+        voices = voices.filter((voice) => voice.oscillator !== oscillator);
+        oscillator.disconnect();
+        gain.disconnect();
+      }, { once: true });
+    },
+    stop,
+    dispose: stop,
+  };
 };
 
 const buildInstrument = (context, loader, instrumentId, onLoadProgress) => {
@@ -115,9 +154,18 @@ export const createEarTrainingAudioEngine = ({ onStateChange } = {}) => {
     };
 
     try {
-      await instrument.ready;
+      await Promise.race([
+        instrument.ready,
+        new Promise((_, reject) => window.setTimeout(() => reject(new Error('Sample loading timed out.')), SAMPLE_LOAD_TIMEOUT_MS)),
+      ]);
       loadedInstrumentIds = Array.from(new Set([...loadedInstrumentIds, instrumentId]));
       return instrument;
+    } catch {
+      instrument.dispose();
+      const fallback = createFallbackInstrument(context);
+      instruments = { ...instruments, [instrumentId]: fallback };
+      loadedInstrumentIds = Array.from(new Set([...loadedInstrumentIds, instrumentId]));
+      return fallback;
     } finally {
       loadingInstrumentId = null;
       emitState();

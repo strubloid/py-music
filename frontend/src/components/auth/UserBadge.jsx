@@ -36,7 +36,7 @@ const updateGuestStreak = () => {
 
 const UserBadge = ({ collapsed = false }) => {
   const { user, logout, isLoggedIn, isGuest, promptLogin } = useAuth();
-  const { levelMeta, progressState } = useGameProgress();
+  const { levelMeta, progressState, rankMeta } = useGameProgress();
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -92,7 +92,6 @@ const UserBadge = ({ collapsed = false }) => {
   if (!user) return null;
 
   const xpProgress = levelMeta.progressInLevel;
-  const level = levelMeta.level || user.level || 1;
   const nextLevelXp = levelMeta.nextLevelXp;
 
   return (
@@ -109,7 +108,7 @@ const UserBadge = ({ collapsed = false }) => {
           <>
             <div className="badge-info">
               <span className="badge-name">{user.username}</span>
-              <span className="badge-level">Lv. {level} · {levelMeta.title}</span>
+              <span className="badge-level">{rankMeta.name} · Lv. {rankMeta.level}/{rankMeta.levels}</span>
             </div>
             <div className="badge-xp-ring">
               <svg viewBox="0 0 36 36">
@@ -129,6 +128,13 @@ const UserBadge = ({ collapsed = false }) => {
       {open && (
         <div className="badge-dropdown">
           <div className="dropdown-header">
+            <div className="dropdown-rank">
+              <span>{rankMeta.name}</span>
+              <strong>{rankMeta.progressLabel}</strong>
+            </div>
+            <div className="rank-bar" aria-label={`${rankMeta.name} rank progress: ${rankMeta.progressPercent}%`}>
+              <div className="rank-bar-fill" style={{ width: `${rankMeta.progressPercent}%` }} />
+            </div>
             <div className="dropdown-xp">
               <span className="xp-label">XP</span>
               <span className="xp-value">{user.xp} / {nextLevelXp}</span>

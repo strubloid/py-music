@@ -10,7 +10,8 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "serve": "vite preview --host",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:unit": "node --test src/features/ear-game/tests/*.test.js"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.0.0",

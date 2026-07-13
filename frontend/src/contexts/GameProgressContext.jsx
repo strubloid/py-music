@@ -10,6 +10,12 @@ import {
   getNewBadgesForResult,
   getUnlockedPowers,
 } from '../game/gameSystem.tsx';
+import {
+  advanceRankProgress,
+  createInitialRankProgress,
+  getRankMeta,
+  normalizeRankProgress,
+} from '../game/rankSystem.js';
 
 const GameProgressContext = createContext(null);
 
@@ -24,6 +30,8 @@ const getDefaultProgress = (xp = 0, level = 1) => ({
   powersUsedCount: {},
   lastLevelSeen: level,
   lastKnownXp: xp,
+  rankProgress: createInitialRankProgress(),
+  lastRankEvent: null,
 });
 
 export const useGameProgress = () => {
@@ -51,6 +59,7 @@ export const GameProgressProvider = ({ children }) => {
         setProgressState({
           ...getDefaultProgress(xp, level),
           ...parsed,
+          rankProgress: normalizeRankProgress(parsed.rankProgress),
           lastKnownXp: xp,
           lastLevelSeen: parsed.lastLevelSeen || level,
         });
@@ -142,6 +151,10 @@ export const GameProgressProvider = ({ children }) => {
         nextPowersUsedCount[powerId] = (nextPowersUsedCount[powerId] || 0) + 1;
       });
 
+      const rankUpdate = result.mode === 'note-runner-run'
+        ? advanceRankProgress(current.rankProgress, result)
+        : { progress: normalizeRankProgress(current.rankProgress), event: current.lastRankEvent };
+
       return {
         ...current,
         badges: Array.from(nextBadges),
@@ -149,6 +162,8 @@ export const GameProgressProvider = ({ children }) => {
         totalCompleted: nextTotalCompleted,
         totalCorrect: nextTotalCorrect,
         powersUsedCount: nextPowersUsedCount,
+        rankProgress: rankUpdate.progress,
+        lastRankEvent: rankUpdate.event,
       };
     });
   }, []);
@@ -158,14 +173,16 @@ export const GameProgressProvider = ({ children }) => {
   const derived = useMemo(() => {
     const xp = user?.xp || 0;
     const levelMeta = getLevelMeta(xp);
+    const rankMeta = getRankMeta(progressState.rankProgress);
     return {
       levelMeta,
+      rankMeta,
       unlockedPowers: getUnlockedPowers(levelMeta.level),
       availableBadges: BADGES,
       allPowers: POWERS,
       allLevels: LEVELS,
     };
-  }, [user?.xp]);
+  }, [progressState.rankProgress, user?.xp]);
 
   return (
     <GameProgressContext.Provider

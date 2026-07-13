@@ -22,6 +22,14 @@ from ..daily_challenge_explanations import build_daily_challenge_explanation
 from ..game_system import calculate_level_from_xp
 from backend.project.models import db
 from backend.project.models.user import DailyChallenge, ChallengeAttempt
+from backend.project.music.chord_inventory import (
+    CHORD_QUALITIES,
+    PITCH_CLASSES,
+    build_chord_definition,
+    build_chord_pair_challenge,
+    build_scheduled_note_events,
+    inventory_payload,
+)
 
 daily_bp = Blueprint('daily', __name__, url_prefix='/api')
 
@@ -90,10 +98,9 @@ INTERVAL_NAMES_REVERSE = {v: k for k, v in INTERVAL_SEMITONES.items()}
 # browser receives the tones/voicing it must play, rather than trying to infer a
 # chord from a display-oriented guitar-shape data set.
 EAR_CHORD_QUALITIES = {
-    'Major': [0, 4, 7],
-    'Minor': [0, 3, 7],
-    'Diminished': [0, 3, 6],
-    'Augmented': [0, 4, 8],
+    quality: metadata
+    for quality, metadata in CHORD_QUALITIES.items()
+    if metadata['enabledForEarTraining']
 }
 
 
@@ -116,9 +123,13 @@ def build_ear_exercise(challenge):
     reseed, while the frontend still receives explicit notes/chords to play.
     """
     rng = random.Random(challenge.id)
-    drill_type = ('interval', 'direction', 'shape', 'chord_quality', 'chord_movement')[challenge.id % 5]
+    drill_type = (
+        'interval', 'direction', 'shape', 'chord_quality',
+        'chord_movement', 'chord_pair', 'inversion',
+    )[challenge.id % 7]
     root_index = rng.randrange(len(NOTES))
     base_octave = 3 + rng.randrange(2)
+    difficulty = max(1, min(10, (challenge.id % 10) + 1))
 
     if drill_type == 'interval':
         semitones = rng.choice([3, 4, 5, 7, 8, 9, 12])
@@ -167,26 +178,88 @@ def build_ear_exercise(challenge):
             'answer_mode': 'melodic_contour',
         }
 
-    quality = rng.choice(list(EAR_CHORD_QUALITIES))
-    chord_notes = [_tone_name(root_index + offset, base_octave) for offset in EAR_CHORD_QUALITIES[quality]]
+    enabled_qualities = [
+        quality for quality, metadata in EAR_CHORD_QUALITIES.items()
+        if metadata['difficulty'] <= max(2, difficulty)
+    ]
+    quality = rng.choice(enabled_qualities)
+    chord_definition = build_chord_definition(PITCH_CLASSES[root_index], quality)
+    chord_events = build_scheduled_note_events(chord_definition, octave=base_octave)
+    chord_notes = [event['note'] for event in chord_events]
     if drill_type == 'chord_quality':
-        options = list(EAR_CHORD_QUALITIES)
+        correct = CHORD_QUALITIES[quality]['displayName']
+        labels = [CHORD_QUALITIES[item]['displayName'] for item in enabled_qualities]
+        options, correct_index = _shuffle_options(correct, labels, rng)
         return {
             'type': drill_type,
             'title': 'Chord Colour',
             'question': 'Which chord quality do you hear?',
             'options': options,
-            'correct_index': options.index(quality),
+            'correct_index': correct_index,
             'chords': [chord_notes],
+            'chordDefinitions': [chord_definition],
+            'events': chord_events,
             'answer_mode': 'single_chord_quality',
+            'explanation': f'{correct}: formula {"–".join(str(interval) for interval in chord_definition["intervals"])} semitones.',
+        }
+
+    if drill_type == 'chord_pair':
+        pair = build_chord_pair_challenge(challenge.id, difficulty)
+        relationship_labels = {
+            'same-root-different-quality': 'Same root, different quality',
+            'different-root-same-quality': 'Different root, same quality',
+            'relative-major-minor': 'Relative major and minor',
+            'diatonic-function': 'Functional movement',
+            'inversion': 'Same chord, different inversion',
+            'random-controlled': 'Different root and quality',
+        }
+        correct = relationship_labels[pair['relationship']]
+        options, correct_index = _shuffle_options(correct, list(relationship_labels.values()), rng)
+        definitions = [pair['first'], pair['second']]
+        chords = [
+            [event['note'] for event in build_scheduled_note_events(item, octave=base_octave)]
+            for item in definitions
+        ]
+        return {
+            'type': drill_type,
+            'title': 'Chord Chase',
+            'question': 'What relationship connects the two chords?',
+            'options': options,
+            'correct_index': correct_index,
+            'chords': chords,
+            'chordDefinitions': definitions,
+            'relationship': pair['relationship'],
+            'answer_mode': 'chord_relationship',
+            'explanation': f'{definitions[0]["shortName"]} → {definitions[1]["shortName"]}: {correct}.',
+        }
+
+    if drill_type == 'inversion':
+        inversion_count = len(chord_definition['inversions'])
+        inversion = 1 + (challenge.id % max(1, inversion_count - 1))
+        inverted = build_chord_definition(PITCH_CLASSES[root_index], quality, inversion=inversion)
+        inverted_notes = [event['note'] for event in build_scheduled_note_events(inverted, octave=base_octave)]
+        labels = ['Root position', 'First inversion', 'Second inversion']
+        if inversion_count == 4:
+            labels.append('Third inversion')
+        return {
+            'type': drill_type,
+            'title': 'Inversion Gate',
+            'question': 'Which inversion places the chord tone in the bass?',
+            'options': labels,
+            'correct_index': inversion,
+            'chords': [inverted_notes],
+            'chordDefinitions': [inverted],
+            'answer_mode': 'inversion',
+            'explanation': f'{inverted["shortName"]} is in {labels[inversion].lower()}.',
         }
 
     movement = rng.choice([3, 4, 5, 7, 9])
     correct = INTERVAL_NAMES_REVERSE[movement]
     options, correct_index = _shuffle_options(correct, list(INTERVAL_SEMITONES), rng)
-    second_quality = rng.choice(list(EAR_CHORD_QUALITIES))
+    second_quality = rng.choice(enabled_qualities)
     second_root = root_index + movement
-    second_chord = [_tone_name(second_root + offset, base_octave) for offset in EAR_CHORD_QUALITIES[second_quality]]
+    second_definition = build_chord_definition(PITCH_CLASSES[second_root % 12], second_quality)
+    second_chord = [event['note'] for event in build_scheduled_note_events(second_definition, octave=base_octave)]
     return {
         'type': 'chord_movement',
         'title': 'Chord Journey',
@@ -194,7 +267,9 @@ def build_ear_exercise(challenge):
         'options': options,
         'correct_index': correct_index,
         'chords': [chord_notes, second_chord],
+        'chordDefinitions': [chord_definition, second_definition],
         'answer_mode': 'root_interval_between_chords',
+        'explanation': f'The roots move by {correct.lower()}.',
     }
 
 
@@ -209,9 +284,17 @@ def serialize_challenge(challenge):
         'question': exercise['question'],
         'options': exercise['options'],
         'correct_index': exercise['correct_index'],
+        'explanation': exercise.get('explanation', data.get('explanation')),
         'exercise': exercise,
     })
     return data
+
+
+@daily_bp.route('/chords/inventory', methods=['GET'])
+@limiter.limit('60 per minute', override_defaults=True)
+def chord_inventory():
+    """Expose the canonical chord theory inventory used by ear training."""
+    return jsonify(inventory_payload())
 
 
 def _semitone_distance(n1, n2):
@@ -741,6 +824,7 @@ def compute_streak(user_id):
 # ─── Routes ────────────────────────────────────────────────────────────────────
 
 @daily_bp.route('/daily-challenges', methods=['GET'])
+@limiter.limit('120 per minute', override_defaults=True)
 def get_daily_challenges():
     """Return challenges the current user hasn't completed yet."""
     limit = min(int(request.args.get('limit', 10)), 50)
@@ -794,6 +878,7 @@ def get_daily_challenges():
 
 
 @daily_bp.route('/daily-challenge/<int:challenge_id>/complete', methods=['POST'])
+@limiter.limit('120 per hour', override_defaults=True)
 def complete_challenge(challenge_id):
     """Mark a challenge as complete and award XP."""
     challenge = DailyChallenge.query.get(challenge_id)

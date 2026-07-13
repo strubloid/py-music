@@ -3,10 +3,11 @@ import os
 import tempfile
 import unittest
 from datetime import datetime
+from types import SimpleNamespace
 
 from flask import Flask
 
-from backend.project.api.daily_challenges import daily_bp, seed_challenges
+from backend.project.api.daily_challenges import build_ear_exercise, daily_bp, seed_challenges
 from backend.project.auth import auth_bp, login_manager
 from backend.project.daily_challenge_explanations import build_daily_challenge_explanation
 from backend.project.extensions import limiter
@@ -63,7 +64,7 @@ class DailyChallengeFlowTest(unittest.TestCase):
         response = self.client.post('/api/auth/register', json={
             'username': 'player',
             'email': 'player@example.com',
-            'password': 'Secret@123',
+            'password': 'Unbroken!DailyFlow9472',
         })
         self.assertEqual(response.status_code, 201, response.get_data(as_text=True))
 
@@ -127,6 +128,30 @@ class DailyChallengeFlowTest(unittest.TestCase):
                     leaks.append((challenge.id, correct, hint))
 
         self.assertEqual(leaks, [])
+
+    def test_ear_training_contract_covers_all_seven_audio_drills(self):
+        expected_types = {
+            'interval', 'direction', 'shape', 'chord_quality',
+            'chord_movement', 'chord_pair', 'inversion',
+        }
+        exercises = [build_ear_exercise(SimpleNamespace(id=index)) for index in range(7, 14)]
+
+        self.assertEqual({exercise['type'] for exercise in exercises}, expected_types)
+        for exercise in exercises:
+            self.assertIn('title', exercise)
+            self.assertIn('question', exercise)
+            self.assertGreaterEqual(len(exercise['options']), 2)
+            self.assertLess(exercise['correct_index'], len(exercise['options']))
+            self.assertIn('answer_mode', exercise)
+            self.assertTrue(exercise.get('notes') or exercise.get('chords'))
+
+    def test_chord_inventory_endpoint_exposes_auditable_definitions(self):
+        response = self.client.get('/api/chords/inventory')
+        self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
+        payload = response.get_json()
+        self.assertEqual(payload['schemaVersion'], 1)
+        self.assertEqual(len(payload['definitions']), 12 * len(payload['qualities']))
+        self.assertTrue(all('inversions' in item for item in payload['definitions']))
 
     def test_migration_replaces_old_one_completion_per_day_constraint(self):
         with self.app.app_context():

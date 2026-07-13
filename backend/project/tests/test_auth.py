@@ -47,7 +47,7 @@ class AuthFlowTest(unittest.TestCase):
         register = self.client.post('/api/auth/register', json={
             'username': 'player',
             'email': 'player@example.com',
-            'password': 'Secret@123',
+            'password': 'Unbroken!AuthFlow9472',
         })
         self.assertEqual(register.status_code, 201, register.get_data(as_text=True))
 
