@@ -7,7 +7,7 @@
 
 .sound-gates-game {
   --sg-void: #050817; --sg-deep: #090d28; --sg-navy: #10163d; --sg-indigo: #171b50; --sg-panel: rgba(17,22,58,.88); --sg-panel-raised: rgba(25,31,76,.94); --sg-gold: #ffbd2e; --sg-gold-light: #ffd96a; --sg-amber: #ff9d1f; --sg-orange: #ff7417; --sg-text: #f7f8ff; --sg-text-soft: #c3c9e5; --sg-text-muted: #7d86b0; --sg-cyan: #49c8ef; --sg-magenta: #dc5dff; --sg-success: #92e84c; --sg-danger: #ff4f60; --sg-border: rgba(255,189,46,.34); --sg-border-hot: rgba(255,205,82,.9); --sg-shadow-panel: 0 24px 80px rgba(0,0,0,.44); --sg-ease-spring: cubic-bezier(.22,1,.36,1);
-  min-height: calc(100vh - var(--header-height, 64px)); padding: clamp(14px,2vw,28px); color: var(--sg-text); background: radial-gradient(circle at 50% -12%, rgba(66,55,168,.3), transparent 36%), linear-gradient(145deg,#050817,#10133c 56%,#090d28); overflow-x: clip;
+  min-height: calc(100vh - var(--header-height, 64px)); padding: clamp(14px,2vw,28px); color: var(--sg-text);  overflow-x: clip;
 }
 .sound-gates-game button,.sound-gates-game select { font: inherit; }
 .sound-gates-game button { min-width: 44px; min-height: 44px; }
