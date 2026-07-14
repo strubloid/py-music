@@ -18,7 +18,7 @@ export default defineConfig({
       command: 'rm -f /tmp/py-music-playwright.db && python3 backend/project/api/app.py',
       cwd: '..',
       url: 'http://127.0.0.1:5000/api/health',
-      reuseExistingServer: false,
+      reuseExistingServer: process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === 'true',
       timeout: 120_000,
       env: {
         ...process.env,
@@ -31,7 +31,7 @@ export default defineConfig({
       command: 'npm run dev -- --host 127.0.0.1 --port 3000 --strictPort',
       cwd: '.',
       url: 'http://127.0.0.1:3000',
-      reuseExistingServer: false,
+      reuseExistingServer: process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === 'true',
       timeout: 120_000,
       env: {
         ...process.env,

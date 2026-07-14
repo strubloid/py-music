@@ -1,28 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
-  CheckCircle2,
-  HelpCircle,
-  Gauge,
   Headphones,
   Pause,
-  Play,
-  RotateCcw,
   Settings2,
-  Shield,
-  Volume2,
-  VolumeX,
   XCircle,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGameProgress } from '../../contexts/GameProgressContext.jsx';
-import StreakBadge from '../../components/game/StreakBadge.jsx';
 import { createEarTrainingAudioEngine, EAR_TRAINING_INSTRUMENTS } from '../../audio/earTrainingAudio.jsx';
 import { completeDailyChallenge, getDailyChallenges, getUserStreak } from '../../services/api';
 import { getModeBaseXp, getPowerById } from '../../game/gameSystem.tsx';
-import AnswerGate from '../../features/ear-game/components/AnswerGate.jsx';
-import EarGameHud from '../../features/ear-game/components/EarGameHud.jsx';
-import NoteAvatar from '../../features/ear-game/components/NoteAvatar.jsx';
-import TouchControls from '../../features/ear-game/components/TouchControls.jsx';
+import SoundGatesGame from '../../features/ear-game/components/SoundGatesGame.jsx';
+import RewardOverlay from '../../features/ear-game/components/RewardOverlay.jsx';
 import { createGameInputHandler } from '../../features/ear-game/hooks/gameInput.js';
 import { normalizeEarChallenge } from '../../features/ear-game/services/challengeNormalizer.js';
 import { calculateRoundScore, updateMasteryWindow } from '../../features/ear-game/services/scoreMastery.js';
@@ -568,167 +557,38 @@ const EarTraining = () => {
           : rankEvent?.type === 'complete'
             ? 'Legendary complete. Every rank level is yours.'
             : `${rankMeta.name} progress advanced to Level ${rankMeta.level}.`;
-    return (
-      <main className="note-runner note-runner--complete">
-        <div className="run-complete__halo" aria-hidden="true">♪</div>
-        <p className="eyebrow">Run complete</p>
-        <h1>{accuracy >= 80 ? 'Clean passage, listener.' : 'The path is getting clearer.'}</h1>
-        <div className="run-complete__stats">
-          <div><strong>{game.score}</strong><span>score</span></div>
-          <div><strong>{accuracy}%</strong><span>accuracy</span></div>
-          <div><strong>{game.maxCombo}x</strong><span>best combo</span></div>
-        </div>
-        <div className="run-complete__rank" aria-label="Rank progress">
-          <span>{rankMeta.name}</span>
-          <strong>{rankMeta.progressLabel}</strong>
-          <div><i style={{ width: `${rankMeta.progressPercent}%` }} /></div>
-          <p>{rankMessage}</p>
-        </div>
-        <p>{game.correctCount} of {game.challengeCount} sound gates crossed. Your skill history and run are saved.</p>
-        <button type="button" className="note-runner__primary" onClick={restartRun}>Run again</button>
-      </main>
-    );
+    return <RewardOverlay accuracy={accuracy} game={game} rankEvent={rankEvent} rankMeta={{ ...rankMeta, progressLabel: rankMessage }} onContinue={restartRun} />;
   }
 
   return (
-    <main className={`note-runner ${settings.highContrast ? 'note-runner--high-contrast' : ''} ${game.reducedMotion ? 'note-runner--reduced-motion' : ''}`}>
-      <div className="sr-only" aria-live="polite" aria-atomic="true">{announcement}</div>
-      <div className="note-runner__topline">
-        <div className="note-runner__brand"><span aria-hidden="true">♪</span><div><p>Note Runner</p><h1>Sound Gates</h1></div></div>
-        <div className="note-runner__rank" aria-label={`${rankMeta.name}, ${rankMeta.progressLabel}`}>
-          <span>{rankMeta.name}</span>
-          <strong>{rankMeta.challengePending ? 'Rank challenge' : `Lv. ${rankMeta.level}/${rankMeta.levels} · ${rankMeta.remainingLevels} to go`}</strong>
-        </div>
-        <div className="note-runner__top-actions">
-          <StreakBadge streak={streak} />
-          <button type="button" aria-label={game.muted ? 'Unmute game effects' : 'Mute game effects'} onClick={() => dispatchGameAction('mute')}>{game.muted ? <VolumeX /> : <Volume2 />}</button>
-          <button type="button" aria-label="Open game settings" onClick={openSettings} disabled={!['ready', 'accepting-input'].includes(game.phase)}><Settings2 /></button>
-          <button type="button" aria-label="Pause game" onClick={() => dispatchGameAction('pause')}><Pause /></button>
-        </div>
-      </div>
-
-      <EarGameHud
-        challengeIndex={game.challengeIndex}
-        challengeCount={game.challengeCount}
-        combo={game.combo}
-        correctCount={game.correctCount}
-        score={game.score}
-        skill={challenge?.title || 'Listening'}
+    <>
+      <SoundGatesGame
+        game={game}
+        challenge={challenge}
+        result={result}
+        hiddenAnswerIds={hiddenAnswerIds}
+        avatarState={avatarState}
+        playing={playing}
+        inputSignal={{ ...inputSignal, announcement }}
+        powers={powers}
+        focus={progressState.focusPoints}
+        rankMeta={rankMeta}
+        streak={streak}
+        instrument={selectedInstrument}
+        instruments={EAR_TRAINING_INSTRUMENTS}
+        audioState={audioState}
+        highContrast={settings.highContrast}
+        bossMode={rankMeta.challengePending}
+        onPlay={() => playPrompt({ replay: game.phase !== 'ready', preservePhase: game.phase.startsWith('showing-') })}
+        onSelect={selectAnswer}
+        onCommit={commitAnswer}
+        onCompare={playComparison}
+        onNext={nextRound}
+        onUsePower={usePower}
+        onInstrumentChange={setSelectedInstrument}
+        onAction={dispatchGameAction}
+        onOpenSettings={openSettings}
       />
-
-      <section className="sound-stage" aria-label="Sound Gates game stage">
-        <div className="sound-stage__sky" aria-hidden="true"><span>𝄞</span><i /><i /><i /><i /></div>
-        <div className={`listening-beacon ${playing ? 'listening-beacon--playing' : ''}`}>
-          <button
-            type="button"
-            className="listening-beacon__button"
-            onClick={() => playPrompt({ replay: game.phase !== 'ready', preservePhase: game.phase.startsWith('showing-') })}
-            disabled={playing}
-            aria-label={`${game.phase === 'ready' ? 'Start' : 'Replay'} ${challenge?.prompt.playbackMode || ''} musical question`}
-          >
-            {playing ? <Gauge /> : game.phase === 'ready' ? <Play /> : <RotateCcw />}
-          </button>
-          <div>
-            <span>{playing ? 'Listening…' : 'Listening beacon'}</span>
-            <strong>{challenge?.prompt.playbackMode === 'harmonic' ? 'Harmonic chord' : challenge?.prompt.playbackMode === 'sequence' ? 'Chord pair' : 'Melodic signal'}</strong>
-          </div>
-        </div>
-
-        <div className="sound-stage__brief">
-          <span>{challenge?.title}</span>
-          <h2>{challenge?.question}</h2>
-          <p>{game.phase === 'ready' ? 'Activate the beacon. Movement unlocks when the prompt finishes.' : 'A / D or arrow keys move Nomi. Enter, W, or Space commits.'}</p>
-          <output className={`input-signal ${inputSignal.locked ? 'input-signal--locked' : ''}`}>
-            <kbd>{inputSignal.action ? inputSignal.action.replace('move-', '').replace('lane-', '') : '⌨'}</kbd>
-            {inputSignal.label}
-          </output>
-        </div>
-
-        <div className="sound-stage__world" ref={worldRef}>
-          <div
-            className="sound-stage__lanes"
-            style={{
-              '--gate-count': challenge?.answers.length || 1,
-              '--mobile-lanes-width': `${(challenge?.answers.length || 1) * 120 - 8}px`,
-            }}
-          >
-            <div className="staff-lines" aria-hidden="true"><i /><i /><i /><i /><i /></div>
-            <NoteAvatar lane={game.avatarLane} laneCount={challenge?.answers.length} state={avatarState} reducedMotion={game.reducedMotion} />
-            <div className="answer-gates" role="radiogroup" aria-label="Answer gates">
-              {challenge?.answers.map((answer) => (
-                <AnswerGate
-                  key={answer.id}
-                  answer={answer}
-                  selected={game.selectedAnswerId === answer.id}
-                  disabled={game.phase !== 'accepting-input'}
-                  hidden={hiddenAnswerIds.includes(answer.id)}
-                  result={result}
-                  correct={challenge.correctAnswerId === answer.id}
-                  onSelect={(id) => selectAnswer(id, 'pointer')}
-                  onCommit={commitAnswer}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {result && (
-          <div className={`round-feedback ${result.correct ? 'round-feedback--correct' : 'round-feedback--incorrect'}`} role="status">
-            {result.correct ? <CheckCircle2 /> : <XCircle />}
-            <div>
-              <strong>{result.correct ? 'Clean hit' : 'Off-key wobble — listen again'}</strong>
-              <p>{challenge.explanation.summary}</p>
-              {!result.correct && <span>You chose {result.selectedLabel}. Correct: {result.correctLabel}.</span>}
-            </div>
-            <div className="round-feedback__actions">
-              <button type="button" onClick={playComparison}><Headphones /> Compare (C)</button>
-              <button type="button" onClick={nextRound}>Next gate <span>Enter</span></button>
-            </div>
-          </div>
-        )}
-      </section>
-
-      <section className="power-belt" aria-label="Listening powers">
-        <div className="power-belt__instrument">
-          <Headphones />
-          <select
-            aria-label="Playback instrument"
-            value={selectedInstrument}
-            onChange={(event) => setSelectedInstrument(event.target.value)}
-            disabled={playing}
-          >
-            {EAR_TRAINING_INSTRUMENTS.map((instrument) => <option key={instrument.id} value={instrument.id}>{instrument.label}</option>)}
-          </select>
-          <small>{audioState.loadingInstrumentId ? 'Loading samples…' : `${selectedInstrumentMeta?.label} · balanced voicing`}</small>
-        </div>
-        <div className="power-belt__items">
-          {powers.map((power) => (
-            <button
-              type="button"
-              key={power.id}
-              onClick={() => usePower(power.id)}
-              disabled={game.phase !== 'accepting-input' || game.usedPowers.includes(power.id)}
-              aria-pressed={game.usedPowers.includes(power.id)}
-            >
-              {power.id.includes('combo') || power.id === 'second_chance' ? <Shield /> : power.id === 'slow_down' ? <Gauge /> : <HelpCircle />}
-              <span>{power.name}</span>
-              <small>{power.focusCost ? `${power.focusCost} focus` : power.xpPenalty ? `−${power.xpPenalty} XP` : 'learning aid'}</small>
-            </button>
-          ))}
-        </div>
-        <div className="power-belt__focus"><span>Focus</span><strong>{progressState.focusPoints}</strong></div>
-      </section>
-
-      <TouchControls onAction={dispatchGameAction} disabled={game.phase !== 'accepting-input'} />
-
-      <footer className="note-runner__controls" aria-label="Keyboard controls">
-        <span><kbd>A</kbd><kbd>D</kbd> move</span>
-        <span><kbd>Space</kbd> commit</span>
-        <span><kbd>R</kbd> replay</span>
-        <span><kbd>⇧R</kbd> slow</span>
-        <span><kbd>C</kbd> compare</span>
-        <span><kbd>P</kbd> pause</span>
-      </footer>
 
       {game.phase === 'paused' && !settingsOpen && (
         <div className="game-modal" role="dialog" aria-modal="true" aria-labelledby="pause-title" ref={modalRef}>
@@ -784,7 +644,7 @@ const EarTraining = () => {
           </div>
         </div>
       )}
-    </main>
+    </>
   );
 };
 

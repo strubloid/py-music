@@ -1,24 +1,28 @@
 import React from 'react';
 
-const AnswerGate = ({ answer, selected, disabled, hidden, result, correct, onSelect, onCommit }) => {
-  if (hidden) return <div className="answer-gate answer-gate--removed" aria-hidden="true"><span>Gate muted</span></div>;
-  const outcome = result ? (correct ? 'correct' : result.selectedAnswerId === answer.id ? 'incorrect' : '') : '';
+const AnswerGate = ({ answer, phase, selected, disabled, hidden, result, correct, reducedMotion, onSelect, onCommit }) => {
+  const revealed = !['loading', 'ready', 'playing-prompt'].includes(phase);
+  const outcome = result ? (correct ? 'correct' : result.selectedAnswerId === answer.id ? 'incorrect' : 'dimmed') : '';
+  const state = hidden ? 'eliminated' : outcome || (!revealed ? 'locked' : selected ? 'focused' : 'revealed');
   return (
     <button
       type="button"
-      className={`answer-gate ${selected ? 'answer-gate--selected' : ''} ${outcome ? `answer-gate--${outcome}` : ''}`}
+      className={`game-gate game-gate--${state} ${reducedMotion ? 'game-gate--reduced-motion' : ''}`}
       role="radio"
       aria-checked={selected}
       aria-current={selected ? 'true' : undefined}
-      aria-label={answer.accessibleLabel}
-      disabled={disabled}
+      aria-label={hidden ? `${answer.accessibleLabel}, eliminated` : answer.accessibleLabel}
+      aria-disabled={disabled || hidden}
+      disabled={disabled || hidden}
+      data-gate-state={state}
       onClick={() => (selected ? onCommit(answer.id) : onSelect(answer.id))}
       onDoubleClick={() => onCommit(answer.id)}
     >
-      <span className="answer-gate__number">{answer.lane + 1}</span>
-      <span className="answer-gate__arch" aria-hidden="true" />
-      <strong>{answer.label}</strong>
-      <small>{selected ? 'Press again or Enter' : 'Move here'}</small>
+      <span className="game-gate__beam" aria-hidden="true" />
+      <span className="game-gate__frame" aria-hidden="true"><span className="game-gate__card"><span className="game-gate__back"><i>♪</i><em>Signal locked</em></span><span className="game-gate__front"><i>♫</i><em>Sound gate</em></span></span></span>
+      <span className="game-gate__lane">{answer.lane + 1}</span>
+      <span className="game-gate__label"><strong>{revealed ? answer.label : 'Listening…'}</strong><small>{hidden ? 'Eliminated' : selected ? 'Commit · Enter' : revealed ? 'Move to gate' : 'Signal locked'}</small></span>
+      <span className="game-gate__platform" aria-hidden="true" />
     </button>
   );
 };

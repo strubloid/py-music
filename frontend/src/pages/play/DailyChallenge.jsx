@@ -532,7 +532,7 @@ const DailyChallenge = () => {
   }
 
   return (
-    <div className="daily-page">
+    <div className="daily-page daily-page--arcade">
       <div className="daily-header">
         <Zap className="daily-icon" size={28} />
         <div>
@@ -631,6 +631,7 @@ const DailyChallenge = () => {
                     lane={selectedOptionIndex}
                     laneCount={activeChallenge.options.length}
                     state={activeResult ? (activeResult.correct ? 'celebrating' : 'wobble') : 'idle'}
+                    legacy
                   />
                 </div>
               <div className="challenge-options" role="radiogroup" aria-label="Challenge answer gates">
@@ -654,7 +655,7 @@ const DailyChallenge = () => {
                       onClick={() => handleAnswer(activeChallenge.id, i, activeChallenge.correct_index)}
                     >
                       <span className="challenge-gate-key">{i + 1}</span>
-                      {opt}
+                      <span className="challenge-gate-answer">{opt}</span>
                       {activeResult && i === activeChallenge.correct_index && <CheckCircle size={16} className="opt-correct-icon" />}
                     </button>
                   );
