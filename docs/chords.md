@@ -1,105 +1,375 @@
-# Chords Ear Training
+# Chord Theory & Implementation Guide
 
-Chord listening is part of Note Runner and is not represented as renamed note-interval questions.
+This document defines how chords are structured, theory-grounded, and implemented in this project. An AI can follow these steps to generate correct CAGED variations for any chord type.
 
-## Architecture
+---
 
-- `data/chord_inventory.json` is the canonical ear-training quality/formula inventory.
-- `backend/project/music/chord_inventory.py` generates definitions, inversions, scheduled note events, and controlled chord pairs.
-- `GET /api/chords/inventory` exposes the auditable contract.
-- `backend/project/api/daily_challenges.py` emits chord quality, chord-root movement, pair relationship, and inversion exercises alongside note drills.
-- `frontend/src/audio/earTrainingAudio.jsx` plays simultaneous sampled chord tones and timed chord groups using the existing piano/guitar engine and proxy cache.
-- `frontend/src/pages/play/EarTraining.jsx` renders chord prompts through the same Sound Gates reducer, input, scoring, and persistence flow as note prompts.
-- `frontend/src/services/ChordDataService.tsx` remains display-oriented guitar fingering data and does not determine ear-game correctness.
+## 1. Guitar String Tuning
 
-The complete root/quality matrix, pair relationships, tests, and known voicing boundaries are documented in `ear-training-chord-coverage.md`.
+Standard tuning (low to high): **E2, A2, D3, G3, B3, E4**
 
-## Canonical chord definition
+String indices in code: `[0]=LowE, [1]=A, [2]=D, [3]=G, [4]=B, [5]=HighE`
 
-Each generated definition carries:
+```
+String:  E(6)   A(5)   D(4)   G(3)   B(2)   E(1)
+Fret 0:  E2     A2     D3     G3     B3     E4
+```
 
-- stable ID;
-- chromatic root;
-- quality ID;
-- semitone formula;
-- display and short names;
-- aliases;
-- every inversion;
-- selected inversion and exact voicing;
-- ear-training enablement and difficulty.
+---
 
-All 12 chromatic roots are supported. Flat aliases are exported for display. Triads, suspended chords, seventh chords, sixth chords, and power chords are included according to the inventory.
+## 2. Note Naming Convention
 
-## Audio contract
+- Use **sharps** (not flats) in code keys: `C`, `C#`, `D`, `D#`, `E`, `F`, `F#`, `G`, `G#`, `A`, `A#`, `B`
+- Flat equivalents exist only for display: `Db` (same as `C#`), `Eb` (same as `D#`), etc.
 
-Chord audio is constructed from notes, not downloaded as one recording per chord.
+---
 
-- A chord starts every tone at the same Web Audio time.
-- A pair uses two voiced groups with a controlled gap.
-- The prompt uses one instrument, register policy, velocity, and timing policy so answer cues come from harmony rather than loudness or timbre.
-- Replay stops prior playback and schedules the same definition again.
-- Slow replay scales timing only.
-- Piano and acoustic steel guitar use the existing `smplr` sample path and same-origin cache.
-- Browser audio resumes only after a user gesture.
+## 3. Chord Type Formulas
 
-Close-position and inversion voicings are supported. Open/drop voicings are outside the current inventory and must not be advertised until they have explicit metadata and tests.
+Intervals are counted in **semitones** from the root:
 
-## Listening families
+| Chord Type | Symbol | Intervals (semitones from root) | Notes Formula |
+|------------|--------|--------------------------------|--------------|
+| Major | (none) | 0, 4, 7 | Root, M3, P5 |
+| Minor | m | 0, 3, 7 | Root, m3, P5 |
+| Dominant 7 | 7 | 0, 4, 7, 10 | Root, M3, P5, m7 |
+| Major 7 | maj7 | 0, 4, 7, 11 | Root, M3, P5, M7 |
+| Minor 7 | m7 | 0, 3, 7, 10 | Root, m3, P5, m7 |
+| Diminished | dim | 0, 3, 6 | Root, m3, d5 |
+| Augmented | aug | 0, 4, 8 | Root, M3, #5 |
+| Sus2 | sus2 | 0, 2, 7 | Root, M2, P5 |
+| Sus4 | sus4 | 0, 5, 7 | Root, P4, P5 |
+| Add9 | add9 | 0, 4, 7, 14 | Root, M3, P5, M9 |
+| 6th | 6 | 0, 4, 7, 9 | Root, M3, P5, M6 |
+| 9th | 9 | 0, 4, 7, 10, 14 | Root, M3, P5, m7, M9 |
+| Power | 5 | 0, 7 | Root, P5 |
+| Minor Major 7 | mM7 | 0, 3, 7, 11 | Root, m3, P5, M7 |
 
-### Chord Colour
+---
 
-One simultaneous chord plays. The learner identifies its quality. Beginner vocabulary is limited by difficulty; advanced levels introduce suspended, sixth, seventh, half-diminished, fully diminished, and minor-major seventh qualities.
+## 4. CAGED System
 
-### Chord Movement
+Each CAGED shape corresponds to a major chord shape that can be **transposed** to any root and **modified** for different chord types.
 
-Two chords play with a stable voicing policy. The learner identifies the interval between roots. The task is explicitly labeled so it is not confused with quality or harmonic-function recognition.
+### 4.1 The Five Open Shapes (C Major)
 
-### Chord Chase
+```
+C SHAPE (open position):
+  E A D G B e
+  x 3 2 0 1 0
+  Finger: - 3 2 - 1 -
 
-Two chords play and the learner identifies one controlled relationship:
+A SHAPE (barre at 3rd fret):
+  E A D G B e
+  x 3 5 5 5 3
+  Finger: - 1 3 3 3 1
 
-- same root, different quality;
-- different root, same quality;
-- relative major/minor;
-- diatonic function;
-- same chord, different inversion;
-- controlled mixed contrast.
+G SHAPE (8th fret):
+  E A D G B e
+  8 7 5 5 8 8
+  Finger: 3 2 1 1 4 4
 
-Difficulty changes allowed qualities, root proximity, shared tones, inversion use, and playback metadata. The generator permanently covers C major/E minor, C major/D major, and G major/A minor acceptance examples without limiting itself to those pairs.
+E SHAPE (8th fret):
+  E A D G B e
+  8 10 10 9 8 8
+  Finger: 1 3 4 2 1 1
 
-### Inversion Gate
+D SHAPE (10th fret):
+  E A D G B e
+  x x 10 12 13 12
+  Finger: - - 1 3 4 2
+```
 
-One inverted chord plays. The learner identifies root position or the numbered inversion. The generated notes and displayed explanation come from the same canonical definition.
+### 4.2 CAGED Transposition Rule
 
-## Learning feedback
+For each semitone up from C:
+- Move the shape **up N frets**
+- The barre (if any) moves up N frets
+- Open strings become fretted at position N
 
-After commitment, Sound Gates shows:
+### 4.3 Modifying CAGED for Minor Chords
 
-- the correct label;
-- the learner's selected label when incorrect;
-- the heard formula or pair relationship;
-- a replay/comparison action;
-- score, combo, and XP effects.
+**Rule:** For minor chords, the **3rd is lowered by 1 semitone**.
 
-Assessed prompts never reveal the correct formula or relationship before the answer.
+For each major CAGED shape:
+- Major 3rd → Minor 3rd
+- Move the finger that plays the major 3rd down 1 fret
+- Keep the root and 5th the same
 
-## Progression and persistence
+**Example (A shape, root C):**
+```
+C Major A-shape:  x 3 5 5 5 3
+                   ↑ major 3rd on A-string (3rd fret = E)
 
-Chord prompts reuse the existing daily-challenge ID and XP completion endpoint. A signed-in learner receives authoritative backend XP and streak updates; guests retain local run and mastery history. Rolling skill windows record accuracy, response time, and replay use so future challenge selection can adapt without creating another progression database.
+C Minor A-shape:  x 3 5 5 4 3
+                   ↑ minor 3rd on A-string (3rd fret stays, D# is m3 of C)
+                   Actually: move the 5th-string finger DOWN 1 fret
+                   C root=3, Eb(m3)=4, G(5)=5 → need Eb, so 4th fret
+                   Correct:  x 3 5 5 4 3
+```
 
-## Tests
+### 4.4 Modifying CAGED for Dominant 7th
 
-- Inventory tests validate formulas for every root, inversion pitch classes, controlled pair examples, scheduled harmonic events, and slow-mode pitch stability.
-- Daily-challenge tests validate all exercise payloads and the inventory endpoint.
-- Frontend unit tests validate stable answer IDs, reducer locks, input mapping, scoring, and mastery.
-- Playwright coverage validates the playable stage and responsive controls.
+**Rule:** Add the minor 7th interval to the major chord.
 
-## Next chord-specific extensions
+For each major CAGED shape:
+- Add m7 note
+- Common positions: below root (1 fret down), or extend shape
 
-These are explicit future modes, not hidden claims in the current game:
+**Example (C7 CAGED A-shape):**
+```
+C Major A-shape:  x 3 5 5 5 3
+C7 A-shape:       x 3 5 3 5 3  (add Bb on G-string, 3rd fret)
 
-- open/drop voicing recognition;
-- progression-completion paths using existing Roman-numeral data;
-- key-context spelling for assessed root-name answers;
-- longer functional progressions;
-- Echo Cave reproduction/timing exercises.
+Alternative (more common): 
+  x 3 2 3 1 0    (open position with 7th added)
+```
+
+### 4.5 Modifying CAGED for Minor 7th
+
+**Rule:** Minor chord + m7 interval.
+
+**Example (Cm7 CAGED A-shape):**
+```
+Cm A-shape:  x 3 5 5 4 3
+Cm7:          x 3 5 3 4 3  (add Bb on G-string)
+```
+
+### 4.6 Modifying CAGED for Diminished
+
+**Rule:** Diminished = m3 + d5. Two adjacent shapes form a full diminished chord.
+
+**Example (Cdim CAGED):**
+```
+Cdim A-shape:  x 3 4 5 4 x  (C-Eb-Gb)
+Or open:       x 2 3 4 3 x  (B-D-F = A#dim = Bdim = Cdim)
+```
+
+### 4.7 Modifying CAGED for Augmented
+
+**Rule:** Aug = M3 + #5. Move the 5th up 1 fret.
+
+**Example (Caug CAGED A-shape):**
+```
+C Major A-shape:  x 3 5 5 5 3
+Caug:              x 3 5 6 5 3  (G → G#)
+```
+
+### 4.8 Modifying CAGED for Sus2 / Sus4
+
+**Sus2:** Replace 3rd with 2nd (root + M2 + P5)
+**Sus4:** Replace 3rd with 4th (root + P4 + P5)
+
+**Example (Csus2, open position):**
+```
+Csus2:  x 3 1 0 3 x  (C-D-G)
+```
+
+---
+
+## 5. Fret Position Logic
+
+### 5.1 Finding Optimal Start Fret
+
+```javascript
+// Parse fret string to number
+const parseFret = (fret) => {
+  if (fret === 'x' || fret === 'X') return -1;  // muted
+  if (fret === '0') return 0;                    // open
+  return parseInt(fret);                         // fretted
+};
+
+// Get played frets (exclude muted strings)
+const playedFrets = frets.map(parseFret).filter(f => f > 0);
+
+const minFret = Math.min(...playedFrets);
+const maxFret = Math.max(...playedFrets);
+
+// Show 5 frets unless starting at fret 5 or higher
+const startFret = minFret <= 5 ? 1 : minFret;
+const showFretNumber = startFret >= 5;
+```
+
+### 5.2 Finger Assignment Heuristic
+
+```javascript
+// 1 = Index, 2 = Middle, 3 = Ring, 4 = Pinky
+// Barre chords: one finger holds multiple strings at same fret
+
+// For CAGED A-shape barre:
+// Finger 1 barres at the starting fret position
+// Other fingers shape the chord
+
+// For CAGED E-shape barre:
+// Finger 1 barres the 1st fret (or starting fret)
+// Finger 2 plays 3rd on G-string
+// Finger 3 plays 4th on B-string
+```
+
+---
+
+## 6. Implementation Structure
+
+### 6.1 Data Structure
+
+```typescript
+interface GuitarChordData {
+  frets: string[];      // 6 strings: E A D G B e (index 0-5)
+  fingers: (number | null)[];  // null = no finger assigned, 0 = open
+  position: string;     // e.g., "A shape (3rd fret)"
+}
+
+// fret values:
+// 'x' or 'X' = muted/not played
+// '0' = open string
+// '1'-'24' = fret number
+```
+
+### 6.2 Chord Naming in Code
+
+```typescript
+// Root + type symbol
+'C'      // C Major
+'Cm'     // C Minor  
+'C7'     // C Dominant 7
+'Cmaj7'  // C Major 7
+'Cm7'    // C Minor 7
+'Cdim'   // C Diminished
+'Caug'   // C Augmented
+'Csus2'  // C Suspended 2nd
+'Csus4'  // C Suspended 4th
+'Cadd9'  // C Add 9
+'C6'     // C 6th
+'C9'     // C Dominant 9
+'C5'     // C Power Chord
+'CmM7'   // C Minor Major 7
+```
+
+### 6.3 Variation Generation Algorithm
+
+For each chord type, generate CAGED variations using:
+
+1. **Major/Minor**: Start with C major CAGED, transpose to root, apply 3rd modification
+2. **7/maj7/m7**: Start with major CAGED, add/remove/modify 7th interval
+3. **dim/aug**: Start with major CAGED, modify 5th
+4. **sus2/sus4**: Start with major CAGED, replace 3rd with 2nd/4th
+
+---
+
+## 7. Required CAGED Variations Per Chord Type
+
+Each chord type MUST have **5 CAGED variations** stored in `guitarChordVariations`:
+
+### 7.1 Major (Complete ✓)
+
+| Shape | C Major | G Major | E Major | A Major | D Major |
+|-------|---------|---------|---------|---------|---------|
+| Position | Open | 8th fret | Open | Open | 10th fret |
+| Barre | No | No | No | No | No |
+
+### 7.2 Minor (Complete ✓)
+
+Same as major CAGED positions, but with minor 3rd.
+
+### 7.3 Dominant 7 (Missing - To Implement)
+
+| Shape | Root Position | Notes |
+|-------|--------------|-------|
+| C7 Open | Open position | Add m7 (Bb for C7) |
+| A7 | 3rd fret barre | A-shape with m7 |
+| G7 | 8th fret | G-shape with m7 |
+| E7 | Open | E with added 7th |
+| D7 | 10th fret | D-shape with m7 |
+
+**Common C7 Shapes:**
+```
+C7 Open:     x 3 2 3 1 0   (open low E, C-E-G-Bb)
+C7 A-shape:  x 3 5 3 5 3   (barre 3, add Bb on G-string)
+C7 E-shape:  0 2 0 1 0 0   (E shape with D in bass = C/E, different)
+C7 alt:      x 3 5 5 5 3   (C major A-shape, same notes as C7 because open low E mutes)
+```
+
+### 7.4 Major 7 (Missing - To Implement)
+
+**Common Cmaj7 Shapes:**
+```
+Cmaj7 Open:  x 3 2 0 0 0   (C-E-G-B)
+Cmaj7 A:     x 3 5 4 5 3    (barre 3, Cmaj7 voicing)
+Cmaj7 E:     0 2 1 1 0 0   (E-shape variant)
+```
+
+### 7.5 Minor 7 (Missing - To Implement)
+
+**Common Cm7 Shapes:**
+```
+Cm7 Open:    x 3 5 3 4 3   (C-Eb-G-Bb)
+Cm7 A:       x 3 5 3 4 3   (same as C7 A-shape but with Eb)
+Cm7 E:       0 2 0 0 0 0   (Em with m7 voicing)
+```
+
+### 7.6 Diminished (Incomplete)
+
+Need proper CAGED system with barre chords.
+
+### 7.7 Augmented (Missing - To Implement)
+
+### 7.8 Sus2 / Sus4 (Missing - To Implement)
+
+### 7.9 Add9 / 6th / 9th (Missing - To Implement)
+
+### 7.10 Power (5) (Missing - To Implement)
+
+### 7.11 Minor Major 7 (Missing - To Implement)
+
+---
+
+## 8. Verification Checklist
+
+When implementing any chord, verify:
+
+- [ ] All 5 CAGED positions exist
+- [ ] Fret numbers are physically playable
+- [ ] Finger assignments follow natural hand shape
+- [ ] Barre positions are at correct frets
+- [ ] Open/muted strings are correct for the voicing
+- [ ] Chord notes match the theoretical formula
+- [ ] `parseFret` handles all fret values correctly
+- [ ] Start fret calculation works for positions 5+
+
+---
+
+## 9. Reference: Chromatic Note Positions
+
+Standard tuning reference (fret 0 = open):
+
+```
+Fret:  0    1    2    3    4    5    6    7    8    9    10   11   12
+E:     E    F    F#   G    G#   A    A#   B    C    C#   D    D#   E
+A:     A    A#   B    C    C#   D    D#   E    F    F#   G    G#   A
+D:     D    D#   E    F    F#   G    G#   A    A#   B    C    C#   D
+G:     G    G#   A    A#   B    C    C#   D    D#   E    F    F#   G
+B:     B    C    C#   D    D#   E    F    F#   G    G#   A    A#   B
+e:     e    f    f#   g    g#   a    a#   b    c    c#   d    d#   e
+```
+
+---
+
+## 10. Implementation Order
+
+To fix the missing CAGED variations, implement in this order:
+
+1. **Dominant 7th (7)** - Most common extension after major/minor
+2. **Major 7th (maj7)** - Common in jazz/pop
+3. **Minor 7th (m7)** - Common minor extension
+4. **Diminished (dim)** - Two-shape system
+5. **Augmented (aug)** - Simple 5th modification
+6. **Sus2 / Sus4** - 3rd replacement
+7. **Add9 / 6th / 9th** - Extended chords
+8. **Power (5)** - Simple two-note chords
+9. **Minor Major 7 (mM7)** - Minor with M7
+
+Each chord type follows the same pattern:
+1. Start with the major CAGED shape
+2. Apply the interval modification rule
+3. Verify all 5 positions are playable
+4. Add to `guitarChordVariations` with proper `position` labels

@@ -5,6 +5,9 @@ primary_region = 'lhr'
 
 [build]
 
+[deploy]
+  strategy = "immediate"
+
 [http_service]
   internal_port = 5000
   force_https = true
