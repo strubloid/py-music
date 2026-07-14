@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import chordDataService from "../../services/ChordDataService";
+import PianoKeyboard from "../../components/PianoKeyboard/PianoKeyboard";
 import "../../components/common/ChordDiagram.scss";
 import "./ChordsPage.scss";
 
@@ -26,6 +27,7 @@ const CHORD_TYPES = [
 
 // Get chord name from root and type
 const getChordName = (root, type) => `${root}${type?.symbol ?? ""}`;
+const BLACK_KEYS = [{ after_natural: 0 }, { after_natural: 1 }, { after_natural: 3 }, { after_natural: 4 }, { after_natural: 5 }];
 
 const PianoChordDiagram = ({ chord, size = "large" }) => {
     const renderData = chordDataService.renderPianoKeys(chord, { className: "chord-diagram-piano" });
@@ -116,12 +118,12 @@ const ChordVariationDiagram = ({ variation, chordName, size = "large" }) => {
     const getFingerColor = (finger) => {
         const colors = {
             0: "transparent",
-            1: "#ff6b6b",
-            2: "#4ecdc4",
-            3: "#45b7d1",
-            4: "#96ceb4",
+            1: "#ffbd2e",
+            2: "#49c8ef",
+            3: "#dc5dff",
+            4: "#ffd96a",
         };
-        return colors[finger] || "#333";
+        return colors[finger] || "#10163d";
     };
 
     return (
@@ -168,15 +170,15 @@ const ChordVariationDiagram = ({ variation, chordName, size = "large" }) => {
                         if (fret === -1) {
                             return (
                                 <g key={stringIndex}>
-                                    <line x1={x - 3} y1="18" x2={x + 3} y2="26" stroke="#ff4444" strokeWidth="4" />
-                                    <line x1={x - 3} y1="26" x2={x + 3} y2="18" stroke="#ff4444" strokeWidth="4" />
+                                    <line x1={x - 3} y1="18" x2={x + 3} y2="26" stroke="#ff4f60" strokeWidth="4" />
+                                    <line x1={x - 3} y1="26" x2={x + 3} y2="18" stroke="#ff4f60" strokeWidth="4" />
                                 </g>
                             );
                         } else if (fret === 0) {
                             return (
                                 <g key={stringIndex}>
-                                    <circle cx={x} cy="22" r="5" fill="#1a1a1a" stroke="#4CAF50" strokeWidth="3" />
-                                    <text x={x} y="26" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#4CAF50">
+                                    <circle cx={x} cy="22" r="5" fill="#10163d" stroke="#49c8ef" strokeWidth="3" />
+                                    <text x={x} y="26" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#49c8ef">
                                         0
                                     </text>
                                 </g>
@@ -211,6 +213,8 @@ const ChordsPage = () => {
     const [selectedRoot, setSelectedRoot] = useState("C");
     const [selectedType, setSelectedType] = useState("major");
     const [selectedChord, setSelectedChord] = useState(null);
+    const [selectedVariationIndex, setSelectedVariationIndex] = useState(0);
+    const [shapeInstrument, setShapeInstrument] = useState("guitar");
 
     const selectedChordType = useMemo(() => {
         return CHORD_TYPES.find((t) => t.id === selectedType) || CHORD_TYPES[0];
@@ -237,17 +241,29 @@ const ChordsPage = () => {
     const hasVariations = chordVariations.length > 0;
     const hasMultipleVariations = chordVariations.length > 1;
 
+    const keyboardData = useMemo(() => ({
+        natural_keys: ["C", "D", "E", "F", "G", "A", "B"],
+        black_keys: BLACK_KEYS,
+        scale_notes: pianoNotes,
+        root_note: selectedRoot,
+    }), [pianoNotes, selectedRoot]);
+
+    useEffect(() => setSelectedVariationIndex(0), [currentChordName]);
+    const selectedVariation = chordVariations[selectedVariationIndex] || chordVariations[0];
+
     const handleChordClick = (root, type) => {
         const chordType = typeof type === "string" ? CHORD_TYPES.find((t) => t.id === type) || CHORD_TYPES[0] : type || CHORD_TYPES[0];
 
         setSelectedRoot(root);
         setSelectedType(chordType.id);
         setSelectedChord(getChordName(root, chordType));
+        setSelectedVariationIndex(0);
     };
 
     const handleTypeClick = (type) => {
         setSelectedType(type.id);
         setSelectedChord(getChordName(selectedRoot, type));
+        setSelectedVariationIndex(0);
     };
 
     return (
@@ -305,28 +321,23 @@ const ChordsPage = () => {
                 </aside>
 
                 <main className="chords-lab">
-                    {hasVariations && (
-                        <div className="chord-variations-panel">
-                            <div className="variations-panel-header">
-                                <h2>All CAGED variations</h2>
-                                <span className="variations-hint">Click any shape to see finger positions</span>
-                            </div>
-                            <div className="chord-variations-list">
-                                {chordVariations.map((variation, index) => (
-                                    <ChordVariationDiagram key={`${currentChordName}-${index}`} variation={variation} chordName={currentChordName} size="large" />
-                                ))}
-                            </div>
-                        </div>
+                    {hasVariations && selectedVariation && (
+                        <section className="chord-shape-preview" aria-label={`${currentChordName} chord shape`}>
+                            <header>
+                                <div><span>Chord shape</span><strong>{currentChordName} · {selectedVariation.position}</strong></div>
+                                <div className="chord-shape-preview__tabs" role="tablist" aria-label="Chord shape instrument">
+                                    <button type="button" role="tab" aria-selected={shapeInstrument === "guitar"} className={shapeInstrument === "guitar" ? "is-active" : ""} onClick={() => setShapeInstrument("guitar")}>Fretboard</button>
+                                    <button type="button" role="tab" aria-selected={shapeInstrument === "piano"} className={shapeInstrument === "piano" ? "is-active" : ""} onClick={() => setShapeInstrument("piano")}>Piano</button>
+                                </div>
+                            </header>
+                            {shapeInstrument === "guitar"
+                                ? <div className="chord-shape-preview__guitar"><ChordVariationDiagram variation={selectedVariation} chordName={currentChordName} size="large" /></div>
+                                : <PianoKeyboard keyboardData={keyboardData} />}
+                            {shapeInstrument === "guitar" && hasMultipleVariations && <div className="chord-shape-preview__variations" role="list" aria-label="CAGED variations">
+                                {chordVariations.map((variation, index) => <button type="button" key={`${currentChordName}-${index}`} role="listitem" className={selectedVariationIndex === index ? "is-active" : ""} onClick={() => setSelectedVariationIndex(index)}>{variation.position}</button>)}
+                            </div>}
+                        </section>
                     )}
-
-                    <div className="piano-chord-panel">
-                        <div className="piano-chord-panel-header">
-                            <h2>Piano voicing</h2>
-                        </div>
-                        <div className="piano-chord-panel-body">
-                            <PianoChordDiagram chord={currentChordName} size="large" />
-                        </div>
-                    </div>
 
                     <div className="chord-quick-reference">
                         <div className="quick-reference-header">
