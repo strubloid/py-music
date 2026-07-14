@@ -138,7 +138,7 @@ class DailyChallengeFlowTest(unittest.TestCase):
 
         self.assertEqual(leaks, [])
 
-    def test_quest_claim_awards_small_xp_and_focus_exactly_once(self):
+    def test_quest_claim_awards_configured_xp_and_focus_exactly_once(self):
         self._register_user()
         payload = {'quest_id': 'daily-play-1'}
 
@@ -147,13 +147,13 @@ class DailyChallengeFlowTest(unittest.TestCase):
         unknown = self.client.post('/api/me/quest-claim', json={'quest_id': 'invented-jackpot'})
 
         self.assertEqual(first.status_code, 200, first.get_data(as_text=True))
-        self.assertEqual(first.get_json()['xp_awarded'], 3)
+        self.assertEqual(first.get_json()['xp_awarded'], 5)
         self.assertEqual(first.get_json()['focus_restored'], 1)
         self.assertFalse(first.get_json()['already_claimed'])
         self.assertEqual(duplicate.get_json()['xp_awarded'], 0)
         self.assertTrue(duplicate.get_json()['already_claimed'])
         self.assertEqual(unknown.status_code, 400)
-        self.assertEqual(self.client.get('/api/auth/me').get_json()['user']['xp'], 3)
+        self.assertEqual(self.client.get('/api/auth/me').get_json()['user']['xp'], 5)
 
     def test_ear_training_contract_covers_all_seven_audio_drills(self):
         expected_types = {

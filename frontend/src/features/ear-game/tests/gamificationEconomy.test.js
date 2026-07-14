@@ -20,9 +20,11 @@ test('challenge base XP is exactly ten times equal-difficulty ear training XP', 
   }
 });
 
-test('quest catalog provides dozens of small rewards that can restore challenge focus', () => {
+test('quest catalog has intentional daily, weekly, and lifetime reward pools', () => {
   assert.ok(QUEST_CATALOG.length >= 40);
-  assert.ok(QUEST_CATALOG.every((quest) => quest.xp >= 2 && quest.xp <= 15));
+  assert.equal(QUEST_CATALOG.filter((quest) => quest.cadence === 'daily').reduce((sum, quest) => sum + quest.xp, 0), 100);
+  assert.equal(QUEST_CATALOG.filter((quest) => quest.cadence === 'weekly').reduce((sum, quest) => sum + quest.xp, 0), 700);
+  assert.equal(QUEST_CATALOG.filter((quest) => quest.cadence === 'milestone').reduce((sum, quest) => sum + quest.xp, 0), 10000);
   assert.ok(QUEST_CATALOG.filter((quest) => quest.focus > 0).length >= 20);
   assert.equal(new Set(QUEST_CATALOG.map((quest) => quest.id)).size, QUEST_CATALOG.length);
 });

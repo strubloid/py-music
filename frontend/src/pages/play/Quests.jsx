@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { BatteryCharging, Check, Clock3, Flame, Sparkles, Target, Trophy } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useGameProgress } from '../../contexts/GameProgressContext.jsx';
 import {
   getQuestPeriodKey,
@@ -14,8 +15,12 @@ const CADENCES = [
   { id: 'milestone', label: 'Milestones', icon: Trophy },
 ];
 
+const REWARD_POOLS = { daily: 100, weekly: 700, milestone: 10000 };
+const getMissionRoute = (quest) => quest.metric === 'daily-wins' ? '/play/daily' : '/play/ear-training';
+
 const Quests = () => {
   const { progressState, claimQuest, rankMeta } = useGameProgress();
+  const navigate = useNavigate();
   const [cadence, setCadence] = useState('daily');
   const [claiming, setClaiming] = useState(null);
   const [message, setMessage] = useState('');
@@ -26,6 +31,10 @@ const Quests = () => {
     const periodKey = getQuestPeriodKey(quest, now);
     return Boolean(progressState.questClaims?.[`${quest.id}:${periodKey}`]);
   }).length;
+  const activeMission = visibleQuests.find((quest) => getQuestProgress(quest, progressState, now) < quest.target) || visibleQuests[0];
+  const activeMissionProgress = activeMission
+    ? Math.min(activeMission.target, getQuestProgress(activeMission, progressState, now))
+    : 0;
 
   const handleClaim = async (quest) => {
     const periodKey = getQuestPeriodKey(quest, now);
@@ -49,6 +58,12 @@ const Quests = () => {
           <span className="quest-kicker"><Sparkles size={15} /> Practice missions</span>
           <h1>Quest Board</h1>
           <p>Small musical missions refill Focus for powers and nudge your rank journey forward without replacing real practice.</p>
+          {activeMission && (
+            <div className="quest-now-playing">
+              <div><span>Active mission</span><strong>{activeMission.title}</strong><small>{activeMissionProgress}/{activeMission.target} complete</small></div>
+              <button type="button" onClick={() => navigate(getMissionRoute(activeMission))}>Launch mission</button>
+            </div>
+          )}
         </div>
         <div className="quest-hero-meters">
           <div className="quest-room-meter" aria-label={rankMeta.progressLabel}>
@@ -72,7 +87,7 @@ const Quests = () => {
         {CADENCES.map(({ id, label, icon: Icon }) => (
           <button key={id} type="button" className={cadence === id ? 'is-active' : ''} onClick={() => setCadence(id)}>
             <Icon size={16} /> {label}
-            <span>{quests.filter((quest) => quest.cadence === id).length}</span>
+            <span>{quests.filter((quest) => quest.cadence === id).length} · {REWARD_POOLS[id].toLocaleString()} XP</span>
           </button>
         ))}
       </nav>
@@ -89,7 +104,7 @@ const Quests = () => {
           const canClaim = complete && !claimed;
           const percent = Math.round((current / quest.target) * 100);
           return (
-            <article className={`quest-card ${complete ? 'is-complete' : ''} ${claimed ? 'is-claimed' : ''}`} key={quest.id}>
+            <article className={`quest-card quest-card--${cadence} ${complete ? 'is-complete' : ''} ${claimed ? 'is-claimed' : ''}`} key={quest.id}>
               <div className="quest-card-top">
                 <span className="quest-number">{String(index + 1).padStart(2, '0')}</span>
                 <span className="quest-reward">+{quest.xp} XP {quest.focus ? `· +${quest.focus} Focus` : ''}</span>
@@ -99,8 +114,8 @@ const Quests = () => {
               <p>{quest.description}</p>
               <div className="quest-progress-copy"><span>{current} / {quest.target}</span><span>{percent}%</span></div>
               <div className="quest-progress-track"><span style={{ width: `${percent}%` }} /></div>
-              <button type="button" disabled={!canClaim || claiming === quest.id} onClick={() => handleClaim(quest)}>
-                {claimed ? <><Check size={15} /> Claimed</> : canClaim ? 'Claim reward' : 'Keep playing'}
+              <button type="button" className="quest-card-action" disabled={claimed || claiming === quest.id} onClick={() => (canClaim ? handleClaim(quest) : navigate(getMissionRoute(quest)))}>
+                {claimed ? <><Check size={15} /> Claimed</> : canClaim ? 'Claim reward' : 'Launch mission'}
               </button>
             </article>
           );

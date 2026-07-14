@@ -15,20 +15,20 @@ def _quest_rows(cadence, metric, thresholds, xp, focus):
 
 
 QUEST_REWARDS = {
-    **_quest_rows('daily', 'play', [1, 3, 5, 8], 3, 1),
-    **_quest_rows('daily', 'correct', [1, 3, 5, 8], 4, 1),
-    **_quest_rows('daily', 'combo', [2, 3, 5], 5, 1),
-    **_quest_rows('daily', 'no-power', [1, 3], 5, 1),
-    **_quest_rows('weekly', 'ear-runs', [1, 3, 5, 10], 8, 1),
-    **_quest_rows('weekly', 'perfect', [1, 3, 5], 10, 1),
-    **_quest_rows('weekly', 'daily-wins', [1, 3, 5], 10, 1),
-    **_quest_rows('weekly', 'combo', [5, 8, 10], 8, 1),
-    **_quest_rows('weekly', 'power-uses', [1, 3], 6, 1),
-    **_quest_rows('milestone', 'play', [1, 5, 10, 25, 50], lambda _n, i: min(15, 5 + i * 2), lambda _n, i: 1 if i % 2 == 0 else 0),
-    **_quest_rows('milestone', 'correct', [1, 5, 10, 25, 50], lambda _n, i: min(15, 5 + i * 2), lambda _n, i: 1 if i % 2 == 1 else 0),
-    **_quest_rows('milestone', 'ear-runs', [1, 5, 10], 12, 1),
-    **_quest_rows('milestone', 'perfect', [1, 5, 10], 15, 1),
-    **_quest_rows('milestone', 'combo', [5, 10], 12, 1),
+    **_quest_rows('daily', 'play', [1, 3, 5, 8], lambda _n, i: [5, 7, 9, 11][i], 1),
+    **_quest_rows('daily', 'correct', [1, 3, 5, 8], lambda _n, i: [5, 7, 9, 11][i], 1),
+    **_quest_rows('daily', 'combo', [2, 3, 5], lambda _n, i: [7, 9, 10][i], 1),
+    **_quest_rows('daily', 'no-power', [1, 3], lambda _n, i: [4, 6][i], 1),
+    **_quest_rows('weekly', 'ear-runs', [1, 3, 5, 10], lambda _n, i: [30, 45, 55, 70][i], 1),
+    **_quest_rows('weekly', 'perfect', [1, 3, 5], lambda _n, i: [35, 55, 70][i], 1),
+    **_quest_rows('weekly', 'daily-wins', [1, 3, 5], lambda _n, i: [30, 45, 55][i], 1),
+    **_quest_rows('weekly', 'combo', [5, 8, 10], lambda _n, i: [30, 45, 50][i], 1),
+    **_quest_rows('weekly', 'power-uses', [1, 3], lambda _n, i: [30, 55][i], 1),
+    **_quest_rows('milestone', 'play', [1, 10, 25, 50, 100], lambda _n, i: [100, 200, 350, 500, 750][i], lambda _n, i: 1 if i % 2 == 0 else 0),
+    **_quest_rows('milestone', 'correct', [1, 10, 25, 50, 100], lambda _n, i: [100, 200, 350, 500, 750][i], lambda _n, i: 1 if i % 2 == 1 else 0),
+    **_quest_rows('milestone', 'ear-runs', [1, 5, 10], lambda _n, i: [300, 600, 900][i], 1),
+    **_quest_rows('milestone', 'perfect', [1, 5, 10], lambda _n, i: [400, 800, 1200][i], 1),
+    **_quest_rows('milestone', 'combo', [5, 10], lambda _n, i: [700, 1300][i], 1),
 }
 
 
