@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import { useChordPanel } from '../../contexts/ChordPanelContext'
 import Card from '../common/Card'
 import ChordDiagram from '../common/ChordDiagram'
-import chordDataService from '../../services/ChordDataService.tsx'
-import chordPreferenceManager from '../../services/ChordPreferenceManager.tsx'
+import chordDataService from '../../services/ChordDataService'
+import chordPreferenceManager from '../../services/ChordPreferenceManager'
 import './ScaleInfo.scss'
 
 const ScaleInfo = ({ scaleData }) => {

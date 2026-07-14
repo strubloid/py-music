@@ -41,7 +41,7 @@ export {
   EAR_TRAINING_XP_PER_DIFFICULTY,
   MAX_FOCUS_POINTS,
   getModeBaseXp,
-} from './rewardSystem.js';
+} from './rewardSystem';
 
 export const getLevelMeta = (xp = 0) => {
   const current = [...LEVELS].reverse().find((entry) => xp >= entry.xpRequired) || LEVELS[0];

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import { claimQuestReward } from '../services/api';
-import LevelUpModal from '../components/game/LevelUpModal.jsx';
+import LevelUpModal from '../components/game/LevelUpModal';
 import {
   BADGES,
   DEFAULT_FOCUS_POINTS,
@@ -11,13 +11,13 @@ import {
   getLevelMeta,
   getNewBadgesForResult,
   getUnlockedPowers,
-} from '../game/gameSystem.tsx';
+} from '../game/gameSystem';
 import {
   advanceRankProgress,
   createInitialRankProgress,
   getRankMeta,
   normalizeRankProgress,
-} from '../game/rankSystem.js';
+} from '../game/rankSystem';
 
 const GameProgressContext = createContext(null);
 

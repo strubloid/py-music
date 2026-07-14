@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useChordDisplay } from '../../contexts/ChordDisplayContext'
-import chordDataService from '../../services/ChordDataService.tsx'
-import chordPreferenceManager from '../../services/ChordPreferenceManager.tsx'
-import ChordVariationPicker from './ChordVariationPicker.jsx'
+import chordDataService from '../../services/ChordDataService'
+import chordPreferenceManager from '../../services/ChordPreferenceManager'
+import ChordVariationPicker from './ChordVariationPicker'
 import './ChordDiagram.scss'
 
 // Guitar chord fingering data

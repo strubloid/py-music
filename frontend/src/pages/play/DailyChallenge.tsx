@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Zap, RefreshCw, CheckCircle, Loader, Flame, Target, Trophy } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useGameProgress } from '../../contexts/GameProgressContext.jsx';
-import StreakBadge from '../../components/game/StreakBadge.jsx';
-import NoteAvatar from '../../features/ear-game/components/NoteAvatar.jsx';
-import { actionForKeyboardEvent, shouldIgnoreGameShortcut } from '../../features/ear-game/hooks/gameInput.js';
+import { useGameProgress } from '../../contexts/GameProgressContext';
+import StreakBadge from '../../components/game/StreakBadge';
+import NoteAvatar from '../../features/ear-game/components/NoteAvatar';
+import { actionForKeyboardEvent, shouldIgnoreGameShortcut } from '../../features/ear-game/hooks/gameInput';
 import {
   getDailyChallenges,
   completeDailyChallenge,
   seedChallenges,
   getUserStreak,
 } from '../../services/api';
-import { calculateXpPreview, getModeBaseXp, getPowerById } from '../../game/gameSystem.tsx';
+import { calculateXpPreview, getModeBaseXp, getPowerById } from '../../game/gameSystem';
 import './DailyChallenge.scss';
 
 const INITIAL_LIMIT = 1;

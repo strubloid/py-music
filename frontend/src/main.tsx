@@ -1,9 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
-import App from './App.jsx'
+import App from './App'
 import { AuthProvider } from './contexts/AuthContext'
-import { GameProgressProvider } from './contexts/GameProgressContext.jsx'
+import { GameProgressProvider } from './contexts/GameProgressContext'
 import './index.scss'
 
 ReactDOM.createRoot(document.getElementById('root')).render(

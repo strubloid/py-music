@@ -6,7 +6,7 @@ import {
   advanceRankProgress,
   createInitialRankProgress,
   getRankMeta,
-} from '../../../game/rankSystem.js';
+} from '../../../game/rankSystem';
 
 test('rank inventory matches the specified internal level counts', () => {
   assert.deepEqual(

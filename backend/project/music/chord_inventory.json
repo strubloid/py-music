@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "pitchClasses": ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
+  "flatAliases": {"C#": "Db", "D#": "Eb", "F#": "Gb", "G#": "Ab", "A#": "Bb"},
+  "qualities": {
+    "major": {"displayName": "Major", "shortName": "maj", "aliases": ["", "M", "maj"], "intervals": [0, 4, 7], "difficulty": 1, "enabledForEarTraining": true},
+    "minor": {"displayName": "Minor", "shortName": "min", "aliases": ["m", "min"], "intervals": [0, 3, 7], "difficulty": 1, "enabledForEarTraining": true},
+    "diminished": {"displayName": "Diminished", "shortName": "dim", "aliases": ["dim", "°"], "intervals": [0, 3, 6], "difficulty": 2, "enabledForEarTraining": true},
+    "augmented": {"displayName": "Augmented", "shortName": "aug", "aliases": ["aug", "+"], "intervals": [0, 4, 8], "difficulty": 2, "enabledForEarTraining": true},
+    "sus2": {"displayName": "Suspended second", "shortName": "sus2", "aliases": ["sus2"], "intervals": [0, 2, 7], "difficulty": 5, "enabledForEarTraining": true},
+    "sus4": {"displayName": "Suspended fourth", "shortName": "sus4", "aliases": ["sus4", "sus"], "intervals": [0, 5, 7], "difficulty": 5, "enabledForEarTraining": true},
+    "dominant7": {"displayName": "Dominant seventh", "shortName": "7", "aliases": ["7", "dom7"], "intervals": [0, 4, 7, 10], "difficulty": 6, "enabledForEarTraining": true},
+    "major7": {"displayName": "Major seventh", "shortName": "maj7", "aliases": ["maj7", "M7"], "intervals": [0, 4, 7, 11], "difficulty": 6, "enabledForEarTraining": true},
+    "minor7": {"displayName": "Minor seventh", "shortName": "m7", "aliases": ["m7", "min7"], "intervals": [0, 3, 7, 10], "difficulty": 6, "enabledForEarTraining": true},
+    "minorMajor7": {"displayName": "Minor-major seventh", "shortName": "mM7", "aliases": ["mM7", "minMaj7"], "intervals": [0, 3, 7, 11], "difficulty": 9, "enabledForEarTraining": true},
+    "halfDiminished7": {"displayName": "Half-diminished seventh", "shortName": "m7b5", "aliases": ["m7b5", "ø7"], "intervals": [0, 3, 6, 10], "difficulty": 8, "enabledForEarTraining": true},
+    "diminished7": {"displayName": "Fully diminished seventh", "shortName": "dim7", "aliases": ["dim7", "°7"], "intervals": [0, 3, 6, 9], "difficulty": 8, "enabledForEarTraining": true},
+    "major6": {"displayName": "Major sixth", "shortName": "6", "aliases": ["6", "maj6"], "intervals": [0, 4, 7, 9], "difficulty": 7, "enabledForEarTraining": true},
+    "minor6": {"displayName": "Minor sixth", "shortName": "m6", "aliases": ["m6", "min6"], "intervals": [0, 3, 7, 9], "difficulty": 7, "enabledForEarTraining": true},
+    "power5": {"displayName": "Power chord", "shortName": "5", "aliases": ["5", "power"], "intervals": [0, 7], "difficulty": 4, "enabledForEarTraining": true}
+  }
+}

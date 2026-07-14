@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import chordDataService from "../../services/ChordDataService.tsx";
+import chordDataService from "../../services/ChordDataService";
 import "../../components/common/ChordDiagram.scss";
 import "./ChordsPage.scss";
 

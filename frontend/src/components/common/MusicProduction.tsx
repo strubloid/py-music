@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useChordPanel } from '../../contexts/ChordPanelContext'
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
-import PDFExportService from '../../services/PDFExportService.tsx'
+import PDFExportService from '../../services/PDFExportService'
 import ChordDiagram from './ChordDiagram'
 import './MusicProduction.scss'
 

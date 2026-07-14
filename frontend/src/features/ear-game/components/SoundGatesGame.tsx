@@ -1,10 +1,10 @@
 import React from 'react';
 import { Pause, Settings2, Volume2, VolumeX } from 'lucide-react';
-import StreakBadge from '../../../components/game/StreakBadge.jsx';
-import EarGameHud from './EarGameHud.jsx';
-import GameArena from './GameArena.jsx';
-import AbilityDock from './AbilityDock.jsx';
-import TouchControls from './TouchControls.jsx';
+import StreakBadge from '../../../components/game/StreakBadge';
+import EarGameHud from './EarGameHud';
+import GameArena from './GameArena';
+import AbilityDock from './AbilityDock';
+import TouchControls from './TouchControls';
 import '../styles/sound-gates.scss';
 
 const SoundGatesGame = ({ game, challenge, result, hiddenAnswerIds, avatarState, playing, inputSignal, powers, focus, rankMeta, streak, instrument, instruments, audioState, highContrast, bossMode, onPlay, onSelect, onCommit, onCompare, onNext, onUsePower, onInstrumentChange, onAction, onOpenSettings, overlays }) => {

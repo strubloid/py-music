@@ -4,13 +4,13 @@ import assert from 'node:assert/strict';
 import {
   CHALLENGE_XP_MULTIPLIER,
   getModeBaseXp,
-} from '../../../game/rewardSystem.js';
+} from '../../../game/rewardSystem';
 import {
   QUEST_CATALOG,
   getQuestPeriodKey,
   getQuestProgress,
   selectQuestBoard,
-} from '../../../game/questSystem.js';
+} from '../../../game/questSystem';
 
 test('challenge base XP is exactly ten times equal-difficulty ear training XP', () => {
   assert.equal(CHALLENGE_XP_MULTIPLIER, 10);

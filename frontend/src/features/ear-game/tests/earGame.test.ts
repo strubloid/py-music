@@ -5,8 +5,8 @@ import {
   createInitialEarGameState,
   earGameReducer,
   isGameInputLocked,
-} from '../state/earGameReducer.js';
-import { actionForKeyboardEvent, shouldIgnoreGameShortcut } from '../hooks/gameInput.js';
+} from '../state/earGameReducer';
+import { actionForKeyboardEvent, shouldIgnoreGameShortcut } from '../hooks/gameInput';
 
 const challenge = {
   id: 'challenge-1',

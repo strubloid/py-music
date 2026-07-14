@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { LogOut, User, ChevronDown, Music, Flame } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useGameProgress } from '../../contexts/GameProgressContext.jsx';
+import { useGameProgress } from '../../contexts/GameProgressContext';
 import { getUserStreak } from '../../services/api';
 import './UserBadge.scss';
 

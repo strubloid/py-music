@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import chordDataService from '../../services/ChordDataService.tsx'
-import chordPreferenceManager from '../../services/ChordPreferenceManager.tsx'
+import chordDataService from '../../services/ChordDataService'
+import chordPreferenceManager from '../../services/ChordPreferenceManager'
 import './ChordVariationPicker.scss'
 
 const ChordVariationPicker = ({ chordName, currentVariationIndex, onSelectVariation, onClose }) => {

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { calculateRoundScore, updateMasteryWindow } from '../services/scoreMastery.js';
-import { normalizeEarChallenge } from '../services/challengeNormalizer.js';
+import { calculateRoundScore, updateMasteryWindow } from '../services/scoreMastery';
+import { normalizeEarChallenge } from '../services/challengeNormalizer';
 
 const raw = {
   id: 42,

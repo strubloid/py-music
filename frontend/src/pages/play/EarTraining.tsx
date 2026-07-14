@@ -6,20 +6,20 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useGameProgress } from '../../contexts/GameProgressContext.jsx';
-import { createEarTrainingAudioEngine, EAR_TRAINING_INSTRUMENTS } from '../../audio/earTrainingAudio.jsx';
+import { useGameProgress } from '../../contexts/GameProgressContext';
+import { createEarTrainingAudioEngine, EAR_TRAINING_INSTRUMENTS } from '../../audio/earTrainingAudio';
 import { completeDailyChallenge, getDailyChallenges, getUserStreak } from '../../services/api';
-import { getModeBaseXp, getPowerById } from '../../game/gameSystem.tsx';
-import SoundGatesGame from '../../features/ear-game/components/SoundGatesGame.jsx';
-import RewardOverlay from '../../features/ear-game/components/RewardOverlay.jsx';
-import { createGameInputHandler } from '../../features/ear-game/hooks/gameInput.js';
-import { normalizeEarChallenge } from '../../features/ear-game/services/challengeNormalizer.js';
-import { calculateRoundScore, updateMasteryWindow } from '../../features/ear-game/services/scoreMastery.js';
+import { getModeBaseXp, getPowerById } from '../../game/gameSystem';
+import SoundGatesGame from '../../features/ear-game/components/SoundGatesGame';
+import RewardOverlay from '../../features/ear-game/components/RewardOverlay';
+import { createGameInputHandler } from '../../features/ear-game/hooks/gameInput';
+import { normalizeEarChallenge } from '../../features/ear-game/services/challengeNormalizer';
+import { calculateRoundScore, updateMasteryWindow } from '../../features/ear-game/services/scoreMastery';
 import {
   createInitialEarGameState,
   earGameReducer,
   isGameInputLocked,
-} from '../../features/ear-game/state/earGameReducer.js';
+} from '../../features/ear-game/state/earGameReducer';
 import './EarTraining.scss';
 
 const FETCH_LIMIT = 24;

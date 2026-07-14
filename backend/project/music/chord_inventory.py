@@ -6,7 +6,7 @@ import json
 import random
 from pathlib import Path
 
-_INVENTORY_PATH = Path(__file__).resolve().parents[3] / 'data' / 'chord_inventory.json'
+_INVENTORY_PATH = Path(__file__).with_name('chord_inventory.json')
 with _INVENTORY_PATH.open(encoding='utf-8') as inventory_file:
     _INVENTORY = json.load(inventory_file)
 

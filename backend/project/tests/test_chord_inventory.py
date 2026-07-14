@@ -1,5 +1,7 @@
 import unittest
+from pathlib import Path
 
+import backend.project.music.chord_inventory as chord_inventory
 from backend.project.music.chord_inventory import (
     CHORD_QUALITIES,
     PITCH_CLASSES,
@@ -10,6 +12,11 @@ from backend.project.music.chord_inventory import (
 
 
 class ChordInventoryTest(unittest.TestCase):
+    def test_inventory_is_bundled_with_its_module_not_persistent_volume(self):
+        expected_path = Path(chord_inventory.__file__).with_name('chord_inventory.json')
+        self.assertEqual(chord_inventory._INVENTORY_PATH, expected_path)
+        self.assertTrue(expected_path.is_file())
+
     def test_required_qualities_are_enabled_and_cover_every_root(self):
         required = {
             'major', 'minor', 'diminished', 'augmented', 'sus2', 'sus4',

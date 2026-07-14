@@ -1,14 +1,14 @@
 import React from 'react';
 import { Gauge, Play, RotateCcw } from 'lucide-react';
-import AnswerGate from './AnswerGate.jsx';
-import NoteAvatar from './NoteAvatar.jsx';
-import ResultPresentation from './ResultPresentation.jsx';
-import BossLayer from './BossLayer.jsx';
-import PuzzleLayer from './PuzzleLayer.jsx';
-import PinballLayer from './PinballLayer.jsx';
-import PartyLayer from './PartyLayer.jsx';
-import HologramLayer from './HologramLayer.jsx';
-import SideScrollerLayer from './SideScrollerLayer.jsx';
+import AnswerGate from './AnswerGate';
+import NoteAvatar from './NoteAvatar';
+import ResultPresentation from './ResultPresentation';
+import BossLayer from './BossLayer';
+import PuzzleLayer from './PuzzleLayer';
+import PinballLayer from './PinballLayer';
+import PartyLayer from './PartyLayer';
+import HologramLayer from './HologramLayer';
+import SideScrollerLayer from './SideScrollerLayer';
 
 const GameArena = ({
   game,

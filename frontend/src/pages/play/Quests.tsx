@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { BatteryCharging, Check, Clock3, Flame, Sparkles, Target, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useGameProgress } from '../../contexts/GameProgressContext.jsx';
+import { useGameProgress } from '../../contexts/GameProgressContext';
 import {
   getQuestPeriodKey,
   getQuestProgress,
   selectQuestBoard,
-} from '../../game/questSystem.js';
+} from '../../game/questSystem';
 import './Quests.scss';
 
 const CADENCES = [
