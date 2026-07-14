@@ -1,7 +1,7 @@
 import React from 'react'
 import { Music } from 'lucide-react'
 import { useChordPanel } from '../../contexts/ChordPanelContext'
-import './ChordDisplaySwitch.css'
+import './ChordDisplaySwitch.scss'
 
 const ChordsToggle = ({ className = '' }) => {
   const { showChords, toggleChords } = useChordPanel();

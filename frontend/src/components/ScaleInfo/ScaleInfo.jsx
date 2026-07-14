@@ -4,7 +4,7 @@ import Card from '../common/Card'
 import ChordDiagram from '../common/ChordDiagram'
 import chordDataService from '../../services/ChordDataService.tsx'
 import chordPreferenceManager from '../../services/ChordPreferenceManager.tsx'
-import './ScaleInfo.css'
+import './ScaleInfo.scss'
 
 const ScaleInfo = ({ scaleData }) => {
   const { scale_name, notes, scale_degrees, chords } = scaleData

@@ -4,7 +4,7 @@ import { Music, Piano, Guitar, Target, Zap, Maximize2 } from "lucide-react";
 import KeySelector from "../../components/KeySelector/KeySelector";
 import PianoKeyboard from "../../components/PianoKeyboard/PianoKeyboard";
 import GuitarFretboard from "../../components/GuitarFretboard/GuitarFretboard";
-import "./ScalesPage.css";
+import "./ScalesPage.scss";
 
 const STORAGE_KEY = "strubloid:scales:visited";
 const RANGE_STORAGE_KEY = "strubloid:scales:range";

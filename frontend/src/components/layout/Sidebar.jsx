@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import UserBadge from '../auth/UserBadge'
 import { useAuth } from '../../contexts/AuthContext'
-import './Sidebar.css'
+import './Sidebar.scss'
 
 const NEW_SONGS_KEY = 'newSongsCount'
 

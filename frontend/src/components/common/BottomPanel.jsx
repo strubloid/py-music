@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 
 import ProgressionBuilder from './ProgressionBuilder'
 import MusicProduction from './MusicProduction'
-import './BottomPanel.css'
+import './BottomPanel.scss'
 
 const BottomPanel = ({ scaleData }) => {
   const [activePanel, setActivePanel] = useState(null)

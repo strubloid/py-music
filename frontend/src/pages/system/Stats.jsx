@@ -1,7 +1,7 @@
 import React from 'react';
 import { BarChart2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import './Stats.css';
+import './Stats.scss';
 
 const Stats = () => {
   const { user } = useAuth();

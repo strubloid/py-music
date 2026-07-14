@@ -2,7 +2,7 @@ import React from 'react'
 import { ArrowRight } from 'lucide-react'
 import { useChordPanel } from '../../contexts/ChordPanelContext'
 import ChordDiagram from '../common/ChordDiagram'
-import './SecondaryDominants.css'
+import './SecondaryDominants.scss'
 
 const SecondaryDominants = ({ chordSevenths, keyName }) => {
   const { showChords } = useChordPanel()

@@ -7,7 +7,7 @@ import LyricsSection from '../../components/common/LyricsSection';
 import { useAuth } from '../../contexts/AuthContext';
 import { useChordPanel } from '../../contexts/ChordPanelContext';
 import { createProgression } from '../../services/api';
-import './CreateProgressionsPage.css';
+import './CreateProgressionsPage.scss';
 
 const CreateProgressionsPage = () => {
   const { isLoggedIn, isGuest, promptLogin } = useAuth();

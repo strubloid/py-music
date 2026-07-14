@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import './PracticeTip.css';
+import './PracticeTip.scss';
 
 const PracticeTip = ({ title = "🎯 Practice Tip", children, initialExpanded = false }) => {
   const [isExpanded, setIsExpanded] = useState(initialExpanded);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Flame } from 'lucide-react';
-import './StreakBadge.css';
+import './StreakBadge.scss';
 
 const StreakBadge = ({ streak = 0, className = '', label }) => {
   const text = label || `${streak} day streak`;

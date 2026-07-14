@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useChordPanel } from '../../contexts/ChordPanelContext'
-import './LyricsSection.css'
+import './LyricsSection.scss'
 
 const LYRICS_KEY = 'create-page-lyrics'
 

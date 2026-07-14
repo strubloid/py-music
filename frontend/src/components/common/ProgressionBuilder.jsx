@@ -3,7 +3,7 @@ import { useChordPanel } from '../../contexts/ChordPanelContext'
 import ChordTooltip from './ChordTooltip'
 import ChordDiagram from './ChordDiagram'
 import InlineChordDisplay from './InlineChordDisplay'
-import './ProgressionBuilder.css'
+import './ProgressionBuilder.scss'
 
 const ProgressionBuilder = ({ scaleData, saveName = '' }) => {
   const { 

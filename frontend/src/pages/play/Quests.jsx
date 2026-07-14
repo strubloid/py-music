@@ -7,7 +7,7 @@ import {
   getQuestProgress,
   selectQuestBoard,
 } from '../../game/questSystem.js';
-import './Quests.css';
+import './Quests.scss';
 
 const CADENCES = [
   { id: 'daily', label: 'Daily', icon: Clock3 },

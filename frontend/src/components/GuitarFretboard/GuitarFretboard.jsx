@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import Card from "../common/Card";
 import { MAX_FRETS, MIN_FRET_COUNT } from "../../config/musicConfig.tsx";
-import "./GuitarFretboard.css";
+import "./GuitarFretboard.scss";
 
 const GuitarFretboard = ({ fretboardData, fretCount: fretCountProp = 12 }) => {
     const scrollRef = useRef(null);

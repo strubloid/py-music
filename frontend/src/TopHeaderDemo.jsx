@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import TopHeader from './components/common/TopHeader'
-import './App.css'
+import './App.scss'
 
 // Demo component showing both floating and block modes
 const TopHeaderDemo = () => {

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import chordDataService from "../../services/ChordDataService.tsx";
-import "../../components/common/ChordDiagram.css";
-import "./ChordsPage.css";
+import "../../components/common/ChordDiagram.scss";
+import "./ChordsPage.scss";
 
 // Root notes with sharps
 const ROOT_NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];

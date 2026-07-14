@@ -1,7 +1,7 @@
 import React from 'react';
 import { Settings, User, Mail, Shield, Music } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import './Settings.css';
+import './Settings.scss';
 
 const INSTRUMENTS = [
   { id: 'guitar', label: 'Guitar' },

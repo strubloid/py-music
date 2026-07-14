@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Mail, Lock, User, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import './LoginModal.css';
+import './LoginModal.scss';
 
 const LoginModal = () => {
   const { user, showLoginModal, loading: authLoading, login, register, requestPasswordReset, continueAsGuest, closeLoginModal, loginReason, isLoggedIn } = useAuth();

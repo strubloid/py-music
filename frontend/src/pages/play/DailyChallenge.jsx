@@ -12,7 +12,7 @@ import {
   getUserStreak,
 } from '../../services/api';
 import { calculateXpPreview, getModeBaseXp, getPowerById } from '../../game/gameSystem.tsx';
-import './DailyChallenge.css';
+import './DailyChallenge.scss';
 
 const INITIAL_LIMIT = 1;
 const RANDOM_FETCH_LIMIT = 10;

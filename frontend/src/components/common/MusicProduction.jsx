@@ -4,7 +4,7 @@ import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
 import PDFExportService from '../../services/PDFExportService.tsx'
 import ChordDiagram from './ChordDiagram'
-import './MusicProduction.css'
+import './MusicProduction.scss'
 
 // Cache key for storing lyrics data
 const LYRICS_CACHE_KEY = 'music-production-lyrics'

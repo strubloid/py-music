@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import './TopHeader.css'
+import './TopHeader.scss'
 
 const TopHeader = () => {
   const [activePanel, setActivePanel] = useState(null)

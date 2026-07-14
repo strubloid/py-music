@@ -13,7 +13,7 @@ import Quests from './pages/play/Quests'
 import Stats from './pages/system/Stats'
 import Settings from './pages/system/Settings'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage'
-import './App.css'
+import './App.scss'
 
 const App = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)

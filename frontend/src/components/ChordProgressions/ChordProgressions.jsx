@@ -4,7 +4,7 @@ import { useChordPanel } from '../../contexts/ChordPanelContext'
 import PracticeTip from '../common/PracticeTip'
 import ChordTooltip from '../common/ChordTooltip'
 import ChordDiagram from '../common/ChordDiagram'
-import './ChordProgressions.css'
+import './ChordProgressions.scss'
 
 const ChordProgressions = ({ progressions, keyName }) => {
   const { showChords } = useChordPanel()

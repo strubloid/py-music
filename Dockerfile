@@ -18,7 +18,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy Python backend code
 COPY backend/ ./backend/
-COPY data/ ./data/
 COPY main.py ./
 
 # Copy built frontend

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Zap, ListMusic, BookOpen, ArrowRight, Sparkles, Flame, Music2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useGameProgress } from '../contexts/GameProgressContext.jsx';
-import './Dashboard.css';
+import './Dashboard.scss';
 
 const Dashboard = () => {
   const { user, isLoggedIn, promptLogin } = useAuth();

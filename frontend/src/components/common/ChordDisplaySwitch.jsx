@@ -1,7 +1,7 @@
 import React from 'react';
 import { Guitar, Piano } from 'lucide-react';
 import { useChordDisplay } from '../../contexts/ChordDisplayContext';
-import './ChordDisplaySwitch.css';
+import './ChordDisplaySwitch.scss';
 
 const ChordDisplaySwitch = ({ className = '' }) => {
   const { displayMode, toggleDisplayMode } = useChordDisplay();

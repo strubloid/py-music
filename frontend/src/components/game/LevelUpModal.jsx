@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sparkles, Trophy } from 'lucide-react';
-import './LevelUpModal.css';
+import './LevelUpModal.scss';
 
 const LevelUpModal = ({ levelUpState, onClose }) => {
   if (!levelUpState) return null;

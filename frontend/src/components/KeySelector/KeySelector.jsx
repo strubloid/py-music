@@ -1,6 +1,6 @@
 import React from 'react'
 import Button from '../common/Button'
-import './KeySelector.css'
+import './KeySelector.scss'
 
 const KeySelector = ({ selectedKey, onKeyChange, loading, selectedInterval, onIntervalChange, availableIntervals }) => {
   const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']

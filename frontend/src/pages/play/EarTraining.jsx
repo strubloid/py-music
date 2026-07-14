@@ -20,7 +20,7 @@ import {
   earGameReducer,
   isGameInputLocked,
 } from '../../features/ear-game/state/earGameReducer.js';
-import './EarTraining.css';
+import './EarTraining.scss';
 
 const FETCH_LIMIT = 24;
 const RUN_LENGTH = 5;

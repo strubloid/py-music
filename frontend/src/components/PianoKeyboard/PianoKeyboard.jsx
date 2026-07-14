@@ -1,5 +1,5 @@
 import React from 'react'
-import './PianoKeyboard.css'
+import './PianoKeyboard.scss'
 
 // Helper: given a natural key name (C, D, E, F, G, A, B) and a chromatic position
 // offset (1 semitone up = the black key between this natural and the next),

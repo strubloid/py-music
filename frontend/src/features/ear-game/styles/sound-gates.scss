@@ -1,10 +1,10 @@
-@import './arena.css';
-@import './gates.css';
-@import './mascot.css';
-@import './feedback.css';
-@import './abilities.css';
-@import './overlays.css';
-@import './special-modes.css';
+@import './arena.scss';
+@import './gates.scss';
+@import './mascot.scss';
+@import './feedback.scss';
+@import './abilities.scss';
+@import './overlays.scss';
+@import './special-modes.scss';
 
 .sound-gates-game {
   --sg-void: #050817; --sg-deep: #090d28; --sg-navy: #10163d; --sg-indigo: #171b50; --sg-panel: rgba(17,22,58,.88); --sg-panel-raised: rgba(25,31,76,.94); --sg-gold: #ffbd2e; --sg-gold-light: #ffd96a; --sg-amber: #ff9d1f; --sg-orange: #ff7417; --sg-text: #f7f8ff; --sg-text-soft: #c3c9e5; --sg-text-muted: #7d86b0; --sg-cyan: #49c8ef; --sg-magenta: #dc5dff; --sg-success: #92e84c; --sg-danger: #ff4f60; --sg-border: rgba(255,189,46,.34); --sg-border-hot: rgba(255,205,82,.9); --sg-shadow-panel: 0 24px 80px rgba(0,0,0,.44); --sg-ease-spring: cubic-bezier(.22,1,.36,1);

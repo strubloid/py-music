@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { createProgression, deleteProgression, getProgressions, updateProgression } from '../../services/api'
-import './MySongsPage.css'
+import './MySongsPage.scss'
 
 const GUEST_SONGS_KEY = 'guestProgressions'
 const NEW_SONGS_KEY = 'newSongsCount'

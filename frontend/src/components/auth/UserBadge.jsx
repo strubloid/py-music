@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGameProgress } from '../../contexts/GameProgressContext.jsx';
 import { getUserStreak } from '../../services/api';
-import './UserBadge.css';
+import './UserBadge.scss';
 
 const XP_PER_LEVEL = 500;
 const GUEST_SONGS_KEY = 'guestSongs';

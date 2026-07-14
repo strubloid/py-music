@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useChordDisplay } from '../../contexts/ChordDisplayContext';
 import { useChordPanel } from '../../contexts/ChordPanelContext';
 import chordDataService from '../../services/ChordDataService.tsx';
-import './ChordTooltip.css';
+import './ChordTooltip.scss';
 
 const ChordTooltip = ({ 
   chord, 

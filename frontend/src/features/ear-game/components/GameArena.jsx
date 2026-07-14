@@ -43,7 +43,14 @@ const GameArena = ({
       <div className="arena-backdrop" aria-hidden="true"><div className="arena-backdrop__stars" /><div className="arena-backdrop__city" /></div>
       <div className="arena-atmosphere" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /></div>
       <div className="arena-vignette" aria-hidden="true" />
-      <SideScrollerLayer lane={game.avatarLane} laneCount={gateCount} stageStep={stageStep} />
+      <SideScrollerLayer
+        lane={game.avatarLane}
+        laneCount={gateCount}
+        stageStep={stageStep}
+        portalLabel={game.phase === 'ready' ? 'Start stage' : ['showing-correct', 'showing-incorrect'].includes(game.phase) ? 'Enter next stage' : stageStep === game.challengeCount ? 'Reward vault locked' : 'Stage portal locked'}
+        portalDisabled={!['ready', 'showing-correct', 'showing-incorrect'].includes(game.phase)}
+        onPortalActivate={game.phase === 'ready' ? onPlay : onNext}
+      />
       <div className="arena-stage-map" aria-label={`Stage progress: sector ${stageStep} of ${game.challengeCount}`}>
         <span>STAGE RUN</span>
         <ol>{Array.from({ length: game.challengeCount }, (_, index) => <li key={index} className={index < stageStep - 1 ? 'arena-stage-map__sector--cleared' : index === stageStep - 1 ? 'arena-stage-map__sector--active' : ''}><b>{index + 1}</b><small>{index === game.challengeCount - 1 ? 'VAULT' : `SECTOR ${index + 1}`}</small></li>)}</ol>

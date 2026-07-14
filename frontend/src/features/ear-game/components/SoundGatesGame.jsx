@@ -5,7 +5,7 @@ import EarGameHud from './EarGameHud.jsx';
 import GameArena from './GameArena.jsx';
 import AbilityDock from './AbilityDock.jsx';
 import TouchControls from './TouchControls.jsx';
-import '../styles/sound-gates.css';
+import '../styles/sound-gates.scss';
 
 const SoundGatesGame = ({ game, challenge, result, hiddenAnswerIds, avatarState, playing, inputSignal, powers, focus, rankMeta, streak, instrument, instruments, audioState, highContrast, bossMode, onPlay, onSelect, onCommit, onCompare, onNext, onUsePower, onInstrumentChange, onAction, onOpenSettings, overlays }) => {
   const comboTier = game.combo >= 30 ? 4 : game.combo >= 20 ? 3 : game.combo >= 10 ? 2 : game.combo >= 5 ? 1 : 0;
