@@ -10,6 +10,13 @@ export default defineConfig({
     include: '**/*.{jsx,js}',
   })],
   base: '/', // Ensure correct base path for deployment
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern',
+      },
+    },
+  },
   server: {
     port: 3000,
     host: true, // Allow external connections

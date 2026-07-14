@@ -180,5 +180,3 @@ export const ChordPanelProvider = ({ children }) => {
     </ChordPanelContext.Provider>
   );
 };
-
-export default ChordPanelContext;
