@@ -79,38 +79,6 @@ export const loginSharedUser = async (page: Page) => {
 
   // Wait for login to settle in the UI
   await expect(page.locator('.badge-trigger')).toBeVisible();
-
-  // Award XP via page-context fetch (handles CSRF natively).
-  await page.evaluate(async (amount) => {
-    const g = (n: string) => {
-      const m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)'));
-      return m ? decodeURIComponent(m[2]) : null;
-    };
-    const csrf = g('csrf_token');
-    await fetch('/api/me/xp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(csrf ? { 'X-CSRFToken': csrf } : {}) },
-      body: JSON.stringify({ amount }),
-    });
-  }, 250);
-
-  // Reload to pick up level in React state
-  await page.goto('/');
-  await page.waitForLoadState('networkidle');
-
-  // Dismiss the level-up modal overlay that may appear after gaining XP
-  const keepBtn = page.getByRole('button', { name: /keep training/i });
-  try {
-    await keepBtn.waitFor({ state: 'visible', timeout: 5000 });
-    await keepBtn.click();
-    // Reload again so lastLevelSeen is persisted and modal won't reappear
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
-  } catch {
-    // No level-up modal appeared — that's fine
-  }
-
-  await expect(page.locator('.badge-trigger')).toBeVisible();
   return SHARED_USER;
 };
 
@@ -159,16 +127,8 @@ export const captureChallengeResponse = async (page: Page, path: string, categor
 
 export const answerCapturedChallenge = async (page: Page, challenge: any) => {
   const correctOption = challenge.options[challenge.correct_index];
-  const btn = page.getByRole('button', { name: new RegExp(`^${escapeForRegex(correctOption)}$`) });
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      await btn.click({ timeout: 5000 });
-      return correctOption;
-    } catch (e) {
-      if (attempt === 2) throw e;
-      await page.waitForTimeout(500);
-    }
-  }
+  const btn = page.getByRole('radio', { name: new RegExp(`^${escapeForRegex(correctOption)}$`) });
+  await btn.click({ timeout: 5000 });
   return correctOption;
 };
 

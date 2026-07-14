@@ -3,13 +3,15 @@ import { Zap, RefreshCw, CheckCircle, Loader, Flame, Target, Trophy } from 'luci
 import { useAuth } from '../../contexts/AuthContext';
 import { useGameProgress } from '../../contexts/GameProgressContext.jsx';
 import StreakBadge from '../../components/game/StreakBadge.jsx';
+import NoteAvatar from '../../features/ear-game/components/NoteAvatar.jsx';
+import { actionForKeyboardEvent, shouldIgnoreGameShortcut } from '../../features/ear-game/hooks/gameInput.js';
 import {
   getDailyChallenges,
   completeDailyChallenge,
   seedChallenges,
   getUserStreak,
 } from '../../services/api';
-import { calculateChallengeBonuses, calculateQuestionXp, calculateXpPreview, getPowerById } from '../../game/gameSystem.tsx';
+import { calculateXpPreview, getModeBaseXp, getPowerById } from '../../game/gameSystem.tsx';
 import './DailyChallenge.css';
 
 const INITIAL_LIMIT = 1;
@@ -51,12 +53,14 @@ const DailyChallenge = () => {
   const [dailyBonusClaimed, setDailyBonusClaimed] = useState(false);
   const [xpBreakdown, setXpBreakdown] = useState(null);
   const [feedbackBurst, setFeedbackBurst] = useState(null);
+  const [selectedOptionIndex, setSelectedOptionIndex] = useState(0);
   const seenChallengeIdsRef = useRef([]);
   const advanceTimerRef = useRef(null);
   const questionStartedAtRef = useRef(Date.now());
+  const answerCommitRef = useRef(false);
   const sessionStatsRef = useRef({ answered: 0, correct: 0, totalXp: 0, powersUsed: [] });
   const burstTimerRef = useRef(null);
-  const { unlockedPowers, consumeFocus, recordChallengeResult, levelMeta, progressState } = useGameProgress();
+  const { unlockedPowers, consumeFocus, recordChallengeResult, rankMeta, progressState } = useGameProgress();
 
   const showFeedbackBurst = useCallback((label, tone = 'positive') => {
     if (burstTimerRef.current) clearTimeout(burstTimerRef.current);
@@ -162,6 +166,8 @@ const DailyChallenge = () => {
     questionStartedAtRef.current = Date.now();
     setHiddenOptionIndexes([]);
     setQuestionPowersUsed([]);
+    setSelectedOptionIndex(0);
+    answerCommitRef.current = false;
   }, [activeIndex]);
 
   useEffect(() => () => {
@@ -170,26 +176,21 @@ const DailyChallenge = () => {
 
   const activeChallenge = challenges[activeIndex] || null;
   const activeResult = activeChallenge ? results[activeChallenge.id] : null;
-  const xpPreview = calculateXpPreview({ baseXp: activeChallenge?.xp_reward || 0, replayCount: 0, powerIds: questionPowersUsed });
+  const challengeBaseXp = activeChallenge
+    ? getModeBaseXp({ mode: 'challenge', difficulty: activeChallenge.difficulty })
+    : 0;
+  const xpPreview = calculateXpPreview({ baseXp: challengeBaseXp, replayCount: 0, powerIds: [] });
 
   const handleAnswer = async (challengeId, selectedIdx, correctIdx) => {
-    if (completing[challengeId] || results[challengeId]) return;
+    if (completing[challengeId] || results[challengeId] || answerCommitRef.current) return;
+    answerCommitRef.current = true;
 
     const isCorrect = selectedIdx === correctIdx;
-    const isFastAnswer = Date.now() - questionStartedAtRef.current <= 7000;
-    const penalties = (questionPowersUsed.includes('remove_one_option') ? 10 : 0);
-    const comboBonus = combo >= 10 ? 5 : combo >= 5 ? 3 : combo >= 2 ? 1 : 0;
-    const bonusXp = (isCorrect ? 5 : 0) + (isCorrect && isFastAnswer ? 3 : 0) + (isCorrect ? comboBonus : 0);
-    const awardedXp = calculateQuestionXp({
-      baseXp: activeChallenge?.xp_reward || 10,
-      isCorrect,
-      isFirstTry: true,
-      isFastAnswer,
-      combo,
-      penalties,
-    });
+    const penalties = 0;
+    const bonusXp = 0;
+    const awardedXp = isCorrect ? challengeBaseXp : 0;
     setXpBreakdown({
-      baseXp: activeChallenge?.xp_reward || 10,
+      baseXp: challengeBaseXp,
       penalties,
       bonusXp,
       finalXp: isCorrect ? awardedXp : 0,
@@ -218,14 +219,8 @@ const DailyChallenge = () => {
           setStreak(streakRes.data.streak);
           setCompletedToday(streakRes.data.completed_today);
 
-          const bonuses = !dailyBonusClaimed
-            ? calculateChallengeBonuses({ answeredCorrectly: 1, totalQuestions: 1, maxCombo: nextCombo, isDaily: true })
-            : { completionXp: 0, perfectXp: 0, dailyXp: 0, comboXp: 0 };
-          const streakBonus = !dailyBonusClaimed && streakRes.data.streak >= 3 ? 20 : 0;
-          const bonusTotal = bonuses.completionXp + bonuses.perfectXp + bonuses.dailyXp + streakBonus;
-          const totalAwardXp = awardedXp + bonusTotal;
-
-          const res = await completeDailyChallenge(challengeId, { xp_award: totalAwardXp });
+          const res = await completeDailyChallenge(challengeId, { mode: 'challenge' });
+          const totalAwardXp = res.data.xp_awarded || 0;
           rememberCompletedChallengeId(challengeId);
           const isAuthenticatedReward = res.data.authenticated !== false;
 
@@ -354,6 +349,7 @@ const DailyChallenge = () => {
       }
     } finally {
       setCompleting((prev) => ({ ...prev, [challengeId]: false }));
+      answerCommitRef.current = false;
     }
   };
 
@@ -374,6 +370,44 @@ const DailyChallenge = () => {
       showFeedbackBurst(`-${power.focusCost} focus`, 'neutral');
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (!activeChallenge || activeResult || shouldIgnoreGameShortcut(event)) return;
+      const action = actionForKeyboardEvent(event);
+      if (!action) return;
+      const visible = activeChallenge.options
+        .map((_, index) => index)
+        .filter((index) => !hiddenOptionIndexes.includes(index));
+      if (!visible.length) return;
+
+      if (action === 'move-left' || action === 'move-right') {
+        event.preventDefault();
+        const currentPosition = Math.max(0, visible.indexOf(selectedOptionIndex));
+        const direction = action === 'move-left' ? -1 : 1;
+        setSelectedOptionIndex(visible[(currentPosition + direction + visible.length) % visible.length]);
+        return;
+      }
+      if (action.startsWith('lane-')) {
+        const optionIndex = visible[Number(action.slice(5)) - 1];
+        if (optionIndex !== undefined) {
+          event.preventDefault();
+          setSelectedOptionIndex(optionIndex);
+          handleAnswer(activeChallenge.id, optionIndex, activeChallenge.correct_index);
+        }
+        return;
+      }
+      if (['jump', 'confirm'].includes(action)) {
+        event.preventDefault();
+        handleAnswer(activeChallenge.id, selectedOptionIndex, activeChallenge.correct_index);
+      } else if (action === 'hint') {
+        event.preventDefault();
+        usePower('remove_one_option');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeChallenge, activeResult, hiddenOptionIndexes, selectedOptionIndex]);
 
   const handleLoadMore = async () => {
     if (loadingMore) return;
@@ -515,7 +549,7 @@ const DailyChallenge = () => {
         {error && <div className="daily-error">{error}</div>}
 
         <div className="daily-run-header">
-          <div className="daily-run-stat"><Trophy size={16} /><span>Title</span><strong>{levelMeta.title}</strong></div>
+          <div className="daily-run-stat"><Trophy size={16} /><span>{rankMeta.name}</span><strong>Level {rankMeta.level} of {rankMeta.levels}</strong></div>
           <div className="daily-run-stat combo"><Flame size={16} /><span>Combo</span><strong>{combo}x</strong></div>
           <div className="daily-run-stat"><Target size={16} /><span>Focus</span><strong>{progressState.focusPoints}</strong></div>
           <div className="daily-score-rail" aria-label="Current reward score rail">
@@ -590,7 +624,16 @@ const DailyChallenge = () => {
                 ))}
               </div>
 
-              <div className="challenge-options">
+              <div className="challenge-controls-hint">A / D or arrows move · W / Space / Enter commit · 1–6 jump to a gate · H uses a hint</div>
+              <div className="challenge-gate-world" style={{ '--gate-count': activeChallenge.options.length, '--selected-gate': selectedOptionIndex }}>
+                <div className="challenge-nomi-track" aria-hidden="true">
+                  <NoteAvatar
+                    lane={selectedOptionIndex}
+                    laneCount={activeChallenge.options.length}
+                    state={activeResult ? (activeResult.correct ? 'celebrating' : 'wobble') : 'idle'}
+                  />
+                </div>
+              <div className="challenge-options" role="radiogroup" aria-label="Challenge answer gates">
                 {activeChallenge.options.map((opt, i) => {
                   if (hiddenOptionIndexes.includes(i)) return null;
                   let optClass = 'challenge-option';
@@ -600,16 +643,23 @@ const DailyChallenge = () => {
                   }
                   return (
                     <button
-                      key={i}
+                      key={`${activeChallenge.id}-${i}-${opt}`}
                       type="button"
+                      aria-label={String(opt)}
                       className={optClass}
+                      role="radio"
+                      aria-checked={selectedOptionIndex === i}
+                      onPointerEnter={() => setSelectedOptionIndex(i)}
+                      onFocus={() => setSelectedOptionIndex(i)}
                       onClick={() => handleAnswer(activeChallenge.id, i, activeChallenge.correct_index)}
                     >
+                      <span className="challenge-gate-key">{i + 1}</span>
                       {opt}
                       {activeResult && i === activeChallenge.correct_index && <CheckCircle size={16} className="opt-correct-icon" />}
                     </button>
                   );
                 })}
+              </div>
               </div>
 
               {activeResult && (

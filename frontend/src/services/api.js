@@ -75,6 +75,9 @@ export const deleteFavorite = (id) =>
 export const awardXp = (amount) =>
   api.post('/api/me/xp', { amount });
 
+export const claimQuestReward = (questId) =>
+  api.post('/api/me/quest-claim', { quest_id: questId });
+
 // ─── Daily Challenges ─────────────────────────────────────────────────────────
 
 export const getDailyChallenges = (limit = 10, offset = 0, options = {}) => {

@@ -638,6 +638,24 @@
   }
 }
 
+.challenge-controls-hint { margin: 18px 0 8px; color: #9fa99f; font-size: .74rem; font-weight: 700; text-align: center; }
+.challenge-gate-world { position: relative; min-height: 230px; padding-top: 104px; overflow: hidden; border: 1px solid rgba(210,255,67,.14); border-radius: 20px; background: repeating-linear-gradient(0deg,transparent 0 27px,rgba(210,255,67,.065) 28px 29px),linear-gradient(180deg,rgba(210,255,67,.035),rgba(5,10,7,.55)); }
+.challenge-nomi-track { position: absolute; inset: 7px 0 auto; height: 100px; }
+.challenge-gate-world .nomi { --runner-accent:#d2ff43; position:absolute; z-index:3; top:2px; left:var(--nomi-lane); width:67px; height:92px; transform:translateX(-50%); transition:left .28s cubic-bezier(.2,.8,.2,1); filter:drop-shadow(0 10px 10px rgba(0,0,0,.36)); pointer-events:none; }
+.challenge-gate-world .nomi svg { width:100%; height:100%; overflow:visible; }
+.challenge-gate-world .nomi-body { fill:#d2ff43; stroke:#f3ffc8; stroke-width:1.5; }
+.challenge-gate-world .nomi-stem,.challenge-gate-world .nomi-flag,.challenge-gate-world .nomi-leg,.challenge-gate-world .nomi-mouth { fill:none; stroke:#d2ff43; stroke-width:6; stroke-linecap:round; stroke-linejoin:round; }
+.challenge-gate-world .nomi-mouth { stroke:#19331d; stroke-width:2.5; }
+.challenge-gate-world .nomi-eye { fill:#13251a; }
+.challenge-gate-world .nomi--celebrating { animation:daily-nomi-jump .65s cubic-bezier(.2,.7,.3,1); }
+.challenge-gate-world .nomi--wobble { animation:daily-nomi-wobble .48s ease-in-out; }
+.challenge-gate-world .challenge-options { grid-template-columns:repeat(var(--gate-count),minmax(0,1fr)); margin:0; padding:0 10px 10px; }
+.challenge-gate-world .challenge-option { position:relative; min-height:100px; border-top:5px solid #465048; border-radius:10px 10px 16px 16px; background:linear-gradient(180deg,#202822,#121813); }
+.challenge-gate-world .challenge-option[aria-checked="true"] { border-color:#d2ff43; color:#efffc8; box-shadow:0 0 0 2px rgba(210,255,67,.17),0 0 30px rgba(210,255,67,.1); transform:translateY(-5px); }
+.challenge-gate-key { position:absolute; top:7px; left:8px; display:grid; place-items:center; width:22px; height:22px; border:1px solid #4a554c; border-radius:6px; color:#aab4aa; font-size:.68rem; }
+@keyframes daily-nomi-jump { 50% { transform:translate(-50%,-18px) rotate(-4deg); } }
+@keyframes daily-nomi-wobble { 25% { transform:translateX(-58%) rotate(-6deg); } 75% { transform:translateX(-42%) rotate(6deg); } }
+
 @media (prefers-reduced-motion: reduce) {
   .daily-score-track span,
   .challenge-option,
@@ -650,3 +668,21 @@
     transform: none;
   }
 }
+
+/* DESIGN.md: the challenge arena shares the app's indigo glass and gold voice. */
+.challenge-controls-hint { color: #9ca3af; }
+.challenge-gate-world {
+  border-color: rgba(251, 191, 36, .2);
+  background: repeating-linear-gradient(0deg, transparent 0 27px, rgba(251,191,36,.055) 28px 29px), linear-gradient(180deg, rgba(55,48,163,.24), rgba(5,8,22,.72));
+}
+.challenge-gate-world .nomi { --runner-accent: #fbbf24; }
+.challenge-gate-world .nomi-body { fill: #fbbf24; stroke: #fde68a; }
+.challenge-gate-world .nomi-stem,
+.challenge-gate-world .nomi-flag,
+.challenge-gate-world .nomi-leg,
+.challenge-gate-world .nomi-mouth { stroke: #fbbf24; }
+.challenge-gate-world .nomi-mouth { stroke: #3b2a08; }
+.challenge-gate-world .nomi-eye { fill: #1f1708; }
+.challenge-gate-world .challenge-option { border-top-color: rgba(255,255,255,.18); background: linear-gradient(180deg, rgba(49,46,129,.46), rgba(5,8,22,.9)); }
+.challenge-gate-world .challenge-option[aria-checked="true"] { border-color: #fbbf24; color: #fff; box-shadow: 0 0 0 2px rgba(251,191,36,.16), 0 0 26px rgba(251,191,36,.09); }
+.challenge-gate-key { border-color: rgba(255,255,255,.16); color: #9ca3af; }

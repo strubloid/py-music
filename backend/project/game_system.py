@@ -11,6 +11,20 @@ LEVELS = [
     {'level': 10, 'title': 'Master of Ears', 'xp_required': 6000},
 ]
 
+EAR_TRAINING_XP_PER_DIFFICULTY = 10
+CHALLENGE_XP_MULTIPLIER = 10
+
+
+def get_mode_base_xp(mode='ear-training', difficulty=1):
+    """Return server-authoritative XP for a correctly completed game prompt."""
+    try:
+        normalized_difficulty = round(float(difficulty or 1))
+    except (TypeError, ValueError):
+        normalized_difficulty = 1
+    normalized_difficulty = max(1, min(5, normalized_difficulty))
+    ear_training_xp = EAR_TRAINING_XP_PER_DIFFICULTY * normalized_difficulty
+    return ear_training_xp * CHALLENGE_XP_MULTIPLIER if mode == 'challenge' else ear_training_xp
+
 
 def calculate_level_from_xp(xp):
     xp = max(0, xp or 0)

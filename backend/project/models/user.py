@@ -22,6 +22,7 @@ class User(db.Model):
     progressions = db.relationship('Progression', backref='user', lazy=True, cascade='all, delete-orphan')
     favorites = db.relationship('Favorite', backref='user', lazy=True, cascade='all, delete-orphan')
     challenge_attempts = db.relationship('ChallengeAttempt', backref='user', lazy=True, cascade='all, delete-orphan')
+    quest_claims = db.relationship('QuestClaim', backref='user', lazy=True, cascade='all, delete-orphan')
 
     # Flask-Login required attributes
     @property
@@ -188,6 +189,22 @@ class ChallengeAttempt(db.Model):
             'score': self.score,
             'completed': self.completed,
         }
+
+
+class QuestClaim(db.Model):
+    __tablename__ = 'quest_claims'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    quest_id = db.Column(db.String(80), nullable=False)
+    period_key = db.Column(db.String(20), nullable=False)
+    xp_awarded = db.Column(db.Integer, nullable=False, default=0)
+    focus_restored = db.Column(db.Integer, nullable=False, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'quest_id', 'period_key', name='unique_user_quest_period'),
+    )
 
 
 # ─── Migration helpers ─────────────────────────────────────────────────────────

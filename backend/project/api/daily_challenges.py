@@ -19,7 +19,7 @@ from flask_login import current_user, login_required
 
 from backend.project.extensions import limiter
 from ..daily_challenge_explanations import build_daily_challenge_explanation
-from ..game_system import calculate_level_from_xp
+from ..game_system import calculate_level_from_xp, get_mode_base_xp
 from backend.project.models import db
 from backend.project.models.user import DailyChallenge, ChallengeAttempt
 from backend.project.music.chord_inventory import (
@@ -275,6 +275,7 @@ def build_ear_exercise(challenge):
 
 def serialize_challenge(challenge):
     data = challenge.to_dict()
+    data['xp_reward'] = get_mode_base_xp('challenge', challenge.difficulty)
     if challenge.category != 'ear_training':
         return data
 
@@ -896,13 +897,10 @@ def complete_challenge(challenge_id):
 
     today = datetime.utcnow().strftime('%Y-%m-%d')
     data = request.get_json(silent=True) or {}
-    requested_xp_award = data.get('xp_award')
-    try:
-        requested_xp_award = int(requested_xp_award) if requested_xp_award is not None else None
-    except (TypeError, ValueError):
-        requested_xp_award = None
-
-    xp_award = requested_xp_award if requested_xp_award and requested_xp_award > 0 else challenge.xp_reward
+    reward_mode = data.get('mode', 'challenge')
+    if reward_mode not in {'challenge', 'ear-training'}:
+        return jsonify({'error': 'mode must be challenge or ear-training'}), 400
+    xp_award = get_mode_base_xp(reward_mode, challenge.difficulty)
 
     # One reward per challenge: completed challenges are filtered out of the list,
     # so a visible challenge should pay its own reward exactly once.

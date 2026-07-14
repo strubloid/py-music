@@ -8,6 +8,7 @@ from types import SimpleNamespace
 from flask import Flask
 
 from backend.project.api.daily_challenges import build_ear_exercise, daily_bp, seed_challenges
+from backend.project.api.protected import api_bp
 from backend.project.auth import auth_bp, login_manager
 from backend.project.daily_challenge_explanations import build_daily_challenge_explanation
 from backend.project.extensions import limiter
@@ -33,6 +34,7 @@ class DailyChallengeFlowTest(unittest.TestCase):
         login_manager.init_app(self.app)
         self.app.register_blueprint(auth_bp, url_prefix='/api/auth')
         self.app.register_blueprint(daily_bp)
+        self.app.register_blueprint(api_bp)
 
         with self.app.app_context():
             db.create_all()
@@ -77,20 +79,27 @@ class DailyChallengeFlowTest(unittest.TestCase):
         ).get_json()['challenges'][0]
         self.assertNotEqual(first['id'], second['id'])
 
-        first_complete = self.client.post(f'/api/daily-challenge/{first["id"]}/complete')
-        second_complete = self.client.post(f'/api/daily-challenge/{second["id"]}/complete')
+        first_complete = self.client.post(
+            f'/api/daily-challenge/{first["id"]}/complete',
+            json={'mode': 'challenge', 'xp_award': 999999},
+        )
+        second_complete = self.client.post(
+            f'/api/daily-challenge/{second["id"]}/complete',
+            json={'mode': 'ear-training'},
+        )
         duplicate_complete = self.client.post(f'/api/daily-challenge/{first["id"]}/complete')
 
         self.assertEqual(first_complete.status_code, 200, first_complete.get_data(as_text=True))
         self.assertEqual(second_complete.status_code, 200, second_complete.get_data(as_text=True))
         self.assertEqual(duplicate_complete.status_code, 200, duplicate_complete.get_data(as_text=True))
-        self.assertEqual(first_complete.get_json()['xp_awarded'], first['xp_reward'])
-        self.assertEqual(second_complete.get_json()['xp_awarded'], second['xp_reward'])
+        self.assertEqual(first_complete.get_json()['xp_awarded'], 100)
+        self.assertEqual(second_complete.get_json()['xp_awarded'], 10)
+        self.assertEqual(first_complete.get_json()['xp_awarded'], second_complete.get_json()['xp_awarded'] * 10)
         self.assertEqual(duplicate_complete.get_json()['xp_awarded'], 0)
         self.assertTrue(duplicate_complete.get_json()['already_completed'])
 
         me = self.client.get('/api/auth/me').get_json()['user']
-        self.assertEqual(me['xp'], first['xp_reward'] + second['xp_reward'])
+        self.assertEqual(me['xp'], 110)
 
         today = datetime.utcnow().strftime('%Y-%m-%d')
         streak = self.client.get('/api/user/streak').get_json()
@@ -128,6 +137,23 @@ class DailyChallengeFlowTest(unittest.TestCase):
                     leaks.append((challenge.id, correct, hint))
 
         self.assertEqual(leaks, [])
+
+    def test_quest_claim_awards_small_xp_and_focus_exactly_once(self):
+        self._register_user()
+        payload = {'quest_id': 'daily-play-1'}
+
+        first = self.client.post('/api/me/quest-claim', json=payload)
+        duplicate = self.client.post('/api/me/quest-claim', json=payload)
+        unknown = self.client.post('/api/me/quest-claim', json={'quest_id': 'invented-jackpot'})
+
+        self.assertEqual(first.status_code, 200, first.get_data(as_text=True))
+        self.assertEqual(first.get_json()['xp_awarded'], 3)
+        self.assertEqual(first.get_json()['focus_restored'], 1)
+        self.assertFalse(first.get_json()['already_claimed'])
+        self.assertEqual(duplicate.get_json()['xp_awarded'], 0)
+        self.assertTrue(duplicate.get_json()['already_claimed'])
+        self.assertEqual(unknown.status_code, 400)
+        self.assertEqual(self.client.get('/api/auth/me').get_json()['user']['xp'], 3)
 
     def test_ear_training_contract_covers_all_seven_audio_drills(self):
         expected_types = {

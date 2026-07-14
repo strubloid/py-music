@@ -15,17 +15,23 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: 'python3 backend/project/api/app.py',
+      command: 'rm -f /tmp/py-music-playwright.db && python3 backend/project/api/app.py',
       cwd: '..',
       url: 'http://127.0.0.1:5000/api/health',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: false,
       timeout: 120_000,
+      env: {
+        ...process.env,
+        DATABASE_URL: 'sqlite:////tmp/py-music-playwright.db',
+        RATELIMIT_ENABLED: 'false',
+        SEED_CHALLENGES_ON_START: 'true',
+      },
     },
     {
       command: 'npm run dev -- --host 127.0.0.1 --port 3000 --strictPort',
       cwd: '.',
       url: 'http://127.0.0.1:3000',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: false,
       timeout: 120_000,
       env: {
         ...process.env,

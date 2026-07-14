@@ -18,7 +18,7 @@ import { useGameProgress } from '../../contexts/GameProgressContext.jsx';
 import StreakBadge from '../../components/game/StreakBadge.jsx';
 import { createEarTrainingAudioEngine, EAR_TRAINING_INSTRUMENTS } from '../../audio/earTrainingAudio.jsx';
 import { completeDailyChallenge, getDailyChallenges, getUserStreak } from '../../services/api';
-import { calculateQuestionXp, getPowerById } from '../../game/gameSystem.tsx';
+import { getModeBaseXp, getPowerById } from '../../game/gameSystem.tsx';
 import AnswerGate from '../../features/ear-game/components/AnswerGate.jsx';
 import EarGameHud from '../../features/ear-game/components/EarGameHud.jsx';
 import NoteAvatar from '../../features/ear-game/components/NoteAvatar.jsx';
@@ -86,15 +86,18 @@ const EarTraining = () => {
   );
   const gameRef = useRef(game);
   const actionRef = useRef(() => {});
+  const answerCommitRef = useRef(false);
   const audioRef = useRef(null);
   const playbackTimerRef = useRef(null);
   const transitionTimerRef = useRef(null);
+  const inputSignalTimerRef = useRef(null);
   const questionStartedRef = useRef(Date.now());
   const worldRef = useRef(null);
   const modalRef = useRef(null);
   const [streak, setStreak] = useState(0);
   const [result, setResult] = useState(null);
   const [announcement, setAnnouncement] = useState('Note Runner is loading.');
+  const [inputSignal, setInputSignal] = useState({ action: null, label: 'Keyboard ready', locked: false });
   const [selectedInstrument, setSelectedInstrument] = useState(() => {
     const preference = user?.instrument_preference;
     return EAR_TRAINING_INSTRUMENTS.some((item) => item.id === preference) ? preference : 'piano';
@@ -220,14 +223,16 @@ const EarTraining = () => {
 
   const commitAnswer = useCallback(async (answerId = gameRef.current.selectedAnswerId) => {
     const state = gameRef.current;
-    if (state.phase !== 'accepting-input' || !state.challenge || !answerId) return;
+    if (state.phase !== 'accepting-input' || !state.challenge || !answerId || answerCommitRef.current) return;
+    answerCommitRef.current = true;
     if (answerId !== state.selectedAnswerId) dispatch({ type: 'SELECT_ANSWER', answerId, inputMode: 'pointer' });
     const challenge = state.challenge;
     const correct = answerId === challenge.correctAnswerId;
     const responseMs = Date.now() - questionStartedRef.current;
     const assists = state.usedPowers.length;
+    const earTrainingBaseXp = getModeBaseXp({ mode: 'ear-training', difficulty: challenge.difficulty });
     const scoreDelta = calculateRoundScore({
-      base: challenge.xpReward,
+      base: earTrainingBaseXp,
       correct,
       firstAttempt: true,
       replays: state.replayCount,
@@ -235,20 +240,13 @@ const EarTraining = () => {
       difficulty: challenge.difficulty,
       assists,
     });
-    const xpAward = calculateQuestionXp({
-      baseXp: challenge.xpReward,
-      isCorrect: correct,
-      isFirstTry: true,
-      isFastAnswer: settingsRef.current.unlimitedTime ? false : responseMs <= 7000,
-      combo: state.combo,
-      penalties: assists * 8 + Math.max(0, state.replayCount - 1) * 2,
-    });
+
     dispatch({ type: 'COMMIT_ANSWER' });
     clearTimersAndAudio();
     let awardedXp = 0;
     try {
       if (correct && isLoggedIn) {
-        const response = await completeDailyChallenge(challenge.sourceChallengeId, { xp_award: xpAward });
+        const response = await completeDailyChallenge(challenge.sourceChallengeId, { mode: 'ear-training' });
         awardedXp = response.data.xp_awarded || 0;
         updateUserProgress({ xp: response.data.xp, level: response.data.level });
         const streakResponse = await getUserStreak();
@@ -284,6 +282,7 @@ const EarTraining = () => {
       ? `Correct. ${challenge.explanation.summary} ${awardedXp ? `Awarded ${awardedXp} XP.` : ''}`
       : `Not this gate. The correct answer is ${challenge.explanation.correctLabel}. ${challenge.explanation.summary}`);
     scheduleNext(correct ? 1900 : 3400);
+    answerCommitRef.current = false;
   }, [clearTimersAndAudio, isLoggedIn, persistMastery, scheduleNext, updateUserProgress]);
 
   const playComparison = useCallback(async () => {
@@ -330,6 +329,30 @@ const EarTraining = () => {
 
   const dispatchGameAction = useCallback((action, inputMode = 'keyboard') => {
     const state = gameRef.current;
+    const lockedAction = ['move-left', 'move-right', 'jump', 'confirm'].includes(action)
+      && isGameInputLocked(state)
+      && !(state.phase === 'ready' && ['jump', 'confirm'].includes(action));
+    const labels = {
+      'move-left': 'Nomi moved left',
+      'move-right': 'Nomi moved right',
+      jump: state.phase === 'ready' ? 'Starting the sound' : 'Gate committed',
+      confirm: state.phase === 'ready' ? 'Starting the sound' : 'Gate committed',
+      replay: 'Prompt replayed',
+      'slow-replay': 'Slow replay',
+      hint: 'Hint power',
+      compare: 'A/B comparison',
+      pause: state.phase === 'paused' ? 'Run resumed' : 'Run paused',
+      mute: state.muted ? 'Effects on' : 'Effects muted',
+    };
+    setInputSignal({
+      action,
+      label: lockedAction ? 'Controls unlock when the sound ends' : (labels[action] || 'Shortcut accepted'),
+      locked: lockedAction,
+    });
+    if (inputSignalTimerRef.current) window.clearTimeout(inputSignalTimerRef.current);
+    inputSignalTimerRef.current = window.setTimeout(() => {
+      setInputSignal({ action: null, label: 'Keyboard ready', locked: false });
+    }, 900);
     if (action === 'pause') {
       if (state.phase === 'paused') {
         dispatch({ type: 'RESUME' });
@@ -379,6 +402,7 @@ const EarTraining = () => {
     if (isLoggedIn) getUserStreak().then((response) => setStreak(response.data.streak || 0)).catch(() => {});
     return () => {
       clearTimersAndAudio();
+      if (inputSignalTimerRef.current) window.clearTimeout(inputSignalTimerRef.current);
       audioRef.current?.dispose();
     };
   }, [clearTimersAndAudio, isLoggedIn, loadChallenge]);
@@ -447,6 +471,7 @@ const EarTraining = () => {
 
   const restartRun = useCallback(() => {
     clearTimersAndAudio();
+    answerCommitRef.current = false;
     dispatch({ type: 'RUN_RESET' });
     loadChallenge();
   }, [clearTimersAndAudio, loadChallenge]);
@@ -613,6 +638,10 @@ const EarTraining = () => {
           <span>{challenge?.title}</span>
           <h2>{challenge?.question}</h2>
           <p>{game.phase === 'ready' ? 'Activate the beacon. Movement unlocks when the prompt finishes.' : 'A / D or arrow keys move Nomi. Enter, W, or Space commits.'}</p>
+          <output className={`input-signal ${inputSignal.locked ? 'input-signal--locked' : ''}`}>
+            <kbd>{inputSignal.action ? inputSignal.action.replace('move-', '').replace('lane-', '') : '⌨'}</kbd>
+            {inputSignal.label}
+          </output>
         </div>
 
         <div className="sound-stage__world" ref={worldRef}>

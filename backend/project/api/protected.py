@@ -2,8 +2,9 @@ import json
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from backend.project.models import db
-from backend.project.models.user import Progression, Favorite
+from backend.project.models.user import Progression, Favorite, QuestClaim
 from backend.project.game_system import calculate_level_from_xp
+from backend.project.gamification import QUEST_REWARDS, quest_period_key
 
 # Protected API blueprint
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -152,6 +153,51 @@ def award_xp():
         db.session.commit()
 
     return jsonify({'xp': current_user.xp, 'level': current_user.level}), 200
+
+
+@api_bp.route('/me/quest-claim', methods=['POST'])
+@login_required
+def claim_quest():
+    """Claim a small server-defined quest reward once per reset period."""
+    data = request.get_json(silent=True) or {}
+    quest_id = data.get('quest_id', '')
+    reward = QUEST_REWARDS.get(quest_id)
+    if not reward:
+        return jsonify({'error': 'Unknown quest'}), 400
+
+    period_key = quest_period_key(reward['cadence'])
+    existing = QuestClaim.query.filter_by(
+        user_id=current_user.id,
+        quest_id=quest_id,
+        period_key=period_key,
+    ).first()
+    if existing:
+        return jsonify({
+            'already_claimed': True,
+            'xp_awarded': 0,
+            'focus_restored': 0,
+            'xp': current_user.xp,
+            'level': current_user.level,
+        }), 200
+
+    claim = QuestClaim(
+        user_id=current_user.id,
+        quest_id=quest_id,
+        period_key=period_key,
+        xp_awarded=reward['xp'],
+        focus_restored=reward['focus'],
+    )
+    db.session.add(claim)
+    current_user.xp = (current_user.xp or 0) + reward['xp']
+    current_user.level = calculate_level_from_xp(current_user.xp)
+    db.session.commit()
+    return jsonify({
+        'already_claimed': False,
+        'xp_awarded': reward['xp'],
+        'focus_restored': reward['focus'],
+        'xp': current_user.xp,
+        'level': current_user.level,
+    }), 200
 
 
 @api_bp.route('/me/preferences', methods=['PATCH'])

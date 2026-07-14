@@ -55,6 +55,7 @@ app.config['SECRET_KEY'] = SECRET_KEY
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', f'sqlite:///{project_root}/strubloid.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['RATELIMIT_ENABLED'] = os.getenv('RATELIMIT_ENABLED', 'true').lower() != 'false'
 
 # Session cookie hardening
 IS_PRODUCTION = os.getenv('FLASK_ENV') == 'production' or os.getenv('FLY_APP_NAME') is not None
@@ -322,7 +323,7 @@ app.register_blueprint(auth_bp, url_prefix='/api/auth')
 from backend.project.api.protected import api_bp
 app.register_blueprint(api_bp)
 
-from backend.project.api.daily_challenges import daily_bp
+from backend.project.api.daily_challenges import daily_bp, seed_challenges
 app.register_blueprint(daily_bp)
 
 from backend.project.error_logger import log_error, log_request_error
@@ -558,6 +559,8 @@ def init_db():
     """Create all database tables."""
     with app.app_context():
         db.create_all()
+        if os.getenv('SEED_CHALLENGES_ON_START', 'false').lower() == 'true':
+            seed_challenges(target=200)
         print("✅ Database tables created")
 
 

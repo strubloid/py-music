@@ -12,14 +12,14 @@ export const LEVELS = [
 ] as const;
 
 export const POWERS = [
-  { id: 'replay', name: 'Replay', unlockLevel: 1, xpPenalty: 2, effect: 'Replay the sound again.' },
-  { id: 'slow_down', name: 'Slow Down', unlockLevel: 2, xpPenalty: 8, effect: 'Play the audio slower for easier listening.' },
-  { id: 'remove_one_option', name: 'Remove One Option', unlockLevel: 3, xpPenalty: 10, effect: 'Remove one wrong answer.' },
-  { id: 'root_note_anchor', name: 'Root Note Anchor', unlockLevel: 4, xpPenalty: 6, effect: 'Replay the root note before the interval.' },
-  { id: 'compare_mode', name: 'Compare Mode', unlockLevel: 5, xpPenalty: 12, effect: 'Compare the original with your selected answer.' },
+  { id: 'replay', name: 'Replay', unlockLevel: 1, xpPenalty: 0, effect: 'Replay the sound again.' },
+  { id: 'slow_down', name: 'Slow Down', unlockLevel: 2, xpPenalty: 0, focusCost: 1, effect: 'Play the audio slower for easier listening.' },
+  { id: 'remove_one_option', name: 'Remove One Option', unlockLevel: 3, xpPenalty: 0, focusCost: 1, effect: 'Remove one wrong answer.' },
+  { id: 'root_note_anchor', name: 'Root Note Anchor', unlockLevel: 4, xpPenalty: 0, focusCost: 1, effect: 'Replay the root note before the interval.' },
+  { id: 'compare_mode', name: 'Compare Mode', unlockLevel: 5, xpPenalty: 0, focusCost: 1, effect: 'Compare the original with your selected answer.' },
   { id: 'second_chance', name: 'Second Chance', unlockLevel: 6, xpPenalty: 0, focusCost: 1, effect: 'Protect one mistake in a run.' },
   { id: 'freeze_combo', name: 'Freeze Combo', unlockLevel: 7, xpPenalty: 0, focusCost: 1, effect: 'Prevent one combo break.' },
-  { id: 'reveal_direction', name: 'Reveal Direction', unlockLevel: 8, xpPenalty: 10, effect: 'Reveal whether the pitch goes up, down, or repeats.' },
+  { id: 'reveal_direction', name: 'Reveal Direction', unlockLevel: 8, xpPenalty: 0, focusCost: 1, effect: 'Reveal whether the pitch goes up, down, or repeats.' },
 ] as const;
 
 export const BADGES = [
@@ -36,6 +36,12 @@ export const BADGES = [
 ] as const;
 
 export const DEFAULT_FOCUS_POINTS = 3;
+export {
+  CHALLENGE_XP_MULTIPLIER,
+  EAR_TRAINING_XP_PER_DIFFICULTY,
+  MAX_FOCUS_POINTS,
+  getModeBaseXp,
+} from './rewardSystem.js';
 
 export const getLevelMeta = (xp = 0) => {
   const current = [...LEVELS].reverse().find((entry) => xp >= entry.xpRequired) || LEVELS[0];

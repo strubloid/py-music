@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import { claimQuestReward } from '../services/api';
 import LevelUpModal from '../components/game/LevelUpModal.jsx';
 import {
   BADGES,
   DEFAULT_FOCUS_POINTS,
+  MAX_FOCUS_POINTS,
   LEVELS,
   POWERS,
   getLevelMeta,
@@ -25,6 +27,7 @@ const getDefaultProgress = (xp = 0, level = 1) => ({
   focusPoints: DEFAULT_FOCUS_POINTS,
   badges: [],
   challengeResults: [],
+  questClaims: {},
   totalCorrect: 0,
   totalCompleted: 0,
   powersUsedCount: {},
@@ -128,6 +131,14 @@ export const GameProgressProvider = ({ children }) => {
     return allowed;
   }, []);
 
+  const restoreFocus = useCallback((amount = 1) => {
+    if (amount <= 0) return;
+    setProgressState((current) => ({
+      ...current,
+      focusPoints: Math.min(MAX_FOCUS_POINTS, current.focusPoints + amount),
+    }));
+  }, []);
+
   const recordChallengeResult = useCallback((result) => {
     setProgressState((current) => {
       const nextResults = [result, ...current.challengeResults].slice(0, 25);
@@ -168,6 +179,33 @@ export const GameProgressProvider = ({ children }) => {
     });
   }, []);
 
+  const claimQuest = useCallback(async (quest, periodKey) => {
+    const claimKey = `${quest.id}:${periodKey}`;
+    if (progressState.questClaims?.[claimKey]) return { alreadyClaimed: true };
+
+    let xpAwarded = quest.xp;
+    let focusRestored = quest.focus;
+    if (isLoggedIn) {
+      const response = await claimQuestReward(quest.id);
+      xpAwarded = response.data.xp_awarded || 0;
+      focusRestored = response.data.focus_restored || 0;
+      updateUserProgress({ xp: response.data.xp, level: response.data.level });
+    } else {
+      const nextXp = (user?.xp || 0) + xpAwarded;
+      updateUserProgress({ xp: nextXp, level: getLevelMeta(nextXp).level });
+    }
+
+    setProgressState((current) => ({
+      ...current,
+      focusPoints: Math.min(MAX_FOCUS_POINTS, current.focusPoints + focusRestored),
+      questClaims: {
+        ...(current.questClaims || {}),
+        [claimKey]: { claimedAt: new Date().toISOString(), xpAwarded, focusRestored },
+      },
+    }));
+    return { alreadyClaimed: false, xpAwarded, focusRestored };
+  }, [isLoggedIn, progressState.questClaims, updateUserProgress, user?.xp]);
+
   const clearLevelUp = useCallback(() => setLevelUpState(null), []);
 
   const derived = useMemo(() => {
@@ -191,7 +229,9 @@ export const GameProgressProvider = ({ children }) => {
         levelUpState,
         clearLevelUp,
         addBonusXp,
+        claimQuest,
         consumeFocus,
+        restoreFocus,
         recordChallengeResult,
         ...derived,
       }}
