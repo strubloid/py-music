@@ -19,7 +19,7 @@ const AnswerGate = ({ answer, phase, selected, disabled, hidden, result, correct
       onDoubleClick={() => onCommit(answer.id)}
     >
       <span className="game-gate__beam" aria-hidden="true" />
-      <span className="game-gate__frame" aria-hidden="true"><span className="game-gate__card"><span className="game-gate__back"><i>♪</i><em>Signal locked</em></span><span className="game-gate__front"><i>♫</i><em>Sound gate</em></span></span></span>
+      <span className="game-gate__frame" aria-hidden="true"><span className="game-gate__card"><span className="game-gate__back"><i>♪</i><em>Signal locked</em></span><span className="game-gate__front"><i>♫</i><em>Sound gate</em><b /></span></span></span>
       <span className="game-gate__lane">{answer.lane + 1}</span>
       <span className="game-gate__label"><strong>{revealed ? answer.label : 'Listening…'}</strong><small>{hidden ? 'Eliminated' : selected ? 'Commit · Enter' : revealed ? 'Move to gate' : 'Signal locked'}</small></span>
       <span className="game-gate__platform" aria-hidden="true" />

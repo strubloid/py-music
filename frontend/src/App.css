@@ -14,19 +14,16 @@
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 100vh;
-  padding: 1.5rem;
   background: linear-gradient(180deg, rgba(5, 8, 22, 0.2), rgba(5, 8, 22, 0.05));
   border-left: 1px solid var(--border-soft);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   box-sizing: border-box;
-  transition: padding 0.25s ease;
 }
 
 /* Mobile: sidebar is at bottom, full-width workspace */
 @media (max-width: 768px) {
   .workspace {
-    padding: 1rem 1rem calc(7.5rem + env(safe-area-inset-bottom));
     border-left: none;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
   }

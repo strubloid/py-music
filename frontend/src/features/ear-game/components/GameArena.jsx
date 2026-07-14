@@ -3,6 +3,12 @@ import { Gauge, Play, RotateCcw } from 'lucide-react';
 import AnswerGate from './AnswerGate.jsx';
 import NoteAvatar from './NoteAvatar.jsx';
 import ResultPresentation from './ResultPresentation.jsx';
+import BossLayer from './BossLayer.jsx';
+import PuzzleLayer from './PuzzleLayer.jsx';
+import PinballLayer from './PinballLayer.jsx';
+import PartyLayer from './PartyLayer.jsx';
+import HologramLayer from './HologramLayer.jsx';
+import SideScrollerLayer from './SideScrollerLayer.jsx';
 
 const GameArena = ({
   game,
@@ -20,19 +26,33 @@ const GameArena = ({
   bossMode,
 }) => {
   const gateCount = challenge?.answers.length || 1;
+  const puzzleMode = ['theory', 'scales'].includes(challenge?.category);
+  const pinballMode = game.combo >= 5 || challenge?.category === 'intervals';
+  const partyMode = game.combo >= 30;
+  const activeBoss = bossMode || game.challengeIndex === game.challengeCount - 1;
+  const stageStep = Math.min(game.challengeCount, game.challengeIndex + 1);
   const visualMode = game.phase === 'comparison' ? 'comparison' : result?.correct ? 'correct' : result ? 'incorrect' : playing ? 'playing' : game.phase === 'accepting-input' ? 'active' : 'ready';
 
   return (
     <section
-      className={`game-arena game-arena--${visualMode}`}
+      className={`game-arena game-arena--${visualMode} ${puzzleMode ? 'game-arena--puzzle' : ''} ${activeBoss ? 'game-arena--boss' : ''} ${pinballMode ? 'game-arena--pinball' : ''} ${partyMode ? 'game-arena--party' : ''}`}
       aria-label="Sound Gates game arena"
       data-phase={game.phase}
       data-combo-tier={Math.min(4, game.combo >= 30 ? 4 : game.combo >= 20 ? 3 : game.combo >= 10 ? 2 : game.combo >= 5 ? 1 : 0)}
     >
-      <div className="arena-backdrop" aria-hidden="true"><div className="arena-backdrop__city" /></div>
+      <div className="arena-backdrop" aria-hidden="true"><div className="arena-backdrop__stars" /><div className="arena-backdrop__city" /></div>
       <div className="arena-atmosphere" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /></div>
       <div className="arena-vignette" aria-hidden="true" />
-      {bossMode && <div className="arena-boss" aria-label="Harmonic guardian shield" data-boss-mode="true"><div className="arena-boss__body" /><div className="arena-boss__bar"><span>GUARDIAN SHIELD</span><i style={{ '--boss-health': `${Math.max(8, 100 - game.correctCount * 20)}%` }} /></div></div>}
+      <SideScrollerLayer lane={game.avatarLane} laneCount={gateCount} stageStep={stageStep} />
+      <div className="arena-stage-map" aria-label={`Stage progress: sector ${stageStep} of ${game.challengeCount}`}>
+        <span>STAGE RUN</span>
+        <ol>{Array.from({ length: game.challengeCount }, (_, index) => <li key={index} className={index < stageStep - 1 ? 'arena-stage-map__sector--cleared' : index === stageStep - 1 ? 'arena-stage-map__sector--active' : ''}><b>{index + 1}</b><small>{index === game.challengeCount - 1 ? 'VAULT' : `SECTOR ${index + 1}`}</small></li>)}</ol>
+      </div>
+      <div className="arena-world-signature" aria-hidden="true"><i>♪</i><span>HARMONIC CITY</span></div>
+      {activeBoss && <BossLayer correctCount={game.correctCount} challengeCount={game.challengeCount} result={result} />}
+      {puzzleMode && <PuzzleLayer question={challenge?.question} selectedLane={game.avatarLane} />}
+      {pinballMode && <PinballLayer combo={game.combo} />}
+      {partyMode && <PartyLayer combo={game.combo} result={result} />}
 
       <div className={`listening-beacon listening-beacon--${playing ? 'playing' : 'ready'}`}>
         <button
@@ -45,6 +65,7 @@ const GameArena = ({
           {playing ? <Gauge /> : game.phase === 'ready' ? <Play /> : <RotateCcw />}
         </button>
         <div><span>{playing ? 'Listening signal' : 'Listening beacon'}</span><strong>{challenge?.prompt.playbackMode === 'harmonic' ? 'Harmonic chord' : challenge?.prompt.playbackMode === 'sequence' ? 'Chord pair' : 'Melodic signal'}</strong></div>
+        <div className="listening-beacon__meter" aria-hidden="true"><i /><i /><i /><i /><i /></div>
       </div>
 
       <div className="arena-prompt">
@@ -55,6 +76,7 @@ const GameArena = ({
           <kbd>{inputSignal.action ? inputSignal.action.replace('move-', '').replace('lane-', '') : '⌨'}</kbd>{inputSignal.label}
         </output>
       </div>
+      {game.phase === 'accepting-input' && <div className="arena-unlocked" role="status">MOVEMENT UNLOCKED</div>}
 
       <div className="runner-track" aria-hidden="true">
         {Array.from({ length: gateCount }, (_, index) => <span className={index === game.avatarLane ? 'runner-track__lane runner-track__lane--active' : 'runner-track__lane'} key={index} />)}
@@ -78,8 +100,8 @@ const GameArena = ({
         ))}
       </div>
       <NoteAvatar lane={game.avatarLane} laneCount={gateCount} state={avatarState} reducedMotion={game.reducedMotion} />
-      {game.phase === 'comparison' && result && <div className="comparison-overlay" role="status" data-comparison-mode="hologram"><div className="comparison-overlay__card"><span>YOUR GATE</span><strong>{result.selectedLabel}</strong><i className="comparison-overlay__wave" /></div><span>VS</span><div className="comparison-overlay__card"><span>TRUE SIGNAL</span><strong>{result.correctLabel}</strong><i className="comparison-overlay__wave" /></div></div>}
-      {game.phase !== 'comparison' && <ResultPresentation challenge={challenge} result={result} combo={game.combo} onCompare={onCompare} onNext={onNext} />}
+      {game.phase === 'comparison' && result && <HologramLayer answers={challenge?.answers || []} result={result} />}
+      {game.phase !== 'comparison' && <ResultPresentation challenge={challenge} result={result} combo={game.combo} milestone={stageStep === game.challengeCount || game.combo > 0 && game.combo % 5 === 0} onCompare={onCompare} onNext={onNext} />}
     </section>
   );
 };

@@ -563,6 +563,10 @@ const DailyChallenge = () => {
             <div className="daily-score-track"><span style={{ width: `${Math.max(8, runProgress)}%` }} /></div>
           </div>
         </div>
+        <div className="daily-stage-map" aria-label={`Daily run progress: ${Math.min(5, answeredCount)} of 5 sectors complete`}>
+          <div><span>DAILY GATE RUN</span><strong>{Math.min(5, answeredCount) + 1 < 5 ? `Sector ${Math.min(5, answeredCount) + 1} ahead` : 'Reward vault ahead'}</strong></div>
+          <ol>{Array.from({ length: 5 }, (_, index) => <li key={index} className={index < answeredCount ? 'daily-stage-map__cleared' : index === answeredCount ? 'daily-stage-map__active' : ''}><b>{index + 1}</b><small>{index === 4 ? 'VAULT' : 'GATE'}</small></li>)}</ol>
+        </div>
 
         {!activeChallenge ? (
         <div className="daily-empty">
