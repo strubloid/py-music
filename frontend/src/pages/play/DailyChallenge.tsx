@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useGameProgress } from '../../contexts/GameProgressContext';
 import StreakBadge from '../../components/game/StreakBadge';
 import NoteAvatar from '../../features/ear-game/components/NoteAvatar';
+import ScaleChallengeInstruments from '../../features/scale-play/components/ScaleChallengeInstruments';
 import { actionForKeyboardEvent, shouldIgnoreGameShortcut } from '../../features/ear-game/hooks/gameInput';
 import {
   getDailyChallenges,
@@ -508,6 +509,13 @@ const DailyChallenge = () => {
     };
   };
 
+  const getScaleRecipe = (challenge) => {
+    if (challenge?.category !== 'scales') return null;
+    const matches = challenge.question?.toUpperCase().match(/\b[WH]\b/g) || [];
+    const root = challenge.question?.match(/scale recipe time:\s*([A-G](?:#|b)?)/i)?.[1];
+    return matches.length >= 3 && root ? { root, steps: matches } : null;
+  };
+
   const getNextRecommendation = () => {
     if (!activeChallenge) return 'Next: keep the run warm.';
     if (activeChallenge.category === 'intervals') return 'Next: try another interval without powers.';
@@ -517,6 +525,7 @@ const DailyChallenge = () => {
   };
 
   const stage = getCategoryStage(activeChallenge);
+  const scaleRecipe = getScaleRecipe(activeChallenge);
   const answeredCount = sessionStatsRef.current.answered + (activeResult ? 1 : 0);
   const runProgress = Math.min(100, ((answeredCount || 0) / 5) * 100);
 
@@ -603,6 +612,8 @@ const DailyChallenge = () => {
                   {stage.nodes.map((node, index) => <i key={`${node}-${index}`}>{node}</i>)}
                 </div>
               </div>
+
+              {scaleRecipe && <ScaleChallengeInstruments root={scaleRecipe.root} steps={scaleRecipe.steps} />}
 
               <div className="daily-xp-preview">
                 <span className="daily-xp-base">Base +{xpPreview.baseXp} XP</span>
