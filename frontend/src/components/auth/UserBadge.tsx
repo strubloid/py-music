@@ -136,6 +136,13 @@ const UserBadge = ({ collapsed = false }) => {
               <div className="rank-bar-fill" style={{ width: `${rankMeta.progressPercent}%` }} />
             </div>
             <div className="dropdown-xp">
+              <span className="xp-label">Rank XP</span>
+              <span className="xp-value">{rankMeta.xpProgress} / {rankMeta.xpProgress + rankMeta.xpToNextLevel}</span>
+            </div>
+            <div className="xp-bar">
+              <div className="xp-bar-fill" style={{ width: `${Math.min(100, (rankMeta.xpProgress / (rankMeta.xpProgress + rankMeta.xpToNextLevel || 1)) * 100)}%` }} />
+            </div>
+            <div className="dropdown-xp">
               <span className="xp-label">XP</span>
               <span className="xp-value">{user.xp} / {nextLevelXp}</span>
             </div>

@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   RANKS,
   advanceRankProgress,
+  applyRankXp,
   createInitialRankProgress,
   getRankMeta,
 } from '../../../game/rankSystem';
@@ -37,6 +38,26 @@ test('completed runs advance one internal level and expose progress', () => {
   assert.equal(getRankMeta(update.progress).progressLabel, 'Level 2 of 10 · 8 levels until Bronze Rank Challenge');
 });
 
+test('awarded XP builds rank progress and grants one internal level at 500 XP', () => {
+  const partial = applyRankXp(createInitialRankProgress(), { challengeId: 'daily-1', xpEarned: 200 });
+  assert.equal(partial.progress.level, 1);
+  assert.equal(partial.progress.xpProgress, 200);
+  assert.equal(partial.event.type, 'rank-xp');
+
+  const levelUp = applyRankXp(partial.progress, { challengeId: 'daily-2', xpEarned: 300 });
+  assert.equal(levelUp.progress.level, 2);
+  assert.equal(levelUp.progress.xpProgress, 0);
+  assert.equal(levelUp.event.type, 'level-up');
+  assert.equal(levelUp.event.source, 'xp');
+});
+
+test('rank XP cannot skip a pending rank challenge', () => {
+  const pending = { rankIndex: 0, level: 10, xpProgress: 120, challengePending: true, completed: false };
+  const update = applyRankXp(pending, { challengeId: 'daily-3', xpEarned: 500 });
+  assert.deepEqual(update.progress, pending);
+  assert.equal(update.event, null);
+});
+
 test('finishing a rank unlocks a separate rank challenge', () => {
   const update = advanceRankProgress({
     rankIndex: 0,
@@ -51,7 +72,7 @@ test('finishing a rank unlocks a separate rank challenge', () => {
 });
 
 test('rank challenge requires 80 percent and promotes to level one', () => {
-  const pending = { rankIndex: 0, level: 10, challengePending: true, completed: false };
+  const pending = { rankIndex: 0, level: 10, xpProgress: 0, challengePending: true, completed: false };
   const failed = advanceRankProgress(pending, { runId: 'failed', accuracy: 0.6 });
   assert.equal(failed.event.type, 'challenge-failed');
   assert.deepEqual(failed.progress, pending);

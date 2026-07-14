@@ -110,7 +110,7 @@ The interface always shows both rank and internal progress:
 > Silver — Level 28 of 35  
 > 7 levels until the Gold Rank Challenge
 
-A completed five-question Note Runner run advances one internal level. Completing a rank unlocks a five-question Rank Challenge. Passing requires 4/5 (80%). Failure keeps the challenge available and removes no rank progress. Passing promotes to Level 1 of the next rank. Legendary Level 250 is terminal.
+A completed five-question Note Runner run advances one internal level. Awarded account XP from Ear Training, Daily Challenges, and claimed Quests also fills Rank XP; every 500 Rank XP advances one internal level. Rank XP pauses while a Rank Challenge is pending, so it cannot bypass promotion. Completing a rank unlocks a five-question Rank Challenge. Passing requires 4/5 (80%). Failure keeps the challenge available and removes no rank progress. Passing promotes to Level 1 of the next rank. Legendary Level 250 is terminal. The detailed source, balance, and UI rules are in `docs/xp-rank-application.md`.
 
 Rank naming is a presentation of durable player progression, not a second spendable XP currency. Account XP remains server-authoritative; rank-run state has one persistence boundary and must eventually be migrated server-side before cross-device rank sync is promised.
 

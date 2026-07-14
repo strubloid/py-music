@@ -14,6 +14,7 @@ import {
 } from '../game/gameSystem';
 import {
   advanceRankProgress,
+  applyRankXp,
   createInitialRankProgress,
   getRankMeta,
   normalizeRankProgress,
@@ -164,7 +165,7 @@ export const GameProgressProvider = ({ children }) => {
 
       const rankUpdate = result.mode === 'note-runner-run'
         ? advanceRankProgress(current.rankProgress, result)
-        : { progress: normalizeRankProgress(current.rankProgress), event: current.lastRankEvent };
+        : applyRankXp(current.rankProgress, result);
 
       return {
         ...current,
@@ -174,7 +175,7 @@ export const GameProgressProvider = ({ children }) => {
         totalCorrect: nextTotalCorrect,
         powersUsedCount: nextPowersUsedCount,
         rankProgress: rankUpdate.progress,
-        lastRankEvent: rankUpdate.event,
+        lastRankEvent: rankUpdate.event || current.lastRankEvent,
       };
     });
   }, []);
@@ -195,14 +196,19 @@ export const GameProgressProvider = ({ children }) => {
       updateUserProgress({ xp: nextXp, level: getLevelMeta(nextXp).level });
     }
 
-    setProgressState((current) => ({
-      ...current,
-      focusPoints: Math.min(MAX_FOCUS_POINTS, current.focusPoints + focusRestored),
-      questClaims: {
-        ...(current.questClaims || {}),
-        [claimKey]: { claimedAt: new Date().toISOString(), xpAwarded, focusRestored },
-      },
-    }));
+    setProgressState((current) => {
+      const rankUpdate = applyRankXp(current.rankProgress, { challengeId: claimKey, mode: 'quest', xpEarned });
+      return {
+        ...current,
+        focusPoints: Math.min(MAX_FOCUS_POINTS, current.focusPoints + focusRestored),
+        rankProgress: rankUpdate.progress,
+        lastRankEvent: rankUpdate.event || current.lastRankEvent,
+        questClaims: {
+          ...(current.questClaims || {}),
+          [claimKey]: { claimedAt: new Date().toISOString(), xpAwarded, focusRestored },
+        },
+      };
+    });
     return { alreadyClaimed: false, xpAwarded, focusRestored };
   }, [isLoggedIn, progressState.questClaims, updateUserProgress, user?.xp]);
 

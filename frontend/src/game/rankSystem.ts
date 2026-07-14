@@ -13,10 +13,12 @@ export const RANKS = Object.freeze([
 ]);
 
 export const RANK_CHALLENGE_ACCURACY = 0.8;
+export const RANK_XP_PER_LEVEL = 500;
 
 export const createInitialRankProgress = () => ({
   rankIndex: 0,
   level: 1,
+  xpProgress: 0,
   challengePending: false,
   completed: false,
 });
@@ -27,6 +29,7 @@ export const normalizeRankProgress = (value = {}) => {
   return {
     rankIndex,
     level: Math.min(rank.levels, Math.max(1, Number(value.level) || 1)),
+    xpProgress: Math.max(0, Number(value.xpProgress) || 0),
     challengePending: Boolean(value.challengePending) && rankIndex < RANKS.length - 1,
     completed: Boolean(value.completed) && rankIndex === RANKS.length - 1,
   };
@@ -47,12 +50,40 @@ export const getRankMeta = (progress = createInitialRankProgress()) => {
     nextRank,
     remainingLevels,
     progressPercent: normalized.completed ? 100 : Math.round((completedLevels / rank.levels) * 100),
+    xpProgress: normalized.xpProgress,
+    xpToNextLevel: Math.max(0, RANK_XP_PER_LEVEL - normalized.xpProgress),
     progressLabel: normalized.challengePending
       ? `Rank challenge · ${Math.round(RANK_CHALLENGE_ACCURACY * 100)}% required`
       : normalized.completed
         ? 'All rank levels complete'
         : `Level ${normalized.level} of ${rank.levels} · ${remainingLevels} ${remainingLevels === 1 ? 'level' : 'levels'} until ${nextRank ? `${nextRank.name} Rank Challenge` : 'completion'}`,
     isFinalRank,
+  };
+};
+
+// Awarded account XP contributes a measured amount of rank progress, but never
+// skips a rank challenge or grants more than one internal level per reward.
+export const applyRankXp = (value, result = {}) => {
+  const current = normalizeRankProgress(value);
+  const rankXp = Math.max(0, Number(result.xpEarned) || 0);
+  const runId = result.runId || result.challengeId || null;
+
+  if (!rankXp || current.completed || current.challengePending) {
+    return { progress: current, event: null };
+  }
+
+  const xpProgress = current.xpProgress + rankXp;
+  if (xpProgress < RANK_XP_PER_LEVEL) {
+    return {
+      progress: { ...current, xpProgress },
+      event: { runId, type: 'rank-xp', rank: RANKS[current.rankIndex].name, xpAwarded: rankXp, xpProgress },
+    };
+  }
+
+  const levelUpdate = advanceRankProgress({ ...current, xpProgress: xpProgress - RANK_XP_PER_LEVEL }, result);
+  return {
+    progress: levelUpdate.progress,
+    event: { ...levelUpdate.event, source: 'xp', xpAwarded: rankXp },
   };
 };
 
