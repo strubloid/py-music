@@ -2,6 +2,10 @@
 
 A full-stack music theory platform with a Python Flask backend and React/Vite frontend. Explore scales, build chord progressions, practice with daily challenges, and track your learning with XP and levels.
 
+## Documentation
+
+Start with [PROJECT.md](PROJECT.md), then use the concise [documentation index](docs/README.md). The project rules and curriculum are the source of truth for all assessed music-learning content.
+
 ## Features
 
 - 🎹 **Interactive Piano Keyboard** — scale representation with highlighted notes

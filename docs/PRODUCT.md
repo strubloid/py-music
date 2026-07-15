@@ -1,5 +1,7 @@
 # Product
 
+> **Mandatory rules:** Read [PROJECT.md](../PROJECT.md) and [Project Rules](project-rules.md) before changing product behavior or content. Strubloid rewards transferable musical practice, never music-history or word-only trivia.
+
 ## Register
 
 product

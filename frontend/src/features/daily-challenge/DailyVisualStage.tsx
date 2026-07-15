@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useId, useRef, useState } from "react";
 import { Play, Volume2 } from "lucide-react";
 import { createEarTrainingAudioEngine } from "../../audio/earTrainingAudio";
 import PianoKeyboard from "../../components/PianoKeyboard/PianoKeyboard";
@@ -7,6 +7,7 @@ import "./DailyVisualStage.scss";
 
 const CHROMATIC = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const TUNING = ["E", "B", "G", "D", "A", "E"];
+const KEYBOARD_POSITIONS = { C: 7, "C#": 14.5, D: 21.5, "D#": 28.5, E: 35.5, F: 50, "F#": 57, G: 64.5, "G#": 71.5, A: 78.5, "A#": 85.5, B: 93 };
 
 const pitchClass = (note = "") => {
     const match = String(note).match(/[A-G](?:#|b)?/i)?.[0];
@@ -14,7 +15,30 @@ const pitchClass = (note = "") => {
     return CHROMATIC.indexOf(normalized);
 };
 
-const InstrumentFrame = ({ notes, root, label, mode, children }) => {
+const IntervalJourney = ({ journey }) => {
+    const markerId = useId().replace(/:/g, "");
+    const origin = CHROMATIC[pitchClass(journey.from)] || "C";
+    const destination = CHROMATIC[pitchClass(journey.to)] || "C";
+    const startX = KEYBOARD_POSITIONS[origin];
+    const endX = KEYBOARD_POSITIONS[destination];
+    const isAscending = journey.direction !== "down";
+    const curveY = isAscending ? 8 : 82;
+    const path = `M ${startX} 52 Q ${(startX + endX) / 2} ${curveY} ${endX} 52`;
+    return (
+        <svg className="daily-interval-journey" data-phase={journey.phase} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+                <marker id={markerId} markerWidth="7" markerHeight="7" refX="5.5" refY="3.5" orient="auto">
+                    <path d="M 0 0 L 7 3.5 L 0 7 z" className="daily-interval-journey__arrowhead" />
+                </marker>
+            </defs>
+            <path className="daily-interval-journey__path" d={path} markerEnd={`url(#${markerId})`} />
+            <circle className="daily-interval-journey__origin" cx={startX} cy="52" r="4" />
+            <circle className="daily-interval-journey__destination" cx={endX} cy="52" r="4" />
+        </svg>
+    );
+};
+
+const InstrumentFrame = ({ notes, root, label, mode, children, journey }) => {
     if (mode === "off") return null;
     const normalizedNotes = notes.map((note) => CHROMATIC[pitchClass(note)]).filter(Boolean);
     const normalizedRoot = CHROMATIC[pitchClass(root)] || root;
@@ -33,7 +57,7 @@ const InstrumentFrame = ({ notes, root, label, mode, children }) => {
     }));
     return (
         <div className="daily-instrument-frame" aria-label={label}>
-            {mode === "guitar" ? <GuitarFretboard fretboardData={fretboardData} fretCount={12} /> : <PianoKeyboard keyboardData={keyboardData} />}
+            {mode === "guitar" ? <GuitarFretboard fretboardData={fretboardData} fretCount={12} /> : <div className={journey ? "daily-interval-piano" : undefined}><PianoKeyboard keyboardData={keyboardData} />{journey && <IntervalJourney journey={journey} />}</div>}
             {children}
         </div>
     );
@@ -77,7 +101,7 @@ const ChordVisual = ({ visual, mode }) => (
     </div>
 );
 
-const IntervalVisual = ({ visual, mode }) => {
+const IntervalVisual = ({ visual, mode, playbackPhase }) => {
     const notes = visual.notes || [];
     const distance = Math.max(1, Math.min(11, Number(visual.semitones) || Math.abs(pitchClass(notes[1]) - pitchClass(notes[0])) || 1));
     return (
@@ -88,13 +112,11 @@ const IntervalVisual = ({ visual, mode }) => {
                 <i />
                 <i />
                 <i />
-                <b className="daily-interval-note daily-interval-note--start">{notes[0]}</b>
-                <b className="daily-interval-note daily-interval-note--end" style={{ "--interval-rise": `${Math.max(8, Math.min(62, distance * 5))}%` }}>
-                    {notes[1]}
-                </b>
+                <b className="daily-interval-note daily-interval-note--start" />
+                <b className="daily-interval-note daily-interval-note--end" style={{ "--interval-rise": `${Math.max(8, Math.min(62, distance * 5))}%` }} />
                 <span className="daily-interval-arc" />
             </div>
-            <InstrumentFrame notes={notes} root={notes[0]} label={`Interval endpoints: ${notes.join(" and ")}`} mode={mode} />
+            <InstrumentFrame notes={notes} root={notes[0]} label={`Interval journey from ${notes[0]} to ${notes[1]}`} mode={mode} journey={{ from: notes[0], to: notes[1], direction: visual.direction, phase: playbackPhase }} />
         </div>
     );
 };
@@ -190,13 +212,14 @@ const ConceptVisual = ({ visual }) => {
     );
 };
 
-const EarReplay = ({ exercise }) => {
+const EarReplay = ({ exercise, onPlaybackPhase }) => {
     const engine = useRef(null);
     const [playing, setPlaying] = useState(false);
     const replay = async () => {
         if (!exercise || playing) return;
         if (!engine.current) engine.current = createEarTrainingAudioEngine({ onStateChange: () => {} });
         setPlaying(true);
+        onPlaybackPhase?.("origin");
         try {
             await engine.current.ensureContext();
             const playback =
@@ -207,9 +230,14 @@ const EarReplay = ({ exercise }) => {
                       : exercise.notes?.length > 2
                         ? await engine.current.playNoteSequence({ instrumentId: "piano", notes: exercise.notes })
                         : await engine.current.playInterval({ instrumentId: "piano", mode: "melodic", rootToneNote: exercise.notes?.[0], targetToneNote: exercise.notes?.[1] });
-            window.setTimeout(() => setPlaying(false), playback.durationMs);
+            window.setTimeout(() => onPlaybackPhase?.("destination"), Math.max(180, playback.durationMs * 0.55));
+            window.setTimeout(() => {
+                setPlaying(false);
+                onPlaybackPhase?.("idle");
+            }, playback.durationMs);
         } catch {
             setPlaying(false);
+            onPlaybackPhase?.("idle");
         }
     };
     return (
@@ -252,6 +280,7 @@ const legacyVisual = (category, question = "", title = "") => {
 
 const DailyVisualStage = ({ visual, exercise, category, question, title }) => {
     const [instrument, setInstrument] = useState<"piano" | "guitar" | "off">("piano");
+    const [playbackPhase, setPlaybackPhase] = useState("idle");
     const effectiveVisual = visual?.kind === "history" ? legacyVisual(category, question, title) : visual;
     if (!effectiveVisual) return null;
     const supportsInstrument = ["scale", "chord", "interval"].includes(effectiveVisual.kind);
@@ -261,7 +290,7 @@ const DailyVisualStage = ({ visual, exercise, category, question, title }) => {
         ) : effectiveVisual.kind === "chord" ? (
             <ChordVisual visual={effectiveVisual} mode={instrument} />
         ) : effectiveVisual.kind === "interval" ? (
-            <IntervalVisual visual={effectiveVisual} mode={instrument} />
+            <IntervalVisual visual={effectiveVisual} mode={instrument} playbackPhase={playbackPhase} />
         ) : effectiveVisual.kind === "rhythm" ? (
             <RhythmVisual visual={effectiveVisual} />
         ) : (
@@ -286,7 +315,7 @@ const DailyVisualStage = ({ visual, exercise, category, question, title }) => {
                                 </button>
                             </div>
                         )}
-                        {exercise && <EarReplay exercise={exercise} />}
+                        {exercise && <EarReplay exercise={exercise} onPlaybackPhase={setPlaybackPhase} />}
                     </div>
                 </header>
                 {content}
