@@ -7,13 +7,17 @@ from types import SimpleNamespace
 
 from flask import Flask
 
-from backend.project.api.daily_challenges import build_ear_exercise, daily_bp, seed_challenges
+from backend.project.api.daily_challenges import (
+    SCALE_FORMULAS, _utc_hint_state, build_ear_exercise, daily_bp, seed_challenges,
+)
 from backend.project.api.protected import api_bp
 from backend.project.auth import auth_bp, login_manager
 from backend.project.daily_challenge_explanations import build_daily_challenge_explanation
 from backend.project.extensions import limiter
 from backend.project.models import bcrypt, db
-from backend.project.models.user import ChallengeAttempt, DailyChallenge, User, run_migrations
+from backend.project.models.user import (
+    ChallengeAttempt, DailyChallenge, DailyHintUsage, User, run_migrations,
+)
 
 
 class DailyChallengeFlowTest(unittest.TestCase):
@@ -137,6 +141,54 @@ class DailyChallengeFlowTest(unittest.TestCase):
                     leaks.append((challenge.id, correct, hint))
 
         self.assertEqual(leaks, [])
+
+    def test_seeded_questions_persist_typed_visuals_and_correct_mode_formulas(self):
+        self.assertEqual(SCALE_FORMULAS['lydian'], [0, 2, 4, 6, 7, 9, 11])
+        self.assertEqual(SCALE_FORMULAS['mixolydian'], [0, 2, 4, 5, 7, 9, 10])
+        with self.app.app_context():
+            DailyChallenge.query.delete()
+            db.session.commit()
+            seed_challenges(120)
+            challenges = DailyChallenge.query.all()
+            self.assertTrue(challenges)
+            for challenge in challenges:
+                payload = challenge.to_dict()
+                self.assertTrue(payload['question_type'])
+                self.assertIsInstance(payload['visual'], dict)
+                self.assertIn('kind', payload['visual'])
+
+    def test_authenticated_hint_is_idempotent_and_uses_persisted_rank_allowance(self):
+        self._register_user()
+        with self.app.app_context():
+            user = User.query.filter_by(username='player').first()
+            user.rank_id = 'gold'
+            db.session.commit()
+
+        initial = self.client.get('/api/daily-challenges?limit=1').get_json()
+        self.assertEqual(initial['hint_allowance']['limit'], 5)
+        challenge_id = initial['challenges'][0]['id']
+        first = self.client.post(f'/api/daily-challenge/{challenge_id}/hint')
+        second = self.client.post(f'/api/daily-challenge/{challenge_id}/hint')
+        self.assertEqual(first.status_code, 200, first.get_data(as_text=True))
+        self.assertEqual(second.status_code, 200, second.get_data(as_text=True))
+        self.assertEqual(first.get_json()['remaining'], 4)
+        self.assertEqual(second.get_json()['remaining'], 4)
+        self.assertTrue(second.get_json()['already_revealed'])
+        with self.app.app_context():
+            self.assertEqual(DailyHintUsage.query.one().used_count, 1)
+
+    def test_hint_allowance_uses_rank_boundaries_and_utc_dates(self):
+        with self.app.app_context():
+            user = User(username='ranked', email='ranked@example.com')
+            user.set_password('secret123')
+            user.rank_id = 'legendary'
+            db.session.add(user)
+            db.session.commit()
+            date, limit, used, reset_at = _utc_hint_state(user, datetime(2026, 7, 15, 23, 59, 59))
+            self.assertEqual((date, limit, used), ('2026-07-15', 12, 0))
+            self.assertEqual(reset_at, '2026-07-16T00:00:00Z')
+            user.rank_id = 'unknown-rank'
+            self.assertEqual(_utc_hint_state(user, datetime(2026, 7, 16))[1], 2)
 
     def test_quest_claim_awards_configured_xp_and_focus_exactly_once(self):
         self._register_user()

@@ -108,6 +108,7 @@ export const AuthProvider = ({ children }) => {
         ...current,
         ...(progress.xp !== undefined ? { xp: progress.xp } : {}),
         ...(progress.level !== undefined ? { level: progress.level } : {}),
+        ...(progress.rank !== undefined ? { rank: progress.rank } : {}),
       };
 
       if (!nextUser.id) {

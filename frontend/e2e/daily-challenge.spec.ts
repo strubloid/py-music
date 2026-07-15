@@ -13,8 +13,11 @@ test('daily challenge uses Nomi gates and awards the authoritative 10x reward', 
   const correctOption = challenge.options[challenge.correct_index];
   await expect(page.getByRole('radio', { name: new RegExp(`^${escapeForRegex(correctOption)}$`) })).toBeVisible();
   await answerCapturedChallenge(page, challenge);
+  await expect(page.getByRole('dialog', { name: 'Correct answer' })).toBeVisible();
   await expect(page.getByText(new RegExp(`= ${challenge.xp_reward} XP`))).toBeVisible();
   await expect(page.getByText(new RegExp(`the answer was|Perfect groove|Nice hit`, 'i'))).toBeVisible();
+  await page.getByRole('dialog', { name: 'Correct answer' }).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
 });
 
 test('daily challenge streak is consistent between page header and user badge dropdown after completion', async ({ page }) => {
@@ -22,6 +25,7 @@ test('daily challenge streak is consistent between page header and user badge dr
   const challenge = await captureChallengeResponse(page, '/play/daily');
 
   await answerCapturedChallenge(page, challenge);
+  await page.getByRole('dialog', { name: 'Correct answer' }).click();
   const streakLabel = page.getByText(/\d+ day streak/i).first();
   await expect(streakLabel).toBeVisible();
   const streakText = await streakLabel.textContent();

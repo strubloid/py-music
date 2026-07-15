@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Music, BookOpen, Zap, Gamepad2, ListMusic,
   FolderOpen, BarChart2, Settings, ChevronLeft, ChevronRight,
-  Train, LogIn, LogOut
+  Train, LogIn, LogOut, Compass, FlaskConical
 } from 'lucide-react'
 import UserBadge from '../auth/UserBadge'
 import { useAuth } from '../../contexts/AuthContext'
@@ -85,6 +85,8 @@ const Sidebar = ({ collapsed, onToggle }) => {
         {!collapsed && <span className="nav-section-label">Play</span>}
         {navItem(<Zap size={18} />, 'Challenges', '/play/daily')}
         {navItem(<Train size={18} />, 'Ear Training', '/play/ear-training')}
+        {navItem(<Compass size={18} />, 'Scale Path', '/play/scales')}
+        {navItem(<FlaskConical size={18} />, 'Scale Lab', '/play/learn-scales')}
         {navItem(<Gamepad2 size={18} />, 'Quests', '/play/quests')}
       </div>
 

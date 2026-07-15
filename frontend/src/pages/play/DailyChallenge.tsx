@@ -1,23 +1,32 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Zap, RefreshCw, CheckCircle, Loader, Flame, Target, Trophy } from 'lucide-react';
+import { Zap, RefreshCw, CheckCircle, Loader, Flame, Target, Trophy, XCircle, Lightbulb } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGameProgress } from '../../contexts/GameProgressContext';
 import StreakBadge from '../../components/game/StreakBadge';
 import NoteAvatar from '../../features/ear-game/components/NoteAvatar';
-import ScaleChallengeInstruments from '../../features/scale-play/components/ScaleChallengeInstruments';
+import DailyVisualStage from '../../features/daily-challenge/DailyVisualStage';
 import { actionForKeyboardEvent, shouldIgnoreGameShortcut } from '../../features/ear-game/hooks/gameInput';
 import {
   getDailyChallenges,
   completeDailyChallenge,
   seedChallenges,
   getUserStreak,
+  revealDailyChallengeHint,
 } from '../../services/api';
 import { calculateXpPreview, getModeBaseXp, getPowerById } from '../../game/gameSystem';
 import './DailyChallenge.scss';
 
 const INITIAL_LIMIT = 1;
 const RANDOM_FETCH_LIMIT = 10;
-const NEXT_CHALLENGE_DELAY_MS = 900;
+const GUEST_HINT_LIMITS = { unranked: 2, bronze: 3, silver: 4, gold: 5, platinum: 6, diamond: 7, master: 8, grandmaster: 9, virtuoso: 10, maestro: 11, legendary: 12 };
+const utcDateKey = () => new Date().toISOString().slice(0, 10);
+const getDisplayQuestion = (challenge) => {
+  if (challenge?.visual?.kind !== 'history') return challenge?.question;
+  if (challenge.category === 'scales') return 'Which scale is this?';
+  if (challenge.category === 'intervals') return 'Name this interval.';
+  if (/5th of C Major/i.test(challenge.question || '')) return 'Which note is degree 5?';
+  return challenge?.question;
+};
 
 const getCompletedChallengeIds = () => {
   try {
@@ -54,9 +63,11 @@ const DailyChallenge = () => {
   const [dailyBonusClaimed, setDailyBonusClaimed] = useState(false);
   const [xpBreakdown, setXpBreakdown] = useState(null);
   const [feedbackBurst, setFeedbackBurst] = useState(null);
+  const [answerPopup, setAnswerPopup] = useState(null);
   const [selectedOptionIndex, setSelectedOptionIndex] = useState(0);
+  const [hintAllowance, setHintAllowance] = useState(null);
+  const [revealedHint, setRevealedHint] = useState('');
   const seenChallengeIdsRef = useRef([]);
-  const advanceTimerRef = useRef(null);
   const questionStartedAtRef = useRef(Date.now());
   const answerCommitRef = useRef(false);
   const sessionStatsRef = useRef({ answered: 0, correct: 0, totalXp: 0, powersUsed: [] });
@@ -121,6 +132,7 @@ const DailyChallenge = () => {
     }
 
     setTotalRemaining(res.data.remaining);
+    if (res.data.hint_allowance) setHintAllowance(res.data.hint_allowance);
     return nextChallenge;
   }, [rememberSeenChallenges]);
 
@@ -150,6 +162,8 @@ const DailyChallenge = () => {
       setHiddenOptionIndexes([]);
       setQuestionPowersUsed([]);
       setXpBreakdown(null);
+      setHintAllowance(chalRes.data.hint_allowance || null);
+      setRevealedHint('');
       sessionStatsRef.current = { answered: 0, correct: 0, totalXp: 0, powersUsed: [] };
       window.dispatchEvent(new Event('streak:updated'));
     } catch (err) {
@@ -168,19 +182,36 @@ const DailyChallenge = () => {
     setHiddenOptionIndexes([]);
     setQuestionPowersUsed([]);
     setSelectedOptionIndex(0);
+    setRevealedHint('');
     answerCommitRef.current = false;
   }, [activeIndex]);
 
-  useEffect(() => () => {
-    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
-  }, []);
-
   const activeChallenge = challenges[activeIndex] || null;
+  const displayQuestion = getDisplayQuestion(activeChallenge);
   const activeResult = activeChallenge ? results[activeChallenge.id] : null;
   const challengeBaseXp = activeChallenge
     ? getModeBaseXp({ mode: 'challenge', difficulty: activeChallenge.difficulty })
     : 0;
   const xpPreview = calculateXpPreview({ baseXp: challengeBaseXp, replayCount: 0, powerIds: [] });
+
+  const advanceToNextChallenge = useCallback((challengeId) => {
+    const excludeIds = Array.from(new Set([...seenChallengeIdsRef.current, challengeId]));
+    loadRandomChallenge({
+      replace: true,
+      excludeIds,
+      fallbackExcludeIds: [challengeId],
+      avoidIds: [challengeId],
+    }).catch(() => {
+      setError('Failed to load next challenge.');
+    });
+  }, [loadRandomChallenge]);
+
+  const dismissAnswerPopup = () => {
+    if (!answerPopup) return;
+    const { challengeId } = answerPopup;
+    setAnswerPopup(null);
+    advanceToNextChallenge(challengeId);
+  };
 
   const handleAnswer = async (challengeId, selectedIdx, correctIdx) => {
     if (completing[challengeId] || results[challengeId] || answerCommitRef.current) return;
@@ -198,17 +229,13 @@ const DailyChallenge = () => {
     });
     setCompleting((prev) => ({ ...prev, [challengeId]: true }));
 
-    const queueNextChallenge = () => {
-      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
-      const excludeIds = Array.from(new Set([...seenChallengeIdsRef.current, challengeId]));
-      const fallbackExcludeIds = [challengeId];
-      const avoidIds = [challengeId];
-      advanceTimerRef.current = setTimeout(() => {
-        loadRandomChallenge({ replace: true, excludeIds, fallbackExcludeIds, avoidIds }).catch(() => {
-          setError('Failed to load next challenge.');
-        });
-      }, NEXT_CHALLENGE_DELAY_MS);
-    };
+    const openAnswerPopup = (result) => setAnswerPopup({
+      challengeId,
+      correct: isCorrect,
+      correctAnswer: activeChallenge?.options?.[correctIdx],
+      explanation: activeChallenge?.explanation,
+      ...result,
+    });
 
     try {
       if (isCorrect) {
@@ -226,7 +253,7 @@ const DailyChallenge = () => {
           const isAuthenticatedReward = res.data.authenticated !== false;
 
           if (isAuthenticatedReward) {
-            updateUserProgress({ xp: res.data.xp, level: res.data.level });
+            updateUserProgress({ xp: res.data.xp, level: res.data.level, rank: res.data.rank });
           }
 
           setResults((prev) => ({
@@ -286,7 +313,7 @@ const DailyChallenge = () => {
           });
           showFeedbackBurst(isAuthenticatedReward ? `+${totalAwardXp} XP` : 'Sign in to save XP', isAuthenticatedReward ? 'positive' : 'neutral');
           window.dispatchEvent(new Event('streak:updated'));
-          queueNextChallenge();
+          openAnswerPopup({ xpAwarded: isAuthenticatedReward ? totalAwardXp : 0, signedInReward: isAuthenticatedReward });
         } else {
           setResults((prev) => ({
             ...prev,
@@ -314,7 +341,7 @@ const DailyChallenge = () => {
             completedAt: new Date().toISOString(),
           });
           showFeedbackBurst(`+${awardedXp} XP`, 'positive');
-          queueNextChallenge();
+          openAnswerPopup({ xpAwarded: awardedXp, signedInReward: false });
         }
       } else {
         const preservesCombo = questionPowersUsed.includes('second_chance') || questionPowersUsed.includes('freeze_combo');
@@ -333,7 +360,7 @@ const DailyChallenge = () => {
         setDailySummary({ score: 0, accuracy: 0, xpEarned: 0, combo, powersUsed: questionPowersUsed, streak });
         if (penalties > 0) showFeedbackBurst(`-${penalties} XP lost`, 'negative');
         rememberCompletedChallengeId(challengeId);
-        queueNextChallenge();
+        openAnswerPopup();
       }
     } catch (err) {
       if (err.response?.status === 400) {
@@ -344,7 +371,7 @@ const DailyChallenge = () => {
             xpAwarded: 0,
           },
         }));
-        queueNextChallenge();
+        openAnswerPopup({ xpAwarded: 0, signedInReward: false });
       } else {
         setError('Failed to submit answer.');
       }
@@ -372,9 +399,46 @@ const DailyChallenge = () => {
     }
   };
 
+  const revealHint = async () => {
+    if (!activeChallenge || activeResult || revealedHint) return;
+    if (isLoggedIn) {
+      try {
+        const response = await revealDailyChallengeHint(activeChallenge.id);
+        setHintAllowance({ remaining: response.data.remaining, limit: response.data.limit, reset_at: response.data.reset_at, local_only: false });
+        setRevealedHint(response.data.explanation);
+      } catch (err) {
+        if (err.response?.status === 429) {
+          setHintAllowance((current) => ({ ...(current || {}), remaining: 0 }));
+          showFeedbackBurst('No daily hints left', 'neutral');
+          return;
+        }
+        setError('Failed to reveal hint. Try again.');
+      }
+      return;
+    }
+
+    const storageKey = 'strubloid:guest-daily-hints';
+    const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    const rankId = rankMeta.id || 'unranked';
+    const limit = GUEST_HINT_LIMITS[rankId] || GUEST_HINT_LIMITS.unranked;
+    const usage = saved.date === utcDateKey() ? saved : { date: utcDateKey(), used: 0, revealed: [] };
+    if (!usage.revealed.includes(activeChallenge.id) && usage.used >= limit) {
+      setHintAllowance({ remaining: 0, limit, local_only: true });
+      showFeedbackBurst('No daily hints left', 'neutral');
+      return;
+    }
+    if (!usage.revealed.includes(activeChallenge.id)) {
+      usage.used += 1;
+      usage.revealed.push(activeChallenge.id);
+      localStorage.setItem(storageKey, JSON.stringify(usage));
+    }
+    setHintAllowance({ remaining: limit - usage.used, limit, local_only: true });
+    setRevealedHint(activeChallenge.explanation);
+  };
+
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (!activeChallenge || activeResult || shouldIgnoreGameShortcut(event)) return;
+      if (!activeChallenge || activeResult || answerPopup || shouldIgnoreGameShortcut(event)) return;
       const action = actionForKeyboardEvent(event);
       if (!action) return;
       const visible = activeChallenge.options
@@ -403,12 +467,12 @@ const DailyChallenge = () => {
         handleAnswer(activeChallenge.id, selectedOptionIndex, activeChallenge.correct_index);
       } else if (action === 'hint') {
         event.preventDefault();
-        usePower('remove_one_option');
+        revealHint();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeChallenge, activeResult, hiddenOptionIndexes, selectedOptionIndex]);
+  }, [activeChallenge, activeResult, answerPopup, hiddenOptionIndexes, selectedOptionIndex, revealedHint, hintAllowance]);
 
   const handleLoadMore = async () => {
     if (loadingMore) return;
@@ -463,59 +527,6 @@ const DailyChallenge = () => {
 
   const diffStars = (d) => '★'.repeat(d) + '☆'.repeat(5 - d);
 
-  const getCategoryStage = (challenge) => {
-    const category = challenge?.category || 'theory';
-    const option = challenge?.options?.[challenge.correct_index] || 'Listen';
-    const question = challenge?.question || '';
-    const semitoneMatch = question.match(/(\d+)\s*semitones?/i);
-    const semitones = semitoneMatch?.[1] || `${challenge?.difficulty || 1}`;
-
-    if (category === 'intervals' || category === 'ear_training') {
-      return {
-        className: 'stage-interval',
-        label: 'Catch the interval',
-        primary: `Distance: ${semitones} steps`,
-        secondary: 'Name the jump',
-        nodes: ['Root', 'Target'],
-      };
-    }
-
-    if (category === 'chords') {
-      return {
-        className: 'stage-chord',
-        label: 'Stack the chord',
-        primary: `Color: ${option}`,
-        secondary: 'Build the color',
-        nodes: ['1', '3', '5'],
-      };
-    }
-
-    if (category === 'scales') {
-      return {
-        className: 'stage-scale',
-        label: 'Complete the route',
-        primary: `Route: ${option}`,
-        secondary: 'Find the path',
-        nodes: ['I', 'II', 'III', 'IV', 'V'],
-      };
-    }
-
-    return {
-      className: 'stage-theory',
-      label: 'Resolve the clue',
-      primary: `Move: ${option}`,
-      secondary: 'Theory move',
-      nodes: ['Cue', 'Choice'],
-    };
-  };
-
-  const getScaleRecipe = (challenge) => {
-    if (challenge?.category !== 'scales') return null;
-    const matches = challenge.question?.toUpperCase().match(/\b[WH]\b/g) || [];
-    const root = challenge.question?.match(/scale recipe time:\s*([A-G](?:#|b)?)/i)?.[1];
-    return matches.length >= 3 && root ? { root, steps: matches } : null;
-  };
-
   const getNextRecommendation = () => {
     if (!activeChallenge) return 'Next: keep the run warm.';
     if (activeChallenge.category === 'intervals') return 'Next: try another interval without powers.';
@@ -524,8 +535,6 @@ const DailyChallenge = () => {
     return 'Next: keep the combo moving.';
   };
 
-  const stage = getCategoryStage(activeChallenge);
-  const scaleRecipe = getScaleRecipe(activeChallenge);
   const answeredCount = sessionStatsRef.current.answered + (activeResult ? 1 : 0);
   const runProgress = Math.min(100, ((answeredCount || 0) / 5) * 100);
 
@@ -542,6 +551,28 @@ const DailyChallenge = () => {
 
   return (
     <div className="daily-page daily-page--arcade">
+      {answerPopup && (
+        <div
+          className={`challenge-answer-popup ${answerPopup.correct ? 'challenge-answer-popup--correct' : 'challenge-answer-popup--incorrect'}`}
+          role="dialog"
+          aria-modal="true"
+          aria-label={answerPopup.correct ? 'Correct answer' : 'Incorrect answer'}
+          onClick={dismissAnswerPopup}
+        >
+          <div className="challenge-answer-popup__panel">
+            {answerPopup.correct ? <CheckCircle size={42} /> : <XCircle size={42} />}
+            <p className="challenge-answer-popup__eyebrow">{answerPopup.correct ? 'Clean hit' : 'Not this time'}</p>
+            <h2>{answerPopup.correct ? 'You got it!' : `The answer was ${answerPopup.correctAnswer}`}</h2>
+            {answerPopup.correct && (
+              <strong className="challenge-answer-popup__reward">
+                {answerPopup.signedInReward ? `+${answerPopup.xpAwarded} XP` : 'Nice work!'}
+              </strong>
+            )}
+            {answerPopup.explanation && <p className="challenge-answer-popup__explanation">{answerPopup.explanation}</p>}
+            <span className="challenge-answer-popup__continue">Click anywhere to continue</span>
+          </div>
+        </div>
+      )}
       <div className="daily-header">
         <Zap className="daily-icon" size={28} />
         <div>
@@ -602,18 +633,7 @@ const DailyChallenge = () => {
                 <span className="challenge-diff">{diffStars(activeChallenge.difficulty)}</span>
               </div>
 
-              <div className={`challenge-stage ${stage.className}`}>
-                <div className="challenge-stage-copy">
-                  <span>{stage.label}</span>
-                  <strong>{stage.primary}</strong>
-                  <small>{stage.secondary}</small>
-                </div>
-                <div className="challenge-stage-visual" aria-hidden="true">
-                  {stage.nodes.map((node, index) => <i key={`${node}-${index}`}>{node}</i>)}
-                </div>
-              </div>
-
-              {scaleRecipe && <ScaleChallengeInstruments root={scaleRecipe.root} steps={scaleRecipe.steps} />}
+              <DailyVisualStage visual={activeChallenge.visual} exercise={activeChallenge.exercise} category={activeChallenge.category} question={activeChallenge.question} title={activeChallenge.title} />
 
               <div className="daily-xp-preview">
                 <span className="daily-xp-base">Base +{xpPreview.baseXp} XP</span>
@@ -623,10 +643,16 @@ const DailyChallenge = () => {
               {feedbackBurst && <div className={`daily-feedback-burst ${feedbackBurst.tone}`}>{feedbackBurst.label}</div>}
 
               <h3 className="challenge-title">{activeChallenge.title}</h3>
-              <p className="challenge-question">{activeChallenge.question}</p>
-              {activeChallenge.explanation && (
+              <p className="challenge-question">{displayQuestion}</p>
+              <div className="daily-hint-row">
+                <button type="button" className="daily-hint-button" onClick={revealHint} disabled={!!activeResult || !!revealedHint || hintAllowance?.remaining === 0}>
+                  <Lightbulb size={16} />
+                  {revealedHint ? 'Hint shown' : hintAllowance?.remaining === 0 ? 'Hints reset at 00:00 UTC' : `Hint${hintAllowance?.remaining !== null && hintAllowance?.remaining !== undefined ? ` ${hintAllowance.remaining} left today` : ''}`}
+                </button>
+              </div>
+              {revealedHint && (
                 <div className="challenge-explanation">
-                  <strong>Helpful hint:</strong> {activeChallenge.explanation}
+                  <strong>Hint:</strong> {revealedHint}
                 </div>
               )}
 
@@ -639,7 +665,7 @@ const DailyChallenge = () => {
                 ))}
               </div>
 
-              <div className="challenge-controls-hint">A / D or arrows move · W / Space / Enter commit · 1–6 jump to a gate · H uses a hint</div>
+              <details className="challenge-controls-hint"><summary>Controls</summary>A / D or arrows move · W / Space / Enter commit · 1–6 jump to a gate · H shows a hint</details>
               <div className="challenge-gate-world" style={{ '--gate-count': activeChallenge.options.length, '--selected-gate': selectedOptionIndex }}>
                 <div className="challenge-nomi-track" aria-hidden="true">
                   <NoteAvatar

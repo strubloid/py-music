@@ -12,16 +12,20 @@ Endpoints:
 """
 import json
 import random
+import re
 from datetime import datetime, timedelta
 
 from flask import Blueprint, request, jsonify
 from flask_login import current_user, login_required
+from sqlalchemy.exc import IntegrityError
 
 from backend.project.extensions import limiter
 from ..daily_challenge_explanations import build_daily_challenge_explanation
 from ..game_system import calculate_level_from_xp, get_mode_base_xp
 from backend.project.models import db
-from backend.project.models.user import DailyChallenge, ChallengeAttempt
+from backend.project.models.user import (
+    DailyChallenge, ChallengeAttempt, DailyHintUsage, DailyHintReveal,
+)
 from backend.project.music.chord_inventory import (
     CHORD_QUALITIES,
     PITCH_CLASSES,
@@ -57,6 +61,43 @@ SCALE_NAMES = {
 
 MAJOR_SCALE_INTERVALS = ['W', 'W', 'H', 'W', 'W', 'W', 'H']
 MINOR_SCALE_INTERVALS = ['W', 'H', 'W', 'W', 'H', 'W', 'W']
+
+# Semitone offsets are the canonical source for visuals; step labels remain only
+# for explanations and accessible scale rails.
+SCALE_FORMULAS = {
+    'major': [0, 2, 4, 5, 7, 9, 11],
+    'minor': [0, 2, 3, 5, 7, 8, 10],
+    'harmonic_minor': [0, 2, 3, 5, 7, 8, 11],
+    'melodic_minor': [0, 2, 3, 5, 7, 9, 11],
+    'pentatonic_major': [0, 2, 4, 7, 9],
+    'pentatonic_minor': [0, 3, 5, 7, 10],
+    'chromatic': list(range(12)),
+    'whole_tone': [0, 2, 4, 6, 8, 10],
+    'dorian': [0, 2, 3, 5, 7, 9, 10],
+    'phrygian': [0, 1, 3, 5, 7, 8, 10],
+    'lydian': [0, 2, 4, 6, 7, 9, 11],
+    'mixolydian': [0, 2, 4, 5, 7, 9, 10],
+    'locrian': [0, 1, 3, 5, 6, 8, 10],
+}
+SCALE_DEGREES = ['1', '2', '3', '4', '5', '6', '7']
+CHORD_INTERVALS = {
+    'Major': [0, 4, 7], 'Minor': [0, 3, 7], 'Diminished': [0, 3, 6],
+    'Augmented': [0, 4, 8], 'Major 7th': [0, 4, 7, 11],
+    'Minor 7th': [0, 3, 7, 10], 'Dominant 7th': [0, 4, 7, 10],
+    'Sus2': [0, 2, 7], 'Sus4': [0, 5, 7], 'Dim 7th': [0, 3, 6, 9],
+}
+HINT_LIMITS = {
+    'unranked': 2, 'bronze': 3, 'silver': 4, 'gold': 5, 'platinum': 6,
+    'diamond': 7, 'master': 8, 'grandmaster': 9, 'virtuoso': 10,
+    'maestro': 11, 'legendary': 12,
+}
+RANK_LEVELS = {
+    'unranked': 10, 'bronze': 20, 'silver': 35, 'gold': 50, 'platinum': 70,
+    'diamond': 90, 'master': 115, 'grandmaster': 140, 'virtuoso': 170,
+    'maestro': 200, 'legendary': 250,
+}
+RANK_ORDER = list(RANK_LEVELS)
+RANK_XP_PER_LEVEL = 500
 
 CHORD_TYPES = [
     ('Major',       ['major', 'Major', 'M', '']),
@@ -113,6 +154,54 @@ def _shuffle_options(correct, candidates, rng, count=4):
 
 def _tone_name(note_index, octave):
     return f'{NOTES[note_index % 12]}{octave + (note_index // 12)}'
+
+
+def _scale_visual(root, scale_type):
+    intervals = SCALE_FORMULAS[scale_type]
+    root_index = NOTES.index(root)
+    return {
+        'kind': 'scale', 'root': root, 'intervals': intervals,
+        'degrees': SCALE_DEGREES[:len(intervals)],
+        'notes': [NOTES[(root_index + interval) % 12] for interval in intervals],
+        'pitch_classes': [(root_index + interval) % 12 for interval in intervals],
+    }
+
+
+def _chord_visual(root, label):
+    intervals = CHORD_INTERVALS[label]
+    root_index = NOTES.index(root)
+    return {'kind': 'chord', 'chords': [{
+        'root': root, 'intervals': intervals,
+        'notes': [NOTES[(root_index + interval) % 12] for interval in intervals],
+        'degrees': ['1', '3', '5', '7'][:len(intervals)],
+    }]}
+
+
+def _interval_visual(first, second, semitones, direction='up'):
+    return {'kind': 'interval', 'notes': [first, second], 'semitones': semitones, 'direction': direction}
+
+
+def _general_visual(family):
+    """One typed, factual visual family for every fixed general-bank family."""
+    visuals = {
+        'Note Values': {'kind': 'rhythm', 'meter': [4, 4], 'events': [{'value': 'quarter', 'beats': 1}]},
+        'Clefs': {'kind': 'staff', 'clef': 'treble', 'notes': [{'note': 'B4', 'position': 'middle-line'}]},
+        'Dynamics': {'kind': 'dynamics', 'mark': 'mf'},
+        'Rhythm': {'kind': 'rhythm', 'meter': [4, 4], 'events': [{'value': 'quarter', 'beat': 1}]},
+        'Instruments': {'kind': 'instrument', 'instrument': 'piano', 'keys': 88},
+        'Notation': {'kind': 'staff', 'clef': 'treble', 'notes': [{'note': 'C4'}], 'accidental': 'sharp'},
+        'Harmony': {'kind': 'harmony', 'romanNumerals': ['V', 'I'], 'key': 'C'},
+        'History': {'kind': 'history', 'subject': 'Music history', 'timeline': []},
+        'Tuning': {'kind': 'fretboard', 'tuning': ['E2', 'A2', 'D3', 'G3', 'B3', 'E4']},
+        'Tempo': {'kind': 'tempo', 'bpmRange': [76, 108]},
+        'Modes': _scale_visual('C', 'major'),
+        'Chords': _chord_visual('C', 'Major'),
+        'Glossary': {'kind': 'technique', 'subject': 'guitar technique', 'frames': []},
+        'Scales': _scale_visual('C', 'major'),
+        'Articulation': {'kind': 'technique', 'subject': 'articulation', 'frames': []},
+        'Intervals': _interval_visual('C4', 'G4', 7),
+    }
+    return visuals[family]
 
 
 def build_ear_exercise(challenge):
@@ -276,6 +365,10 @@ def build_ear_exercise(challenge):
 def serialize_challenge(challenge):
     data = challenge.to_dict()
     data['xp_reward'] = get_mode_base_xp('challenge', challenge.difficulty)
+    # Pre-visual rows remain playable during the additive-column migration.
+    # Newly seeded rows always persist a specific payload below.
+    if not data['visual']:
+        data['visual'], data['question_type'], data['question'] = _legacy_visual(challenge)
     if challenge.category != 'ear_training':
         return data
 
@@ -287,8 +380,51 @@ def serialize_challenge(challenge):
         'correct_index': exercise['correct_index'],
         'explanation': exercise.get('explanation', data.get('explanation')),
         'exercise': exercise,
+        'question_type': f'ear-{exercise["type"]}',
+        'visual': _ear_visual(exercise),
     })
     return data
+
+
+def _ear_visual(exercise):
+    if exercise['type'] in {'interval', 'direction'}:
+        notes = exercise['notes']
+        return _interval_visual(notes[0], notes[1], 0, 'down' if exercise['type'] == 'direction' and notes[1] < notes[0] else 'up')
+    if exercise['type'] == 'shape':
+        return {'kind': 'melody', 'notes': exercise['notes']}
+    definitions = exercise.get('chordDefinitions', [])
+    chords = [
+        {
+            'root': item['root'], 'intervals': item['intervals'],
+            'notes': [NOTES[(NOTES.index(item['root']) + interval) % 12] for interval in item['intervals']],
+        }
+        for item in definitions
+    ]
+    return {'kind': 'chord', 'chords': chords}
+
+
+def _legacy_visual(challenge):
+    """Give pre-migration rows a real visual while users work through the old bank."""
+    question = challenge.question or ''
+    if challenge.category == 'scales':
+        root_match = re.search(r'([A-G](?:#|b)?)\s+uses the pattern', question, flags=re.IGNORECASE)
+        root = root_match.group(1) if root_match else 'C'
+        root = {'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#'}.get(root, root)
+        return _scale_visual(root, 'minor' if 'minor' in (challenge.title or '').lower() else 'major'), 'scale-identification', 'Which scale is this?'
+    if challenge.category == 'intervals':
+        match = re.search(r'([A-G](?:#|b)?)\s*→\s*([A-G](?:#|b)?).*?(\d+)\s+semitones', question, flags=re.IGNORECASE)
+        if match:
+            first, second, semitones = match.groups()
+            return _interval_visual(first, second, int(semitones)), 'interval-identification', 'Name this interval.'
+    if '5th of C Major' in question:
+        return _scale_visual('C', 'major'), 'theory-scale-degree-note', 'Which note is degree 5?'
+    if challenge.category == 'chords':
+        match = re.search(r'([A-G](?:#|b)?)(m7|maj7|dim7|sus2|sus4|dim|aug|m|7)?\?', question, flags=re.IGNORECASE)
+        if match:
+            root, suffix = match.groups()
+            quality = {'m': 'Minor', 'dim': 'Diminished', 'aug': 'Augmented', 'maj7': 'Major 7th', 'm7': 'Minor 7th', '7': 'Dominant 7th', 'sus2': 'Sus2', 'sus4': 'Sus4', 'dim7': 'Dim 7th'}.get((suffix or '').lower(), 'Major')
+            return _chord_visual(root, quality), 'chord-quality', 'What quality is this chord?'
+    return {'kind': 'history', 'subject': challenge.title, 'timeline': []}, 'legacy-concept', question
 
 
 @daily_bp.route('/chords/inventory', methods=['GET'])
@@ -334,13 +470,15 @@ def generate_scales_questions(count):
 
         questions.append({
             'category': 'scales',
-            'title': f'Scale Recipe: {scale_type.replace("_", " ").title()}',
-            'question': f'Scale recipe time: {root} uses the pattern {", ".join(MAJOR_SCALE_INTERVALS if "major" in scale_type or scale_type in ("ionian", "lydian", "mixolydian") else MINOR_SCALE_INTERVALS)}. Which scale fits?',
+            'title': f'Scale: {scale_type.replace("_", " ").title()}',
+            'question': 'Which scale is this?',
             'options': options,
             'correct_index': correct_idx,
             'explanation': build_daily_challenge_explanation('scales', f'Identify the {scale_type.replace("_", " ").title()} Scale', f'Which scale type is built on the root note {root} with the interval pattern: {", ".join(MAJOR_SCALE_INTERVALS if "major" in scale_type or scale_type in ("ionian", "lydian", "mixolydian") else MINOR_SCALE_INTERVALS)}?', options, correct_idx),
             'xp_reward': random.choice([25, 50, 75]),
             'difficulty': random.choice([1, 2]),
+            'question_type': 'scale-identification',
+            'visual': _scale_visual(root, scale_type),
         })
     return questions
 
@@ -369,6 +507,8 @@ def generate_chords_questions(count):
             'explanation': build_daily_challenge_explanation('chords', f'Identify the {root} Chord', f'What type of chord is {root}{correct_name}? (e.g., Major, Minor, Seventh, etc.)', options, correct_idx),
             'xp_reward': random.choice([25, 50, 75]),
             'difficulty': random.choice([1, 2, 3]),
+            'question_type': 'chord-quality',
+            'visual': _chord_visual(root, chord_label),
         })
     return questions
 
@@ -394,12 +534,14 @@ def generate_intervals_questions(count):
         questions.append({
             'category': 'intervals',
             'title': 'Leap Check',
-            'question': f'Leap check: {n1} → {n2} is {semitones} semitones. What interval is it?',
+            'question': 'Name this interval.',
             'options': options,
             'correct_index': correct_idx,
             'explanation': build_daily_challenge_explanation('intervals', 'Identify the Interval', f'What is the interval between {n1} and {n2}? ({n1} → {n2} = {semitones} semitones)', options, correct_idx),
             'xp_reward': random.choice([25, 50]),
             'difficulty': random.choice([1, 2]),
+            'question_type': 'interval-identification',
+            'visual': _interval_visual(n1, n2, semitones),
         })
     return questions
 
@@ -585,8 +727,30 @@ def generate_theory_questions(count):
     ]
     # Generate variations from the bank
     questions = []
+    theory_types = [
+        'perfect-fifth', 'major-scale-pattern', 'pentatonic-count', 'caged', 'key-signature',
+        'relative-minor', 'tonic', 'triad', 'scale-degree-interval', 'chromatic-scale',
+        'guitar-strings', 'guitar-tuning', 'scale-degree-note', 'mode-degree', 'barre-chord',
+        'octave', 'dominant-seventh', 'tempo', 'subdominant', 'meter', 'arpeggio', 'mediant',
+        'major-triad', 'diminished-triad', 'circle-of-fifths',
+    ]
+    theory_visuals = [
+        _interval_visual('C4', 'G4', 7), _scale_visual('C', 'major'),
+        _scale_visual('C', 'pentatonic_major'), {'kind': 'fretboard', 'tuning': ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'], 'chordShape': 'C-A-G-E-D'},
+        {'kind': 'key-signature', 'tonic': 'A', 'mode': 'major', 'accidentals': ['F#', 'C#', 'G#']},
+        {'kind': 'circle-of-fifths', 'activeKey': 'C', 'relation': 'relative-minor'},
+        {'kind': 'key-signature', 'tonic': 'D', 'mode': 'major', 'accidentals': ['F#', 'C#']},
+        _chord_visual('C', 'Major'), _interval_visual('C4', 'E4', 4), _scale_visual('C', 'chromatic'),
+        {'kind': 'instrument', 'instrument': 'guitar', 'strings': 6}, {'kind': 'fretboard', 'tuning': ['E2', 'A2', 'D3', 'G3', 'B3', 'E4']},
+        _scale_visual('C', 'major'), _scale_visual('C', 'dorian'), {'kind': 'fretboard', 'tuning': ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'], 'chordShape': 'barre'},
+        _interval_visual('C4', 'C5', 12), _chord_visual('C', 'Dominant 7th'), {'kind': 'tempo', 'marking': 'tempo', 'bpmRange': [60, 120]},
+        _scale_visual('G', 'major'), {'kind': 'rhythm', 'meter': [4, 4], 'events': [{'value': 'quarter', 'beat': 1}]},
+        {'kind': 'technique', 'subject': 'arpeggio', 'frames': []}, _scale_visual('C', 'major'), _chord_visual('C', 'Major'),
+        _chord_visual('C', 'Diminished'), {'kind': 'circle-of-fifths', 'activeKey': 'C'},
+    ]
     for _ in range(count):
         q = random.choice(theory_bank)
+        index = theory_bank.index(q)
         questions.append({
             'category': 'theory',
             'title': 'Theory Quest',
@@ -596,6 +760,8 @@ def generate_theory_questions(count):
             'explanation': build_daily_challenge_explanation('theory', 'Music Theory', q['question'], q['options'], q['correct_index']),
             'xp_reward': q['xp_reward'],
             'difficulty': q['difficulty'],
+            'question_type': f'theory-{theory_types[index]}',
+            'visual': theory_visuals[index],
         })
     return questions
 
@@ -624,6 +790,8 @@ def generate_ear_training_questions(count):
             'explanation': build_daily_challenge_explanation('ear_training', 'Interval Recognition', f'From {n1} to {n2}, what interval do you hear? (Distance: {semitones} semitones)', options, correct_idx),
             'xp_reward': random.choice([50, 75, 100]),
             'difficulty': random.choice([2, 3, 4]),
+            'question_type': 'ear-training-legacy',
+            'visual': _interval_visual(n1, n2, semitones),
         })
     return questions
 
@@ -733,6 +901,8 @@ def generate_general_questions(count):
             'explanation': build_daily_challenge_explanation('general', title, question, options, correct_idx),
             'xp_reward': xp,
             'difficulty': diff,
+            'question_type': f'general-{title.lower().replace(" ", "-")}',
+            'visual': _general_visual(title),
         })
     return questions
 
@@ -779,6 +949,8 @@ def seed_challenges(target=1000):
                 options_json=json.dumps(q['options']),
                 correct_index=q['correct_index'],
                 explanation=q.get('explanation'),
+                question_type=q.get('question_type'),
+                visual_json=json.dumps(q['visual']),
                 xp_reward=q['xp_reward'],
                 difficulty=q['difficulty'],
             ))
@@ -820,6 +992,41 @@ def compute_streak(user_id):
             break
 
     return streak
+
+
+def _utc_hint_state(user, now=None):
+    now = now or datetime.utcnow()
+    usage_date = now.strftime('%Y-%m-%d')
+    reset_at = (datetime(now.year, now.month, now.day) + timedelta(days=1)).isoformat() + 'Z'
+    rank_id = (user.rank_id or 'unranked').lower()
+    limit = HINT_LIMITS.get(rank_id, HINT_LIMITS['unranked'])
+    usage = DailyHintUsage.query.filter_by(user_id=user.id, usage_date=usage_date).first()
+    used = usage.used_count if usage else 0
+    return usage_date, limit, used, reset_at
+
+
+def _hint_allowance(user):
+    _, limit, used, reset_at = _utc_hint_state(user)
+    return {'remaining': max(limit - used, 0), 'limit': limit, 'reset_at': reset_at, 'local_only': False}
+
+
+def _apply_rank_xp(user, amount):
+    """Apply server-owned daily reward progress without skipping promotion gates."""
+    if not amount or user.rank_challenge_pending:
+        return
+    rank_id = (user.rank_id or 'unranked').lower()
+    if rank_id not in RANK_LEVELS:
+        rank_id = 'unranked'
+    user.rank_id = rank_id
+    user.rank_xp = (user.rank_xp or 0) + amount
+    if user.rank_xp < RANK_XP_PER_LEVEL:
+        return
+    user.rank_xp -= RANK_XP_PER_LEVEL
+    rank_max = RANK_LEVELS[rank_id]
+    user.rank_level = min(rank_max, (user.rank_level or 1) + 1)
+    if user.rank_level >= rank_max:
+        user.rank_level = rank_max
+        user.rank_challenge_pending = rank_id != 'legendary'
 
 
 # ─── Routes ────────────────────────────────────────────────────────────────────
@@ -875,6 +1082,71 @@ def get_daily_challenges():
         'remaining': max(available_total - len(result), 0) if random_mode else max(available_total - offset - len(result), 0),
         'limit': limit,
         'offset': offset,
+        'hint_allowance': _hint_allowance(current_user) if current_user.is_authenticated else {
+            'remaining': None, 'limit': None, 'reset_at': None, 'local_only': True,
+        },
+    })
+
+
+@daily_bp.route('/daily-challenge/<int:challenge_id>/hint', methods=['POST'])
+@login_required
+@limiter.limit('120 per hour', override_defaults=True)
+def reveal_hint(challenge_id):
+    """Spend at most one UTC daily hint for this user's challenge reveal."""
+    challenge = DailyChallenge.query.get(challenge_id)
+    if not challenge:
+        return jsonify({'error': 'Challenge not found'}), 404
+
+    usage_date, limit, _, reset_at = _utc_hint_state(current_user)
+    # The reveal row is the idempotency key. Locking the usage row keeps supported
+    # databases from overspending the daily counter under simultaneous requests.
+    reveal = DailyHintReveal.query.filter_by(
+        user_id=current_user.id, challenge_id=challenge_id, usage_date=usage_date,
+    ).first()
+    usage = DailyHintUsage.query.filter_by(
+        user_id=current_user.id, usage_date=usage_date,
+    ).with_for_update().first()
+    if reveal:
+        used = usage.used_count if usage else 0
+        return jsonify({
+            'remaining': max(limit - used, 0), 'limit': limit, 'reset_at': reset_at,
+            'explanation': challenge.to_dict()['explanation'], 'already_revealed': True,
+        })
+    if usage is None:
+        usage = DailyHintUsage(user_id=current_user.id, usage_date=usage_date, used_count=0)
+        db.session.add(usage)
+    if usage.used_count >= limit:
+        return jsonify({
+            'remaining': 0, 'limit': limit, 'reset_at': reset_at,
+            'error': 'No daily hints remaining',
+        }), 429
+
+    usage.used_count += 1
+    db.session.add(DailyHintReveal(
+        user_id=current_user.id, challenge_id=challenge_id, usage_date=usage_date,
+    ))
+    try:
+        db.session.commit()
+    except IntegrityError:
+        # A concurrent request may have inserted this reveal after our initial
+        # read. The unique idempotency key makes that request a successful reopen.
+        db.session.rollback()
+        reveal = DailyHintReveal.query.filter_by(
+            user_id=current_user.id, challenge_id=challenge_id, usage_date=usage_date,
+        ).first()
+        if reveal:
+            usage = DailyHintUsage.query.filter_by(
+                user_id=current_user.id, usage_date=usage_date,
+            ).first()
+            used = usage.used_count if usage else 0
+            return jsonify({
+                'remaining': max(limit - used, 0), 'limit': limit, 'reset_at': reset_at,
+                'explanation': challenge.to_dict()['explanation'], 'already_revealed': True,
+            })
+        raise
+    return jsonify({
+        'remaining': limit - usage.used_count, 'limit': limit, 'reset_at': reset_at,
+        'explanation': challenge.to_dict()['explanation'], 'already_revealed': False,
     })
 
 
@@ -935,6 +1207,7 @@ def complete_challenge(challenge_id):
     # Award XP
     current_user.xp = (current_user.xp or 0) + xp_award
     current_user.level = calculate_level_from_xp(current_user.xp)
+    _apply_rank_xp(current_user, xp_award)
     db.session.commit()
 
     return jsonify({
@@ -942,6 +1215,7 @@ def complete_challenge(challenge_id):
         'xp': current_user.xp,
         'level': current_user.level,
         'xp_awarded': xp_award,
+        'rank': current_user.to_dict()['rank'],
         'already_completed': False,
         'message': f'+{xp_award} XP!',
     })

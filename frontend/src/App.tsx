@@ -10,6 +10,8 @@ import MySongsPage from './pages/create/MySongsPage'
 import DailyChallenge from './pages/play/DailyChallenge'
 import EarTraining from './pages/play/EarTraining'
 import Quests from './pages/play/Quests'
+import ScalePathGame from './features/scale-play/components/ScalePathGame'
+import ScaleLab from './features/scale-play/components/ScaleLab'
 import Stats from './pages/system/Stats'
 import Settings from './pages/system/Settings'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage'
@@ -37,6 +39,8 @@ const App = () => {
             <Route path="/create/my-songs" element={<MySongsPage />} />
             <Route path="/play/daily" element={<DailyChallenge />} />
             <Route path="/play/ear-training" element={<EarTraining />} />
+            <Route path="/play/scales" element={<ScalePathGame />} />
+            <Route path="/play/learn-scales" element={<ScaleLab />} />
             <Route path="/play/quests" element={<Quests />} />
             <Route path="/stats" element={<Stats />} />
             <Route path="/settings" element={<Settings />} />

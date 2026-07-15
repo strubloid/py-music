@@ -1,698 +1,783 @@
 /* ChordsPage Styles - Dark Glass-morphism Design */
 
 .chords-page {
-  padding: 1.25rem 1.5rem 1.5rem;
-  max-width: 100%;
-  margin: 0 auto;
-  box-sizing: border-box;
-  overflow-x: hidden;
+    padding: 1.25rem 1.5rem 1.5rem;
+    max-width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .chords-hero {
-  display: flex;
-  justify-content: space-between;
-  align-self: center;
-  gap: 1rem;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding: 1.1rem;
-  border: 1px solid var(--border-soft);
-  border-radius: 16px;
-  background: var(--surface-1);
+    display: flex;
+    justify-content: space-between;
+    align-self: center;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1.1rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    background: var(--surface-1);
 }
 
 .chords-hero-copy {
-  grid-area: copy;
-  min-width: 0;
-  max-width: 20rem;
+    grid-area: copy;
+    min-width: 0;
+    max-width: 20rem;
 }
 
 .chords-hero-copy h1 {
-  font-size: clamp(1.85rem, 2.2vw, 2.3rem);
-  font-weight: 700;
-  color: var(--text-strong);
-  margin: 0.15rem 0 0.25rem;
-  line-height: 1.08;
-  text-wrap: balance;
+    font-size: clamp(1.85rem, 2.2vw, 2.3rem);
+    font-weight: 700;
+    color: var(--text-strong);
+    margin: 0.15rem 0 0.25rem;
+    line-height: 1.08;
+    text-wrap: balance;
 }
 
 .chords-page-subtitle {
-  font-size: 0.94rem;
-  color: var(--text-muted);
-  margin: 0;
-  max-width: 50ch;
-  line-height: 1.5;
-  text-wrap: pretty;
+    font-size: 0.94rem;
+    color: var(--text-muted);
+    margin: 0;
+    max-width: 50ch;
+    line-height: 1.5;
+    text-wrap: pretty;
 }
 
 .hero-kicker {
-  margin: 0;
-  color: var(--accent);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+    margin: 0;
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
 }
 
 .chords-hero-summary {
-  grid-area: summary;
-  display: flex;
-  justify-content: flex-end;
-  align-self: center;
+    grid-area: summary;
+    display: flex;
+    justify-content: flex-end;
+    align-self: center;
 }
 
 .summary-chip {
-  width: 100%;
-  min-width: 0;
-  padding: 0.8rem 0.95rem;
-  border-radius: 16px;
-  background: rgba(251, 191, 36, 0.08);
-  border: 1px solid rgba(251, 191, 36, 0.18);
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+    width: 100%;
+    min-width: 0;
+    padding: 0.8rem 0.95rem;
+    border-radius: 16px;
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
 }
 
 .summary-chip.muted {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: var(--border-soft);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--border-soft);
 }
 
 .summary-chip-label {
-  color: var(--text-subtle);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+    color: var(--text-subtle);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .summary-chip strong {
-  color: var(--text-strong);
-  font-size: 1rem;
+    color: var(--text-strong);
+    font-size: 1rem;
 }
 
 .chords-workbench {
-  display: grid;
-  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
-  gap: 1rem;
-  align-items: start;
-  min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+    min-width: 0;
 }
 
 .chords-rail {
-  position: sticky;
-  top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  min-width: 0;
+    position: sticky;
+    top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
 }
 
 .chords-lab {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
 }
 
 .selector-panel {
-  background: var(--surface-1);
-  border: 1px solid var(--border-soft);
-  border-radius: 16px;
-  padding: 1rem;
-  min-width: 0;
+    background: var(--surface-1);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    padding: 1rem;
+    min-width: 0;
 }
 
 .selector-panel-note p {
-  margin: 0;
-  color: var(--text-muted);
-  line-height: 1.6;
-  font-size: 1.5rem;
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.6;
+    font-size: 1.5rem;
 }
 
 /* Root Note Selector */
 .root-note-selector {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .selector-label {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-subtle);
-  margin-bottom: 12px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-subtle);
+    margin-bottom: 12px;
 }
 
 .root-note-buttons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .root-note-btn {
-  width: 48px;
-  height: 48px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .root-note-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--text-strong);
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-strong);
 }
 
 .root-note-btn.active {
-  background: var(--accent);
-  color: #111827;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+    background: var(--accent);
+    color: #111827;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
 }
 
 /* Chord Type Selector */
 .chord-type-selector {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .chord-type-buttons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .chord-type-btn {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .chord-type-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--text-strong);
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-strong);
 }
 
 .chord-type-btn.active {
-  background: rgba(251, 191, 36, 0.2);
-  color: var(--accent);
-  border-color: rgba(251, 191, 36, 0.4);
-  font-weight: 600;
+    background: rgba(251, 191, 36, 0.2);
+    color: var(--accent);
+    border-color: rgba(251, 191, 36, 0.4);
+    font-weight: 600;
 }
 
 /* Selected Chord Display */
 .selected-chord-display {
-  grid-area: selected;
-  grid-column: auto;
-  background: var(--surface-1);
-  border-radius: 16px;
-  padding: 0.9rem 1.05rem;
-  border: 1px solid rgba(251, 191, 36, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  min-width: 0;
-  width: 100%;
-  max-width: 540px;
-  justify-self: center;
+    grid-area: selected;
+    grid-column: auto;
+    background: var(--surface-1);
+    border-radius: 16px;
+    padding: 0.9rem 1.05rem;
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-width: 0;
+    width: 100%;
+    max-width: 540px;
+    justify-self: center;
 }
 
 .selected-chord-name {
-  font-size: clamp(1.7rem, 2.2vw, 2.25rem);
-  font-weight: 700;
-  color: var(--accent);
-  line-height: 1;
-  flex: 0 0 auto;
+    font-size: clamp(1.7rem, 2.2vw, 2.25rem);
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    flex: 0 0 auto;
 }
 
 .selected-chord-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  align-items: flex-end;
-  min-width: 0;
-  margin-left: auto;
-  text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    align-items: flex-end;
+    min-width: 0;
+    margin-left: auto;
+    text-align: right;
 }
 
 .selected-chord-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-subtle);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
 }
 
 .selected-chord-notes {
-  font-size: 0.88rem;
-  color: var(--text-muted);
-  text-align: right;
-  text-wrap: pretty;
-  white-space: nowrap;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    text-align: right;
+    text-wrap: pretty;
+    white-space: nowrap;
 }
 
 /* Chord Variations Panel */
 .chord-variations-panel {
-  background: var(--surface-1);
-  border-radius: 16px;
-  padding: 1.1rem 1.2rem;
-  border: 1px solid var(--border-soft);
-  min-width: 0;
+    background: var(--surface-1);
+    border-radius: 16px;
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--border-soft);
+    min-width: 0;
 }
 
 .variations-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
 .variations-panel-header h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-strong);
-  margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-strong);
+    margin: 0;
 }
 
 .variations-hint {
-  font-size: 12px;
-  color: var(--text-muted);
+    font-size: 12px;
+    color: var(--text-muted);
 }
 
 .chord-variations-list {
-  display: flex;
-  gap: 24px;
-  overflow-x: auto;
-  padding-bottom: 12px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-  min-width: 0;
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    min-width: 0;
 }
-.chord-shape-preview { display:grid; gap:12px; padding:14px; border:1px solid rgba(73,200,239,.42); border-radius:16px; background:linear-gradient(120deg,rgba(73,200,239,.1),rgba(17,22,58,.82)); }.chord-shape-preview > header { display:flex; align-items:center; justify-content:space-between; gap:12px; }.chord-shape-preview > header > div:first-child { display:grid; gap:2px; }.chord-shape-preview > header span { color:#49c8ef; font:800 .62rem ui-monospace,monospace; letter-spacing:.12em; text-transform:uppercase; }.chord-shape-preview > header strong { color:#f7f8ff; font-size:1rem; }.chord-shape-preview__tabs { display:flex; gap:5px; }.chord-shape-preview__tabs button,.chord-shape-preview__variations button { min-height:32px; padding:6px 10px; border:1px solid rgba(73,200,239,.35); border-radius:8px; color:#c7cce6; background:rgba(5,8,23,.62); font-size:.72rem; font-weight:800; cursor:pointer; }.chord-shape-preview__tabs button.is-active,.chord-shape-preview__variations button.is-active { border-color:#ffbd2e; color:#1c1200; background:#ffbd2e; box-shadow:0 0 16px rgba(255,189,46,.26); }.chord-shape-preview__guitar { display:grid; place-items:center; min-height:255px; border:1px solid rgba(255,189,46,.18); border-radius:12px; background:radial-gradient(circle at 50% 43%,rgba(255,189,46,.14),transparent 36%),rgba(5,8,23,.5); }.chord-shape-preview__guitar .chord-variation-item { transform:scale(1.18); }.chord-shape-preview__guitar .chord-variation-label { color:#ffd96a; border:1px solid rgba(255,189,46,.28); background:rgba(5,8,23,.76); }.chord-shape-preview__guitar .chord-variation-diagram { border-color:rgba(73,200,239,.28); background:rgba(5,8,23,.84); }.chord-shape-preview .piano-container { margin:0; }.chord-shape-preview__variations { display:flex; flex-wrap:wrap; gap:7px; justify-content:center; padding-top:2px; }.chord-shape-preview__variations button { flex:0 1 auto; }
+.chord-shape-preview {
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid rgba(73, 200, 239, 0.42);
+    border-radius: 16px;
+    background: linear-gradient(120deg, rgba(73, 200, 239, 0.1), rgba(17, 22, 58, 0.82));
+}
+.chord-shape-preview > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.chord-shape-preview > header > div:first-child {
+    display: grid;
+    gap: 2px;
+}
+.chord-shape-preview > header span {
+    color: #49c8ef;
+    font:
+        800 0.62rem ui-monospace,
+        monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+.chord-shape-preview > header strong {
+    color: #f7f8ff;
+    font-size: 1rem;
+}
+.chord-shape-preview__tabs {
+    display: flex;
+    gap: 5px;
+}
+.chord-shape-preview__tabs button,
+.chord-shape-preview__variations button {
+    min-height: 32px;
+    padding: 6px 10px;
+    border: 1px solid rgba(73, 200, 239, 0.35);
+    border-radius: 8px;
+    color: #c7cce6;
+    background: rgba(5, 8, 23, 0.62);
+    font-size: 0.72rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+.chord-shape-preview__tabs button.is-active,
+.chord-shape-preview__variations button.is-active {
+    border-color: #ffbd2e;
+    color: #1c1200;
+    background: #ffbd2e;
+    box-shadow: 0 0 16px rgba(255, 189, 46, 0.26);
+}
+.chord-shape-preview__guitar {
+    display: grid;
+    place-items: center;
+    min-height: 380px;
+    border: 1px solid rgba(255, 189, 46, 0.18);
+    border-radius: 12px;
+    background: radial-gradient(circle at 50% 43%, rgba(255, 189, 46, 0.14), transparent 36%), rgba(5, 8, 23, 0.5);
+}
+.chord-shape-preview__guitar .chord-variation-item {
+    transform: scale(1.18);
+}
+.chord-shape-preview__guitar .chord-variation-label {
+    color: #ffd96a;
+    border: 1px solid rgba(255, 189, 46, 0.28);
+    background: rgba(5, 8, 23, 0.76);
+}
+.chord-shape-preview__guitar .chord-variation-diagram {
+    border-color: rgba(73, 200, 239, 0.28);
+    background: rgba(5, 8, 23, 0.84);
+}
+.chord-shape-preview .piano-container {
+    margin: 0;
+}
+.chord-shape-preview__variations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    justify-content: center;
+    padding-top: 2px;
+}
+.chord-shape-preview__variations button {
+    flex: 0 1 auto;
+}
 
 .piano-chord-panel {
-  background: var(--surface-1);
-  border-radius: 16px;
-  padding: 1.1rem 1.2rem;
-  border: 1px solid var(--border-soft);
-  min-width: 0;
+    background: var(--surface-1);
+    border-radius: 16px;
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--border-soft);
+    min-width: 0;
 }
 
 .piano-chord-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 16px;
 }
 
 .piano-chord-panel-header h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-strong);
-  margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-strong);
+    margin: 0;
 }
 
 .piano-chord-panel-body {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
 }
 
 .piano-chord-preview {
-  display: inline-block;
-  padding: 0.6rem;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 248, 255, 0.95));
-  border: 1px solid rgba(251, 191, 36, 0.2);
+    display: inline-block;
+    padding: 0.6rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 248, 255, 0.95));
+    border: 1px solid rgba(251, 191, 36, 0.2);
 }
 
 .piano-chord-notes {
-  min-width: min(360px, 100%);
-  flex: 1;
-  color: var(--text-muted);
+    min-width: min(360px, 100%);
+    flex: 1;
+    color: var(--text-muted);
 }
 
 .piano-chord-notes p {
-  margin: 0.4rem 0 0;
-  line-height: 1.6;
+    margin: 0.4rem 0 0;
+    line-height: 1.6;
 }
 
 .chord-variations-list::-webkit-scrollbar {
-  height: 6px;
+    height: 6px;
 }
 
 .chord-variations-list::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 .chord-variations-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
 }
 
 /* Individual Variation Item */
 .chord-variation-item {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
 }
 
 .chord-variation-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-align: center;
-  background: rgba(255, 255, 255, 0.06);
-  padding: 4px 12px;
-  border-radius: 4px;
-  white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-align: center;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 4px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
 }
 
 .chord-variation-diagram {
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  padding: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  max-width: 100%;
-  overflow-x: auto;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    max-width: 100%;
+    overflow-x: auto;
 }
 
 /* Quick Reference Grid */
 .chord-quick-reference {
-  background: var(--surface-1);
-  border-radius: 16px;
-  padding: 1.1rem 1.2rem;
-  border: 1px solid var(--border-soft);
-  min-width: 0;
+    background: var(--surface-1);
+    border-radius: 16px;
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--border-soft);
+    min-width: 0;
 }
 
 .quick-reference-header {
-  margin-bottom: 16px;
+    margin-bottom: 16px;
 }
 
 .quick-reference-header h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-strong);
-  margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-strong);
+    margin: 0;
 }
 
 .chord-type-sections {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
 }
 
 .chord-type-section {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  padding: 14px 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .chord-type-section:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
 }
 
 .chord-type-section.selected {
-  background: rgba(251, 191, 36, 0.15);
-  border-color: rgba(251, 191, 36, 0.3);
+    background: rgba(251, 191, 36, 0.15);
+    border-color: rgba(251, 191, 36, 0.3);
 }
 
 .chord-type-section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
 }
 
 .chord-type-label {
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-subtle);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-subtle);
 }
 
 .chord-type-symbol {
-  font-size: 10px;
-  color: var(--text-subtle);
-  font-family: monospace;
+    font-size: 10px;
+    color: var(--text-subtle);
+    font-family: monospace;
 }
 
 .chord-type-section-name {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text-strong);
-  margin-bottom: 4px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-strong);
+    margin-bottom: 4px;
 }
 
 .chord-type-section-count {
-  font-size: 11px;
-  color: var(--text-muted);
+    font-size: 11px;
+    color: var(--text-muted);
 }
 
 /* Scrollbar styling for the whole page */
 .chords-page::-webkit-scrollbar {
-  width: 8px;
+    width: 8px;
 }
 
 .chords-page::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .chords-page::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
 }
 
 .chords-page::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.25);
 }
 
 @media (max-width: 860px) {
-  .chords-workbench {
-    grid-template-columns: 1fr;
-  }
+    .chords-workbench {
+        grid-template-columns: 1fr;
+    }
 
-  .chords-rail {
-    position: static;
-  }
+    .chords-rail {
+        position: static;
+    }
 
-  .chords-hero {
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 420px);
-    grid-template-areas:
-      "copy summary"
-      "selected selected";
-    align-items: start;
-  }
+    .chords-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 420px);
+        grid-template-areas:
+            "copy summary"
+            "selected selected";
+        align-items: start;
+    }
 
-  .chords-hero-summary {
-    justify-content: flex-start;
-  }
+    .chords-hero-summary {
+        justify-content: flex-start;
+    }
 
-  .selected-chord-display {
-    grid-column: 1 / -1;
-    max-width: 100%;
-    justify-self: stretch;
-  }
+    .selected-chord-display {
+        grid-column: 1 / -1;
+        max-width: 100%;
+        justify-self: stretch;
+    }
 
-  .chords-hero,
-  .selector-panel,
-  .selected-chord-display,
-  .chord-variations-panel,
-  .chord-quick-reference {
-    max-width: 100%;
-  }
+    .chords-hero,
+    .selector-panel,
+    .selected-chord-display,
+    .chord-variations-panel,
+    .chord-quick-reference {
+        max-width: 100%;
+    }
 }
 
 @media (max-width: 640px) {
-  .chords-page {
-    padding: 0.85rem 0.75rem;
-  }
+    .chords-page {
+        padding: 0.85rem 0.75rem;
+    }
 
-  .chords-hero {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    padding: 0.9rem;
-    gap: 0.75rem;
-    width: 100%;
-  }
+    .chords-hero {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.9rem;
+        gap: 0.75rem;
+        width: 100%;
+    }
 
-  .chords-hero-copy{
-    min-width: 0;
-  }
-  
-  .chords-hero-summary,
-  .selector-panel,
-  .selected-chord-display,
-  .chord-variations-panel,
-  .chord-quick-reference,
-  .chords-workbench,
-  .chords-lab,
-  .chords-rail {
-    width: 100%;
-    min-width: 0;
-  }
+    .chords-hero-copy {
+        min-width: 0;
+    }
 
-  .chords-hero-copy h1 {
-    font-size: 1.65rem;
-  }
+    .chords-hero-summary,
+    .selector-panel,
+    .selected-chord-display,
+    .chord-variations-panel,
+    .chord-quick-reference,
+    .chords-workbench,
+    .chords-lab,
+    .chords-rail {
+        width: 100%;
+        min-width: 0;
+    }
 
-  .summary-chip {
-    min-width: 0;
-    flex: 1 1 70px;
-  }
+    .chords-hero-copy h1 {
+        font-size: 1.65rem;
+    }
 
-  .root-note-btn {
-    width: 42px;
-    height: 42px;
-  }
+    .summary-chip {
+        min-width: 0;
+        flex: 1 1 70px;
+    }
 
-  .chord-type-btn {
-    padding: 0.65rem 0.85rem;
-  }
+    .root-note-btn {
+        width: 42px;
+        height: 42px;
+    }
 
-  .chords-hero-summary {
-    flex-direction: row;
-    align-items: center;
-  }
+    .chord-type-btn {
+        padding: 0.65rem 0.85rem;
+    }
 
-  .summary-chip {
-    width: 100%;
-  }
+    .chords-hero-summary {
+        flex-direction: row;
+        align-items: center;
+    }
 
-  .root-note-buttons,
-  .chord-type-buttons {
-    gap: 0.45rem;
-  }
+    .summary-chip {
+        width: 100%;
+    }
 
-  .root-note-selector,
-  .chord-type-selector {
-    padding: 0.85rem;
-    margin-bottom: 0.9rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
+    .root-note-buttons,
+    .chord-type-buttons {
+        gap: 0.45rem;
+    }
 
-  .root-note-buttons {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+    .root-note-selector,
+    .chord-type-selector {
+        padding: 0.85rem;
+        margin-bottom: 0.9rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
 
-  .root-note-btn {
-    width: 100%;
-  }
+    .root-note-buttons {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
 
-  .chord-type-buttons {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+    .root-note-btn {
+        width: 100%;
+    }
 
-  .chord-type-btn {
-    width: 100%;
-  }
+    .chord-type-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 
-  .chord-variations-list {
-    flex-direction: column;
-    overflow: visible;
-    gap: 0.85rem;
-    padding-bottom: 0;
-  }
+    .chord-type-btn {
+        width: 100%;
+    }
 
-  .chord-variation-item {
-    width: 100%;
-    align-items: stretch;
-  }
+    .chord-variations-list {
+        flex-direction: column;
+        overflow: visible;
+        gap: 0.85rem;
+        padding-bottom: 0;
+    }
 
-  .chord-variation-label {
-    width: 100%;
-    box-sizing: border-box;
-  }
+    .chord-variation-item {
+        width: 100%;
+        align-items: stretch;
+    }
 
-  .chord-variation-diagram {
-    width: 100%;
-    padding: 0.75rem;
-    overflow-x: auto;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+    .chord-variation-label {
+        width: 100%;
+        box-sizing: border-box;
+    }
 
-  .chord-quick-reference {
-    padding: 0.9rem;
-  }
+    .chord-variation-diagram {
+        width: 100%;
+        padding: 0.75rem;
+        overflow-x: auto;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-  .chord-type-sections {
-    grid-template-columns: 1fr;
-  }
+    .chord-quick-reference {
+        padding: 0.9rem;
+    }
 
-  .selected-chord-display {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
+    .chord-type-sections {
+        grid-template-columns: 1fr;
+    }
 
-  .selected-chord-copy {
-    align-items: flex-start;
-    margin-left: 0;
-  }
+    .selected-chord-display {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
 
-  .selected-chord-label,
-  .selected-chord-notes {
-    text-align: left;
-  }
+    .selected-chord-copy {
+        align-items: flex-start;
+        margin-left: 0;
+    }
 
-  .selector-panel,
-  .chord-variations-panel,
-  .chord-quick-reference,
-  .chords-hero {
-    border-radius: 16px;
-  }
+    .selected-chord-label,
+    .selected-chord-notes {
+        text-align: left;
+    }
 
-  .selected-chord-name {
-    font-size: clamp(1.7rem, 9vw, 2.4rem);
-  }
+    .selector-panel,
+    .chord-variations-panel,
+    .chord-quick-reference,
+    .chords-hero {
+        border-radius: 16px;
+    }
+
+    .selected-chord-name {
+        font-size: clamp(1.7rem, 9vw, 2.4rem);
+    }
 }
 
 @media (max-width: 420px) {
-  .chord-type-sections {
-    grid-template-columns: 1fr;
-  }
+    .chord-type-sections {
+        grid-template-columns: 1fr;
+    }
 
-  .root-note-buttons,
-  .chord-type-buttons {
-    gap: 0.45rem;
-  }
+    .root-note-buttons,
+    .chord-type-buttons {
+        gap: 0.45rem;
+    }
 }

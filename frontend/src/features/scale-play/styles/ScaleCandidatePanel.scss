@@ -1,0 +1,73 @@
+.sc-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  &__title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #7d86b0;
+    margin: 0;
+  }
+
+  &__empty {
+    font-size: 0.78rem;
+    color: #7d86b0;
+    margin: 0;
+    text-align: center;
+    padding: 12px 0;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.sc-candidate {
+  padding: 10px 12px;
+  background: rgba(9, 13, 40, 0.7);
+  border: 1px solid rgba(71, 61, 140, 0.4);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  &--target {
+    border-color: rgba(255, 157, 31, 0.5);
+    background: rgba(255, 157, 31, 0.08);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #f7f8ff;
+  }
+
+  &__match {
+    font-size: 0.68rem;
+    color: #7d86b0;
+    font-family: ui-monospace, monospace;
+    background: rgba(71, 61, 140, 0.3);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  &__missing {
+    font-size: 0.68rem;
+    color: #49c8ef;
+  }
+}

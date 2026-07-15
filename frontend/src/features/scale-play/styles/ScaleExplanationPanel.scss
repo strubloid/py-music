@@ -1,0 +1,65 @@
+.se-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(9, 13, 40, 0.7);
+  border: 1px solid rgba(71, 61, 140, 0.4);
+  border-radius: 12px;
+
+  &--confirmed {
+    border-color: rgba(146, 232, 76, 0.4);
+    background: rgba(146, 232, 76, 0.05);
+  }
+
+  &__text {
+    font-size: 0.82rem;
+    color: #c3c9e5;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  &__message {
+    font-size: 0.82rem;
+    color: #f7f8ff;
+    margin: 0;
+
+    &--good { color: #92e84c; font-weight: 700; }
+  }
+
+  &__missing,
+  &__extra {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  &__missing-label { font-size: 0.68rem; color: #49c8ef; text-transform: uppercase; letter-spacing: 0.08em; }
+  &__extra-label { font-size: 0.68rem; color: #ff4f60; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+}
+
+.se-chip {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: ui-monospace, monospace;
+
+  &--missing {
+    background: rgba(73, 200, 239, 0.15);
+    border: 1px solid rgba(73, 200, 239, 0.4);
+    color: #49c8ef;
+  }
+
+  &--extra {
+    background: rgba(255, 79, 96, 0.15);
+    border: 1px solid rgba(255, 79, 96, 0.4);
+    color: #ff4f60;
+  }
+}

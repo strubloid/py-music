@@ -1,0 +1,261 @@
+// Scale Path game styles — Sound Gates visual language
+@use './scale-fretboard';
+@use './ScaleFragmentHud';
+
+.scale-path-game {
+  --sp-bg: #05080f;
+  --sp-deep: #090d28;
+  --sp-navy: #0d1535;
+  --sp-indigo: #171b50;
+  --sp-surface: rgba(13, 21, 53, 0.92);
+  --sp-amber: #ff9d1f;
+  --sp-amber-light: #ffbd2e;
+  --sp-cyan: #49c8ef;
+  --sp-green: #92e84c;
+  --sp-red: #ff4f60;
+  --sp-text: #f7f8ff;
+  --sp-text-soft: #c3c9e5;
+  --sp-text-muted: #7d86b0;
+  --sp-border: rgba(255, 189, 46, 0.28);
+  --sp-border-hot: rgba(255, 205, 82, 0.9);
+
+  min-height: 100vh;
+  background: var(--sp-bg);
+  color: var(--sp-text);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px;
+
+  // Phase-based theming
+  &[data-phase="showing-correct"] {
+    --accent: var(--sp-green);
+  }
+  &[data-phase="showing-incorrect"] {
+    --accent: var(--sp-red);
+  }
+}
+
+// Header
+.sp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--sp-surface);
+  border: 1px solid var(--sp-border);
+  border-radius: 14px;
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    > span {
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+
+    p {
+      font-size: 0.65rem;
+      color: var(--sp-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--sp-amber);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+
+    button {
+      background: transparent;
+      border: 1px solid var(--sp-border);
+      border-radius: 8px;
+      color: var(--sp-text-soft);
+      padding: 7px 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: background 120ms, border-color 120ms;
+      &:hover { background: rgba(255,189,46,0.1); border-color: var(--sp-amber); }
+      &:focus-visible { outline: 2px solid var(--sp-amber); outline-offset: 2px; }
+    }
+  }
+}
+
+// Board area
+.sp-board {
+  background: var(--sp-deep);
+  border: 1px solid var(--sp-border);
+  border-radius: 16px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+// Controls
+.sp-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.sp-btn {
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: background 120ms, border-color 120ms, transform 80ms;
+  letter-spacing: 0.02em;
+
+  &:focus-visible { outline: 2px solid var(--sp-amber); outline-offset: 2px; }
+  &:active { transform: scale(0.97); }
+
+  &--commit {
+    background: rgba(255, 157, 31, 0.18);
+    border-color: var(--sp-amber);
+    color: var(--sp-amber-light);
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 157, 31, 0.3);
+      border-color: var(--sp-amber-light);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  &:not(&--commit) {
+    background: transparent;
+    border-color: var(--sp-border);
+    color: var(--sp-text-soft);
+    &:hover { background: rgba(255,255,255,0.05); }
+  }
+}
+
+// Keyboard legend
+.sp-legend {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--sp-text-muted);
+
+  kbd {
+    display: inline-block;
+    padding: 2px 5px;
+    background: rgba(23, 27, 80, 0.9);
+    border: 1px solid rgba(71, 61, 140, 0.6);
+    border-radius: 4px;
+    font-family: ui-monospace, monospace;
+    font-size: 0.65rem;
+    color: var(--sp-text-soft);
+  }
+}
+
+// Complete screen
+.sp-complete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 20px;
+  text-align: center;
+
+  h2 { font-size: 1.6rem; color: var(--sp-amber-light); margin: 0; }
+
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 380px;
+  }
+}
+
+.sp-stat {
+  background: var(--sp-surface);
+  border: 1px solid var(--sp-border);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  span { font-size: 0.72rem; color: var(--sp-text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  strong { font-size: 1.4rem; font-weight: 800; color: var(--sp-amber-light); }
+}
+
+// Error state
+.sp-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px 20px;
+  text-align: center;
+
+  p { color: var(--sp-red); font-size: 0.95rem; }
+}
+
+// Paused overlay
+.sp-paused-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 15, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+
+.sp-paused-card {
+  background: var(--sp-navy);
+  border: 1px solid var(--sp-amber);
+  border-radius: 20px;
+  padding: 32px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+
+  h2 { margin: 0; color: var(--sp-amber-light); font-size: 1.4rem; }
+}
+
+// Screen-reader only
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+// Reduced motion
+.reduced-motion {
+  *, *::before, *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}

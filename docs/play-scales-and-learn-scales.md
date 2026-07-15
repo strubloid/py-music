@@ -20,6 +20,12 @@ The new pages must not create a second music-data model. They consume the existi
 - `/api/scale/:key?interval=:mode&octaves=:count` for scale degrees, keyboard notes, and fretboard positions.
 - Existing root/key naming, instrument range, and fretboard rendering rules.
 
+### Current Repository Status
+
+This document describes the target feature, not features that are already shipped. Before calling the work complete, the repository must have real `/play/scales` and `/play/learn-scales` routes, sidebar links, `/learn/scales` deep links, shared scale-data normalization, server-recognized Scale Path results, and browser coverage for loading, navigation, commitment, rewards, and resume.
+
+The existing `/play/daily` scale-recipe challenge is a separate legacy challenge. It may reuse the same instrument preview, but it is not a substitute for Scale Path or Scale Lab.
+
 ## Product Intent
 
 Scale recognition should feel like navigating a musical route, not answering a multiple-choice theory question. The player learns that a scale is a connected set of note choices across the fretboard:
@@ -60,6 +66,33 @@ Scale Path is a five-fragment run, matching Note Runner's short-session contract
 
 The five-fragment session must use the same durable result pathway as Ear Training: one result record per completed fragment plus one run record at session completion. It must not award decorative client-only XP.
 
+### Run Contract
+
+Each run carries a durable `runId`, deterministic seed, selected root/mode/range, difficulty, and generator version. The client renders and submits candidates, but must not choose reward amounts or claim correctness for authenticated users.
+
+Minimum fragment result fields:
+
+```ts
+{
+  resultId: string;
+  runId: string;
+  fragmentId: string;
+  mode: 'scale-path';
+  root: string;
+  scaleFamily: string;
+  difficulty: number;
+  goal: 'find-pitch' | 'continue-shape';
+  selectedPosition: { stringIndex: number; fret: number };
+  correctPosition: { stringIndex: number; fret: number };
+  correct: boolean;
+  responseMs?: number;
+  powersUsed: string[];
+  completedAt: string;
+}
+```
+
+The server response includes `xpAwarded`, `accountXp`, `level`, and an idempotency result. Repeating the same `resultId` never awards XP twice.
+
 ### The Core Board
 
 The primary surface is a responsive guitar fretboard with an overlay route. It is not a generic grid of answer buttons.
@@ -90,6 +123,18 @@ The phrase "one step left or up" is implemented as a **route constraint**, not a
 - If multiple guitar positions contain the same correct pitch, the fragment declares whether the goal is `find the pitch` or `continue this shape`. Only the latter constrains the position.
 
 This keeps the game playful while respecting real fretboard geometry.
+
+### Chord-Context Variant
+
+The phrase "notes from the last three chords" is an explicit fragment type, not an ambiguous visual rule.
+
+- A chord-context fragment contains three source chords, their ordered pitch classes, and a target scale family/root.
+- The board initially highlights pitch classes contributed by those chords as neutral evidence.
+- The player identifies missing scale degrees that complete the target scale.
+- Chord tones and scale-only tones use different labels and patterns; color alone is insufficient.
+- The prompt names the task: `Complete the scale from the last three chords`.
+- If more than one scale fits, the fragment exposes a disambiguating root, mode clue, or fourth chord. Otherwise the fragment is invalid.
+- The generator records exact chord voicings and note spellings so explanations can identify which chord supplied each note.
 
 ### Interaction Model
 
@@ -267,6 +312,10 @@ When no target scale is chosen, Scale Lab must present possibilities honestly:
 
 When a target is selected, the system may show the exact remainder because the mode is explicitly instructional.
 
+### Scale Lab Reward Boundary
+
+Scale Lab awards no XP for placing individual notes, repeatedly clearing the board, or toggling `Show the rest`. A verified construction may create one mastery record per target/root/range/day combination, but it is idempotent and does not create account XP by default.
+
 ### Audio
 
 - The root can be played on demand.
@@ -317,6 +366,39 @@ Suggested routes and navigation:
 /play/learn-scales -> ScaleLab
 ```
 
+### API Contract
+
+The existing scale endpoint is the source of display data, but it is not sufficient for assessed gameplay. Define validated gameplay endpoints before shipping Scale Path:
+
+```text
+GET  /api/scale-path/run?seed=...&difficulty=...
+POST /api/scale-path/results
+POST /api/scale-lab/verify
+```
+
+`GET /api/scale-path/run` returns normalized fragments or a server seed that produces the same fragments. `POST /api/scale-path/results` validates the result and returns authoritative progression. `POST /api/scale-lab/verify` returns explanation/mastery information and no XP by default.
+
+Anonymous mode may generate locally, but rewards must be labeled local until explicit authenticated reconciliation. Never trust client-provided `correctPosition`, `xpAwarded`, `difficulty`, or `scaleFamily` as authority.
+
+### Shared Normalized Shape
+
+Both modes consume one normalized representation:
+
+```ts
+type NormalizedScale = {
+  root: string;
+  modeKey: string;
+  modeName: string;
+  notes: string[];
+  intervals: string[];
+  degrees: Array<{ degree: number; roman: string; note: string }>;
+  keyboardData: unknown;
+  fretboardData: Array<{ string: string; frets: Array<{ fret: number; note: string; isScaleNote: boolean; isRoot: boolean }> }>;
+};
+```
+
+The normalizer converts backend `is_scale_note`/`is_root` fields, preserves flat/sharp spelling, and rejects incomplete fretboard data instead of rendering a misleading empty instrument.
+
 Sidebar Play navigation should expose:
 
 ```text
@@ -335,6 +417,8 @@ The existing `GuitarFretboard` is a display component. Do not overload it with a
 - Selected and committed answer positions.
 - Root, scale, invalid, and guidance states.
 - Keyboard focus coordinate.
+
+The existing `PianoKeyboard` and `GuitarFretboard` may be used as read-only previews in Scale Lab and legacy Daily Challenge scale recipes. Scale Path requires an assessment wrapper around the same normalized data; its primary visual must not be text-only `W/H` recipes.
 
 ## Generator Rules
 
@@ -366,6 +450,21 @@ Scale Path should follow the proven Ear Training phase structure where applicabl
 
 Scale Lab has its own non-competitive builder state because it never commits an assessed answer. It must not reuse Scale Path result states merely for visual effect.
 
+### Persistence And Recovery
+
+- Store active runs under a versioned key such as `strubloid:scale-path:v1:<user-or-guest-id>`.
+- Persist the seed, run ID, fragment index, selected answers, used powers, combo, and submitted result IDs.
+- Do not persist transient animation coordinates or audio playback state.
+- On reload, offer `Resume run` or `Start fresh`; never silently regenerate a different fragment.
+- Do not merge guest rank or XP into an authenticated account implicitly.
+
+### Failure And Network Rules
+
+- If scale data cannot load, show a retry state and do not start timers or consume Focus.
+- If result submission times out, keep the result pending and prevent duplicate submission while offering retry.
+- If the server says a result was already accepted, render the stored reward and mark it synchronized.
+- If the server rejects a stale run or generator version, explain that the run must restart; never award a client result.
+
 ## Implementation Sequence
 
 1. Extract scale API normalization shared by both modes.
@@ -377,6 +476,8 @@ Scale Lab has its own non-competitive builder state because it never commits an 
 7. Add two-gap and modal-family difficulty tiers.
 8. Add Scale Path and Scale Lab sidebar entries plus cross-links from `/learn/scales`.
 9. Test desktop, tablet, 390x844, 360x780, keyboard-only, screen-reader labels, high contrast, and reduced motion.
+10. Add backend tests for fragment validity, chord-context ambiguity, server-side correctness, reward idempotency, stale-run rejection, and client XP tampering.
+11. Add browser tests for resume, refresh during a run, offline/result retry, route deep links, and guest-to-authenticated boundaries.
 
 ## Acceptance Criteria
 
@@ -390,3 +491,7 @@ Scale Lab has its own non-competitive builder state because it never commits an 
 - Existing scale explorer behavior remains available.
 - All interaction states are keyboard, touch, and screen-reader accessible.
 - Both modes are usable without color vision or motion-dependent feedback.
+- The legacy `/play/daily` scale recipe visibly uses the same Piano/Fretboard vocabulary but remains separate from Scale Path.
+- Three-chord fragments identify their source chords and never present an underdetermined answer as unique.
+- Repeated result submission cannot duplicate XP, Rank XP, quests, badges, streaks, or mastery counts.
+- Refreshing, pausing, losing network, and changing authentication state do not silently change the fragment or progression outcome.

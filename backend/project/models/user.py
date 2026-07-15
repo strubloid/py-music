@@ -17,6 +17,11 @@ class User(db.Model):
     level = db.Column(db.Integer, default=1)
     instrument_preference = db.Column(db.String(20), nullable=True)  # 'guitar', 'piano', 'both'
     skill_level = db.Column(db.String(20), nullable=True)  # 'beginner', 'intermediate', 'advanced'
+    # Rank progression is server-owned so entitlements are not derived from mutable clients.
+    rank_id = db.Column(db.String(20), nullable=False, default='unranked')
+    rank_level = db.Column(db.Integer, nullable=False, default=1)
+    rank_xp = db.Column(db.Integer, nullable=False, default=0)
+    rank_challenge_pending = db.Column(db.Boolean, nullable=False, default=False)
 
     # Relationships
     progressions = db.relationship('Progression', backref='user', lazy=True, cascade='all, delete-orphan')
@@ -57,6 +62,12 @@ class User(db.Model):
             'level': self.level,
             'instrument_preference': self.instrument_preference,
             'skill_level': self.skill_level,
+            'rank': {
+                'id': self.rank_id or 'unranked',
+                'level': self.rank_level or 1,
+                'xp': self.rank_xp or 0,
+                'challenge_pending': bool(self.rank_challenge_pending),
+            },
         }
 
 
@@ -137,6 +148,8 @@ class DailyChallenge(db.Model):
     options_json = db.Column(db.Text, nullable=False)  # JSON array of answer strings
     correct_index = db.Column(db.Integer, nullable=False)  # index into options_json
     explanation = db.Column(db.Text, nullable=True)
+    question_type = db.Column(db.String(80), nullable=True)
+    visual_json = db.Column(db.Text, nullable=True)
     xp_reward = db.Column(db.Integer, default=50)
     difficulty = db.Column(db.Integer, default=1)  # 1-5
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -161,6 +174,8 @@ class DailyChallenge(db.Model):
             'xp_reward': self.xp_reward,
             'difficulty': self.difficulty,
             'explanation': explanation,
+            'question_type': self.question_type,
+            'visual': json.loads(self.visual_json) if self.visual_json else None,
         }
 
 
@@ -204,6 +219,33 @@ class QuestClaim(db.Model):
 
     __table_args__ = (
         db.UniqueConstraint('user_id', 'quest_id', 'period_key', name='unique_user_quest_period'),
+    )
+
+
+class DailyHintUsage(db.Model):
+    __tablename__ = 'daily_hint_usage'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    usage_date = db.Column(db.String(10), nullable=False)  # UTC YYYY-MM-DD
+    used_count = db.Column(db.Integer, nullable=False, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (db.UniqueConstraint('user_id', 'usage_date', name='unique_user_hint_date'),)
+
+
+class DailyHintReveal(db.Model):
+    __tablename__ = 'daily_hint_reveals'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    challenge_id = db.Column(db.Integer, db.ForeignKey('daily_challenges.id'), nullable=False)
+    usage_date = db.Column(db.String(10), nullable=False)  # UTC YYYY-MM-DD
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'challenge_id', 'usage_date', name='unique_user_challenge_hint_date'),
     )
 
 
@@ -267,6 +309,27 @@ def run_migrations():
         )
         db.session.commit()
         print("✅ Added explanation column to daily_challenges")
+
+    for column, definition in (
+        ('question_type', 'VARCHAR(80)'),
+        ('visual_json', 'TEXT'),
+    ):
+        if column not in challenge_columns:
+            db.session.execute(sa.text(f'ALTER TABLE daily_challenges ADD COLUMN {column} {definition}'))
+            db.session.commit()
+            print(f"✅ Added {column} column to daily_challenges")
+
+    user_columns = [c['name'] for c in inspector.get_columns('users')]
+    for column, definition in (
+        ('rank_id', "VARCHAR(20) NOT NULL DEFAULT 'unranked'"),
+        ('rank_level', 'INTEGER NOT NULL DEFAULT 1'),
+        ('rank_xp', 'INTEGER NOT NULL DEFAULT 0'),
+        ('rank_challenge_pending', 'BOOLEAN NOT NULL DEFAULT 0'),
+    ):
+        if column not in user_columns:
+            db.session.execute(sa.text(f'ALTER TABLE users ADD COLUMN {column} {definition}'))
+            db.session.commit()
+            print(f"✅ Added {column} column to users")
 
 
 import json  # noqa: E402 — must be after DailyChallenge to_dict

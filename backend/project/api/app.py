@@ -16,6 +16,8 @@ from backend.project.extensions import limiter, generate_csrf_token, validate_cs
 
 import threading
 import requests
+import random
+import time
 
 from backend.project.music.chords.intervals.Major import MajorInterval
 from backend.project.music.chords.intervals.Minor import MinorInterval
@@ -562,6 +564,236 @@ def init_db():
         if os.getenv('SEED_CHALLENGES_ON_START', 'false').lower() == 'true':
             seed_challenges(target=200)
         print("✅ Database tables created")
+
+
+# ─── Scale Path (assessed) ─────────────────────────────────────────────────────
+
+def _build_scale_route(root_key, mode, octaves, fret_count):
+    """Generate a playable route of scale notes on the guitar fretboard."""
+    NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    MODE_INTERVALS = {
+        'ionian': [0, 2, 4, 5, 7, 9, 11],
+        'aeolian': [0, 2, 3, 5, 7, 8, 10],
+        'dorian': [0, 2, 3, 5, 7, 9, 10],
+        'mixolydian': [0, 2, 4, 5, 7, 9, 10],
+        'phrygian': [0, 1, 3, 5, 7, 8, 10],
+        'lydian': [0, 2, 4, 6, 7, 9, 11],
+        'locrian': [0, 1, 3, 5, 6, 8, 10],
+    }
+
+    # Keep route generation independent of optional LLM/music-system startup.
+    # A Scale Path run must always have a playable, deterministic note set.
+    NOTE_TONES = {
+        'C': 0, 'C#': 1, 'DB': 1, 'D': 2, 'D#': 3, 'EB': 3,
+        'E': 4, 'F': 5, 'F#': 6, 'GB': 6, 'G': 7, 'G#': 8,
+        'AB': 8, 'A': 9, 'A#': 10, 'BB': 10, 'B': 11,
+    }
+    root_tone = NOTE_TONES.get(root_key.upper(), 0)
+    scale_notes = [NOTE_NAMES[(root_tone + interval) % 12] for interval in MODE_INTERVALS.get(mode, MODE_INTERVALS['ionian'])]
+
+    # Guitar standard tuning: high E through low E.
+    TUNING = [('E', 4), ('B', 3), ('G', 2), ('D', 1), ('A', 0), ('E', -1)]
+
+    def note_to_semitone(note):
+        return NOTE_TONES.get(note.upper(), 0)
+
+    # Build all scale-note positions on the fretboard up to fret_count
+    positions = []
+    for string_note, string_offset in TUNING:
+        base_tone = note_to_semitone(string_note)
+        for fret in range(fret_count + 1):
+            pos_tone = (base_tone + fret) % 12
+            if scale_notes:
+                # Match by note name (handle sharps)
+                matching = [n for n in scale_notes
+                            if note_to_semitone(n) == pos_tone]
+                if matching:
+                    positions.append({
+                        'string': string_note,
+                        'fret': fret,
+                        'note': matching[0],
+                        'stringIndex': TUNING.index((string_note, string_offset)),
+                        'pitch': pos_tone,
+                    })
+            else:
+                # Fallback: any note matching the mode's expected degrees
+                pass
+
+    return positions
+
+
+def _select_tier1_fragment(positions, root_key, mode):
+    """Select a deterministic Tier-1 fragment: root + 3 notes + 1 gap + 2 candidates."""
+    if len(positions) < 5:
+        return None
+
+    # Use positions that span at least 2 strings or 4 frets for variety
+    suitable = [p for p in positions if p['fret'] >= 2]
+    if not suitable:
+        suitable = positions[1:] if len(positions) > 1 else positions
+
+    # Pick a mid-point anchor (not first or last, to have room on both sides)
+    mid = len(suitable) // 2
+    anchor = suitable[mid] if suitable else positions[0]
+
+    # Collect the visible suffix: 3 notes after anchor in pitch order
+    anchor_idx = positions.index(anchor)
+    suffix_positions = positions[anchor_idx + 1:anchor_idx + 4]
+
+    # The gap is the next valid position after suffix
+    gap_candidates = positions[anchor_idx + 4:anchor_idx + 7]
+
+    if not gap_candidates:
+        gap_candidates = positions[anchor_idx:anchor_idx + 2]
+
+    # Two candidates: the correct one + one wrong note on the same string or adjacent
+    correct_gap = gap_candidates[0] if gap_candidates else None
+
+    # Build wrong options from the same string or adjacent
+    wrong_options = []
+    if correct_gap:
+        same_string = [p for p in positions
+                       if p['string'] == correct_gap['string']
+                       and p['fret'] != correct_gap['fret']
+                       and p['fret'] <= 12]
+        wrong_options = [same_string[0]] if same_string else []
+
+        if not wrong_options:
+            # Adjacent string wrong option
+            all_wrong = [p for p in positions
+                         if p['stringIndex'] in [correct_gap['stringIndex'] - 1, correct_gap['stringIndex'] + 1]
+                         and p != correct_gap]
+            wrong_options = [all_wrong[0]] if all_wrong else []
+
+    candidates = []
+    if correct_gap:
+        candidates.append({**correct_gap, 'isCorrect': True})
+    for w in wrong_options[:1]:
+        candidates.append({**w, 'isCorrect': False})
+
+    # Shuffle candidates so correct isn't always last
+    import random
+    random.shuffle(candidates)
+
+    # Determine direction: if same string, it's "left" (higher fret on same string)
+    direction = 'left' if correct_gap and len([p for p in positions if p['string'] == correct_gap['string'] and p['fret'] > correct_gap['fret']]) > 0 else 'up'
+
+    return {
+        'root': root_key.upper(),
+        'mode': mode,
+        'difficulty': 1,
+        'anchor': {**anchor},
+        'suffix': [{**p} for p in suffix_positions],
+        'gap': {**correct_gap} if correct_gap else None,
+        'candidates': candidates,
+        'direction': direction,
+        'degreeClue': '?_?',
+    }
+
+
+@app.route('/api/scale-path/run', methods=['GET'])
+def get_scale_path_run():
+    """Get a seeded Scale Path run: root, mode, difficulty, and 5 fragments."""
+    try:
+        root = request.args.get('root', random.choice(['C', 'G', 'D', 'A', 'E', 'F']))
+        mode = request.args.get('mode', random.choice(['ionian', 'aeolian']))
+        octaves = max(1, min(3, int(request.args.get('octaves', 1))))
+        difficulty = max(1, min(5, int(request.args.get('difficulty', 1))))
+        fret_count = {1: 12, 2: 17, 3: 22}.get(octaves, 12)
+
+        # Build full route for this run
+        positions = _build_scale_route(root, mode, octaves, fret_count)
+
+        # Generate 5 fragments deterministically
+        fragments = []
+        for i in range(5):
+            frag = _select_tier1_fragment(positions, root, mode)
+            if frag:
+                frag['fragmentIndex'] = i
+                fragments.append(frag)
+
+        return jsonify({
+            'runId': f'scale-path-{root}-{mode}-{int(time.time())}',
+            'root': root.upper(),
+            'mode': mode,
+            'difficulty': difficulty,
+            'octaves': octaves,
+            'fretCount': fret_count,
+            'positions': positions[:60],  # Send capped positions for the game
+            'fragments': fragments,
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/scale-path/complete', methods=['POST'])
+def complete_scale_path_fragment():
+    """Submit a Scale Path fragment result; returns XP awarded."""
+    try:
+        data = request.get_json() or {}
+        fragment_index = int(data.get('fragmentIndex', 0))
+        correct = bool(data.get('correct', False))
+        run_id = data.get('runId', '')
+        difficulty = max(1, min(5, int(data.get('difficulty', 1))))
+
+        # Authoritative XP for logged-in users; guests get local only
+        xp_awarded = 0
+        if correct:
+            xp_awarded = min(50, max(10, 10 * difficulty))
+
+        return jsonify({
+            'fragmentIndex': fragment_index,
+            'correct': correct,
+            'xpAwarded': xp_awarded,
+            'xpTotal': xp_awarded,  # Client accumulates
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/scale-path/verify', methods=['POST'])
+def verify_scale_lab_build():
+    """Verify a Scale Lab build — no XP, just confirmation and feedback."""
+    try:
+        data = request.get_json() or {}
+        root = data.get('root', 'C').upper()
+        mode = data.get('mode', 'ionian')
+        selected_notes = data.get('selectedNotes', [])  # list of pitch class indices
+
+        mode_intervals = {
+            'ionian': [0, 2, 4, 5, 7, 9, 11],
+            'aeolian': [0, 2, 3, 5, 7, 8, 10],
+            'dorian': [0, 2, 3, 5, 7, 9, 10],
+            'mixolydian': [0, 2, 4, 5, 7, 9, 10],
+            'phrygian': [0, 1, 3, 5, 7, 8, 10],
+            'lydian': [0, 2, 4, 6, 7, 9, 11],
+            'locrian': [0, 1, 3, 5, 6, 8, 10],
+        }
+        note_tones = {
+            'C': 0, 'C#': 1, 'DB': 1, 'D': 2, 'D#': 3, 'EB': 3,
+            'E': 4, 'F': 5, 'F#': 6, 'GB': 6, 'G': 7, 'G#': 8,
+            'AB': 8, 'A': 9, 'A#': 10, 'BB': 10, 'B': 11,
+        }
+        root_tone = note_tones.get(root, 0)
+        expected_pitch_classes = {
+            (root_tone + interval) % 12
+            for interval in mode_intervals.get(mode, mode_intervals['ionian'])
+        }
+
+        selected_pitch_classes = set(selected_notes)
+        confirmed = selected_pitch_classes == expected_pitch_classes
+        missing = expected_pitch_classes - selected_pitch_classes
+        extra = selected_pitch_classes - expected_pitch_classes
+
+        return jsonify({
+            'confirmed': confirmed,
+            'expectedPitchClasses': list(expected_pitch_classes),
+            'missingPitchClasses': list(missing),
+            'extraPitchClasses': list(extra),
+            'message': 'Build verified!' if confirmed else f"Missing {len(missing)} note(s).",
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':
