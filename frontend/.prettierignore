@@ -1,0 +1,9 @@
+node_modules/
+dist/
+storybook-static/
+coverage/
+playwright-report/
+test-results/
+public/assets/rive/*.riv
+e2e/**/*.png
+package-lock.json

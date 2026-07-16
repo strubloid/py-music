@@ -4,6 +4,11 @@ export default defineConfig({
   testDir: './e2e',
   timeout: 60_000,
   workers: 1,
+  reporter: [
+    ['line'],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    ['junit', { outputFile: 'test-results/e2e-junit.xml' }],
+  ],
   expect: {
     timeout: 10_000,
   },

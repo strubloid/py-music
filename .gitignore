@@ -211,6 +211,8 @@ frontend/storybook-static/
 
 # Playwright test results & baselines
 frontend/test-results/
+frontend/playwright-report/
+frontend/coverage/
 frontend/e2e/baselines/
 
 # Database files

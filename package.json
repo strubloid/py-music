@@ -3,16 +3,33 @@
   "version": "1.0.0",
   "private": true,
   "description": "Strubloid music theory learning platform — full-stack Python/Flask + React/Vite.",
+  "engines": {
+    "node": ">=22 <25"
+  },
   "scripts": {
-    "check-all-errors": "node scripts/check-all-errors.js",
-    "check:backend": "pyright -p pyrightconfig.json",
-    "check:backend:compile": "node scripts/check-backend-compile.js",
+    "audit": "npm run audit:node && npm run audit:python",
+    "audit:node": "npm --prefix frontend run audit",
+    "audit:python": "node scripts/run-python.js -m pip_audit -r requirements.txt",
+    "build": "npm --prefix frontend run build",
+    "check-all-errors": "npm run validate",
+    "check:backend": "node scripts/run-python.js -m pyright -p pyrightconfig.json",
+    "check:backend:compile": "node scripts/run-python.js -m compileall -q backend/project",
     "check:frontend": "npm --prefix frontend run lint",
     "check:frontend:build": "npm --prefix frontend run build",
     "check:frontend:types": "npm --prefix frontend exec -- tsc --noEmit",
-    "check:backend:tests": "python -m unittest discover -s backend/project/tests -v",
-    "test:backend": "python -m unittest discover -s backend/project/tests",
+    "check:repository": "npm run check:backend:compile && npm --prefix frontend run build-storybook",
+    "format": "npm --prefix frontend run format",
+    "format:check": "npm --prefix frontend run format:check",
+    "lint": "npm --prefix frontend run lint",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:backend": "node scripts/run-python.js -m unittest discover -s backend/project/tests -v",
+    "test:backend:coverage": "node scripts/run-python.js -m coverage run --source=backend.project -m unittest discover -s backend/project/tests -v && node scripts/run-python.js -m coverage xml -o coverage.xml && node scripts/run-python.js -m coverage report",
+    "test:coverage": "npm run test:backend:coverage && npm --prefix frontend run test:coverage",
     "test:frontend:unit": "npm --prefix frontend run test:unit",
-    "test:frontend:e2e": "npm --prefix frontend run test:e2e"
+    "test:frontend:e2e": "npm --prefix frontend run test:e2e",
+    "test:integration": "npm run test:backend && npm run test:frontend:e2e",
+    "test:unit": "npm run test:frontend:unit",
+    "typecheck": "npm run check:backend && npm run check:frontend:types",
+    "validate": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run test:coverage && npm run build && npm run check:repository && npm run audit"
   }
 }
