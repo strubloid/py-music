@@ -13,17 +13,17 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir --disable-pip-version-check -r requirements.txt
 
-COPY backend/ ./backend/
-COPY main.py ./
-COPY --from=frontend-build /app/frontend/dist ./frontend/dist
+RUN useradd --create-home --shell /bin/bash app && \
+    mkdir -p /app/data && \
+    chown app:app /app /app/data
+COPY --chown=app:app backend/ ./backend/
+COPY --chown=app:app main.py ./
+COPY --chown=app:app --from=frontend-build /app/frontend/dist ./frontend/dist
 
 ENV FLASK_APP=backend.project.api.app:app
 ENV PYTHONUNBUFFERED=1
 ENV PORT=5000
 
-RUN useradd --create-home --shell /bin/bash app && \
-    mkdir -p /app/data && \
-    chown -R app:app /app
 USER app
 
 EXPOSE 5000
