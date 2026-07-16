@@ -18,7 +18,8 @@
     "check:frontend": "npm --prefix frontend run lint",
     "check:frontend:build": "npm --prefix frontend run build",
     "check:frontend:types": "npm --prefix frontend run typecheck",
-    "check:repository": "npm run check:backend:compile && npm --prefix frontend run build-storybook:ci && npm run check:docker",
+    "check:repository": "npm run check:tooling && npm run check:backend:compile && npm --prefix frontend run build-storybook:ci && npm run check:docker",
+    "check:tooling": "node scripts/check-tooling.js",
     "format": "npm --prefix frontend run format",
     "format:check": "npm --prefix frontend run format:check",
     "lint": "npm --prefix frontend run lint",
@@ -30,7 +31,8 @@
     "test:frontend:e2e": "npm --prefix frontend run test:e2e",
     "test:integration": "npm run test:backend && npm run test:frontend:e2e",
     "test:unit": "npm run test:frontend:unit",
-    "typecheck": "npm run check:backend && npm run check:frontend:types",
+    "prepush": "npm run check:tooling && npm run typecheck && npm run lint && npm run format:check && npm run build",
+    "typecheck": "npm run check:tooling && npm run check:backend && npm run check:frontend:types",
     "validate": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run test:coverage && npm run build && npm run check:repository && npm run audit"
   }
 }

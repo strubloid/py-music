@@ -9,6 +9,7 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements-dev.txt
 npm --prefix frontend ci
 npx --prefix frontend playwright install chromium
+git config core.hooksPath .githooks
 ```
 
 Backend authentication tests generate a process-local strong password when `TEST_PASSWORD` is not provided. CI therefore does not require a credential secret.
@@ -20,6 +21,8 @@ npm run validate
 ```
 
 No task, pull request, or coding-agent run should be marked complete until this command passes. The command runs TypeScript and Python type checks, linting, formatting validation, unit and integration/E2E tests, coverage generation, the production and Storybook builds, Python compilation, and dependency audits.
+
+The tracked pre-push hook runs the static preflight (`npm run prepush`) before Git sends commits. The hook is enabled by the `git config` command above and blocks pushes when tooling configuration, type checks, linting, formatting, or the production build fails.
 
 Useful focused commands:
 

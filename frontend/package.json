@@ -25,7 +25,7 @@
     "test:unit:node": "tsx --test src/features/ear-game/tests/*.test.ts",
     "test:unit:vitest": "vitest run",
     "test:visual": "playwright test e2e/living-city.visual.spec.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit --project tsconfig.json"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.0.0",
