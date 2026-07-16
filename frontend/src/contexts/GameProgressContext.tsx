@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
-import { claimQuestReward } from '../services/api';
+import { claimQuestReward, getGameProgress } from '../services/api';
 import LevelUpModal from '../components/game/LevelUpModal';
+import CityRewardCeremony from '../components/game/CityRewardCeremony';
 import {
   BADGES,
   DEFAULT_FOCUS_POINTS,
@@ -12,20 +13,15 @@ import {
   getNewBadgesForResult,
   getUnlockedPowers,
 } from '../game/gameSystem';
-import {
-  advanceRankProgress,
-  applyRankXp,
-  createInitialRankProgress,
-  getRankMeta,
-  normalizeRankProgress,
-} from '../game/rankSystem';
+import { getRankMeta } from '../game/rankSystem';
 
 const GameProgressContext = createContext(null);
 
 const getStorageKey = (userId) => `strubloid:game-progress:${userId || 'guest'}`;
 
-const getDefaultProgress = (xp = 0, level = 1) => ({
-  focusPoints: DEFAULT_FOCUS_POINTS,
+const getDefaultProgress = (xp = 0, level = 1, focusPoints = DEFAULT_FOCUS_POINTS) => ({
+  economyVersion: 2,
+  focusPoints,
   badges: [],
   challengeResults: [],
   questClaims: {},
@@ -34,8 +30,6 @@ const getDefaultProgress = (xp = 0, level = 1) => ({
   powersUsedCount: {},
   lastLevelSeen: level,
   lastKnownXp: xp,
-  rankProgress: createInitialRankProgress(),
-  lastRankEvent: null,
 });
 
 export const useGameProgress = () => {
@@ -50,20 +44,28 @@ export const GameProgressProvider = ({ children }) => {
   const { user, updateUserProgress, isLoggedIn } = useAuth();
   const [progressState, setProgressState] = useState(() => getDefaultProgress());
   const [levelUpState, setLevelUpState] = useState(null);
+  const [cityReward, setCityReward] = useState(null);
 
   useEffect(() => {
     const level = user?.level || 1;
     const xp = user?.xp || 0;
+    const serverFocus = isLoggedIn && Number.isFinite(user?.focus_points)
+      ? Math.min(MAX_FOCUS_POINTS, Math.max(0, user.focus_points))
+      : null;
     const storageKey = getStorageKey(user?.id);
 
     try {
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
+        const migratedFocus = parsed.economyVersion === 2
+          ? Math.min(MAX_FOCUS_POINTS, Math.max(0, Number(parsed.focusPoints) || 0))
+          : Math.min(MAX_FOCUS_POINTS, Math.max(0, Number(parsed.focusPoints) || 0) + 2);
         setProgressState({
           ...getDefaultProgress(xp, level),
           ...parsed,
-          rankProgress: normalizeRankProgress(parsed.rankProgress),
+          economyVersion: 2,
+          focusPoints: serverFocus ?? migratedFocus,
           lastKnownXp: xp,
           lastLevelSeen: parsed.lastLevelSeen || level,
         });
@@ -73,8 +75,35 @@ export const GameProgressProvider = ({ children }) => {
       // Ignore corrupt local progress.
     }
 
-    setProgressState(getDefaultProgress(xp, level));
-  }, [user?.id, user?.level, user?.xp]);
+    setProgressState(getDefaultProgress(xp, level, serverFocus ?? DEFAULT_FOCUS_POINTS));
+  }, [isLoggedIn, user?.id]);
+
+  useEffect(() => {
+    if (!isLoggedIn || !Number.isFinite(user?.focus_points)) return;
+    setProgressState((current) => ({
+      ...current,
+      focusPoints: Math.min(MAX_FOCUS_POINTS, Math.max(0, user.focus_points)),
+    }));
+  }, [isLoggedIn, user?.focus_points]);
+
+  useEffect(() => {
+    if (!isLoggedIn || !user?.id) return undefined;
+    let cancelled = false;
+    getGameProgress().then((response) => {
+      if (cancelled) return;
+      setProgressState((current) => ({
+        ...current,
+        focusPoints: Number.isFinite(response.data.focus_points)
+          ? Math.min(MAX_FOCUS_POINTS, Math.max(0, response.data.focus_points))
+          : current.focusPoints,
+        questClaims: {
+          ...(current.questClaims || {}),
+          ...(response.data.quest_claims || {}),
+        },
+      }));
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [isLoggedIn, user?.id]);
 
   useEffect(() => {
     const storageKey = getStorageKey(user?.id);
@@ -101,7 +130,6 @@ export const GameProgressProvider = ({ children }) => {
 
       return {
         ...current,
-        focusPoints: DEFAULT_FOCUS_POINTS,
         lastLevelSeen: currentLevel,
         lastKnownXp: currentXp,
       };
@@ -140,6 +168,14 @@ export const GameProgressProvider = ({ children }) => {
     }));
   }, []);
 
+  const setFocusBalance = useCallback((balance) => {
+    if (!Number.isFinite(balance)) return;
+    setProgressState((current) => ({
+      ...current,
+      focusPoints: Math.min(MAX_FOCUS_POINTS, Math.max(0, balance)),
+    }));
+  }, []);
+
   const recordChallengeResult = useCallback((result) => {
     setProgressState((current) => {
       const nextResults = [result, ...current.challengeResults].slice(0, 25);
@@ -163,10 +199,6 @@ export const GameProgressProvider = ({ children }) => {
         nextPowersUsedCount[powerId] = (nextPowersUsedCount[powerId] || 0) + 1;
       });
 
-      const rankUpdate = result.mode === 'note-runner-run'
-        ? advanceRankProgress(current.rankProgress, result)
-        : applyRankXp(current.rankProgress, result);
-
       return {
         ...current,
         badges: Array.from(nextBadges),
@@ -174,8 +206,6 @@ export const GameProgressProvider = ({ children }) => {
         totalCompleted: nextTotalCompleted,
         totalCorrect: nextTotalCorrect,
         powersUsedCount: nextPowersUsedCount,
-        rankProgress: rankUpdate.progress,
-        lastRankEvent: rankUpdate.event || current.lastRankEvent,
       };
     });
   }, []);
@@ -197,12 +227,9 @@ export const GameProgressProvider = ({ children }) => {
     }
 
     setProgressState((current) => {
-      const rankUpdate = applyRankXp(current.rankProgress, { challengeId: claimKey, mode: 'quest', xpEarned });
       return {
         ...current,
         focusPoints: Math.min(MAX_FOCUS_POINTS, current.focusPoints + focusRestored),
-        rankProgress: rankUpdate.progress,
-        lastRankEvent: rankUpdate.event || current.lastRankEvent,
         questClaims: {
           ...(current.questClaims || {}),
           [claimKey]: { claimedAt: new Date().toISOString(), xpAwarded, focusRestored },
@@ -213,11 +240,13 @@ export const GameProgressProvider = ({ children }) => {
   }, [isLoggedIn, progressState.questClaims, updateUserProgress, user?.xp]);
 
   const clearLevelUp = useCallback(() => setLevelUpState(null), []);
+  const showCityReward = useCallback((reward) => setCityReward(reward), []);
+  const clearCityReward = useCallback(() => setCityReward(null), []);
 
   const derived = useMemo(() => {
     const xp = user?.xp || 0;
     const levelMeta = getLevelMeta(xp);
-    const rankMeta = getRankMeta(progressState.rankProgress);
+    const rankMeta = getRankMeta(levelMeta.level, user?.rank?.id);
     return {
       levelMeta,
       rankMeta,
@@ -226,7 +255,7 @@ export const GameProgressProvider = ({ children }) => {
       allPowers: POWERS,
       allLevels: LEVELS,
     };
-  }, [progressState.rankProgress, user?.xp]);
+  }, [user?.rank?.id, user?.xp]);
 
   return (
     <GameProgressContext.Provider
@@ -238,12 +267,15 @@ export const GameProgressProvider = ({ children }) => {
         claimQuest,
         consumeFocus,
         restoreFocus,
+        setFocusBalance,
+        showCityReward,
         recordChallengeResult,
         ...derived,
       }}
     >
       {children}
       <LevelUpModal levelUpState={levelUpState} onClose={clearLevelUp} />
+      <CityRewardCeremony reward={levelUpState ? null : cityReward} onClose={clearCityReward} />
     </GameProgressContext.Provider>
   );
 };

@@ -11,6 +11,7 @@ This directory contains only current, authoritative project documentation. Histo
 | Daily, Ear Training, Sound Gates, XP, ranks, quests, hints | [Practice and Progression](practice-and-progression.md) |
 | Piano, guitar, scales, chords, songwriting, settings | [Instruments and Creation](instruments-and-creation.md) |
 | Product purpose, audience, visual direction | [Product](PRODUCT.md) and [Design System](DESIGN.md) |
+| Living Music City runtime, districts, assets, privacy, and phase gates | [Living Music City](features/living-music-city.md) and [Implementation Specification](../layout-update.md) |
 | Recreate the repository, route/API/model map | [Architecture and Reproduction](architecture.md) |
 | Detailed feature behavior and ownership | [Feature Contracts](features/README.md) |
 | Deployment | [Deployment](fly-deployment.md) |

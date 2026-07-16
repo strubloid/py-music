@@ -198,6 +198,35 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+# ── Project-specific additions ──────────────────────────────
+
+# AI assistant / coding tool local settings
+.claude/
+.codex/
+.impeccable/
+.opencode/
+
+# Storybook build output
+frontend/storybook-static/
+
+# Playwright test results & baselines
+frontend/test-results/
+frontend/e2e/baselines/
+
+# Database files
+*.db
+*.sqlite3
+
+# Windows Zone.Identifier files
+*:Zone.Identifier
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Node (root-level, frontend uses its own)
+node_modules/
+
 # Cursor
 #  Cursor is an AI-powered code editor. `.cursorignore` specifies files/directories to
 #  exclude from AI features like autocomplete and code analysis. Recommended for sensitive data

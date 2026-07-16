@@ -38,7 +38,7 @@ export const QUEST_CATALOG = [
   ...thresholdQuests({ cadence: 'milestone', metric: 'correct', thresholds: [1, 10, 25, 50, 100], title: (n) => `${n} Clean Hits`, description: (n) => `Land ${n} correct answers in total.`, xp: (_n, i) => [100, 200, 350, 500, 750][i], focus: (_n, i) => (i % 2 === 1 ? 1 : 0) }),
   ...thresholdQuests({ cadence: 'milestone', metric: 'ear-runs', thresholds: [1, 5, 10], title: (n) => `Runner ${n}`, description: (n) => `Finish ${n} Note Runner ${n === 1 ? 'run' : 'runs'} in total.`, xp: (_n, i) => [300, 600, 900][i], focus: 1 }),
   ...thresholdQuests({ cadence: 'milestone', metric: 'perfect', thresholds: [1, 5, 10], title: (n) => `Perfect Ear ${n}`, description: (n) => `Finish ${n} perfect Note Runner ${n === 1 ? 'run' : 'runs'}.`, xp: (_n, i) => [400, 800, 1200][i], focus: 1 }),
-  ...thresholdQuests({ cadence: 'milestone', metric: 'combo', thresholds: [5, 10], title: (n) => `${n}x Nomi Aura`, description: (n) => `Reach a best combo of ${n}x.`, xp: (_n, i) => [700, 1300][i], focus: 1 }),
+  ...thresholdQuests({ cadence: 'milestone', metric: 'combo', thresholds: [5, 10], title: (n) => `${n}x Pip Aura`, description: (n) => `Reach a best combo of ${n}x.`, xp: (_n, i) => [700, 1300][i], focus: 1 }),
 ];
 
 const localDateKey = (date) => {

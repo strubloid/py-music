@@ -22,12 +22,21 @@ class User(db.Model):
     rank_level = db.Column(db.Integer, nullable=False, default=1)
     rank_xp = db.Column(db.Integer, nullable=False, default=0)
     rank_challenge_pending = db.Column(db.Boolean, nullable=False, default=False)
+    focus_points = db.Column(db.Integer, nullable=False, default=5)
+    active_plays = db.Column(db.Integer, nullable=False, default=0)
+    lifetime_points = db.Column(db.Integer, nullable=False, default=0, index=True)
+    analytics_enabled = db.Column(db.Boolean, nullable=False, default=False)
+    city_badge = db.Column(db.String(80), nullable=True)
+    pip_cosmetic = db.Column(db.String(80), nullable=True)
 
     # Relationships
     progressions = db.relationship('Progression', backref='user', lazy=True, cascade='all, delete-orphan')
     favorites = db.relationship('Favorite', backref='user', lazy=True, cascade='all, delete-orphan')
     challenge_attempts = db.relationship('ChallengeAttempt', backref='user', lazy=True, cascade='all, delete-orphan')
     quest_claims = db.relationship('QuestClaim', backref='user', lazy=True, cascade='all, delete-orphan')
+    activity_plays = db.relationship('ActivityPlay', backref='user', lazy=True, cascade='all, delete-orphan')
+    focus_transactions = db.relationship('FocusTransaction', backref='user', lazy=True, cascade='all, delete-orphan')
+    rewards = db.relationship('UserReward', backref='user', lazy=True, cascade='all, delete-orphan')
 
     # Flask-Login required attributes
     @property
@@ -60,6 +69,12 @@ class User(db.Model):
             'last_login': self.last_login.isoformat() if self.last_login else None,
             'xp': self.xp,
             'level': self.level,
+            'focus_points': self.focus_points if self.focus_points is not None else 5,
+            'active_plays': self.active_plays or 0,
+            'lifetime_points': self.lifetime_points or 0,
+            'analytics_enabled': bool(self.analytics_enabled),
+            'city_badge': self.city_badge,
+            'pip_cosmetic': self.pip_cosmetic,
             'instrument_preference': self.instrument_preference,
             'skill_level': self.skill_level,
             'rank': {
@@ -336,6 +351,60 @@ class QuestProgress(db.Model):
     )
 
 
+class ActivityPlay(db.Model):
+    """One real entry into active interaction, idempotent per browser session key."""
+
+    __tablename__ = 'activity_plays'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    activity = db.Column(db.String(40), nullable=False)
+    session_key = db.Column(db.String(80), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    completed_at = db.Column(db.DateTime, nullable=True)
+    __table_args__ = (db.UniqueConstraint('user_id', 'session_key', name='unique_user_activity_session'),)
+
+
+class FocusTransaction(db.Model):
+    __tablename__ = 'focus_transactions'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    transaction_key = db.Column(db.String(100), nullable=False)
+    reason = db.Column(db.String(50), nullable=False)
+    amount = db.Column(db.Integer, nullable=False)
+    balance_after = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (db.UniqueConstraint('user_id', 'transaction_key', name='unique_user_focus_transaction'),)
+
+
+class UserReward(db.Model):
+    __tablename__ = 'user_rewards'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    reward_id = db.Column(db.String(80), nullable=False)
+    reward_type = db.Column(db.String(40), nullable=False)
+    payload_json = db.Column(db.Text, nullable=False, default='{}')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (db.UniqueConstraint('user_id', 'reward_id', name='unique_user_reward'),)
+
+    def to_dict(self):
+        return {
+            'id': self.reward_id,
+            'type': self.reward_type,
+            'payload': json.loads(self.payload_json or '{}'),
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class AnalyticsEvent(db.Model):
+    __tablename__ = 'analytics_events'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    event_name = db.Column(db.String(40), nullable=False, index=True)
+    activity = db.Column(db.String(40), nullable=True)
+    coarse_json = db.Column(db.Text, nullable=False, default='{}')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+
 # ─── Migration helpers ─────────────────────────────────────────────────────────
 
 def run_migrations():
@@ -420,11 +489,22 @@ def run_migrations():
         ('rank_level', 'INTEGER NOT NULL DEFAULT 1'),
         ('rank_xp', 'INTEGER NOT NULL DEFAULT 0'),
         ('rank_challenge_pending', 'BOOLEAN NOT NULL DEFAULT 0'),
+        ('focus_points', 'INTEGER NOT NULL DEFAULT 5'),
+        ('active_plays', 'INTEGER NOT NULL DEFAULT 0'),
+        ('lifetime_points', 'INTEGER NOT NULL DEFAULT 0'),
+        ('analytics_enabled', 'BOOLEAN NOT NULL DEFAULT 0'),
+        ('city_badge', 'VARCHAR(80)'),
+        ('pip_cosmetic', 'VARCHAR(80)'),
     ):
         if column not in user_columns:
             db.session.execute(sa.text(f'ALTER TABLE users ADD COLUMN {column} {definition}'))
             db.session.commit()
             print(f"✅ Added {column} column to users")
+
+    # Existing XP is the safest deterministic seed for lifetime leaderboard
+    # points. Never reduce a value already written by a newer deployment.
+    db.session.execute(sa.text('UPDATE users SET lifetime_points = xp WHERE lifetime_points < xp'))
+    db.session.commit()
 
     typed_metadata_columns = (
         ('skill_id', 'VARCHAR(120)'),

@@ -26,7 +26,7 @@ const LevelUpModal = ({ levelUpState, onClose }) => {
         <div className="levelup-footer">
           <div className="levelup-reward">
             <Trophy size={16} />
-            <span>Focus restored</span>
+            <span>A new City lane is open</span>
           </div>
           <button type="button" className="levelup-action" onClick={onClose}>Keep training</button>
         </div>

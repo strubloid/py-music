@@ -9,10 +9,14 @@ This guide is sufficient to reconstruct Strubloid's current architecture in a ne
 ```text
 React browser application
   BrowserRouter + providers + Axios cookie client
+    React DOM accessibility/HUD + lazy game runtimes
+      Phaser scenes + PixiJS animated layers + Rive characters
+      Tone.js transport + XState activity machines
     Flask application
       public music/game APIs + authenticated APIs
       Flask-Login sessions + CSRF + rate limiting
       SQLAlchemy models + additive migrations
+      music21 deterministic analysis
       audio proxy/cache
       SPA fallback serving frontend/dist
         SQLite locally or DATABASE_URL in deployment
@@ -41,6 +45,11 @@ frontend/src/
   contexts/                  auth, game progress, chord-panel state
   game/                      powers, ranks, rewards, quests
   audio/                     browser ear-training engine
+  game/engine/               Phaser/Pixi hosts, scene registry, performance profiles
+  game/characters/           Rive character controller and generated character assets
+  game/audio/                Tone transport, instruments, analyser bridge
+  game/machines/             XState activity machines
+  ui/                        world HUD, overlays, and DOM accessible equivalents
   services/api.ts            Axios client and API calls
 data/chord_inventory.json    canonical assessed chord inventory
 ```
@@ -49,7 +58,7 @@ data/chord_inventory.json    canonical assessed chord inventory
 
 | Route | Feature |
 | --- | --- |
-| `/` | Dashboard |
+| `/` | Practice Square world hub |
 | `/learn/scales` | Scale Explorer |
 | `/learn/chords` | Chord Atlas |
 | `/play/daily` | Daily Challenges |
@@ -63,7 +72,7 @@ data/chord_inventory.json    canonical assessed chord inventory
 | `/settings` | Settings |
 | `/reset-password/:token` | Password reset |
 
-All client routes sit under the persistent sidebar and chord-panel provider. Flask returns `frontend/dist/index.html` for non-API paths so direct navigation continues to work.
+Client routes sit under the chord-panel provider. Play routes use a collapsed-by-default map drawer; non-game routes retain efficient DOM navigation. Flask returns `frontend/dist/index.html` for non-API paths so direct navigation continues to work.
 
 ## API Surface
 
@@ -149,6 +158,8 @@ Flask uses port `5000`. Vite proxies `/api` during development and emits `fronte
 - `data/chord_inventory.json` owns assessed chord formulas and inversions; display fingerings do not.
 - Structured question data owns notes, visuals, and answer validation; display prose does not.
 - Account rewards and signed-in entitlements are server-authoritative.
+- Focus, active-play attempts, permanent rank tiers, lifetime leaderboard points, reward grants, Sound Formulas, and analytics consent are server-authoritative for signed-in players.
+- Canvas state mirrors authoritative data but never grants correctness, XP, Focus, rank, quest, or inventory entitlements.
 - Scale Path currently has known authority gaps: it accepts client-reported correctness and is not yet a production-grade reward path. Do not represent it as fully authoritative until its feature contract is completed.
 - Daily completion currently trusts the client to call completion only after a local correct-index comparison. Treat server-side submitted-answer validation as required future hardening.
 

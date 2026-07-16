@@ -1,0 +1,82 @@
+.quest-vaults {
+  --vault-gold: #ffc21c;
+  --vault-cyan: #42d8ff;
+  --vault-violet: #9d79ff;
+  width: min(1240px, 100%);
+  min-width: 0;
+  margin: 0 auto;
+  padding: clamp(14px, 2.5vw, 30px);
+  color: #f7f4ff;
+}
+
+.vault-chamber__header {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+.vault-chamber__header > span { display: inline-flex; align-items: center; gap: 7px; color: var(--vault-gold); font: 900 .68rem ui-monospace, monospace; letter-spacing: .16em; }
+.vault-chamber__header h1 { margin: 7px 0 5px; font-size: clamp(2rem, 4vw, 3.8rem); line-height: 1; letter-spacing: -.045em; }
+.vault-chamber__header p { max-width: 690px; margin: 0; color: #aeb5d4; line-height: 1.5; }
+.vault-chamber__meters { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 13px; }
+.vault-chamber__meters span { display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; border: 1px solid rgba(255,194,28,.27); border-radius: 999px; background: rgba(7,10,28,.72); color: #e8e9fa; font-size: .73rem; font-weight: 800; }
+.vault-chamber__meters svg { width: 15px; color: var(--vault-gold); }
+
+.vault-chamber {
+  position: relative;
+  isolation: isolate;
+  min-height: clamp(500px, 62vh, 610px);
+  margin-top: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255,194,28,.27);
+  border-radius: 46% 46% 28px 28px / 18% 18% 28px 28px;
+  background: radial-gradient(ellipse at 50% 115%, rgba(255,194,28,.2), transparent 35%), radial-gradient(circle at 50% 40%, rgba(111,77,212,.22), transparent 35%), linear-gradient(180deg,#151846,#070a1c 68%);
+  box-shadow: inset 0 1px rgba(255,255,255,.08), 0 24px 70px rgba(0,0,0,.3);
+}
+.vault-chamber::before { content:""; position:absolute; inset:0; opacity:.38; background: repeating-radial-gradient(ellipse at 50% 110%,transparent 0 79px,rgba(255,194,28,.11) 80px 81px); pointer-events:none; }
+.vault-chamber__rings i { position:absolute; z-index:-1; left:50%; top:43%; width:68%; aspect-ratio:1; border:1px solid rgba(157,121,255,.12); border-radius:50%; transform:translate(-50%,-50%); }
+.vault-chamber__rings i:nth-child(2){width:49%}.vault-chamber__rings i:nth-child(3){width:31%}
+.vault-keeper,.vault-pip { position:absolute; z-index:4; display:grid; justify-items:center; color:#dfe2fa; }
+.vault-keeper { right:4%; bottom:21px; }
+.vault-keeper span { display:grid; place-items:center; width:58px; height:70px; border:2px solid var(--vault-gold); border-radius:16px 16px 8px 8px; background:linear-gradient(145deg,#473f5c,#15182e); color:var(--vault-gold); font-size:2.5rem; box-shadow:0 0 24px rgba(255,194,28,.24); }
+.vault-keeper b { margin-top:5px; color:#d5a82c; font:900 .51rem ui-monospace,monospace; letter-spacing:.09em; text-align:center; }
+.vault-pip { left:50%; bottom:17px; transform:translateX(-50%); }
+.vault-pip i { display:grid; place-items:center; width:54px; height:54px; border-radius:60% 45% 55% 45%; background:var(--vault-gold); color:#17101f; font-size:2.2rem; font-style:normal; box-shadow:0 0 28px rgba(255,194,28,.45); transform:rotate(-9deg); }
+.vault-pip span { margin-top:3px; font:900 .58rem ui-monospace,monospace; letter-spacing:.12em; }
+.vault-energy { position:absolute; z-index:1; right:12%; bottom:47px; left:12%; height:3px; background:linear-gradient(90deg,var(--vault-gold),var(--vault-cyan),var(--vault-violet)); box-shadow:0 0 15px rgba(66,216,255,.55); }
+.vault-energy i { position:absolute; width:6px; height:6px; border-radius:50%; background:white; box-shadow:0 0 12px var(--vault-gold); animation:vault-energy-flow 2.4s linear infinite; }
+.vault-energy i:nth-child(2){animation-delay:-.5s}.vault-energy i:nth-child(3){animation-delay:-1s}.vault-energy i:nth-child(4){animation-delay:-1.5s}.vault-energy i:nth-child(5){animation-delay:-2s}
+
+.vault-door-row { position:relative; z-index:2; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:end; gap:clamp(16px,3vw,38px); width:min(900px,82%); height:100%; min-height:500px; margin:0 auto; padding:52px 0 87px; }
+.vault-door { position:relative; display:grid; justify-items:center; align-content:end; min-width:0; height:360px; padding:19px 12px 16px; border:0; color:#f5f2ff; background:transparent; cursor:pointer; }
+.vault-door::before { content:""; position:absolute; inset:0; border:2px solid currentColor; border-bottom-width:7px; border-radius:110px 110px 15px 15px; background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.13),transparent 25%),linear-gradient(180deg,rgba(42,42,99,.97),rgba(8,10,29,.99)); box-shadow:inset 0 0 0 8px rgba(255,255,255,.025),0 20px 28px rgba(0,0,0,.34); transition:transform .25s ease,filter .25s ease; }
+.vault-door:hover::before,.vault-door:focus-visible::before { transform:translateY(-8px); filter:brightness(1.16); }
+.vault-door--daily { color:var(--vault-gold) }.vault-door--weekly { color:var(--vault-cyan) }.vault-door--milestone { color:var(--vault-violet) }
+.vault-door--milestone { height:400px; }
+.vault-door__arch { position:absolute; z-index:1; top:48px; display:grid; place-items:center; width:115px; height:115px; border-radius:50%; background:rgba(5,8,24,.82); }
+.vault-door__arch > i { position:absolute; inset:8px; border-radius:50%; background:conic-gradient(currentColor var(--vault-progress),rgba(255,255,255,.08) 0); mask:radial-gradient(circle,transparent 57%,#000 59%); }
+.vault-door__arch svg { width:31px; height:31px; color:currentColor; }.vault-door__arch b { position:absolute; top:77px; color:#fff; font-size:.61rem; }
+.vault-door > strong,.vault-door > span:not(.vault-door__arch):not(.vault-door__reward),.vault-door > small,.vault-door > em { position:relative; z-index:1; }
+.vault-door > strong { color:#fff; font-size:1.15rem; }.vault-door > span { margin-top:4px; font-size:.7rem; font-weight:900; }.vault-door > small { width:90%; margin-top:9px; overflow:hidden; color:#c9cce5; white-space:nowrap; text-overflow:ellipsis; }.vault-door > em { margin-top:6px; color:#858cad; font-size:.6rem; font-style:normal; }
+.vault-door__reward { position:absolute; z-index:1; top:185px; width:75%; padding:10px 4px; border:1px dashed currentColor; border-radius:9px; color:transparent; background:currentColor; opacity:.13; font-size:.55rem; }
+.vault-door.is-ready::before { box-shadow:inset 0 0 0 8px rgba(255,255,255,.025),0 0 38px currentColor; animation:vault-ready 1.8s ease-in-out infinite; }
+
+.vault-interior__header { position:relative; display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:20px; min-height:160px; padding:25px clamp(18px,4vw,42px); overflow:hidden; border:1px solid rgba(255,194,28,.24); border-radius:28px; background:radial-gradient(circle at 85% 20%,rgba(255,194,28,.14),transparent 28%),linear-gradient(135deg,#211d58,#080b24); }
+.quest-vaults--weekly .vault-interior__header { border-color:rgba(66,216,255,.35); }.quest-vaults--milestone .vault-interior__header { border-color:rgba(157,121,255,.42); }
+.vault-interior__header button { display:inline-flex; align-items:center; gap:7px; padding:9px 12px; border:1px solid rgba(255,255,255,.14); border-radius:10px; color:#dfe2f8; background:rgba(7,10,28,.6); cursor:pointer; }
+.vault-interior__header > div span { color:var(--vault-gold); font:900 .61rem ui-monospace,monospace; letter-spacing:.13em; text-transform:uppercase; }.vault-interior__header h1 { margin:3px 0; font-size:clamp(2rem,4vw,3.5rem); }.vault-interior__header p { margin:0; color:#a8afce; }.vault-interior__header > svg { width:70px; height:70px; color:var(--vault-gold); opacity:.7; }
+.vault-message { position:sticky; z-index:5; top:8px; margin:10px 0; padding:10px 14px; border:1px solid rgba(255,194,28,.35); border-radius:12px; background:rgba(25,21,61,.94); color:#ffe28a; text-align:center; }
+.mission-vault { position:relative; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin-top:18px; padding:35px clamp(8px,3vw,34px); border-radius:30px; background:radial-gradient(circle at 50% 0,rgba(255,194,28,.09),transparent 28%),linear-gradient(180deg,rgba(17,21,61,.92),rgba(5,8,23,.96)); }
+.mission-vault__rail { position:absolute; top:68px; bottom:68px; left:50%; width:2px; background:linear-gradient(var(--vault-gold),var(--vault-violet)); opacity:.25; }
+.mission-object { position:relative; display:grid; grid-template-columns:130px 1fr; gap:18px; min-width:0; min-height:245px; padding:18px; border:1px solid rgba(255,255,255,.11); border-radius:19px; background:linear-gradient(145deg,rgba(42,41,103,.72),rgba(8,11,34,.9)); box-shadow:0 15px 25px rgba(0,0,0,.2); }
+.mission-object__artifact { position:relative; align-self:center; display:grid; place-items:center; width:120px; height:150px; border:2px solid rgba(255,194,28,.45); border-radius:9px; background:linear-gradient(145deg,#4d3c31,#191728); box-shadow:inset 0 0 0 7px rgba(255,255,255,.025); }
+.mission-object--scroll .mission-object__artifact { border-radius:28px 8px;background:linear-gradient(90deg,#4e3828,#9c7745 10%,#cfad72 50%,#9c7745 90%,#4e3828) }.mission-object--chest .mission-object__artifact { height:105px;border-radius:45px 45px 10px 10px }.mission-object--medal .mission-object__artifact { width:112px;height:112px;border-radius:50%;background:radial-gradient(circle,#5a4a2c,#191728 70%) }.mission-object--cylinder .mission-object__artifact { width:83px;border-radius:42px;background:repeating-linear-gradient(90deg,#2e2a55 0 8px,#8d73d0 8px 10px) }.mission-object--case .mission-object__artifact { height:125px;border-radius:50px 15px 50px 15px }
+.mission-object__artifact i { width:28px;height:28px;border:3px solid var(--vault-gold);border-radius:50%;box-shadow:0 0 16px rgba(255,194,28,.35) }.mission-object__artifact span { position:absolute;right:7px;bottom:6px;color:#fff;font:900 .62rem ui-monospace,monospace }
+.mission-object__copy { position:relative; display:flex; flex-direction:column; min-width:0; }.mission-object__reward { color:var(--vault-gold);font:900 .65rem ui-monospace,monospace;letter-spacing:.06em }.mission-object h2 { margin:8px 0 4px;font-size:1.18rem }.mission-object p { margin:0;color:#aeb4d0;font-size:.8rem;line-height:1.45 }.mission-seals { display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-top:auto;padding-top:12px }.mission-seals i { width:11px;height:11px;border:1px solid rgba(255,255,255,.2);border-radius:3px;background:#0a0d28 }.mission-seals i.is-lit { border-color:var(--vault-gold);background:var(--vault-gold);box-shadow:0 0 9px rgba(255,194,28,.7) }.mission-seals strong { margin-left:auto;font-size:.72rem;color:#dfe2f7 }
+.mission-object button { display:flex;align-items:center;justify-content:center;gap:7px;width:100%;min-height:39px;margin-top:11px;border:1px solid rgba(255,194,28,.42);border-radius:10px;color:#ffda68;background:rgba(255,194,28,.08);font-weight:900;cursor:pointer }.mission-object button svg { width:16px }.mission-object button:disabled { border-color:rgba(255,255,255,.1);color:#777f9e;cursor:default }.mission-object__period { position:absolute;right:0;top:0;color:#69708e;font:700 .51rem ui-monospace,monospace }.mission-object.is-ready { border-color:var(--vault-gold);box-shadow:0 0 30px rgba(255,194,28,.18) }.mission-object.is-ready .mission-object__artifact { animation:mission-ready 1.6s ease-in-out infinite }.mission-object.is-claimed { opacity:.66 }.mission-object.is-claimed .mission-object__artifact::after { content:'✓';position:absolute;display:grid;place-items:center;inset:24%;border:2px solid #8ceb4a;border-radius:50%;color:#8ceb4a;font-size:2rem;transform:rotate(-9deg) }
+
+@keyframes vault-energy-flow { from{left:0}to{left:100%} } @keyframes vault-ready { 50%{filter:brightness(1.23)} } @keyframes mission-ready { 50%{transform:translateY(-5px);filter:brightness(1.2)} }
+@media (prefers-reduced-motion:reduce) { .quest-vaults *,.quest-vaults *::before,.quest-vaults *::after{animation:none!important;transition:none!important} }
+@media (max-width:760px) { .quest-vaults{padding:10px}.vault-chamber{min-height:760px;border-radius:28px}.vault-door-row{grid-template-columns:1fr;width:88%;min-height:720px;padding:28px 0 100px;gap:10px}.vault-door,.vault-door--milestone{height:175px}.vault-door::before{border-radius:60px 60px 12px 12px}.vault-door__arch{top:18px;left:24px;width:82px;height:82px}.vault-door__arch b{top:55px}.vault-door>strong,.vault-door>span:not(.vault-door__arch):not(.vault-door__reward),.vault-door>small,.vault-door>em{margin-left:105px;justify-self:start;text-align:left}.vault-door__reward{top:117px;left:24px;width:70px}.vault-keeper{right:4%;bottom:15px}.vault-pip{left:25%;bottom:14px}.vault-interior__header{grid-template-columns:1fr auto;padding:18px}.vault-interior__header button{grid-column:1/-1;width:max-content}.vault-interior__header>svg{width:45px;height:45px}.mission-vault{grid-template-columns:1fr;padding:20px 8px}.mission-vault__rail{display:none}.mission-object{grid-template-columns:88px 1fr;gap:12px;padding:13px}.mission-object__artifact,.mission-object--medal .mission-object__artifact,.mission-object--cylinder .mission-object__artifact{width:80px;height:110px}.mission-object--chest .mission-object__artifact,.mission-object--case .mission-object__artifact{height:90px}.mission-object h2{font-size:1rem}.mission-object p{font-size:.73rem} }
+@media (max-width:390px) { .vault-chamber__header p{font-size:.82rem}.vault-door-row{width:94%}.mission-object{grid-template-columns:70px 1fr}.mission-object__artifact,.mission-object--medal .mission-object__artifact,.mission-object--cylinder .mission-object__artifact{width:64px;height:92px}.mission-object__period{display:none} }

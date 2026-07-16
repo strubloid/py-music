@@ -40,6 +40,9 @@ export function normalizeRun(raw: ScalePathRun): {
   fretCount: number;
   positions: ScalePathPosition[];
   fragments: NormalizedFragment[];
+  dieResult: 6 | 7;
+  routeModifier: string;
+  seed: string;
 } {
   return {
     runId: raw.runId,
@@ -50,5 +53,8 @@ export function normalizeRun(raw: ScalePathRun): {
     fretCount: raw.fretCount ?? 12,
     positions: raw.positions ?? [],
     fragments: (raw.fragments ?? []).map((f, i) => normalizeFragment(f, i)),
+    dieResult: raw.dieResult === 7 ? 7 : 6,
+    routeModifier: raw.routeModifier ?? 'ascending',
+    seed: raw.seed ?? '',
   };
 }

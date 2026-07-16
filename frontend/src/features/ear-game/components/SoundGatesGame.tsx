@@ -14,7 +14,7 @@ const SoundGatesGame = ({ game, challenge, result, hiddenAnswerIds, avatarState,
       <div className="sr-only" aria-live="polite" aria-atomic="true">{inputSignal.announcement}</div>
       <header className="sound-gates-header">
         <div className="sound-gates-header__brand"><span aria-hidden="true">♪</span><div><p>Note Runner</p><h1>Sound Gates</h1></div></div>
-        <div className="sound-gates-header__rank" aria-label={`${rankMeta.name}, ${rankMeta.progressLabel}`}><span>{rankMeta.name}</span><strong>{rankMeta.challengePending ? 'Rank challenge' : `Lv. ${rankMeta.level}/${rankMeta.levels} · ${rankMeta.remainingLevels} to go`}</strong></div>
+        <div className="sound-gates-header__rank" aria-label={`${rankMeta.name}, ${rankMeta.progressLabel}`}><span>{rankMeta.name}</span><strong>Level {rankMeta.accountLevel} · {rankMeta.nextRank ? `${rankMeta.remainingLevels} to ${rankMeta.nextRank.name}` : 'highest rank'}</strong></div>
         <div className="sound-gates-header__actions"><StreakBadge streak={streak} /><button type="button" aria-label={game.muted ? 'Unmute game effects' : 'Mute game effects'} onClick={() => onAction('mute')}>{game.muted ? <VolumeX /> : <Volume2 />}</button><button type="button" aria-label="Open game settings" onClick={onOpenSettings} disabled={!['ready', 'accepting-input'].includes(game.phase)}><Settings2 /></button><button type="button" aria-label="Pause game" onClick={() => onAction('pause')}><Pause /></button></div>
       </header>
       <EarGameHud challengeIndex={game.challengeIndex} challengeCount={game.challengeCount} combo={game.combo} correctCount={game.correctCount} score={game.score} skill={challenge?.title || 'Listening'} />

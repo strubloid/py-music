@@ -10,6 +10,24 @@ import PartyLayer from './PartyLayer';
 import HologramLayer from './HologramLayer';
 import SideScrollerLayer from './SideScrollerLayer';
 
+const VARIANT_COPY = {
+  'catch-root': {
+    name: 'Catch the Root',
+    instruction: 'Track the travelling root, move Pip beneath the matching orb, then catch it.',
+    group: 'Root sound orbs',
+  },
+  'bridge-builder': {
+    name: 'Bridge Builder',
+    instruction: 'Find the interval stone that completes the crossing, then place it with Pip.',
+    group: 'Interval bridge stones',
+  },
+  'echo-chase': {
+    name: 'Echo Chase',
+    instruction: 'Follow the heard pattern into the matching route before Echo disappears.',
+    group: 'Echo routes',
+  },
+};
+
 const GameArena = ({
   game,
   challenge,
@@ -32,12 +50,15 @@ const GameArena = ({
   const activeBoss = bossMode || game.challengeIndex === game.challengeCount - 1;
   const stageStep = Math.min(game.challengeCount, game.challengeIndex + 1);
   const visualMode = game.phase === 'comparison' ? 'comparison' : result?.correct ? 'correct' : result ? 'incorrect' : playing ? 'playing' : game.phase === 'accepting-input' ? 'active' : 'ready';
+  const variant = challenge?.variant || 'catch-root';
+  const variantCopy = VARIANT_COPY[variant] || VARIANT_COPY['catch-root'];
 
   return (
     <section
-      className={`game-arena game-arena--${visualMode} ${puzzleMode ? 'game-arena--puzzle' : ''} ${activeBoss ? 'game-arena--boss' : ''} ${pinballMode ? 'game-arena--pinball' : ''} ${partyMode ? 'game-arena--party' : ''}`}
+      className={`game-arena game-arena--${visualMode} game-arena--${variant} ${puzzleMode ? 'game-arena--puzzle' : ''} ${activeBoss ? 'game-arena--boss' : ''} ${pinballMode ? 'game-arena--pinball' : ''} ${partyMode ? 'game-arena--party' : ''}`}
       aria-label="Sound Gates game arena"
       data-phase={game.phase}
+      data-variant={variant}
       data-combo-tier={Math.min(4, game.combo >= 30 ? 4 : game.combo >= 20 ? 3 : game.combo >= 10 ? 2 : game.combo >= 5 ? 1 : 0)}
     >
       <div className="arena-backdrop" aria-hidden="true"><div className="arena-backdrop__stars" /><div className="arena-backdrop__city" /></div>
@@ -56,6 +77,9 @@ const GameArena = ({
         <ol>{Array.from({ length: game.challengeCount }, (_, index) => <li key={index} className={index < stageStep - 1 ? 'arena-stage-map__sector--cleared' : index === stageStep - 1 ? 'arena-stage-map__sector--active' : ''}><b>{index + 1}</b><small>{index === game.challengeCount - 1 ? 'VAULT' : `SECTOR ${index + 1}`}</small></li>)}</ol>
       </div>
       <div className="arena-world-signature" aria-hidden="true"><i>♪</i><span>HARMONIC CITY</span></div>
+      <div className={`challenge-verb challenge-verb--${variant}`} aria-label={`Challenge variant: ${variantCopy.name}`}>
+        <span>{variantCopy.name}</span><i aria-hidden="true" /><i aria-hidden="true" /><i aria-hidden="true" />
+      </div>
       {activeBoss && <BossLayer correctCount={game.correctCount} challengeCount={game.challengeCount} result={result} />}
       {puzzleMode && <PuzzleLayer question={challenge?.question} selectedLane={game.avatarLane} />}
       {pinballMode && <PinballLayer combo={game.combo} />}
@@ -78,7 +102,7 @@ const GameArena = ({
       <div className="arena-prompt">
         <span>{challenge?.title}</span>
         <h2>{challenge?.question}</h2>
-        <p>{game.phase === 'ready' ? 'Activate the beacon. Movement unlocks when the signal resolves.' : 'Move across the lit lanes, then commit the focused gate.'}</p>
+        <p>{game.phase === 'ready' ? 'Activate the beacon. Movement unlocks when the signal resolves.' : variantCopy.instruction}</p>
         <output className={`arena-input-signal ${inputSignal.locked ? 'arena-input-signal--locked' : ''}`}>
           <kbd>{inputSignal.action ? inputSignal.action.replace('move-', '').replace('lane-', '') : '⌨'}</kbd>{inputSignal.label}
         </output>
@@ -89,7 +113,7 @@ const GameArena = ({
         {Array.from({ length: gateCount }, (_, index) => <span className={index === game.avatarLane ? 'runner-track__lane runner-track__lane--active' : 'runner-track__lane'} key={index} />)}
       </div>
 
-      <div className="gate-deck" style={{ '--gate-count': gateCount }} role="radiogroup" aria-label="Answer gates">
+      <div className="gate-deck" style={{ '--gate-count': gateCount }} role="radiogroup" aria-label={variantCopy.group}>
         {challenge?.answers.map((answer) => (
           <AnswerGate
             key={answer.id}
@@ -101,6 +125,7 @@ const GameArena = ({
             result={result}
             correct={challenge.correctAnswerId === answer.id}
             reducedMotion={game.reducedMotion}
+            variant={variant}
             onSelect={(id) => onSelect(id, 'pointer')}
             onCommit={onCommit}
           />

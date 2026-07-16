@@ -1,11 +1,12 @@
 import { expect, test, type Page } from '@playwright/test';
+import { createUser } from './helpers';
 
 const openReadyRun = async (page: Page) => {
   await page.goto('/play/ear-training');
   await expect(page.getByRole('heading', { name: 'Sound Gates' })).toBeVisible();
   await expect(page.getByRole('heading', { level: 2 })).toBeVisible();
   await expect(page.locator('.sound-gates-header__rank')).toContainText('Unranked');
-  await expect(page.locator('.sound-gates-header__rank')).toContainText('Lv. 1/10');
+  await expect(page.locator('.sound-gates-header__rank')).toContainText('Level 1 · 9 to Bronze');
   await expect(page.locator('.game-arena')).toHaveAttribute('data-phase', 'ready');
   await expect(page.locator('.game-gate').first()).toHaveAttribute('data-gate-state', 'locked');
 };
@@ -38,6 +39,52 @@ test('Sound Gates is keyboard playable, locks input during audio, and exposes fe
   await expect(page.locator('.game-arena')).toHaveClass(/game-arena--comparison/);
   await expect(page.locator('[aria-live="polite"]')).not.toHaveText('');
 });
+
+test('Echo Replay spends exactly one server-authoritative Focus once', async ({ page }) => {
+  await createUser(page);
+  await openReadyRun(page);
+  await playUntilInputUnlocks(page);
+  await expect(page.locator('.focus-crystal')).toContainText('5');
+  const replay = page.getByRole('button', { name: /echo replay/i });
+  await replay.click();
+  await expect(page.locator('.focus-crystal')).toContainText('4');
+  await expect(replay).toBeDisabled();
+});
+
+for (const sample of [
+  { type: 'direction', variant: 'catch-root', label: 'Catch the Root', notes: ['C4', 'G4'] },
+  { type: 'interval', variant: 'bridge-builder', label: 'Bridge Builder', notes: ['C4', 'E4'] },
+  { type: 'shape', variant: 'echo-chase', label: 'Echo Chase', notes: ['C4', 'E4', 'D4'] },
+]) {
+  test(`stages ${sample.label} as a distinct accessible world verb`, async ({ page }) => {
+    await page.route('**/api/daily-challenges?**', async (route) => {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          challenges: [{
+            id: 9000 + sample.notes.length,
+            category: 'ear_training',
+            difficulty: 1,
+            xp_reward: 25,
+            exercise: {
+              type: sample.type,
+              title: sample.label,
+              question: 'Follow the musical signal.',
+              options: ['First path', 'Second path', 'Third path'],
+              notes: sample.notes,
+              answer_mode: 'listen',
+            },
+          }],
+        }),
+      });
+    });
+    await page.goto('/play/ear-training');
+    const arena = page.locator('.game-arena');
+    await expect(arena).toHaveAttribute('data-variant', sample.variant);
+    await expect(page.getByLabel(`Challenge variant: ${sample.label}`)).toBeVisible();
+    await expect(page.locator(`.game-gate--${sample.variant}`).first()).toBeVisible();
+  });
+}
 
 test('pause, accessibility settings, and control remapping are operable dialogs', async ({ page }) => {
   await openReadyRun(page);

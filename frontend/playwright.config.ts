@@ -15,7 +15,7 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: 'rm -f /tmp/py-music-playwright.db && python3 backend/project/api/app.py',
+      command: 'rm -f /tmp/py-music-playwright.db && PYTHON_BIN=.venv/bin/python; [ -x "$PYTHON_BIN" ] || PYTHON_BIN=python3; "$PYTHON_BIN" backend/project/api/app.py',
       cwd: '..',
       url: 'http://127.0.0.1:5000/api/health',
       reuseExistingServer: process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === 'true',
@@ -25,6 +25,7 @@ export default defineConfig({
         DATABASE_URL: 'sqlite:////tmp/py-music-playwright.db',
         RATELIMIT_ENABLED: 'false',
         SEED_CHALLENGES_ON_START: 'true',
+        E2E_EXPOSE_ANSWERS: '1',
       },
     },
     {

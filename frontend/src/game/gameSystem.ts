@@ -1,4 +1,4 @@
-export const LEVELS = [
+const FOUNDATION_LEVELS = [
   { level: 1, title: 'Bedroom Listener', xpRequired: 0 },
   { level: 2, title: 'Tuning Rookie', xpRequired: 100 },
   { level: 3, title: 'Interval Scout', xpRequired: 250 },
@@ -9,13 +9,44 @@ export const LEVELS = [
   { level: 8, title: 'Harmony Adept', xpRequired: 3000 },
   { level: 9, title: 'Sound Wizard', xpRequired: 4200 },
   { level: 10, title: 'Master of Ears', xpRequired: 6000 },
-] as const;
+];
+
+export const MAX_ACCOUNT_LEVEL = 999;
+
+export const xpRequiredForLevel = (level = 1) => {
+  const safeLevel = Math.max(1, Math.floor(Number(level) || 1));
+  const foundation = FOUNDATION_LEVELS.find((entry) => entry.level === safeLevel);
+  if (foundation) return foundation.xpRequired;
+  const levelsAfterTen = safeLevel - 10;
+  return 6000 + (levelsAfterTen * 2000) + (50 * levelsAfterTen * (levelsAfterTen - 1));
+};
+
+const advancedTitle = (level: number) => {
+  if (level >= 180) return 'City Legend';
+  if (level >= 130) return 'Maestro of the City';
+  if (level >= 110) return 'City Virtuoso';
+  if (level >= 90) return 'Grand Harmony Master';
+  if (level >= 70) return 'Music City Master';
+  if (level >= 50) return 'Diamond Musician';
+  if (level >= 40) return 'Platinum Performer';
+  if (level >= 30) return 'Golden Harmonist';
+  if (level >= 20) return 'Silver Songsmith';
+  return 'Bronze Pathfinder';
+};
+
+export const LEVELS = [
+  ...FOUNDATION_LEVELS,
+  ...Array.from({ length: 170 }, (_, index) => {
+    const level = index + 11;
+    return { level, title: advancedTitle(level), xpRequired: xpRequiredForLevel(level) };
+  }),
+];
 
 export const POWERS = [
-  { id: 'replay', name: 'Replay', unlockLevel: 1, xpPenalty: 0, effect: 'Replay the sound again.' },
-  { id: 'slow_down', name: 'Slow Down', unlockLevel: 2, xpPenalty: 0, focusCost: 1, effect: 'Play the audio slower for easier listening.' },
-  { id: 'remove_one_option', name: 'Remove One Option', unlockLevel: 3, xpPenalty: 0, focusCost: 1, effect: 'Remove one wrong answer.' },
-  { id: 'root_note_anchor', name: 'Root Note Anchor', unlockLevel: 4, xpPenalty: 0, focusCost: 1, effect: 'Replay the root note before the interval.' },
+  { id: 'replay', name: 'Echo Replay', unlockLevel: 1, xpPenalty: 0, focusCost: 1, effect: 'Ask Echo to replay the full musical signal.' },
+  { id: 'slow_down', name: 'Slow Time', unlockLevel: 2, xpPenalty: 0, focusCost: 2, effect: 'Slow the musical signal without changing its answer.' },
+  { id: 'remove_one_option', name: 'Remove One Gate', unlockLevel: 3, xpPenalty: 0, focusCost: 2, effect: 'Close one server-confirmed wrong gate.' },
+  { id: 'root_note_anchor', name: 'Root Lantern', unlockLevel: 4, xpPenalty: 0, focusCost: 3, effect: 'Illuminate and replay the tonal centre.' },
   { id: 'compare_mode', name: 'Compare Mode', unlockLevel: 5, xpPenalty: 0, focusCost: 1, effect: 'Compare the original with your selected answer.' },
   { id: 'second_chance', name: 'Second Chance', unlockLevel: 6, xpPenalty: 0, focusCost: 1, effect: 'Protect one mistake in a run.' },
   { id: 'freeze_combo', name: 'Freeze Combo', unlockLevel: 7, xpPenalty: 0, focusCost: 1, effect: 'Prevent one combo break.' },
@@ -35,7 +66,7 @@ export const BADGES = [
   { id: 'minimal-help', name: 'Minimal Help' },
 ] as const;
 
-export const DEFAULT_FOCUS_POINTS = 3;
+export const DEFAULT_FOCUS_POINTS = 5;
 export {
   CHALLENGE_XP_MULTIPLIER,
   EAR_TRAINING_XP_PER_DIFFICULTY,
@@ -44,12 +75,23 @@ export {
 } from './rewardSystem';
 
 export const getLevelMeta = (xp = 0) => {
-  const current = [...LEVELS].reverse().find((entry) => xp >= entry.xpRequired) || LEVELS[0];
-  const next = LEVELS.find((entry) => entry.level === current.level + 1) || null;
+  const safeXp = Math.max(0, Number(xp) || 0);
+  let low = 1;
+  let high = MAX_ACCOUNT_LEVEL;
+  while (low < high) {
+    const middle = Math.ceil((low + high) / 2);
+    if (xpRequiredForLevel(middle) <= safeXp) low = middle;
+    else high = middle - 1;
+  }
+  const foundation = FOUNDATION_LEVELS.find((entry) => entry.level === low);
+  const current = foundation || { level: low, title: advancedTitle(low), xpRequired: xpRequiredForLevel(low) };
+  const next = low < MAX_ACCOUNT_LEVEL
+    ? { level: low + 1, title: advancedTitle(low + 1), xpRequired: xpRequiredForLevel(low + 1) }
+    : null;
   return {
     ...current,
     nextLevelXp: next?.xpRequired ?? current.xpRequired,
-    progressInLevel: next ? Math.min(100, ((xp - current.xpRequired) / (next.xpRequired - current.xpRequired)) * 100) : 100,
+    progressInLevel: next ? Math.min(100, ((safeXp - current.xpRequired) / (next.xpRequired - current.xpRequired)) * 100) : 100,
   };
 };
 

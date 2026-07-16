@@ -1,147 +1,51 @@
 export const RANKS = Object.freeze([
-  { id: 'unranked', name: 'Unranked', levels: 10 },
-  { id: 'bronze', name: 'Bronze', levels: 20 },
-  { id: 'silver', name: 'Silver', levels: 35 },
-  { id: 'gold', name: 'Gold', levels: 50 },
-  { id: 'platinum', name: 'Platinum', levels: 70 },
-  { id: 'diamond', name: 'Diamond', levels: 90 },
-  { id: 'master', name: 'Master', levels: 115 },
-  { id: 'grandmaster', name: 'Grandmaster', levels: 140 },
-  { id: 'virtuoso', name: 'Virtuoso', levels: 170 },
-  { id: 'maestro', name: 'Maestro', levels: 200 },
-  { id: 'legendary', name: 'Legendary', levels: 250 },
+  { id: 'unranked', name: 'Unranked', minLevel: 1 },
+  { id: 'bronze', name: 'Bronze', minLevel: 10 },
+  { id: 'silver', name: 'Silver', minLevel: 20 },
+  { id: 'gold', name: 'Gold', minLevel: 30 },
+  { id: 'platinum', name: 'Platinum', minLevel: 40 },
+  { id: 'diamond', name: 'Diamond', minLevel: 50 },
+  { id: 'master', name: 'Master', minLevel: 70 },
+  { id: 'grandmaster', name: 'Grandmaster', minLevel: 90 },
+  { id: 'virtuoso', name: 'Virtuoso', minLevel: 110 },
+  { id: 'maestro', name: 'Maestro', minLevel: 130 },
+  { id: 'legendary', name: 'Legendary', minLevel: 180 },
 ]);
 
-export const RANK_CHALLENGE_ACCURACY = 0.8;
-export const RANK_XP_PER_LEVEL = 500;
+export type RankId = typeof RANKS[number]['id'];
 
-export const createInitialRankProgress = () => ({
-  rankIndex: 0,
-  level: 1,
-  xpProgress: 0,
-  challengePending: false,
-  completed: false,
-});
+const rankIndex = (id?: string | null) => RANKS.findIndex((rank) => rank.id === id);
 
-export const normalizeRankProgress = (value = {}) => {
-  const rankIndex = Math.min(RANKS.length - 1, Math.max(0, Number(value.rankIndex) || 0));
-  const rank = RANKS[rankIndex];
-  return {
-    rankIndex,
-    level: Math.min(rank.levels, Math.max(1, Number(value.level) || 1)),
-    xpProgress: Math.max(0, Number(value.xpProgress) || 0),
-    challengePending: Boolean(value.challengePending) && rankIndex < RANKS.length - 1,
-    completed: Boolean(value.completed) && rankIndex === RANKS.length - 1,
-  };
+export const getRankForLevel = (accountLevel = 1, earnedRankId?: string | null) => {
+  const safeLevel = Math.max(1, Math.floor(Number(accountLevel) || 1));
+  const levelIndex = RANKS.reduce(
+    (highest, rank, index) => safeLevel >= rank.minLevel ? index : highest,
+    0,
+  );
+  const earnedIndex = Math.max(0, rankIndex(earnedRankId));
+  return RANKS[Math.max(levelIndex, earnedIndex)];
 };
 
-export const getRankMeta = (progress = createInitialRankProgress()) => {
-  const normalized = normalizeRankProgress(progress);
-  const rank = RANKS[normalized.rankIndex];
-  const isFinalRank = normalized.rankIndex === RANKS.length - 1;
-  const nextRank = RANKS[normalized.rankIndex + 1] || null;
-  const completedLevels = normalized.completed ? rank.levels : normalized.level;
-  const remainingLevels = normalized.completed || normalized.challengePending
-    ? 0
-    : Math.max(0, rank.levels - normalized.level);
+export const getRankMeta = (accountLevel = 1, earnedRankId?: string | null) => {
+  const safeLevel = Math.max(1, Math.floor(Number(accountLevel) || 1));
+  const current = getRankForLevel(safeLevel, earnedRankId);
+  const currentIndex = rankIndex(current.id);
+  const nextRank = RANKS[currentIndex + 1] || null;
+  const previousThreshold = current.minLevel;
+  const nextThreshold = nextRank?.minLevel ?? current.minLevel;
+  const span = Math.max(1, nextThreshold - previousThreshold);
+  const progress = nextRank ? Math.max(0, safeLevel - previousThreshold) : span;
+  const remainingLevels = nextRank ? Math.max(0, nextThreshold - safeLevel) : 0;
+
   return {
-    ...rank,
-    ...normalized,
+    ...current,
+    accountLevel: safeLevel,
     nextRank,
     remainingLevels,
-    progressPercent: normalized.completed ? 100 : Math.round((completedLevels / rank.levels) * 100),
-    xpProgress: normalized.xpProgress,
-    xpToNextLevel: Math.max(0, RANK_XP_PER_LEVEL - normalized.xpProgress),
-    progressLabel: normalized.challengePending
-      ? `Rank challenge · ${Math.round(RANK_CHALLENGE_ACCURACY * 100)}% required`
-      : normalized.completed
-        ? 'All rank levels complete'
-        : `Level ${normalized.level} of ${rank.levels} · ${remainingLevels} ${remainingLevels === 1 ? 'level' : 'levels'} until ${nextRank ? `${nextRank.name} Rank Challenge` : 'completion'}`,
-    isFinalRank,
-  };
-};
-
-// Awarded account XP contributes a measured amount of rank progress, but never
-// skips a rank challenge or grants more than one internal level per reward.
-export const applyRankXp = (value, result = {}) => {
-  const current = normalizeRankProgress(value);
-  const rankXp = Math.max(0, Number(result.xpEarned) || 0);
-  const runId = result.runId || result.challengeId || null;
-
-  if (!rankXp || current.completed || current.challengePending) {
-    return { progress: current, event: null };
-  }
-
-  const xpProgress = current.xpProgress + rankXp;
-  if (xpProgress < RANK_XP_PER_LEVEL) {
-    return {
-      progress: { ...current, xpProgress },
-      event: { runId, type: 'rank-xp', rank: RANKS[current.rankIndex].name, xpAwarded: rankXp, xpProgress },
-    };
-  }
-
-  const levelUpdate = advanceRankProgress({ ...current, xpProgress: xpProgress - RANK_XP_PER_LEVEL }, result);
-  return {
-    progress: levelUpdate.progress,
-    event: { ...levelUpdate.event, source: 'xp', xpAwarded: rankXp },
-  };
-};
-
-export const advanceRankProgress = (value, result = {}) => {
-  const current = normalizeRankProgress(value);
-  const rank = RANKS[current.rankIndex];
-  const runId = result.runId || result.challengeId || null;
-
-  if (current.completed) {
-    return { progress: current, event: { runId, type: 'complete', rank: rank.name, level: rank.levels } };
-  }
-
-  if (current.challengePending) {
-    const accuracy = Number(result.accuracy) || 0;
-    if (accuracy < RANK_CHALLENGE_ACCURACY) {
-      return {
-        progress: current,
-        event: { runId, type: 'challenge-failed', rank: rank.name, level: current.level },
-      };
-    }
-
-    const nextRankIndex = current.rankIndex + 1;
-    const nextRank = RANKS[nextRankIndex];
-    if (!nextRank) {
-      const completed = { ...current, challengePending: false, completed: true };
-      return { progress: completed, event: { runId, type: 'complete', rank: rank.name, level: rank.levels } };
-    }
-
-    const promoted = { rankIndex: nextRankIndex, level: 1, challengePending: false, completed: false };
-    return {
-      progress: promoted,
-      event: { runId, type: 'rank-up', rank: nextRank.name, previousRank: rank.name, level: 1 },
-    };
-  }
-
-  if (current.level >= rank.levels) {
-    if (current.rankIndex === RANKS.length - 1) {
-      const completed = { ...current, completed: true };
-      return { progress: completed, event: { runId, type: 'complete', rank: rank.name, level: rank.levels } };
-    }
-    const pending = { ...current, challengePending: true };
-    return {
-      progress: pending,
-      event: { runId, type: 'challenge-unlocked', rank: rank.name, level: current.level },
-    };
-  }
-
-  if (current.level + 1 >= rank.levels) {
-    const pending = { ...current, level: rank.levels, challengePending: true };
-    return {
-      progress: pending,
-      event: { runId, type: 'challenge-unlocked', rank: rank.name, level: rank.levels },
-    };
-  }
-
-  const advanced = { ...current, level: current.level + 1 };
-  return {
-    progress: advanced,
-    event: { runId, type: 'level-up', rank: rank.name, level: advanced.level },
+    progressPercent: nextRank ? Math.min(100, Math.round((progress / span) * 100)) : 100,
+    progressLabel: nextRank
+      ? `Level ${safeLevel} · ${remainingLevels} ${remainingLevels === 1 ? 'level' : 'levels'} until ${nextRank.name}`
+      : `Level ${safeLevel} · Highest city rank`,
+    completed: !nextRank,
   };
 };

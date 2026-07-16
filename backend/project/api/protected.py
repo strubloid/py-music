@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from backend.project.models import db
 from backend.project.models.user import Progression, Favorite, QuestClaim, QuestProgress, ChallengeAttempt
-from backend.project.game_system import calculate_level_from_xp
+from backend.project.game_system import sync_user_progression
 from backend.project.gamification import QUEST_REWARDS, quest_period_key
 
 # Protected API blueprint
@@ -47,7 +47,8 @@ def create_progression():
 
     # Award XP
     current_user.xp = (current_user.xp or 0) + 10
-    current_user.level = calculate_level_from_xp(current_user.xp)
+    current_user.lifetime_points = (current_user.lifetime_points or 0) + 10
+    sync_user_progression(current_user)
     db.session.commit()
 
     return jsonify({'progression': progression.to_dict()}), 201
@@ -248,7 +249,8 @@ def claim_quest():
     )
     db.session.add(claim)
     current_user.xp = (current_user.xp or 0) + reward['xp']
-    current_user.level = calculate_level_from_xp(current_user.xp)
+    current_user.lifetime_points = (current_user.lifetime_points or 0) + reward['xp']
+    sync_user_progression(current_user)
     db.session.commit()
     return jsonify({
         'already_claimed': False,

@@ -108,7 +108,7 @@ const UserBadge = ({ collapsed = false }) => {
           <>
             <div className="badge-info">
               <span className="badge-name">{user.username}</span>
-              <span className="badge-level">{rankMeta.name} · Lv. {rankMeta.level}/{rankMeta.levels}</span>
+              <span className="badge-level">{rankMeta.name} · Level {rankMeta.accountLevel}</span>
             </div>
             <div className="badge-xp-ring">
               <svg viewBox="0 0 36 36">
@@ -135,13 +135,7 @@ const UserBadge = ({ collapsed = false }) => {
             <div className="rank-bar" aria-label={`${rankMeta.name} rank progress: ${rankMeta.progressPercent}%`}>
               <div className="rank-bar-fill" style={{ width: `${rankMeta.progressPercent}%` }} />
             </div>
-            <div className="dropdown-xp">
-              <span className="xp-label">Rank XP</span>
-              <span className="xp-value">{rankMeta.xpProgress} / {rankMeta.xpProgress + rankMeta.xpToNextLevel}</span>
-            </div>
-            <div className="xp-bar">
-              <div className="xp-bar-fill" style={{ width: `${Math.min(100, (rankMeta.xpProgress / (rankMeta.xpProgress + rankMeta.xpToNextLevel || 1)) * 100)}%` }} />
-            </div>
+
             <div className="dropdown-xp">
               <span className="xp-label">XP</span>
               <span className="xp-value">{user.xp} / {nextLevelXp}</span>

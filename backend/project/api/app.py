@@ -7,6 +7,7 @@ from functools import wraps
 import sys
 import os
 import json
+import hashlib
 from pathlib import Path
 from urllib.parse import quote
 
@@ -15,7 +16,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from backend.project.extensions import limiter, generate_csrf_token, validate_csrf_token
-from backend.project.game_system import calculate_level_from_xp
+from backend.project.game_system import sync_user_progression
 
 import threading
 import requests
@@ -58,6 +59,7 @@ if not SECRET_KEY:
         raise RuntimeError('SECRET_KEY environment variable is required in production')
     SECRET_KEY = 'dev-secret-key-change-in-production'
 app.config['SECRET_KEY'] = SECRET_KEY
+app.config['E2E_EXPOSE_ANSWERS'] = os.getenv('E2E_EXPOSE_ANSWERS') == '1'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', f'sqlite:///{project_root}/strubloid.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -319,7 +321,7 @@ def _init_db_background():
         print(f"⚠️  Migration failed (will retry on seed): {e}")
     db_ready = True
 
-if os.getenv('PYMUSIC_DISABLE_BACKGROUND_INIT') != '1':
+if os.getenv('PYMUSIC_DISABLE_BACKGROUND_INIT') != '1' and __name__ != '__main__':
     threading.Thread(target=_init_db_background, daemon=True).start()
 
 from backend.project.auth import auth_bp, login_manager
@@ -331,6 +333,9 @@ app.register_blueprint(api_bp)
 
 from backend.project.api.daily_challenges import daily_bp, seed_challenges
 app.register_blueprint(daily_bp)
+
+from backend.project.api.living_city import living_city_bp
+app.register_blueprint(living_city_bp)
 
 from backend.project.error_logger import log_error, log_request_error
 import time
@@ -626,61 +631,55 @@ def _build_scale_route(root_key, mode, octaves, fret_count):
     return positions
 
 
-def _select_tier1_fragment(positions, root_key, mode):
-    """Select a deterministic Tier-1 fragment: root + 3 notes + 1 gap + 2 candidates."""
+def _select_tier1_fragment(positions, root_key, mode, fragment_index=0, seed=0, route_modifier='nearest-position'):
+    """Select one deterministic movement with several physically playable choices."""
     if len(positions) < 5:
         return None
+    rng = random.Random(seed + fragment_index * 7919)
+    playable = [position for position in positions if 0 <= position['fret'] <= 24]
+    anchor_index = (seed + fragment_index * 5) % max(1, len(playable) - 1)
+    anchor = playable[anchor_index]
+    open_midi = [40, 45, 50, 55, 59, 64]
+    anchor_midi = open_midi[anchor['stringIndex']] + anchor['fret']
+    eligible = [position for position in playable if position != anchor]
+    if route_modifier == 'same-string':
+        eligible = [position for position in eligible if position['stringIndex'] == anchor['stringIndex']]
+    elif route_modifier == 'alternate-strings':
+        eligible = [position for position in eligible if position['stringIndex'] != anchor['stringIndex']]
+    elif route_modifier == 'ascending':
+        eligible = [position for position in eligible if open_midi[position['stringIndex']] + position['fret'] > anchor_midi]
+    elif route_modifier == 'descending':
+        eligible = [position for position in eligible if open_midi[position['stringIndex']] + position['fret'] < anchor_midi]
+    elif route_modifier == 'octave-target':
+        eligible = [position for position in eligible if position['pitch'] == anchor['pitch']]
+    if not eligible:
+        eligible = [position for position in playable if position != anchor]
+    eligible.sort(key=lambda position: (
+        abs(position['fret'] - anchor['fret']) + abs(position['stringIndex'] - anchor['stringIndex']) * 2,
+        position['stringIndex'], position['fret'],
+    ))
+    choice_window = eligible[:max(1, min(6, len(eligible)))]
+    correct_gap = choice_window[(seed + fragment_index) % len(choice_window)]
+    suffix_positions = [anchor]
 
-    # Use positions that span at least 2 strings or 4 frets for variety
-    suitable = [p for p in positions if p['fret'] >= 2]
-    if not suitable:
-        suitable = positions[1:] if len(positions) > 1 else positions
+    wrong_options = [
+        position for position in playable
+        if position != correct_gap and position['pitch'] != correct_gap['pitch']
+    ]
+    rng.shuffle(wrong_options)
+    candidates = [{**correct_gap, 'isCorrect': True}]
+    candidates.extend({**option, 'isCorrect': False} for option in wrong_options[:2])
+    rng.shuffle(candidates)
 
-    # Pick a mid-point anchor (not first or last, to have room on both sides)
-    mid = len(suitable) // 2
-    anchor = suitable[mid] if suitable else positions[0]
-
-    # Collect the visible suffix: 3 notes after anchor in pitch order
-    anchor_idx = positions.index(anchor)
-    suffix_positions = positions[anchor_idx + 1:anchor_idx + 4]
-
-    # The gap is the next valid position after suffix
-    gap_candidates = positions[anchor_idx + 4:anchor_idx + 7]
-
-    if not gap_candidates:
-        gap_candidates = positions[anchor_idx:anchor_idx + 2]
-
-    # Two candidates: the correct one + one wrong note on the same string or adjacent
-    correct_gap = gap_candidates[0] if gap_candidates else None
-
-    # Build wrong options from the same string or adjacent
-    wrong_options = []
-    if correct_gap:
-        same_string = [p for p in positions
-                       if p['string'] == correct_gap['string']
-                       and p['fret'] != correct_gap['fret']
-                       and p['fret'] <= 12]
-        wrong_options = [same_string[0]] if same_string else []
-
-        if not wrong_options:
-            # Adjacent string wrong option
-            all_wrong = [p for p in positions
-                         if p['stringIndex'] in [correct_gap['stringIndex'] - 1, correct_gap['stringIndex'] + 1]
-                         and p != correct_gap]
-            wrong_options = [all_wrong[0]] if all_wrong else []
-
-    candidates = []
-    if correct_gap:
-        candidates.append({**correct_gap, 'isCorrect': True})
-    for w in wrong_options[:1]:
-        candidates.append({**w, 'isCorrect': False})
-
-    # Shuffle candidates so correct isn't always last
-    import random
-    random.shuffle(candidates)
-
-    # Determine direction: if same string, it's "left" (higher fret on same string)
-    direction = 'left' if correct_gap and len([p for p in positions if p['string'] == correct_gap['string'] and p['fret'] > correct_gap['fret']]) > 0 else 'up'
+    direction = 'left' if correct_gap['string'] == anchor['string'] else 'up'
+    root_pitch = {'C': 0, 'C#': 1, 'DB': 1, 'D': 2, 'D#': 3, 'EB': 3, 'E': 4, 'F': 5, 'F#': 6, 'GB': 6, 'G': 7, 'G#': 8, 'AB': 8, 'A': 9, 'A#': 10, 'BB': 10, 'B': 11}.get(root_key.upper(), 0)
+    intervals = {
+        'ionian': [0, 2, 4, 5, 7, 9, 11], 'dorian': [0, 2, 3, 5, 7, 9, 10],
+        'phrygian': [0, 1, 3, 5, 7, 8, 10], 'lydian': [0, 2, 4, 6, 7, 9, 11],
+        'mixolydian': [0, 2, 4, 5, 7, 9, 10], 'aeolian': [0, 2, 3, 5, 7, 8, 10],
+        'locrian': [0, 1, 3, 5, 6, 8, 10],
+    }.get(mode, [0, 2, 4, 5, 7, 9, 11])
+    degree = intervals.index((correct_gap['pitch'] - root_pitch) % 12) + 1
 
     return {
         'root': root_key.upper(),
@@ -691,7 +690,7 @@ def _select_tier1_fragment(positions, root_key, mode):
         'gap': {**correct_gap} if correct_gap else None,
         'candidates': candidates,
         'direction': direction,
-        'degreeClue': '?_?',
+        'degreeClue': str(degree),
     }
 
 
@@ -711,25 +710,34 @@ def _public_scale_path_fragment(fragment):
 @app.route('/api/scale-path/run', methods=['GET'])
 @login_required
 def get_scale_path_run():
-    """Get a seeded Scale Path run: root, mode, difficulty, and 5 fragments.
+    """Get a seeded Scale Trail run with exactly six or seven movements.
 
     The server also stores the run so the completion endpoint can validate
     submitted positions without trusting client-supplied correctness.
     """
     try:
-        root = request.args.get('root', random.choice(['C', 'G', 'D', 'A', 'E', 'F']))
-        mode = request.args.get('mode', random.choice(['ionian', 'aeolian']))
+        seed_text = request.args.get('seed') or os.urandom(8).hex()
+        seed = int(hashlib.sha256(seed_text.encode('utf-8')).hexdigest()[:12], 16)
+        rng = random.Random(seed)
+        root = request.args.get('root') or rng.choice(['C', 'G', 'D', 'A', 'E', 'F'])
+        mode = request.args.get('mode') or rng.choice(['ionian', 'aeolian', 'dorian', 'mixolydian'])
         octaves = max(1, min(3, int(request.args.get('octaves', 1))))
         difficulty = max(1, min(5, int(request.args.get('difficulty', 1))))
         fret_count = {1: 12, 2: 17, 3: 22}.get(octaves, 12)
+        move_count = 6 + (seed % 2)
+        route_modifier = rng.choice([
+            'ascending', 'descending', 'same-string', 'nearest-position',
+            'alternate-strings', 'octave-target', 'hidden-labels', 'listen-first',
+        ])
 
         # Build full route for this run
         positions = _build_scale_route(root, mode, octaves, fret_count)
 
-        # Generate 5 fragments deterministically
+        # Every run is a real multi-step journey. The displayed die result is
+        # determined here before its animation starts.
         fragments = []
-        for i in range(5):
-            frag = _select_tier1_fragment(positions, root, mode)
+        for i in range(move_count):
+            frag = _select_tier1_fragment(positions, root, mode, i, seed, route_modifier)
             if frag:
                 frag['fragmentIndex'] = i
                 fragments.append(frag)
@@ -762,6 +770,9 @@ def get_scale_path_run():
             'difficulty': difficulty,
             'octaves': octaves,
             'fretCount': fret_count,
+            'seed': seed_text,
+            'dieResult': move_count,
+            'routeModifier': route_modifier,
             'positions': positions[:60],  # Send capped positions for the game
             'fragments': [_public_scale_path_fragment(fragment) for fragment in fragments],
         })
@@ -793,6 +804,7 @@ def complete_scale_path_fragment():
         run_id = data.get('runId', '')
         fragment_index = int(data.get('fragmentIndex', 0))
         submitted_position = data.get('submittedPosition') or {}
+        submitted_midi = data.get('submittedMidi')
 
         run = ScalePathRun.query.filter_by(run_id=run_id).first()
         if not run:
@@ -810,10 +822,15 @@ def complete_scale_path_fragment():
 
         # The server compares the submitted position against the stored
         # answer. The client cannot mark itself correct.
-        is_correct = (
+        guitar_correct = (
             submitted_position.get('string') == correct_gap.get('string')
             and submitted_position.get('fret') == correct_gap.get('fret')
         )
+        piano_correct = (
+            isinstance(submitted_midi, int)
+            and submitted_midi % 12 == correct_gap.get('pitch')
+        )
+        is_correct = guitar_correct or piano_correct
 
         # Idempotency: one result per (user, run, fragment).
         existing = ScalePathAttempt.query.filter_by(
@@ -845,7 +862,8 @@ def complete_scale_path_fragment():
         db.session.add(attempt)
         if is_correct and xp_awarded:
             current_user.xp = (current_user.xp or 0) + xp_awarded
-            current_user.level = calculate_level_from_xp(current_user.xp)
+            current_user.lifetime_points = (current_user.lifetime_points or 0) + xp_awarded
+            sync_user_progression(current_user)
         from backend.project.api.daily_challenges import _record_quest_progress
         period_key = datetime.utcnow().strftime('%Y-%m-%d')
         _record_quest_progress(current_user.id, 'play', 'daily', period_key)
@@ -870,45 +888,16 @@ def complete_scale_path_fragment():
 
 @app.route('/api/scale-path/verify', methods=['POST'])
 def verify_scale_lab_build():
-    """Verify a Scale Lab build — no XP, just confirmation and feedback."""
+    """Analyze a Scale Lab formula with music21. No XP is awarded here."""
     try:
         data = request.get_json() or {}
         root = data.get('root', 'C').upper()
         mode = data.get('mode', 'ionian')
-        selected_notes = data.get('selectedNotes', [])  # list of pitch class indices
-
-        mode_intervals = {
-            'ionian': [0, 2, 4, 5, 7, 9, 11],
-            'aeolian': [0, 2, 3, 5, 7, 8, 10],
-            'dorian': [0, 2, 3, 5, 7, 9, 10],
-            'mixolydian': [0, 2, 4, 5, 7, 9, 10],
-            'phrygian': [0, 1, 3, 5, 7, 8, 10],
-            'lydian': [0, 2, 4, 6, 7, 9, 11],
-            'locrian': [0, 1, 3, 5, 6, 8, 10],
-        }
-        note_tones = {
-            'C': 0, 'C#': 1, 'DB': 1, 'D': 2, 'D#': 3, 'EB': 3,
-            'E': 4, 'F': 5, 'F#': 6, 'GB': 6, 'G': 7, 'G#': 8,
-            'AB': 8, 'A': 9, 'A#': 10, 'BB': 10, 'B': 11,
-        }
-        root_tone = note_tones.get(root, 0)
-        expected_pitch_classes = {
-            (root_tone + interval) % 12
-            for interval in mode_intervals.get(mode, mode_intervals['ionian'])
-        }
-
-        selected_pitch_classes = set(selected_notes)
-        confirmed = selected_pitch_classes == expected_pitch_classes
-        missing = expected_pitch_classes - selected_pitch_classes
-        extra = selected_pitch_classes - expected_pitch_classes
-
-        return jsonify({
-            'confirmed': confirmed,
-            'expectedPitchClasses': list(expected_pitch_classes),
-            'missingPitchClasses': list(missing),
-            'extraPitchClasses': list(extra),
-            'message': 'Build verified!' if confirmed else f"Missing {len(missing)} note(s).",
-        })
+        selected_notes = data.get('selectedNotes', [])
+        from backend.project.music_analysis import analyze_scale_build
+        return jsonify(analyze_scale_build(root, mode, selected_notes))
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

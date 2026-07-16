@@ -1,122 +1,158 @@
 import React, { useMemo, useState } from 'react';
-import { BatteryCharging, Check, Clock3, Flame, Sparkles, Target, Trophy } from 'lucide-react';
+import { ArrowLeft, BatteryCharging, Check, Clock3, Flame, KeyRound, Sparkles, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGameProgress } from '../../contexts/GameProgressContext';
-import {
-  getQuestPeriodKey,
-  getQuestProgress,
-  selectQuestBoard,
-} from '../../game/questSystem';
+import { getQuestPeriodKey, getQuestProgress, selectQuestBoard } from '../../game/questSystem';
 import './Quests.scss';
+import './QuestVaults.scss';
 
-const CADENCES = [
-  { id: 'daily', label: 'Daily', icon: Clock3 },
-  { id: 'weekly', label: 'Weekly', icon: Flame },
-  { id: 'milestone', label: 'Milestones', icon: Trophy },
+const VAULTS = [
+  { id: 'daily', label: 'Daily Vault', Icon: Clock3, reward: 100, reset: 'Resets at local midnight', object: 'Practice capsule' },
+  { id: 'weekly', label: 'Weekly Vault', Icon: Flame, reward: 700, reset: 'Resets each Monday', object: 'Story chest' },
+  { id: 'milestone', label: 'Milestone Vault', Icon: Trophy, reward: 10000, reset: 'Permanent city legacy', object: 'District relic' },
 ];
+const OBJECT_TYPES = ['scroll', 'chest', 'medal', 'cylinder', 'case'];
 
-const REWARD_POOLS = { daily: 100, weekly: 700, milestone: 10000 };
-const getMissionRoute = (quest) => quest.metric === 'daily-wins' ? '/play/daily' : '/play/ear-training';
+const getMissionRoute = (quest) => {
+  if (quest.metric === 'daily-wins') return '/play/daily';
+  if (quest.title.toLowerCase().includes('scale')) return '/play/scales';
+  return '/play/ear-training';
+};
 
 const Quests = () => {
-  const { progressState, claimQuest, rankMeta } = useGameProgress();
+  const { progressState, claimQuest, rankMeta, showCityReward } = useGameProgress();
   const navigate = useNavigate();
-  const [cadence, setCadence] = useState('daily');
+  const [openVault, setOpenVault] = useState(null);
   const [claiming, setClaiming] = useState(null);
   const [message, setMessage] = useState('');
-  const now = new Date();
-  const quests = useMemo(() => selectQuestBoard(now), []);
-  const visibleQuests = quests.filter((quest) => quest.cadence === cadence);
-  const completed = quests.filter((quest) => {
+  const now = useMemo(() => new Date(), []);
+  const quests = useMemo(() => selectQuestBoard(now), [now]);
+
+  const questState = (quest) => {
+    const current = Math.min(quest.target, getQuestProgress(quest, progressState, now));
     const periodKey = getQuestPeriodKey(quest, now);
-    return Boolean(progressState.questClaims?.[`${quest.id}:${periodKey}`]);
-  }).length;
-  const activeMission = visibleQuests.find((quest) => getQuestProgress(quest, progressState, now) < quest.target) || visibleQuests[0];
-  const activeMissionProgress = activeMission
-    ? Math.min(activeMission.target, getQuestProgress(activeMission, progressState, now))
-    : 0;
+    const claimed = Boolean(progressState.questClaims?.[`${quest.id}:${periodKey}`]);
+    return { current, periodKey, claimed, complete: current >= quest.target };
+  };
+
+  const vaultSummaries = VAULTS.map((vault) => {
+    const missions = quests.filter((quest) => quest.cadence === vault.id);
+    const states = missions.map((quest) => ({ quest, ...questState(quest) }));
+    const ready = states.filter((item) => item.complete && !item.claimed).length;
+    const resolved = states.filter((item) => item.complete || item.claimed).length;
+    const featured = states.find((item) => !item.claimed) || states[0];
+    return { ...vault, missions, states, ready, resolved, featured };
+  });
+  const selectedVault = vaultSummaries.find((vault) => vault.id === openVault);
 
   const handleClaim = async (quest) => {
-    const periodKey = getQuestPeriodKey(quest, now);
+    const { periodKey } = questState(quest);
     setClaiming(quest.id);
-    setMessage('');
+    setMessage('Vault Keeper is releasing the mission seals…');
     try {
       const reward = await claimQuest(quest, periodKey);
-      if (reward.alreadyClaimed) setMessage('That reward is already safely in your collection.');
-      else setMessage(`Quest cleared: +${reward.xpAwarded} XP${reward.focusRestored ? ` and +${reward.focusRestored} Focus` : ''}.`);
+      if (reward.alreadyClaimed) {
+        setMessage('That reward is already stamped into your collection.');
+      } else {
+        setMessage(`Seals released: +${reward.xpAwarded} XP${reward.focusRestored ? ` and +${reward.focusRestored} Focus` : ''}.`);
+        showCityReward({
+          id: `quest-${quest.id}-${periodKey}`,
+          type: 'quest-vault',
+          payload: {
+            name: quest.title,
+            xp: reward.xpAwarded,
+            focus: reward.focusRestored,
+            message: 'Vault Keeper transferred the reward into your city inventory.',
+          },
+        });
+      }
     } catch {
-      setMessage('The quest was completed, but the reward could not be claimed yet.');
+      setMessage('The mission is complete, but its mechanism could not open yet.');
     } finally {
       setClaiming(null);
     }
   };
 
+  if (!selectedVault) {
+    return (
+      <main className="quest-vaults quest-vaults--chamber">
+        <header className="vault-chamber__header">
+          <span><Sparkles size={15} /> QUEST VAULTS</span>
+          <h1>The Resonance Chamber</h1>
+          <p>Three mechanisms hold the City's practice missions. Choose one vault door; completed energy flows toward its reward object.</p>
+          <div className="vault-chamber__meters">
+            <span><Trophy /> {rankMeta.name} · Level {rankMeta.accountLevel}</span>
+            <span><BatteryCharging /> {progressState.focusPoints}/10 Focus</span>
+          </div>
+        </header>
+
+        <section className="vault-chamber" aria-label="Quest vault chamber">
+          <div className="vault-chamber__rings" aria-hidden="true"><i /><i /><i /></div>
+          <div className="vault-keeper" aria-label="Vault Keeper watches the chamber"><span>⌁</span><b>VAULT<br />KEEPER</b></div>
+          <div className="vault-pip" aria-label="Pip waits at the centre of the chamber"><i>♪</i><span>Pip</span></div>
+          <div className="vault-energy" aria-hidden="true"><i /><i /><i /><i /><i /></div>
+          <div className="vault-door-row">
+            {vaultSummaries.map((vault) => {
+              const percent = Math.round((vault.resolved / vault.missions.length) * 100);
+              return (
+                <button
+                  type="button"
+                  className={`vault-door vault-door--${vault.id} ${vault.ready ? 'is-ready' : ''}`}
+                  key={vault.id}
+                  onClick={() => setOpenVault(vault.id)}
+                  aria-label={`Open ${vault.label}. ${vault.ready} rewards ready to claim.`}
+                >
+                  <span className="vault-door__arch"><vault.Icon /><i style={{ '--vault-progress': `${percent * 3.6}deg` }} /><b>{percent}%</b></span>
+                  <strong>{vault.label}</strong>
+                  <span>{vault.ready ? `${vault.ready} ready to claim` : `${vault.resolved}/${vault.missions.length} resonating`}</span>
+                  <small>{vault.featured?.quest.title}</small>
+                  <em>{vault.reset}</em>
+                  <span className="vault-door__reward" aria-hidden="true">{vault.object}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   return (
-    <main className="quest-room">
-      <header className="quest-hero">
-        <div className="quest-hero-copy">
-          <span className="quest-kicker"><Sparkles size={15} /> Practice missions</span>
-          <h1>Quest Board</h1>
-          <p>Small musical missions refill Focus for powers and nudge your rank journey forward without replacing real practice.</p>
-          {activeMission && (
-            <div className="quest-now-playing">
-              <div><span>Active mission</span><strong>{activeMission.title}</strong><small>{activeMissionProgress}/{activeMission.target} complete</small></div>
-              <button type="button" onClick={() => navigate(getMissionRoute(activeMission))}>Launch mission</button>
-            </div>
-          )}
-        </div>
-        <div className="quest-hero-meters">
-          <div className="quest-room-meter" aria-label={rankMeta.progressLabel}>
-            <Trophy size={24} />
-            <div><strong>{rankMeta.name}</strong><span>Level {rankMeta.level} of {rankMeta.levels}</span></div>
-          </div>
-          <div className="quest-room-meter" aria-label={`${progressState.focusPoints} focus available`}>
-            <BatteryCharging size={24} />
-            <div><strong>{progressState.focusPoints}/5</strong><span>Focus bank</span></div>
-          </div>
-        </div>
+    <main className={`quest-vaults quest-vaults--interior quest-vaults--${selectedVault.id}`}>
+      <header className="vault-interior__header">
+        <button type="button" onClick={() => setOpenVault(null)}><ArrowLeft /> Return to chamber</button>
+        <div><span>{selectedVault.reset}</span><h1>{selectedVault.label}</h1><p>{selectedVault.missions.length} mission objects · {selectedVault.reward.toLocaleString()} XP in the full vault</p></div>
+        <selectedVault.Icon aria-hidden="true" />
       </header>
-
-      <section className="quest-summary" aria-label="Quest summary">
-        <div><strong>{quests.length}</strong><span>quests in rotation</span></div>
-        <div><strong>{completed}</strong><span>rewards claimed</span></div>
-        <div><strong>{progressState.totalCompleted}</strong><span>moves recorded</span></div>
-      </section>
-
-      <nav className="quest-tabs" aria-label="Quest periods">
-        {CADENCES.map(({ id, label, icon: Icon }) => (
-          <button key={id} type="button" className={cadence === id ? 'is-active' : ''} onClick={() => setCadence(id)}>
-            <Icon size={16} /> {label}
-            <span>{quests.filter((quest) => quest.cadence === id).length} · {REWARD_POOLS[id].toLocaleString()} XP</span>
-          </button>
-        ))}
-      </nav>
-
-      {message && <p className="quest-toast" role="status">{message}</p>}
-
-      <section className="quest-grid" aria-label={`${cadence} quests`}>
-        {visibleQuests.map((quest, index) => {
-          const current = Math.min(quest.target, getQuestProgress(quest, progressState, now));
-          const complete = current >= quest.target;
-          const periodKey = getQuestPeriodKey(quest, now);
-          const claimKey = `${quest.id}:${periodKey}`;
-          const claimed = Boolean(progressState.questClaims?.[claimKey]);
+      {message && <p className="vault-message" role="status">{message}</p>}
+      <section className="mission-vault" aria-label={`${selectedVault.label} mission objects`}>
+        <div className="mission-vault__rail" aria-hidden="true" />
+        {selectedVault.states.map(({ quest, current, periodKey, claimed, complete }, index) => {
           const canClaim = complete && !claimed;
           const percent = Math.round((current / quest.target) * 100);
+          const sealCount = Math.max(1, Math.min(8, quest.target));
+          const litSeals = Math.round((percent / 100) * sealCount);
+          const objectType = OBJECT_TYPES[index % OBJECT_TYPES.length];
           return (
-            <article className={`quest-card quest-card--${cadence} ${complete ? 'is-complete' : ''} ${claimed ? 'is-claimed' : ''}`} key={quest.id}>
-              <div className="quest-card-top">
-                <span className="quest-number">{String(index + 1).padStart(2, '0')}</span>
-                <span className="quest-reward">+{quest.xp} XP {quest.focus ? `· +${quest.focus} Focus` : ''}</span>
+            <article className={`mission-object mission-object--${objectType} ${canClaim ? 'is-ready' : ''} ${claimed ? 'is-claimed' : ''}`} key={quest.id}>
+              <div className="mission-object__artifact" aria-hidden="true"><i /><span>{String(index + 1).padStart(2, '0')}</span></div>
+              <div className="mission-object__copy">
+                <span className="mission-object__reward">+{quest.xp} XP {quest.focus ? `· +${quest.focus} Focus` : ''}</span>
+                <h2>{quest.title}</h2><p>{quest.description}</p>
+                <div className="mission-seals" aria-label={`${current} of ${quest.target} complete`}>
+                  {Array.from({ length: sealCount }, (_, seal) => <i className={seal < litSeals ? 'is-lit' : ''} key={seal} />)}
+                  <strong>{current}/{quest.target}</strong>
+                </div>
+                <button
+                  type="button"
+                  disabled={claimed || claiming === quest.id}
+                  aria-label={canClaim ? `Claim reward: ${quest.title}` : claimed ? `Claimed: ${quest.title}` : `Launch mission: ${quest.title}`}
+                  onClick={() => (canClaim ? handleClaim(quest) : navigate(getMissionRoute(quest)))}
+                >
+                  {claimed ? <><Check /> Stamped complete</> : canClaim ? <><KeyRound /> Release seals</> : <>Hand mission to Pip</>}
+                </button>
+                <small className="mission-object__period">{periodKey}</small>
               </div>
-              <Target className="quest-target" size={24} aria-hidden="true" />
-              <h2>{quest.title}</h2>
-              <p>{quest.description}</p>
-              <div className="quest-progress-copy"><span>{current} / {quest.target}</span><span>{percent}%</span></div>
-              <div className="quest-progress-track"><span style={{ width: `${percent}%` }} /></div>
-              <button type="button" className="quest-card-action" disabled={claimed || claiming === quest.id} onClick={() => (canClaim ? handleClaim(quest) : navigate(getMissionRoute(quest)))}>
-                {claimed ? <><Check size={15} /> Claimed</> : canClaim ? 'Claim reward' : 'Launch mission'}
-              </button>
             </article>
           );
         })}

@@ -24,6 +24,8 @@ Music theory is supporting language for a musical action. It is never the produc
 8. Correctness, XP, rank progress, and claimable rewards are server-authoritative for signed-in players.
 9. Practice aids, replay, slower playback, and hints are legitimate learning tools. They may change a documented confidence or score measure, but must not shame or lock a learner out of understanding.
 10. Every feature must work by keyboard, pointer, touch, screen reader, reduced motion, and at 320px width. Color and motion are never the only carriers of meaning.
+11. Game Canvas may stage the world, but every meaningful Canvas interaction has a synchronized DOM equivalent and Canvas never owns signed-in reward authority.
+12. First-party analytics collect only the minimum coarse product/learning events required to improve reliability and comprehension; no advertising, cross-site tracking, precise location, child audio, or unnecessary personal data is allowed.
 
 ## The Music Test
 

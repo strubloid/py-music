@@ -42,6 +42,9 @@ export interface ScalePathRun {
   fretCount: number;
   positions: ScalePathPosition[];
   fragments: ScalePathFragment[];
+  dieResult?: 6 | 7;
+  routeModifier?: string;
+  seed?: string;
 }
 
 export interface ScalePathState {
@@ -85,7 +88,7 @@ export const createInitialScalePathState = (opts: { reducedMotion?: boolean; cha
   runId: globalThis.crypto?.randomUUID?.() || `sp-${Date.now()}`,
   run: null,
   fragmentIndex: 0,
-  fragmentCount: opts.challengeCount ?? 5,
+  fragmentCount: opts.challengeCount ?? 6,
   fragment: null,
   selectedCandidateIndex: null,
   score: 0,
@@ -115,6 +118,7 @@ export const scalePathReducer = (state: ScalePathState, event: { type: string; [
         phase: 'ready',
         run,
         runId: run.runId,
+        fragmentCount: run.fragments.length,
         fragmentIndex: 0,
         fragment: first,
         selectedCandidateIndex: null,

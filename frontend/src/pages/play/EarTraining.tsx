@@ -10,10 +10,11 @@ import { useGameProgress } from '../../contexts/GameProgressContext';
 import { createEarTrainingAudioEngine, EAR_TRAINING_INSTRUMENTS } from '../../audio/earTrainingAudio';
 import { completeDailyChallenge, getDailyChallenges, getUserStreak } from '../../services/api';
 import { getModeBaseXp, getPowerById } from '../../game/gameSystem';
+import { useActivitySession } from '../../game/progression/useActivitySession';
 import SoundGatesGame from '../../features/ear-game/components/SoundGatesGame';
 import RewardOverlay from '../../features/ear-game/components/RewardOverlay';
 import { createGameInputHandler } from '../../features/ear-game/hooks/gameInput';
-import { normalizeEarChallenge } from '../../features/ear-game/services/challengeNormalizer';
+import { normalizeEarChallenge, variantForExercise } from '../../features/ear-game/services/challengeNormalizer';
 import { calculateRoundScore, updateMasteryWindow } from '../../features/ear-game/services/scoreMastery';
 import {
   createInitialEarGameState,
@@ -67,11 +68,16 @@ const initialSettings = () => {
 
 const EarTraining = () => {
   const { user, isLoggedIn, updateUserProgress } = useAuth();
+  const { unlockedPowers, consumeFocus, recordChallengeResult, progressState, rankMeta } = useGameProgress();
   const settingsRef = useRef(initialSettings());
   const [game, dispatch] = useReducer(
     earGameReducer,
     null,
     () => createInitialEarGameState({ challengeCount: RUN_LENGTH, reducedMotion: settingsRef.current.reducedMotion }),
+  );
+  const activity = useActivitySession(
+    'sound-gates',
+    !['loading', 'ready', 'run-complete'].includes(game.phase),
   );
   const gameRef = useRef(game);
   const actionRef = useRef(() => {});
@@ -142,7 +148,13 @@ const EarTraining = () => {
           random: true,
           excludeIds: exclusions,
         });
-        raw = response.data.challenges.find((item) => item.category === 'ear_training' && !exclusions.includes(item.id));
+        const available = response.data.challenges.filter(
+          (item) => item.category === 'ear_training' && !exclusions.includes(item.id),
+        );
+        const previousVariant = gameRef.current.challenge?.variant;
+        raw = available.find(
+          (item) => variantForExercise(item.exercise?.type || item.question_type) !== previousVariant,
+        ) || available[0];
       }
       if (!raw) throw new Error('No ear-training challenge is available.');
       const normalized = normalizeEarChallenge(raw, { instrumentId: selectedInstrumentRef.current });
@@ -306,22 +318,46 @@ const EarTraining = () => {
     }
   }, [playPrompt, result, scheduleNext]);
 
-  const usePower = useCallback((powerId) => {
+  const usePower = useCallback(async (powerId) => {
     const state = gameRef.current;
     if (!state.challenge || state.phase !== 'accepting-input' || state.usedPowers.includes(powerId)) return;
     const power = getPowerById(powerId);
-    if (power?.focusCost && !consumeFocus(power.focusCost)) {
-      setAnnouncement('Not enough focus for that power.');
-      return;
+    let powerResult = null;
+    if (power?.focusCost) {
+      if (isLoggedIn) {
+        powerResult = await activity.activateSoundPower(powerId, state.challenge.sourceChallengeId);
+        if (!powerResult) {
+          setAnnouncement('That power could not activate. Check your Focus and try again.');
+          return;
+        }
+      } else {
+        if (powerId === 'remove_one_option') {
+          setAnnouncement('Sign in to use Remove One Gate without exposing the hidden answer key.');
+          return;
+        }
+        if (!consumeFocus(power.focusCost)) {
+          setAnnouncement('Not enough focus for that power.');
+          return;
+        }
+      }
     }
     dispatch({ type: 'POWER_USED', powerId });
     if (powerId === 'remove_one_option') {
-      const removable = state.challenge.answers.find((answer) => answer.id !== state.selectedAnswerId && !hiddenAnswerIds.includes(answer.id));
+      const removable = Number.isInteger(powerResult?.eliminated_index)
+        ? state.challenge.answers[powerResult.eliminated_index]
+        : null;
       if (removable) setHiddenAnswerIds((current) => [...current, removable.id]);
     }
     if (powerId === 'slow_down') playPrompt({ slow: true, replay: true });
-    if (powerId === 'compare_mode') setAnnouncement('Compare is armed. Press C after answering.');
-  }, [hiddenAnswerIds, playPrompt]);
+    if (powerId === 'replay') playPrompt({ replay: true });
+    if (powerId === 'root_note_anchor') {
+      const rootNote = powerResult?.root_note || state.challenge.prompt.events[0]?.note;
+      if (rootNote) {
+        audioRef.current?.playNoteSequence({ instrumentId: selectedInstrument, notes: [rootNote] });
+        setAnnouncement(`Root Lantern illuminated ${rootNote}.`);
+      }
+    }
+  }, [activity, consumeFocus, isLoggedIn, playPrompt, selectedInstrument]);
 
   const nextRound = useCallback(() => {
     const state = gameRef.current;
@@ -337,8 +373,8 @@ const EarTraining = () => {
       && isGameInputLocked(state)
       && !(state.phase === 'ready' && ['jump', 'confirm'].includes(action));
     const labels = {
-      'move-left': 'Nomi moved left',
-      'move-right': 'Nomi moved right',
+      'move-left': 'Pip moved left',
+      'move-right': 'Pip moved right',
       jump: state.phase === 'ready' ? 'Starting the sound' : 'Gate committed',
       confirm: state.phase === 'ready' ? 'Starting the sound' : 'Gate committed',
       replay: 'Prompt replayed',
@@ -391,15 +427,16 @@ const EarTraining = () => {
       else if (['showing-correct', 'showing-incorrect'].includes(state.phase)) nextRound();
       return;
     }
-    if (action === 'replay') playPrompt({ replay: state.phase !== 'ready', preservePhase: state.phase.startsWith('showing-') });
-    if (action === 'slow-replay') playPrompt({ slow: true, replay: state.phase !== 'ready', preservePhase: state.phase.startsWith('showing-') });
+    if (action === 'replay') {
+      if (state.phase === 'accepting-input') usePower('replay');
+      else playPrompt({ replay: state.phase !== 'ready', preservePhase: state.phase.startsWith('showing-') });
+    }
+    if (action === 'slow-replay' && state.phase === 'accepting-input') usePower('slow_down');
     if (action === 'hint') usePower('remove_one_option');
     if (action === 'compare') playComparison();
   }, [clearTimersAndAudio, commitAnswer, nextRound, playComparison, playPrompt, scheduleNext, usePower]);
 
   actionRef.current = dispatchGameAction;
-
-  const { unlockedPowers, consumeFocus, recordChallengeResult, progressState, rankMeta } = useGameProgress();
 
   useEffect(() => {
     loadChallenge();
@@ -464,8 +501,9 @@ const EarTraining = () => {
       maxCombo: game.maxCombo,
       completedAt: new Date().toISOString(),
     });
+    activity.finish().catch(() => setAnnouncement('Run saved locally; city Focus will sync when the connection returns.'));
     dispatch({ type: 'RUN_PERSISTED' });
-  }, [game, recordChallengeResult]);
+  }, [activity, game, recordChallengeResult]);
 
   const selectAnswer = useCallback((answerId, inputMode = 'pointer') => {
     dispatch({ type: 'SELECT_ANSWER', answerId, inputMode });
@@ -476,9 +514,10 @@ const EarTraining = () => {
   const restartRun = useCallback(() => {
     clearTimersAndAudio();
     answerCommitRef.current = false;
+    activity.reset();
     dispatch({ type: 'RUN_RESET' });
     loadChallenge();
-  }, [clearTimersAndAudio, loadChallenge]);
+  }, [activity, clearTimersAndAudio, loadChallenge]);
 
   const openSettings = useCallback(() => {
     if (!['ready', 'accepting-input'].includes(gameRef.current.phase)) return;
@@ -526,8 +565,8 @@ const EarTraining = () => {
   }, [closeSettings, dispatchGameAction, game.phase, settingsOpen]);
 
   const powers = useMemo(() => {
-    const supported = ['remove_one_option', 'slow_down', 'compare_mode', 'freeze_combo', 'second_chance'];
-    return unlockedPowers.filter((power) => supported.includes(power.id)).slice(0, 5);
+    const supported = ['replay', 'slow_down', 'remove_one_option', 'root_note_anchor'];
+    return unlockedPowers.filter((power) => supported.includes(power.id));
   }, [unlockedPowers]);
   const selectedInstrumentMeta = EAR_TRAINING_INSTRUMENTS.find((item) => item.id === selectedInstrument);
   const challenge = game.challenge;
@@ -571,7 +610,7 @@ const EarTraining = () => {
           ? `Rank challenge needs 80% accuracy. Stay at ${rankEvent.rank} and try again.`
           : rankEvent?.type === 'complete'
             ? 'Legendary complete. Every rank level is yours.'
-            : `${rankMeta.name} progress advanced to Level ${rankMeta.level}.`;
+            : `${rankMeta.name} progress follows account Level ${rankMeta.accountLevel}.`;
     return <RewardOverlay accuracy={accuracy} game={game} rankEvent={rankEvent} rankMeta={{ ...rankMeta, progressLabel: rankMessage }} onContinue={restartRun} />;
   }
 
@@ -594,7 +633,10 @@ const EarTraining = () => {
         audioState={audioState}
         highContrast={settings.highContrast}
         bossMode={rankMeta.challengePending}
-        onPlay={() => playPrompt({ replay: game.phase !== 'ready', preservePhase: game.phase.startsWith('showing-') })}
+        onPlay={() => {
+          if (game.phase === 'accepting-input') usePower('replay');
+          else playPrompt({ replay: game.phase !== 'ready', preservePhase: game.phase.startsWith('showing-') });
+        }}
         onSelect={selectAnswer}
         onCommit={commitAnswer}
         onCompare={playComparison}

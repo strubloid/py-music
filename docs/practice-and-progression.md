@@ -86,11 +86,17 @@ Enabled chord vocabulary covers all chromatic roots for major, minor, diminished
 
 Incorrect answers earn no account or Rank XP but always record learning evidence. Replays, hints, and accessibility aids are legitimate; they do not remove already-earned XP.
 
-### Rank
+### Level, Rank, And Leaderboard
 
-Each 500 Rank XP grants one internal level. Rank XP pauses at a pending promotion challenge and cannot bypass it. The rank sequence is Unranked 10 levels, Bronze 20, Silver 35, Gold 50, Platinum 70, Diamond 90, Master 115, Grandmaster 140, Virtuoso 170, Maestro 200, and Legendary 250.
+Account level is the only visible level counter. Rank is a permanent tier earned at server-owned account-level thresholds: early promotions use ten-level gaps, higher promotions use twenty-level gaps, and the final promotion uses a fifty-level gap. The UI says the current account level, permanent tier, and levels remaining to the next tier; it never shows a second nested value such as “Level 1/10 Unranked”. Existing users are migrated from authoritative XP/level without losing earned progress.
 
-Rank must be server-persisted before it controls an entitlement, promotion, quest credit, or cross-device claim. Any local rank state is presentation-only.
+The leaderboard is a separate dynamic position ordered by authoritative lifetime points. Earned rank tiers do not decrease, while leaderboard position can move when another player passes the user. Rank, lifetime points, and public-safe leaderboard identity must be server-persisted before they control an entitlement, promotion, quest credit, or cross-device claim. Local state is presentation-only.
+
+### Focus And Attempt Trail
+
+Focus has a maximum of 10 and starts at 5. Earn, spend, failure refund, and completion locks follow the Living Music City contract. A signed-in Focus mutation is an idempotent server transaction; a power cannot spend after completion or spend twice.
+
+A play counts when an activity reaches active interaction, not when its route opens. Attempt Trail rewards occur at 5, 15, 30, 50, 67, 100, and every additional 100 plays. The 67-play “We Like You” reward permanently grants “The City Likes You”, one Pip cosmetic, and 3 Focus, and praises persistence rather than talent.
 
 ### Quests
 

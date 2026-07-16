@@ -1,4 +1,5 @@
 import { Reverb, SampleLoader, Soundfont, SplendidGrandPiano } from 'smplr';
+import { AUDIO_MIX_EVENT, getAudioLevel } from '../game/audio/audioMix';
 
 const PRE_ROLL_SECONDS = 0.08;
 const SAMPLE_LOAD_TIMEOUT_MS = 8_000;
@@ -45,7 +46,7 @@ const createFallbackInstrument = (context) => {
       const midi = Number.isFinite(Number(note)) ? Number(note) : 60;
       const oscillator = context.createOscillator();
       const gain = context.createGain();
-      const level = Math.min(0.22, Math.max(0.04, Number(velocity) / 600));
+      const level = Math.max(0.0001, Math.min(0.22, Math.max(0.04, Number(velocity) / 600)) * getAudioLevel('musicalPrompt'));
       oscillator.type = 'triangle';
       oscillator.frequency.setValueAtTime(440 * (2 ** ((midi - 69) / 12)), time);
       gain.gain.setValueAtTime(0.0001, time);
@@ -72,7 +73,7 @@ const buildInstrument = (context, loader, instrumentId, onLoadProgress) => {
     const guitar = Soundfont(context, {
       instrumentUrl: GUITAR_PROXY_URL,
       loader,
-      volume: 108,
+      volume: Math.round(108 * getAudioLevel('musicalPrompt')),
       velocity: 108,
       onLoadProgress,
     });
@@ -84,7 +85,7 @@ const buildInstrument = (context, loader, instrumentId, onLoadProgress) => {
   const piano = SplendidGrandPiano(context, {
     baseUrl: PIANO_PROXY_BASE_URL,
     loader,
-    volume: 104,
+    volume: Math.round(104 * getAudioLevel('musicalPrompt')),
     velocity: 104,
     decayTime: 0.9,
     formats: ['ogg', 'm4a'],
@@ -106,6 +107,17 @@ export const createEarTrainingAudioEngine = ({ onStateChange } = {}) => {
   let instruments = {};
   let loadedInstrumentIds = [];
   let loadProgressByInstrument = {};
+
+  const resetLoadedInstruments = () => {
+    Object.values(instruments).forEach((instrument) => instrument.dispose());
+    instruments = {};
+    loadedInstrumentIds = [];
+    loadProgressByInstrument = {};
+    loadingInstrumentId = null;
+    emitState();
+  };
+
+  window.addEventListener(AUDIO_MIX_EVENT, resetLoadedInstruments);
 
   const emitState = () => {
     onStateChange?.({
@@ -278,6 +290,7 @@ export const createEarTrainingAudioEngine = ({ onStateChange } = {}) => {
   };
 
   const dispose = () => {
+    window.removeEventListener(AUDIO_MIX_EVENT, resetLoadedInstruments);
     Object.values(instruments).forEach((instrument) => {
       instrument.dispose();
     });

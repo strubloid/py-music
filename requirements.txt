@@ -16,3 +16,4 @@ flask-limiter>=3.7
 gunicorn>=22.0.0
 pip-audit>=2.7
 requests>=2.31.0
+music21==10.5.0

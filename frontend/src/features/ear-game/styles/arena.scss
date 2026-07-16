@@ -234,6 +234,48 @@
         monospace;
     letter-spacing: 0.14em;
 }
+
+.challenge-verb {
+    position: absolute;
+    z-index: 5;
+    top: 94px;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--sg-cyan);
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+.challenge-verb span {
+    padding: 5px 11px;
+    border: 1px solid rgba(73, 200, 239, 0.28);
+    border-radius: 999px;
+    background: rgba(5, 8, 23, 0.68);
+    font: 800 0.58rem ui-monospace, monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+.challenge-verb i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 12px currentColor;
+}
+.challenge-verb--catch-root i { animation: root-orbit 1.8s ease-in-out infinite alternate; }
+.challenge-verb--catch-root i:nth-child(3) { animation-delay: -0.6s; }
+.challenge-verb--catch-root i:nth-child(4) { animation-delay: -1.2s; }
+.challenge-verb--bridge-builder { color: var(--sg-gold); }
+.challenge-verb--bridge-builder i { border-radius: 1px; transform: rotate(45deg); }
+.challenge-verb--echo-chase { color: #b897ff; }
+.challenge-verb--echo-chase i { animation: echo-route 1.2s linear infinite; }
+.game-arena--catch-root .runner-track__lane { background: linear-gradient(180deg, rgba(73, 200, 239, 0.08), transparent); }
+.game-arena--bridge-builder .runner-track__lane { border-top: 2px dashed rgba(255, 189, 46, 0.25); }
+.game-arena--echo-chase .runner-track__lane { background: repeating-linear-gradient(180deg, rgba(184, 151, 255, 0.18) 0 8px, transparent 8px 18px); }
+@keyframes root-orbit { to { transform: translateY(-8px) scale(1.4); opacity: 0.45; } }
+@keyframes echo-route { 50% { opacity: 0.35; transform: translateX(8px); } }
+
 .side-scroller-layer {
     position: absolute;
     z-index: 2;

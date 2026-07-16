@@ -15,8 +15,8 @@ const MODE_PATTERNS: Record<string, { intervals: number[]; name: string }> = {
   locrian:    { intervals: [0, 1, 3, 5, 6, 8, 10], name: 'Locrian' },
 };
 
-function pitchClass(note: string): number {
-  const name = note.replace('#', '').toUpperCase();
+export function notePitchClass(note: string): number {
+  const name = note.replace(/\d/g, '').toUpperCase();
   return NOTE_NAMES.indexOf(name);
 }
 
@@ -26,7 +26,7 @@ export function analyzeCandidates(
 ): ScaleLabCandidate[] {
   if (placedNotes.length === 0) return [];
 
-  const placedPitches = placedNotes.map((n) => pitchClass(n.note) % 12);
+  const placedPitches = placedNotes.map((n) => notePitchClass(n.note) % 12);
 
   // Find which modes are compatible with the placed notes
   const candidates: ScaleLabCandidate[] = [];

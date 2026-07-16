@@ -7,6 +7,7 @@ import {
   isGameInputLocked,
 } from '../state/earGameReducer';
 import { actionForKeyboardEvent, shouldIgnoreGameShortcut } from '../hooks/gameInput';
+import { normalizeEarChallenge, variantForExercise } from '../services/challengeNormalizer';
 
 const challenge = {
   id: 'challenge-1',
@@ -80,4 +81,24 @@ test('keyboard mappings use physical codes and preserve typing and tab behavior'
   assert.equal(actionForKeyboardEvent({ code: 'Tab', shiftKey: false }), null);
   assert.equal(shouldIgnoreGameShortcut({ target: { tagName: 'INPUT', isContentEditable: false } }), true);
   assert.equal(shouldIgnoreGameShortcut({ target: { tagName: 'DIV', isContentEditable: false } }), false);
+});
+
+test('exercise families rotate through three physical Sound Gates verbs', () => {
+  assert.equal(variantForExercise('direction'), 'catch-root');
+  assert.equal(variantForExercise('interval'), 'bridge-builder');
+  assert.equal(variantForExercise('shape'), 'echo-chase');
+
+  const normalized = normalizeEarChallenge({
+    id: 42,
+    exercise: {
+      type: 'chord_movement',
+      title: 'Root motion',
+      question: 'Where did the root travel?',
+      options: ['Up a fourth', 'Down a third'],
+      chords: [['C3', 'E3', 'G3'], ['F3', 'A3', 'C4']],
+    },
+  });
+  assert.equal(normalized.variant, 'catch-root');
+  assert.equal(normalized.answers.length, 2);
+  assert.equal(normalized.correctAnswerId, null);
 });

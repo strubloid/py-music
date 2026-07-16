@@ -11,6 +11,7 @@ from backend.project.api.daily_challenges import (
     SCALE_FORMULAS, _utc_hint_state, build_ear_exercise, daily_bp, seed_challenges,
 )
 from backend.project.api.protected import api_bp
+from backend.project.api.living_city import living_city_bp
 from backend.project.auth import auth_bp, login_manager
 from backend.project.daily_challenge_explanations import build_daily_challenge_explanation
 from backend.project.extensions import limiter
@@ -39,6 +40,7 @@ class DailyChallengeFlowTest(unittest.TestCase):
         self.app.register_blueprint(auth_bp, url_prefix='/api/auth')
         self.app.register_blueprint(daily_bp)
         self.app.register_blueprint(api_bp)
+        self.app.register_blueprint(living_city_bp)
 
         with self.app.app_context():
             db.create_all()
@@ -357,6 +359,9 @@ class DailyChallengeFlowTest(unittest.TestCase):
         self.assertEqual(unknown.status_code, 400)
         # The user earned 100 XP from the challenge + 5 XP from the quest = 105.
         self.assertEqual(self.client.get('/api/auth/me').get_json()['user']['xp'], 105)
+        server_progress = self.client.get('/api/me/game-progress').get_json()
+        self.assertIn('daily-play-1:', next(iter(server_progress['quest_claims'])))
+        self.assertEqual(next(iter(server_progress['quest_claims'].values()))['xpAwarded'], 5)
 
     def test_quest_claim_rejects_under_progress(self):
         self._register_user()

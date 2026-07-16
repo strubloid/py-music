@@ -208,8 +208,9 @@ const DailyChallenge = () => {
 
   const dismissAnswerPopup = () => {
     if (!answerPopup) return;
-    const { challengeId } = answerPopup;
+    const { challengeId, userProgress } = answerPopup;
     setAnswerPopup(null);
+    if (userProgress) updateUserProgress(userProgress);
     if (sessionStatsRef.current.answered >= DAILY_RUN_LENGTH) {
       setDailyRunComplete(true);
       return;
@@ -236,6 +237,7 @@ const DailyChallenge = () => {
     let serverCorrectAnswer = null;
     let serverXpAwarded = 0;
     let serverAuthenticated = isLoggedIn;
+    let pendingUserProgress = null;
 
     try {
       const res = await completeDailyChallenge(challengeId, {
@@ -292,11 +294,11 @@ const DailyChallenge = () => {
         try {
           const me = await getMe();
           if (me.data?.user) {
-            updateUserProgress({
+            pendingUserProgress = {
               xp: me.data.user.xp,
               level: me.data.user.level,
               rank: me.data.user.rank,
-            });
+            };
           }
         } catch {
           /* ignore */
@@ -333,7 +335,7 @@ const DailyChallenge = () => {
         });
         showFeedbackBurst(`+${serverXpAwarded} XP`, 'positive');
         window.dispatchEvent(new Event('streak:updated'));
-        openAnswerPopup({ xpAwarded: serverXpAwarded, signedInReward: true });
+        openAnswerPopup({ xpAwarded: serverXpAwarded, signedInReward: true, userProgress: pendingUserProgress });
       } else {
         setResults((prev) => ({
           ...prev,
@@ -578,7 +580,7 @@ const DailyChallenge = () => {
         {error && <div className="daily-error">{error}</div>}
 
         <div className="daily-run-header">
-          <div className="daily-run-stat"><Trophy size={16} /><span>{rankMeta.name}</span><strong>Level {rankMeta.level} of {rankMeta.levels}</strong></div>
+          <div className="daily-run-stat"><Trophy size={16} /><span>{rankMeta.name}</span><strong>Account level {rankMeta.accountLevel}</strong></div>
           <div className="daily-run-stat combo"><Flame size={16} /><span>Combo</span><strong>{combo}x</strong></div>
           <div className="daily-run-stat"><Target size={16} /><span>Focus</span><strong>{progressState.focusPoints}</strong></div>
           <div className="daily-score-rail" aria-label="Current reward score rail">

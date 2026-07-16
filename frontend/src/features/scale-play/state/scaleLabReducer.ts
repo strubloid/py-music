@@ -30,10 +30,26 @@ export interface ScaleLabState {
   selectedPositions: LabPosition[]; // all currently placed notes
   candidates: ScaleLabCandidate[];
   verifiedResult: {
+    analysisEngine: 'music21';
     confirmed: boolean;
     expectedPitchClasses: number[];
     missingPitchClasses: number[];
     extraPitchClasses: number[];
+    expectedSpellings: string[];
+    selectedSpellings: string[];
+    selectedIntervals: string[];
+    formula: string[];
+    formulaText: string;
+    characteristicDegree: string;
+    candidates: Array<{
+      root: string;
+      mode: string;
+      name: string;
+      formulaText: string;
+      matchCount: number;
+      score: number;
+      confirmed: boolean;
+    }>;
     message: string;
   } | null;
   reducedMotion: boolean;

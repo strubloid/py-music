@@ -11,6 +11,7 @@ Each feature document is a detailed implementation and reproduction contract. Re
 | Songwriting | [songwriting.md](songwriting.md) |
 | Gamification And Quests | [gamification-and-quests.md](gamification-and-quests.md) |
 | Settings | [settings.md](settings.md) |
+| Living Music City | [living-music-city.md](living-music-city.md) |
 
 ## Required Feature Sections
 

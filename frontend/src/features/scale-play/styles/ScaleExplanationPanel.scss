@@ -1,65 +1,8 @@
-.se-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px;
-  background: rgba(9, 13, 40, 0.7);
-  border: 1px solid rgba(71, 61, 140, 0.4);
-  border-radius: 12px;
-
-  &--confirmed {
-    border-color: rgba(146, 232, 76, 0.4);
-    background: rgba(146, 232, 76, 0.05);
-  }
-
-  &__text {
-    font-size: 0.82rem;
-    color: #c3c9e5;
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  &__message {
-    font-size: 0.82rem;
-    color: #f7f8ff;
-    margin: 0;
-
-    &--good { color: #92e84c; font-weight: 700; }
-  }
-
-  &__missing,
-  &__extra {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  &__missing-label { font-size: 0.68rem; color: #49c8ef; text-transform: uppercase; letter-spacing: 0.08em; }
-  &__extra-label { font-size: 0.68rem; color: #ff4f60; text-transform: uppercase; letter-spacing: 0.08em; }
-
-  &__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-  }
-}
-
-.se-chip {
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  font-family: ui-monospace, monospace;
-
-  &--missing {
-    background: rgba(73, 200, 239, 0.15);
-    border: 1px solid rgba(73, 200, 239, 0.4);
-    color: #49c8ef;
-  }
-
-  &--extra {
-    background: rgba(255, 79, 96, 0.15);
-    border: 1px solid rgba(255, 79, 96, 0.4);
-    color: #ff4f60;
-  }
-}
+.sound-formula { display: grid; gap: 13px; padding: 16px; border: 1px solid rgba(73,200,239,.35); border-radius: 18px 18px 5px; background: linear-gradient(145deg,rgba(9,24,37,.96),rgba(20,14,42,.94)); }
+.sound-formula.is-confirmed { border-color: rgba(184,255,59,.62); box-shadow: inset 0 0 45px rgba(184,255,59,.05); }
+.sound-formula__header { display: flex; align-items: center; gap: 9px; color: #74d4ff; }.sound-formula__header > div { display: grid; }.sound-formula__header span { color: #f1f5e9; font-weight: 900; }.sound-formula__header strong { color: #79938e; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; }
+.sound-formula__equation { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 12px; border: 1px solid rgba(255,199,78,.24); background: rgba(255,199,78,.05); }.sound-formula__equation b { min-width: 33px; min-height: 33px; display: grid; place-items: center; border-radius: 50%; color: #071016; background: #ffc74e; font: 900 .8rem ui-monospace,monospace; }.sound-formula__equation i { color: #766e5a; font-style: normal; }
+.sound-formula__character,.sound-formula__message { display: flex; align-items: center; gap: 7px; margin: 0; color: #aabbb5; font-size: .78rem; }.sound-formula__character strong { color: #ffc74e; font-size: 1rem; }.sound-formula__message { min-height: 38px; padding: 8px 10px; border-left: 3px solid #ff8066; color: #ffd2c7; background: rgba(255,128,102,.06); }.sound-formula__message.is-good { border-color: #b8ff3b; color: #dfffb0; background: rgba(184,255,59,.06); }
+.sound-formula__corrections { display: grid; gap: 5px; }.sound-formula__corrections p { margin: 0; color: #d6ded9; font-size: .76rem; }.sound-formula__corrections span { display: inline-block; min-width: 94px; color: #74d4ff; font-weight: 850; text-transform: uppercase; }
+.sound-formula__intervals { display: grid; gap: 4px; padding: 10px; border: 1px dashed rgba(116,212,255,.28); }.sound-formula__intervals span { color: #79938e; font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; }.sound-formula__intervals strong { color: #dfe7e1; font: 750 .78rem ui-monospace,monospace; }
+.sound-formula__candidates h3 { display: flex; align-items: center; gap: 7px; margin: 4px 0 8px; color: #dfe7e1; font-size: .78rem; }.sound-formula__candidates article { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid rgba(255,255,255,.07); }.sound-formula__candidates article > div { display: grid; }.sound-formula__candidates article strong { color: #dce6df; font-size: .75rem; }.sound-formula__candidates article span { color: #71887f; font: .65rem ui-monospace,monospace; }.sound-formula__candidates article > b { color: #ffc74e; font-size: .73rem; }.sound-formula__candidates article.is-exact > b,.sound-formula__candidates article.is-exact strong { color: #b8ff3b; }

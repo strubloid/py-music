@@ -15,13 +15,13 @@ import random
 import re
 from datetime import datetime, timedelta
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, current_app, request, jsonify
 from flask_login import current_user, login_required
 from sqlalchemy.exc import IntegrityError
 
 from backend.project.extensions import limiter
 from ..daily_challenge_explanations import build_daily_challenge_explanation
-from ..game_system import calculate_level_from_xp, get_mode_base_xp
+from ..game_system import get_mode_base_xp, sync_user_progression
 from backend.project.models import db
 from backend.project.models.user import (
     DailyChallenge, ChallengeAttempt, DailyHintUsage, DailyHintReveal, QuestProgress,
@@ -92,13 +92,6 @@ HINT_LIMITS = {
     'diamond': 7, 'master': 8, 'grandmaster': 9, 'virtuoso': 10,
     'maestro': 11, 'legendary': 12,
 }
-RANK_LEVELS = {
-    'unranked': 10, 'bronze': 20, 'silver': 35, 'gold': 50, 'platinum': 70,
-    'diamond': 90, 'master': 115, 'grandmaster': 140, 'virtuoso': 170,
-    'maestro': 200, 'legendary': 250,
-}
-RANK_ORDER = list(RANK_LEVELS)
-RANK_XP_PER_LEVEL = 500
 
 # Scored categories are typed musical actions. History, band, instrument-fact,
 # glossary, tempo-name, and other non-musical tasks were retired from the
@@ -395,10 +388,13 @@ def serialize_challenge(challenge):
     if not data['visual']:
         data['visual'], data['question_type'], data['question'] = _legacy_visual(challenge)
     data.pop('correct_index', None)
+    if current_app.config.get('E2E_EXPOSE_ANSWERS'):
+        data['correct_index'] = challenge.correct_index
     if challenge.category != 'ear_training':
         return data
 
     exercise = build_ear_exercise(challenge)
+    e2e_correct_index = exercise.get('correct_index')
     data.update({
         'title': exercise['title'],
         'question': exercise['question'],
@@ -409,6 +405,8 @@ def serialize_challenge(challenge):
         'visual': _ear_visual(exercise),
     })
     data['exercise'].pop('correct_index', None)
+    if current_app.config.get('E2E_EXPOSE_ANSWERS') and e2e_correct_index is not None:
+        data['correct_index'] = e2e_correct_index
     return data
 
 
@@ -1089,22 +1087,9 @@ def _hint_allowance(user):
 
 
 def _apply_rank_xp(user, amount):
-    """Apply server-owned daily reward progress without skipping promotion gates."""
-    if not amount or user.rank_challenge_pending:
-        return
-    rank_id = (user.rank_id or 'unranked').lower()
-    if rank_id not in RANK_LEVELS:
-        rank_id = 'unranked'
-    user.rank_id = rank_id
-    user.rank_xp = (user.rank_xp or 0) + amount
-    if user.rank_xp < RANK_XP_PER_LEVEL:
-        return
-    user.rank_xp -= RANK_XP_PER_LEVEL
-    rank_max = RANK_LEVELS[rank_id]
-    user.rank_level = min(rank_max, (user.rank_level or 1) + 1)
-    if user.rank_level >= rank_max:
-        user.rank_level = rank_max
-        user.rank_challenge_pending = rank_id != 'legendary'
+    """Compatibility wrapper: rank now follows the single account level."""
+    if amount:
+        sync_user_progression(user)
 
 
 # ─── Routes ────────────────────────────────────────────────────────────────────
@@ -1332,7 +1317,7 @@ def complete_challenge(challenge_id):
 
     if is_correct:
         current_user.xp = (current_user.xp or 0) + xp_award
-        current_user.level = calculate_level_from_xp(current_user.xp)
+        current_user.lifetime_points = (current_user.lifetime_points or 0) + xp_award
         _apply_rank_xp(current_user, xp_award)
 
     if is_correct:

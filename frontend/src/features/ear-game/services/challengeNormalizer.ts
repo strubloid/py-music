@@ -10,6 +10,21 @@ const CATEGORY_MAP = {
   progression: 'progression',
 };
 
+export type SoundGateVariant = 'catch-root' | 'bridge-builder' | 'echo-chase';
+
+const VARIANT_BY_EXERCISE: Record<string, SoundGateVariant> = {
+  direction: 'catch-root',
+  chord_movement: 'catch-root',
+  interval: 'bridge-builder',
+  chord_quality: 'bridge-builder',
+  inversion: 'bridge-builder',
+  shape: 'echo-chase',
+  chord_pair: 'echo-chase',
+};
+
+export const variantForExercise = (type: string): SoundGateVariant =>
+  VARIANT_BY_EXERCISE[type] || 'echo-chase';
+
 const noteEvents = (exercise) => {
   if (exercise.chords?.length) {
     return exercise.chords.flatMap((chord, chordIndex) => chord.map((note) => ({
@@ -47,6 +62,7 @@ export const normalizeEarChallenge = (raw, { instrumentId = 'piano' } = {}) => {
     sourceChallengeId: raw.id,
     category: CATEGORY_MAP[exercise.type] || 'interval',
     type: exercise.type,
+    variant: variantForExercise(exercise.type),
     title: exercise.title || raw.title,
     question: exercise.question || raw.question,
     difficulty: raw.difficulty || 1,
