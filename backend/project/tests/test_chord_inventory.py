@@ -59,7 +59,7 @@ class ChordInventoryTest(unittest.TestCase):
     def test_harmonic_events_share_start_time_and_slow_mode_preserves_pitch(self):
         chord = build_chord_definition('C', 'major7')
         normal = build_scheduled_note_events(chord, octave=3)
-        slow = build_scheduled_note_events(chord, octave=3, timing_scale=1.5)
+        slow = build_scheduled_note_events(chord, octave=3, timing_scale=2)
         self.assertEqual({event['time'] for event in normal}, {0})
         self.assertEqual([event['note'] for event in normal], [event['note'] for event in slow])
         self.assertTrue(all(event['duration'] > normal[index]['duration'] for index, event in enumerate(slow)))

@@ -9,8 +9,7 @@ export interface NormalizedFragment {
   difficulty: number;
   anchor: ScalePathPosition;
   suffix: ScalePathPosition[];
-  gap: ScalePathPosition | null;
-  candidates: Array<ScalePathPosition & { isCorrect: boolean; id: string }>;
+  candidates: Array<ScalePathPosition & { id: string }>;
   direction: 'left' | 'up';
   degreeClue: string;
 }
@@ -23,7 +22,6 @@ export function normalizeFragment(raw: ScalePathFragment, index: number): Normal
     difficulty: raw.difficulty ?? 1,
     anchor: raw.anchor,
     suffix: raw.suffix ?? [],
-    gap: raw.gap,
     candidates: (raw.candidates ?? []).map((c, ci) => ({
       ...c,
       id: `cand-${index}-${ci}`,

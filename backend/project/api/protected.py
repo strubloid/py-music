@@ -2,7 +2,7 @@ import json
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from backend.project.models import db
-from backend.project.models.user import Progression, Favorite, QuestClaim
+from backend.project.models.user import Progression, Favorite, QuestClaim, QuestProgress, ChallengeAttempt
 from backend.project.game_system import calculate_level_from_xp
 from backend.project.gamification import QUEST_REWARDS, quest_period_key
 
@@ -143,27 +143,86 @@ def delete_favorite(favorite_id):
 @api_bp.route('/me/xp', methods=['POST'])
 @login_required
 def award_xp():
-    """Award XP to the current user. Used for completing challenges, etc."""
-    data = request.get_json()
-    amount = data.get('amount', 0)
+    """Internal XP endpoint, server-only.
 
-    if amount > 0:
-        current_user.xp = (current_user.xp or 0) + amount
-        current_user.level = calculate_level_from_xp(current_user.xp)
-        db.session.commit()
+    The previous implementation trusted a client-supplied `amount`, which
+    allowed untrusted clients to mint XP. This endpoint now only echoes
+    the user's current XP. Real XP gains are issued by
+    `complete_daily_challenge` and `complete_scale_path_fragment` after
+    validating the answer server-side.
+    """
+    return jsonify({
+        'xp': current_user.xp or 0,
+        'level': current_user.level or 1,
+        'message': 'XP is awarded automatically by completed challenges and Scale Path runs.',
+    }), 200
 
-    return jsonify({'xp': current_user.xp, 'level': current_user.level}), 200
+
+def _server_quest_progress(user_id, metric, cadence):
+    """Return the authoritative quest progress counter for a metric/cadence.
+
+    Reads from `QuestProgress`, which is only written by the server when a
+    challenge attempt or scale path attempt is validated. Falls back to
+    aggregating `ChallengeAttempt` for legacy users that pre-date the table.
+    """
+    period_key = quest_period_key(cadence)
+    row = QuestProgress.query.filter_by(
+        user_id=user_id, metric=metric, period_key=period_key,
+    ).first()
+    if row:
+        return row.count
+
+    # Legacy fallback: derive from challenge_attempts. This is read-only and
+    # only matters for users whose QuestProgress table was empty.
+    if metric == 'play' and cadence in ('daily', 'milestone'):
+        count = ChallengeAttempt.query.filter_by(
+            user_id=user_id, completed=True,
+        ).count()
+        return count
+    if metric == 'correct' and cadence in ('daily', 'milestone'):
+        count = ChallengeAttempt.query.filter(
+            ChallengeAttempt.user_id == user_id,
+            ChallengeAttempt.completed == True,
+            ChallengeAttempt.is_correct == True,
+        ).count()
+        return count
+    return 0
 
 
 @api_bp.route('/me/quest-claim', methods=['POST'])
 @login_required
 def claim_quest():
-    """Claim a small server-defined quest reward once per reset period."""
+    """Claim a small server-defined quest reward once per reset period.
+
+    Eligibility is verified against the server-tracked `QuestProgress` table.
+    The client cannot inflate its own quest counter — only validated challenge
+    and scale-path attempts write to it.
+    """
     data = request.get_json(silent=True) or {}
     quest_id = data.get('quest_id', '')
     reward = QUEST_REWARDS.get(quest_id)
     if not reward:
         return jsonify({'error': 'Unknown quest'}), 400
+
+    # quest_id format: '<cadence>-<metric>-<threshold>'. The metric and
+    # cadence are server-defined; the threshold is required to claim.
+    parts = quest_id.split('-', 2)
+    if len(parts) < 3 or parts[0] != reward['cadence']:
+        return jsonify({'error': 'Quest id does not match catalog'}), 400
+    cadence = parts[0]
+    metric = parts[1]
+    try:
+        threshold = int(parts[2])
+    except ValueError:
+        return jsonify({'error': 'Quest threshold must be an integer'}), 400
+
+    progress = _server_quest_progress(current_user.id, metric, cadence)
+    if progress < threshold:
+        return jsonify({
+            'error': 'Quest not yet eligible',
+            'progress': progress,
+            'required': threshold,
+        }), 403
 
     period_key = quest_period_key(reward['cadence'])
     existing = QuestClaim.query.filter_by(
@@ -197,6 +256,20 @@ def claim_quest():
         'focus_restored': reward['focus'],
         'xp': current_user.xp,
         'level': current_user.level,
+    }), 200
+
+
+@api_bp.route('/me/quest-progress', methods=['GET'])
+@login_required
+def quest_progress():
+    """Return authoritative quest progress counters for the user."""
+    data = request.get_json(silent=True) or {}
+    metric = data.get('metric', 'correct')
+    cadence = data.get('cadence', 'daily')
+    return jsonify({
+        'metric': metric,
+        'cadence': cadence,
+        'count': _server_quest_progress(current_user.id, metric, cadence),
     }), 200
 
 

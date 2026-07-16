@@ -41,4 +41,10 @@ Account XP and signed-in Daily rank fields are server backed. Focus, badges, loc
 
 ## Tests And Known Boundaries
 
-Test reward formulas, rank transitions, known quest IDs/reset uniqueness, duplicate claims, Focus bounds, and result-to-quest mapping. Current `/api/me/xp` accepts a client-supplied amount and client quest qualification can drift from server evidence; treat both as hardening work before relying on them for competitive or high-value rewards.
+Test reward formulas, rank transitions, known quest IDs/reset uniqueness, duplicate claims, Focus bounds, and result-to-quest mapping.
+
+### Server Authoritative XP and Quests
+
+`/api/me/xp` no longer accepts a client-supplied `amount`. It is now a read-only endpoint that returns the user's current XP. Real XP is awarded only by the completion endpoints after server-validated correctness.
+
+Quest eligibility is verified server-side from `QuestProgress`, which is only written when a `ChallengeAttempt` or `ScalePathAttempt` is validated as correct. Quest claims must show non-zero progress for the metric/cadence or the server returns `403`. The legacy fallback for users whose `QuestProgress` table is empty aggregates from `ChallengeAttempt` so existing accounts are not locked out, but new progress always flows through the validated path.

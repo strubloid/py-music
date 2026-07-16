@@ -55,14 +55,20 @@ class DailyChallengeFlowTest(unittest.TestCase):
     def _seed_challenges(self):
         for index in range(1, 5):
             challenge = DailyChallenge()
-            challenge.category = 'theory'
-            challenge.title = f'Question {index}'
-            challenge.question = f'Question {index}?'
-            challenge.options_json = '["A", "B", "C"]'
+            challenge.category = 'scales'
+            challenge.title = f'Scale Question {index}'
+            challenge.question = f'Which scale is this? {index}'
+            challenge.options_json = '["Major", "Minor", "Dorian", "Phrygian"]'
             challenge.correct_index = 0
             challenge.explanation = 'Short hint.'
             challenge.xp_reward = 25
             challenge.difficulty = 1
+            challenge.skill_id = f'scales.identify.{index}'
+            challenge.modality = 'locate'
+            challenge.rank_band_min = 'unranked'
+            challenge.rank_band_max = 'legendary'
+            challenge.difficulty_axis = 'root'
+            challenge.stimulus_version = 2
             db.session.add(challenge)
         db.session.commit()
 
@@ -83,15 +89,22 @@ class DailyChallengeFlowTest(unittest.TestCase):
         ).get_json()['challenges'][0]
         self.assertNotEqual(first['id'], second['id'])
 
+        # The client must submit the answer it picked; the server validates.
+        # All seeded challenges have correct_index=0 here, so submitted_answer=0
+        # is the only answer that earns XP. The legacy `xp_award` field is now
+        # ignored — XP is computed from the server formula.
         first_complete = self.client.post(
             f'/api/daily-challenge/{first["id"]}/complete',
-            json={'mode': 'challenge', 'xp_award': 999999},
+            json={'mode': 'challenge', 'submitted_answer': 0, 'xp_award': 999999},
         )
         second_complete = self.client.post(
             f'/api/daily-challenge/{second["id"]}/complete',
-            json={'mode': 'ear-training'},
+            json={'mode': 'ear-training', 'submitted_answer': 0},
         )
-        duplicate_complete = self.client.post(f'/api/daily-challenge/{first["id"]}/complete')
+        duplicate_complete = self.client.post(
+            f'/api/daily-challenge/{first["id"]}/complete',
+            json={'submitted_answer': 0},
+        )
 
         self.assertEqual(first_complete.status_code, 200, first_complete.get_data(as_text=True))
         self.assertEqual(second_complete.status_code, 200, second_complete.get_data(as_text=True))
@@ -101,6 +114,8 @@ class DailyChallengeFlowTest(unittest.TestCase):
         self.assertEqual(first_complete.get_json()['xp_awarded'], second_complete.get_json()['xp_awarded'] * 10)
         self.assertEqual(duplicate_complete.get_json()['xp_awarded'], 0)
         self.assertTrue(duplicate_complete.get_json()['already_completed'])
+        self.assertTrue(first_complete.get_json()['correct'])
+        self.assertTrue(second_complete.get_json()['correct'])
 
         me = self.client.get('/api/auth/me').get_json()['user']
         self.assertEqual(me['xp'], 110)
@@ -118,6 +133,109 @@ class DailyChallengeFlowTest(unittest.TestCase):
             ).count()
         self.assertEqual(attempts, 2)
 
+    def test_completion_rejects_incorrect_answer_with_zero_xp(self):
+        self._register_user()
+        first = self.client.get('/api/daily-challenges?random=1&limit=1').get_json()['challenges'][0]
+        # Seeded rows have correct_index=0; submitting 1 is wrong.
+        response = self.client.post(
+            f'/api/daily-challenge/{first["id"]}/complete',
+            json={'mode': 'challenge', 'submitted_answer': 1},
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.get_json()
+        self.assertFalse(payload['correct'])
+        self.assertEqual(payload['xp_awarded'], 0)
+        self.assertEqual(payload['correct_answer'], 'Major')
+
+        me = self.client.get('/api/auth/me').get_json()['user']
+        self.assertEqual(me['xp'], 0)
+
+    def test_ear_training_completion_uses_the_rendered_exercise_answer(self):
+        self._register_user()
+        with self.app.app_context():
+            challenge = DailyChallenge(
+                category='ear_training',
+                title='Legacy Ear Question',
+                question='Legacy question',
+                options_json='["Stored wrong", "Stored right"]',
+                correct_index=0,
+                difficulty=2,
+            )
+            db.session.add(challenge)
+            db.session.commit()
+            exercise = build_ear_exercise(challenge)
+            # Ensure the stored row is deliberately incompatible with the
+            # generated exercise, which is what the player sees.
+            challenge.correct_index = (exercise['correct_index'] + 1) % len(exercise['options'])
+            db.session.commit()
+            challenge_id = challenge.id
+
+        response = self.client.post(
+            f'/api/daily-challenge/{challenge_id}/complete',
+            json={'mode': 'challenge', 'submitted_answer': exercise['correct_index']},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.get_json()
+        self.assertTrue(payload['correct'])
+        self.assertEqual(payload['correct_answer'], exercise['options'][exercise['correct_index']])
+
+    def test_completion_grades_the_submitted_displayed_answer_label(self):
+        self._register_user()
+        first = self.client.get('/api/daily-challenges?random=1&limit=1').get_json()['challenges'][0]
+        response = self.client.post(
+            f'/api/daily-challenge/{first["id"]}/complete',
+            json={
+                'mode': 'challenge',
+                'submitted_answer': 1,
+                'submitted_answer_label': 'Major',
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.get_json()['correct'])
+
+    def test_completion_rejects_missing_submitted_answer(self):
+        self._register_user()
+        first = self.client.get('/api/daily-challenges?random=1&limit=1').get_json()['challenges'][0]
+        response = self.client.post(
+            f'/api/daily-challenge/{first["id"]}/complete',
+            json={'mode': 'challenge'},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('submitted_answer', response.get_json()['error'])
+
+    def test_scored_bank_excludes_trivia_categories(self):
+        with self.app.app_context():
+            # Insert a "history" / "general" trivia row that the new bank
+            # migration must keep out of the scored surface.
+            trivia = DailyChallenge()
+            trivia.category = 'history'
+            trivia.title = 'Who composed the Four Seasons?'
+            trivia.question = 'Who composed the Four Seasons?'
+            trivia.options_json = '["Vivaldi", "Bach", "Mozart", "Beethoven"]'
+            trivia.correct_index = 0
+            trivia.explanation = 'Vivaldi.'
+            trivia.xp_reward = 25
+            trivia.difficulty = 1
+            db.session.add(trivia)
+            db.session.commit()
+
+            trivia_id = trivia.id
+            response = self.client.get('/api/daily-challenges?random=1&limit=10')
+            self.assertEqual(response.status_code, 200)
+            ids = [c['id'] for c in response.get_json()['challenges']]
+            self.assertNotIn(trivia_id, ids)
+            self.assertTrue(all(c['category'] in ('scales', 'chords', 'intervals', 'ear_training') for c in response.get_json()['challenges']))
+
+            # Submitting a completion for the trivia row must be rejected so
+            # it cannot grant XP even if the client guesses the id.
+            completion = self.client.post(
+                f'/api/daily-challenge/{trivia_id}/complete',
+                json={'submitted_answer': 0},
+            )
+            self.assertEqual(completion.status_code, 400)
+
     def test_generated_hints_do_not_reveal_correct_answer(self):
         with self.app.app_context():
             DailyChallenge.query.delete()
@@ -126,6 +244,7 @@ class DailyChallengeFlowTest(unittest.TestCase):
 
             leaks = []
             for challenge in DailyChallenge.query.all():
+                assert challenge.options_json is not None  # column is nullable=False; narrow for type checkers
                 options = json.loads(challenge.options_json)
                 correct = options[challenge.correct_index]
                 hint = build_daily_challenge_explanation(
@@ -156,11 +275,30 @@ class DailyChallengeFlowTest(unittest.TestCase):
                 self.assertTrue(payload['question_type'])
                 self.assertIsInstance(payload['visual'], dict)
                 self.assertIn('kind', payload['visual'])
+                self.assertTrue(challenge.skill_id)
+                self.assertTrue(challenge.rank_band_min)
+                self.assertTrue(challenge.rank_band_max)
+                self.assertTrue(challenge.modality)
+                self.assertTrue(challenge.difficulty_axis)
+                self.assertEqual(challenge.stimulus_version, 2)
+                self.assertNotIn('semitones', challenge.question.lower())
+                self.assertNotIn('history', challenge.category)
+
+    def test_public_payload_never_exposes_daily_answer_keys(self):
+        response = self.client.get('/api/daily-challenges?limit=1')
+        self.assertEqual(response.status_code, 200)
+        challenge = response.get_json()['challenges'][0]
+        self.assertNotIn('correct_index', challenge)
+        self.assertNotIn('correct_index', challenge.get('exercise', {}))
+        for field in ('skill_id', 'rank_band_min', 'rank_band_max', 'modality', 'difficulty_axis', 'stimulus_version'):
+            self.assertTrue(challenge[field])
 
     def test_authenticated_hint_is_idempotent_and_uses_persisted_rank_allowance(self):
         self._register_user()
         with self.app.app_context():
             user = User.query.filter_by(username='player').first()
+            self.assertIsNotNone(user, 'Registered user should be retrievable')
+            assert user is not None  # narrow Optional[User] for type checkers
             user.rank_id = 'gold'
             db.session.commit()
 
@@ -179,7 +317,9 @@ class DailyChallengeFlowTest(unittest.TestCase):
 
     def test_hint_allowance_uses_rank_boundaries_and_utc_dates(self):
         with self.app.app_context():
-            user = User(username='ranked', email='ranked@example.com')
+            user = User()
+            user.username = 'ranked'
+            user.email = 'ranked@example.com'
             user.set_password('secret123')
             user.rank_id = 'legendary'
             db.session.add(user)
@@ -192,6 +332,16 @@ class DailyChallengeFlowTest(unittest.TestCase):
 
     def test_quest_claim_awards_configured_xp_and_focus_exactly_once(self):
         self._register_user()
+        # The user must have at least one validated challenge attempt before
+        # any quest becomes eligible. The server tracks quest progress
+        # server-side, not from client-supplied counters.
+        challenge = self.client.get('/api/daily-challenges?random=1&limit=1').get_json()['challenges'][0]
+        completion = self.client.post(
+            f'/api/daily-challenge/{challenge["id"]}/complete',
+            json={'submitted_answer': 0, 'mode': 'challenge'},
+        )
+        self.assertEqual(completion.status_code, 200, completion.get_data(as_text=True))
+
         payload = {'quest_id': 'daily-play-1'}
 
         first = self.client.post('/api/me/quest-claim', json=payload)
@@ -205,7 +355,15 @@ class DailyChallengeFlowTest(unittest.TestCase):
         self.assertEqual(duplicate.get_json()['xp_awarded'], 0)
         self.assertTrue(duplicate.get_json()['already_claimed'])
         self.assertEqual(unknown.status_code, 400)
-        self.assertEqual(self.client.get('/api/auth/me').get_json()['user']['xp'], 5)
+        # The user earned 100 XP from the challenge + 5 XP from the quest = 105.
+        self.assertEqual(self.client.get('/api/auth/me').get_json()['user']['xp'], 105)
+
+    def test_quest_claim_rejects_under_progress(self):
+        self._register_user()
+        # A new user with no completed challenges cannot claim any quest.
+        response = self.client.post('/api/me/quest-claim', json={'quest_id': 'daily-play-1'})
+        self.assertEqual(response.status_code, 403, response.get_data(as_text=True))
+        self.assertIn('progress', response.get_json())
 
     def test_ear_training_contract_covers_all_seven_audio_drills(self):
         expected_types = {

@@ -1,10 +1,12 @@
 from flask import Flask, jsonify, request, send_from_directory, send_file, session, current_app
 from flask_cors import CORS
+from flask_login import current_user, login_required
 from dotenv import load_dotenv
 from werkzeug.exceptions import HTTPException
 from functools import wraps
 import sys
 import os
+import json
 from pathlib import Path
 from urllib.parse import quote
 
@@ -13,11 +15,13 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from backend.project.extensions import limiter, generate_csrf_token, validate_csrf_token
+from backend.project.game_system import calculate_level_from_xp
 
 import threading
 import requests
 import random
 import time
+from datetime import datetime, timedelta
 
 from backend.project.music.chords.intervals.Major import MajorInterval
 from backend.project.music.chords.intervals.Minor import MinorInterval
@@ -691,9 +695,27 @@ def _select_tier1_fragment(positions, root_key, mode):
     }
 
 
+def _public_scale_path_fragment(fragment):
+    """Remove the server-only answer fields from a playable fragment."""
+    return {
+        key: value for key, value in fragment.items()
+        if key not in {'gap'}
+    } | {
+        'candidates': [
+            {key: value for key, value in candidate.items() if key != 'isCorrect'}
+            for candidate in fragment.get('candidates', [])
+        ],
+    }
+
+
 @app.route('/api/scale-path/run', methods=['GET'])
+@login_required
 def get_scale_path_run():
-    """Get a seeded Scale Path run: root, mode, difficulty, and 5 fragments."""
+    """Get a seeded Scale Path run: root, mode, difficulty, and 5 fragments.
+
+    The server also stores the run so the completion endpoint can validate
+    submitted positions without trusting client-supplied correctness.
+    """
     try:
         root = request.args.get('root', random.choice(['C', 'G', 'D', 'A', 'E', 'F']))
         mode = request.args.get('mode', random.choice(['ionian', 'aeolian']))
@@ -712,42 +734,137 @@ def get_scale_path_run():
                 frag['fragmentIndex'] = i
                 fragments.append(frag)
 
+        run_id = f'scale-path-{root}-{mode}-{int(time.time())}-{os.urandom(4).hex()}'
+        user_id = current_user.id if current_user.is_authenticated else None
+
+        # Persist the run so completion requests can be validated against it.
+        # We keep the run for 24h; the request body is small and authoritative.
+        from backend.project.models.user import ScalePathRun
+        run_row = ScalePathRun(
+            run_id=run_id,
+            user_id=user_id,
+            root=root.upper(),
+            mode=mode,
+            difficulty=difficulty,
+            octaves=octaves,
+            fret_count=fret_count,
+            fragments_json=json.dumps(fragments),
+            positions_json=json.dumps(positions),
+            expires_at=datetime.utcnow() + timedelta(hours=24),
+        )
+        db.session.add(run_row)
+        db.session.commit()
+
         return jsonify({
-            'runId': f'scale-path-{root}-{mode}-{int(time.time())}',
+            'runId': run_id,
             'root': root.upper(),
             'mode': mode,
             'difficulty': difficulty,
             'octaves': octaves,
             'fretCount': fret_count,
             'positions': positions[:60],  # Send capped positions for the game
-            'fragments': fragments,
+            'fragments': [_public_scale_path_fragment(fragment) for fragment in fragments],
         })
     except Exception as e:
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/scale-path/complete', methods=['POST'])
 def complete_scale_path_fragment():
-    """Submit a Scale Path fragment result; returns XP awarded."""
-    try:
-        data = request.get_json() or {}
-        fragment_index = int(data.get('fragmentIndex', 0))
-        correct = bool(data.get('correct', False))
-        run_id = data.get('runId', '')
-        difficulty = max(1, min(5, int(data.get('difficulty', 1))))
+    """Submit a Scale Path fragment result; the server validates correctness
+    against the stored run and only awards XP for genuinely correct answers.
 
-        # Authoritative XP for logged-in users; guests get local only
+    Idempotent per (user, run, fragment) — replays return the original result
+    without re-awarding XP.
+    """
+    try:
+        from backend.project.models.user import ScalePathRun, ScalePathAttempt
+
+        if not current_user.is_authenticated:
+            return jsonify({
+                'authenticated': False,
+                'correct': False,
+                'xp_awarded': 0,
+                'message': 'Sign in to save Scale Path progress.',
+            }), 401
+
+        data = request.get_json() or {}
+        run_id = data.get('runId', '')
+        fragment_index = int(data.get('fragmentIndex', 0))
+        submitted_position = data.get('submittedPosition') or {}
+
+        run = ScalePathRun.query.filter_by(run_id=run_id).first()
+        if not run:
+            return jsonify({'error': 'Unknown run. Start a new run before submitting.'}), 400
+        if run.user_id != current_user.id:
+            return jsonify({'error': 'This run belongs to another account.'}), 403
+        if run.expires_at and run.expires_at < datetime.utcnow():
+            return jsonify({'error': 'This run has expired. Start a new run before submitting.'}), 410
+
+        fragments = json.loads(run.fragments_json)
+        if fragment_index < 0 or fragment_index >= len(fragments):
+            return jsonify({'error': 'Fragment index out of range'}), 400
+        fragment = fragments[fragment_index]
+        correct_gap = fragment.get('gap') or {}
+
+        # The server compares the submitted position against the stored
+        # answer. The client cannot mark itself correct.
+        is_correct = (
+            submitted_position.get('string') == correct_gap.get('string')
+            and submitted_position.get('fret') == correct_gap.get('fret')
+        )
+
+        # Idempotency: one result per (user, run, fragment).
+        existing = ScalePathAttempt.query.filter_by(
+            user_id=current_user.id,
+            run_id=run_id,
+            fragment_index=fragment_index,
+        ).first()
+        if existing:
+            return jsonify({
+                'authenticated': True,
+                'fragmentIndex': fragment_index,
+                'correct': existing.correct,
+                'xp_awarded': existing.xp_awarded,
+                'correctAnswer': correct_gap,
+                'already_recorded': True,
+            })
+
         xp_awarded = 0
-        if correct:
-            xp_awarded = min(50, max(10, 10 * difficulty))
+        if is_correct:
+            xp_awarded = min(50, max(10, 10 * (run.difficulty or 1)))
+
+        attempt = ScalePathAttempt(
+            user_id=current_user.id,
+            run_id=run_id,
+            fragment_index=fragment_index,
+            correct=is_correct,
+            xp_awarded=xp_awarded,
+        )
+        db.session.add(attempt)
+        if is_correct and xp_awarded:
+            current_user.xp = (current_user.xp or 0) + xp_awarded
+            current_user.level = calculate_level_from_xp(current_user.xp)
+        from backend.project.api.daily_challenges import _record_quest_progress
+        period_key = datetime.utcnow().strftime('%Y-%m-%d')
+        _record_quest_progress(current_user.id, 'play', 'daily', period_key)
+        _record_quest_progress(current_user.id, 'play', 'milestone', 'lifetime')
+        if is_correct:
+            _record_quest_progress(current_user.id, 'correct', 'daily', period_key)
+            _record_quest_progress(current_user.id, 'correct', 'milestone', 'lifetime')
+        db.session.commit()
 
         return jsonify({
+            'authenticated': True,
             'fragmentIndex': fragment_index,
-            'correct': correct,
-            'xpAwarded': xp_awarded,
-            'xpTotal': xp_awarded,  # Client accumulates
+            'correct': is_correct,
+            'xp_awarded': xp_awarded,
+            'correctAnswer': correct_gap,
+            'already_recorded': False,
         })
     except Exception as e:
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 

@@ -142,7 +142,10 @@ class DailyChallenge(db.Model):
     __tablename__ = 'daily_challenges'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    category = db.Column(db.String(50), nullable=False)  # scales, chords, intervals, theory
+    # Scored categories are limited to typed musical actions: scales, chords,
+    # intervals, ear_training. History/band/instrument-fact/glossary rows were
+    # retired from the scored bank in the curriculum migration.
+    category = db.Column(db.String(50), nullable=False)
     title = db.Column(db.String(255), nullable=False)
     question = db.Column(db.Text, nullable=False)
     options_json = db.Column(db.Text, nullable=False)  # JSON array of answer strings
@@ -152,9 +155,17 @@ class DailyChallenge(db.Model):
     visual_json = db.Column(db.Text, nullable=True)
     xp_reward = db.Column(db.Integer, default=50)
     difficulty = db.Column(db.Integer, default=1)  # 1-5
+    # Typed metadata required by the curriculum contract (MusicQuestion).
+    skill_id = db.Column(db.String(120), nullable=True)
+    rank_band_min = db.Column(db.String(20), nullable=True)
+    rank_band_max = db.Column(db.String(20), nullable=True)
+    modality = db.Column(db.String(40), nullable=True)  # listen | locate | build | rhythm | predict | compare | mixed
+    difficulty_axis = db.Column(db.String(80), nullable=True)
+    stimulus_version = db.Column(db.Integer, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
+        assert self.options_json is not None  # column is nullable=False; narrow for type checkers
         options = json.loads(self.options_json)
         explanation = self.explanation or build_daily_challenge_explanation(
             self.category,
@@ -176,6 +187,12 @@ class DailyChallenge(db.Model):
             'explanation': explanation,
             'question_type': self.question_type,
             'visual': json.loads(self.visual_json) if self.visual_json else None,
+            'skill_id': self.skill_id,
+            'rank_band_min': self.rank_band_min,
+            'rank_band_max': self.rank_band_max,
+            'modality': self.modality,
+            'difficulty_axis': self.difficulty_axis,
+            'stimulus_version': self.stimulus_version,
         }
 
 
@@ -188,6 +205,10 @@ class ChallengeAttempt(db.Model):
     challenge_date = db.Column(db.String(10), nullable=False)  # YYYY-MM-DD
     score = db.Column(db.Integer, default=0)
     completed = db.Column(db.Boolean, default=False)
+    # Server-validated correctness. Null for legacy rows where the browser
+    # compared `correct_index` before completion; new rows are always
+    # written by the server after re-checking the submitted answer.
+    is_correct = db.Column(db.Boolean, nullable=True)
 
     __table_args__ = (
         db.UniqueConstraint('user_id', 'challenge_id', name='unique_user_challenge'),
@@ -203,6 +224,7 @@ class ChallengeAttempt(db.Model):
             'challenge_date': self.challenge_date,
             'score': self.score,
             'completed': self.completed,
+            'is_correct': self.is_correct,
         }
 
 
@@ -249,6 +271,71 @@ class DailyHintReveal(db.Model):
     )
 
 
+class ScalePathRun(db.Model):
+    """Server-owned, seeded Scale Path run. Stores the correct answer list so
+    the server can validate the player's selected position instead of trusting
+    the client's `correct` boolean."""
+
+    __tablename__ = 'scale_path_runs'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    run_id = db.Column(db.String(80), nullable=False, unique=True, index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    root = db.Column(db.String(8), nullable=False)
+    mode = db.Column(db.String(20), nullable=False)
+    difficulty = db.Column(db.Integer, nullable=False, default=1)
+    octaves = db.Column(db.Integer, nullable=False, default=1)
+    fret_count = db.Column(db.Integer, nullable=False, default=12)
+    # JSON list of fragment dicts, each holding the canonical correct position
+    # and the candidate list. The candidate list is what the client sees.
+    fragments_json = db.Column(db.Text, nullable=False)
+    # JSON list of accepted scale positions, in order. This is the authoritative
+    # full route the run expected to hear.
+    positions_json = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, nullable=True)
+
+
+class ScalePathAttempt(db.Model):
+    """Idempotent Scale Path fragment result record. The server decides
+    correctness by comparing the submitted position against the run's stored
+    answer; the client cannot mark itself correct."""
+
+    __tablename__ = 'scale_path_attempts'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    run_id = db.Column(db.String(80), db.ForeignKey('scale_path_runs.run_id'), nullable=False)
+    fragment_index = db.Column(db.Integer, nullable=False)
+    correct = db.Column(db.Boolean, nullable=False, default=False)
+    xp_awarded = db.Column(db.Integer, nullable=False, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'run_id', 'fragment_index', name='unique_user_run_fragment'),
+    )
+
+
+class QuestProgress(db.Model):
+    """Server-tracked quest progress. Daily/wins/perfect values come from
+    ChallengeAttempt aggregates; milestone values come from lifetime attempts.
+    The client cannot write to this table — it is owned by the quest
+    qualification pipeline that runs on challenge completion."""
+
+    __tablename__ = 'quest_progress'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    metric = db.Column(db.String(40), nullable=False)  # play, correct, combo, no-power, perfect, ear-runs, daily-wins, power-uses
+    period_key = db.Column(db.String(20), nullable=False)  # YYYY-MM-DD for daily, YYYY-Www for weekly, 'lifetime' for milestone
+    count = db.Column(db.Integer, nullable=False, default=0)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'metric', 'period_key', name='unique_user_metric_period'),
+    )
+
+
 # ─── Migration helpers ─────────────────────────────────────────────────────────
 
 def run_migrations():
@@ -265,6 +352,13 @@ def run_migrations():
         )
         db.session.commit()
         print("✅ Added challenge_id column to challenge_attempts")
+
+    if 'is_correct' not in challenge_attempt_columns:
+        db.session.execute(
+            sa.text('ALTER TABLE challenge_attempts ADD COLUMN is_correct BOOLEAN')
+        )
+        db.session.commit()
+        print("✅ Added is_correct column to challenge_attempts")
 
     unique_constraints = inspector.get_unique_constraints('challenge_attempts')
     has_old_daily_unique = any(
@@ -285,6 +379,7 @@ def run_migrations():
                 challenge_date VARCHAR(10) NOT NULL,
                 score INTEGER,
                 completed BOOLEAN,
+                is_correct BOOLEAN,
                 PRIMARY KEY (id),
                 CONSTRAINT unique_user_challenge UNIQUE (user_id, challenge_id),
                 FOREIGN KEY(user_id) REFERENCES users (id)
@@ -292,8 +387,8 @@ def run_migrations():
         '''))
         db.session.execute(sa.text('''
             INSERT OR IGNORE INTO challenge_attempts_new
-                (id, user_id, challenge_id, challenge_date, score, completed)
-            SELECT id, user_id, challenge_id, challenge_date, score, completed
+                (id, user_id, challenge_id, challenge_date, score, completed, is_correct)
+            SELECT id, user_id, challenge_id, challenge_date, score, completed, is_correct
             FROM challenge_attempts
         '''))
         db.session.execute(sa.text('DROP TABLE challenge_attempts'))
@@ -330,6 +425,22 @@ def run_migrations():
             db.session.execute(sa.text(f'ALTER TABLE users ADD COLUMN {column} {definition}'))
             db.session.commit()
             print(f"✅ Added {column} column to users")
+
+    typed_metadata_columns = (
+        ('skill_id', 'VARCHAR(120)'),
+        ('rank_band_min', 'VARCHAR(20)'),
+        ('rank_band_max', 'VARCHAR(20)'),
+        ('modality', 'VARCHAR(40)'),
+        ('difficulty_axis', 'VARCHAR(80)'),
+        ('stimulus_version', 'INTEGER'),
+    )
+    for column, definition in typed_metadata_columns:
+        if column not in challenge_columns:
+            db.session.execute(
+                sa.text(f'ALTER TABLE daily_challenges ADD COLUMN {column} {definition}')
+            )
+            db.session.commit()
+            print(f"✅ Added {column} column to daily_challenges")
 
 
 import json  # noqa: E402 — must be after DailyChallenge to_dict

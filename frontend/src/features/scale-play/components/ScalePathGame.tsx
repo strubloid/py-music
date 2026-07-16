@@ -97,30 +97,29 @@ const ScalePathGame: React.FC = () => {
     const selected = candidates[selectedIdx];
     dispatch({ type: 'COMMIT_ANSWER' });
 
-    const correct = selected.isCorrect;
-    const correctPos = candidates.find((c) => c.isCorrect) ?? null;
     setCommittedAnswer({ ...selected } as ScalePathPosition);
-    if (correctPos) setCorrectAnswer({ ...correctPos } as ScalePathPosition);
+    let correct = false;
+    let awardedXp = 0;
+    let correctPos: ScalePathPosition | null = null;
+    try {
+      const res = await completeScalePathFragment({
+        runId: state.runId ?? '',
+        fragmentIndex: state.fragmentIndex,
+        submittedPosition: { string: selected.string, fret: selected.fret },
+        difficulty: fragment.difficulty ?? 1,
+      });
+      correct = Boolean(res.data.correct);
+      awardedXp = res.data.xp_awarded ?? 0;
+      correctPos = res.data.correctAnswer ?? null;
+      if (correctPos) setCorrectAnswer(correctPos);
+    } catch {
+      dispatch({ type: 'ERROR', error: 'Could not verify this selection. Please start a new run.' });
+      return;
+    }
 
-    // Compute explanation
     const explanation = correct
       ? `${selected.note} is degree ${fragment.degreeClue} in ${fragment.root} ${fragment.mode}.`
-      : `${selected.note} is outside this scale path. The correct note is ${correctPos?.note}.`;
-
-    let awardedXp = 0;
-    if (correct) {
-      try {
-        const res = await completeScalePathFragment({
-          runId: state.runId ?? '',
-          fragmentIndex: state.fragmentIndex,
-          correct: true,
-          difficulty: fragment.difficulty ?? 1,
-        });
-        awardedXp = res.data.xpAwarded ?? 0;
-      } catch {
-        awardedXp = Math.min(50, Math.max(10, 10 * (fragment.difficulty ?? 1)));
-      }
-    }
+      : `${selected.note} is outside this scale path. The correct note is ${correctPos?.note ?? 'shown above'}.`;
 
     dispatch({ type: 'ANSWER_RESOLVED', correct, selectedNote: selected.note ?? '', correctNote: correctPos?.note ?? '', awardedXp, explanation });
     setAnnouncement(correct
@@ -208,7 +207,7 @@ const ScalePathGame: React.FC = () => {
           {fragment && (
             <ScaleRouteOverlay
               fragment={fragment}
-              correctAnswerCommitted={game.phase === 'showing-correct'}
+              correctAnswer={correctAnswer}
               reducedMotion={game.reducedMotion}
             />
           )}

@@ -20,10 +20,10 @@ const raw = {
   },
 };
 
-test('challenge normalization determines correctness from ids, not labels or ordering', () => {
+test('challenge normalization never retains the server-only correct answer index', () => {
   const challenge = normalizeEarChallenge(raw, { instrumentId: 'piano' });
   assert.equal(challenge.category, 'chord-quality');
-  assert.equal(challenge.correctAnswerId, '42-answer-1');
+  assert.equal(challenge.correctAnswerId, null);
   assert.equal(challenge.answers[0].lane, 0);
   assert.equal(challenge.prompt.events.length, 3);
   assert.equal(new Set(challenge.prompt.events.map((event) => event.time)).size, 1);

@@ -216,36 +216,51 @@ const EarTraining = () => {
     answerCommitRef.current = true;
     if (answerId !== state.selectedAnswerId) dispatch({ type: 'SELECT_ANSWER', answerId, inputMode: 'pointer' });
     const challenge = state.challenge;
-    const correct = answerId === challenge.correctAnswerId;
     const responseMs = Date.now() - questionStartedRef.current;
     const assists = state.usedPowers.length;
     const earTrainingBaseXp = getModeBaseXp({ mode: 'ear-training', difficulty: challenge.difficulty });
+
+    dispatch({ type: 'COMMIT_ANSWER' });
+    clearTimersAndAudio();
+    let awardedXp = 0;
+    // The server is the source of truth: look up the lane of the answer we
+    // picked and submit that index. The browser never decides correctness.
+    const selectedAnswer = (challenge.answers || []).find((answer) => answer.id === answerId);
+    const submittedAnswerIndex = selectedAnswer ? selectedAnswer.lane : -1;
+    let serverCorrect = false;
+    let serverXp = 0;
+    try {
+      if (submittedAnswerIndex >= 0) {
+        const response = await completeDailyChallenge(challenge.sourceChallengeId, {
+          mode: 'ear-training',
+          submitted_answer: submittedAnswerIndex,
+        });
+        serverCorrect = Boolean(response.data.correct);
+        serverXp = response.data.xp_awarded || 0;
+        challenge.explanation.correctLabel = response.data.correct_answer || '';
+        if (serverCorrect) {
+          awardedXp = serverXp;
+          updateUserProgress({ xp: response.data.xp, level: response.data.level });
+          const streakResponse = await getUserStreak();
+          setStreak(streakResponse.data.streak || 0);
+        }
+      }
+    } catch (error) {
+      if (error.response?.status !== 400) setAnnouncement('Answer saved locally. Account progress could not be updated.');
+    }
+    // Use the server's verdict; only treat as correct when validated above.
+    const finalCorrect = serverCorrect;
     const scoreDelta = calculateRoundScore({
       base: earTrainingBaseXp,
-      correct,
+      correct: finalCorrect,
       firstAttempt: true,
       replays: state.replayCount,
       combo: state.combo,
       difficulty: challenge.difficulty,
       assists,
     });
-
-    dispatch({ type: 'COMMIT_ANSWER' });
-    clearTimersAndAudio();
-    let awardedXp = 0;
-    try {
-      if (correct && isLoggedIn) {
-        const response = await completeDailyChallenge(challenge.sourceChallengeId, { mode: 'ear-training' });
-        awardedXp = response.data.xp_awarded || 0;
-        updateUserProgress({ xp: response.data.xp, level: response.data.level });
-        const streakResponse = await getUserStreak();
-        setStreak(streakResponse.data.streak || 0);
-      }
-    } catch (error) {
-      if (error.response?.status !== 400) setAnnouncement('Answer saved locally. Account progress could not be updated.');
-    }
     const resolved = {
-      correct,
+      correct: finalCorrect,
       selectedAnswerId: answerId,
       selectedLabel: challenge.answers.find((answer) => answer.id === answerId)?.label,
       correctLabel: challenge.explanation.correctLabel,
@@ -253,26 +268,26 @@ const EarTraining = () => {
       responseMs,
     };
     setResult(resolved);
-    dispatch({ type: 'ANSWER_RESOLVED', correct, scoreDelta });
+    dispatch({ type: 'ANSWER_RESOLVED', correct: finalCorrect, scoreDelta });
     rememberCompletedChallengeId(challenge.sourceChallengeId);
-    persistMastery(challenge, { correct, responseMs, replays: state.replayCount });
+    persistMastery(challenge, { correct: finalCorrect, responseMs, replays: state.replayCount });
     recordChallengeResult({
       challengeId: `${challenge.sourceChallengeId}`,
       mode: challenge.type,
-      score: correct ? 1 : 0,
-      accuracy: correct ? 1 : 0,
+      score: finalCorrect ? 1 : 0,
+      accuracy: finalCorrect ? 1 : 0,
       xpEarned: awardedXp,
-      maxCombo: correct ? state.combo + 1 : state.maxCombo,
+      maxCombo: finalCorrect ? state.combo + 1 : state.maxCombo,
       powersUsed: state.usedPowers,
-      hadMistake: !correct,
+      hadMistake: !finalCorrect,
       completedAt: new Date().toISOString(),
     });
-    setAnnouncement(correct
+    setAnnouncement(finalCorrect
       ? `Correct. ${challenge.explanation.summary} ${awardedXp ? `Awarded ${awardedXp} XP.` : ''}`
       : `Not this gate. The correct answer is ${challenge.explanation.correctLabel}. ${challenge.explanation.summary}`);
-    scheduleNext(correct ? 1900 : 3400);
+    scheduleNext(finalCorrect ? 1900 : 3400);
     answerCommitRef.current = false;
-  }, [clearTimersAndAudio, isLoggedIn, persistMastery, scheduleNext, updateUserProgress]);
+  }, [clearTimersAndAudio, persistMastery, scheduleNext, updateUserProgress]);
 
   const playComparison = useCallback(async () => {
     const state = gameRef.current;
@@ -301,8 +316,8 @@ const EarTraining = () => {
     }
     dispatch({ type: 'POWER_USED', powerId });
     if (powerId === 'remove_one_option') {
-      const wrong = state.challenge.answers.find((answer) => answer.id !== state.challenge.correctAnswerId && answer.id !== state.selectedAnswerId && !hiddenAnswerIds.includes(answer.id));
-      if (wrong) setHiddenAnswerIds((current) => [...current, wrong.id]);
+      const removable = state.challenge.answers.find((answer) => answer.id !== state.selectedAnswerId && !hiddenAnswerIds.includes(answer.id));
+      if (removable) setHiddenAnswerIds((current) => [...current, removable.id]);
     }
     if (powerId === 'slow_down') playPrompt({ slow: true, replay: true });
     if (powerId === 'compare_mode') setAnnouncement('Compare is armed. Press C after answering.');

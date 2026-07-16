@@ -13,6 +13,13 @@ const ResetPasswordPage = () => {
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [invalid, setInvalid] = useState(false)
+  const requirements = [
+    ['At least 8 characters', password.length >= 8],
+    ['An uppercase letter', /[A-Z]/.test(password)],
+    ['A lowercase letter', /[a-z]/.test(password)],
+    ['A number', /[0-9]/.test(password)],
+    ['A special character', /[!@#$%^&*(),.?":{}|<>_\-]/.test(password)],
+  ]
 
   useEffect(() => {
     if (!token) {
@@ -29,8 +36,8 @@ const ResetPasswordPage = () => {
       setError('Please fill in both fields.')
       return
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.')
+    if (requirements.some(([, met]) => !met)) {
+      setError('Use a password that meets every requirement.')
       return
     }
     if (password !== confirm) {
@@ -83,7 +90,7 @@ const ResetPasswordPage = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="reset-form">
-            <div className="reset-form-group">
+              <div className="reset-form-group">
               <Lock size={16} className="reset-form-icon" />
               <input
                 type="password"
@@ -95,7 +102,13 @@ const ResetPasswordPage = () => {
                 minLength={6}
                 autoFocus
               />
-            </div>
+              </div>
+              <div className="password-strength" aria-live="polite">
+                <strong>Password requirements</strong>
+                <ul>
+                  {requirements.map(([label, met]) => <li key={label} className={met ? 'met' : ''}>{met ? 'Met: ' : ''}{label}</li>)}
+                </ul>
+              </div>
 
             <div className="reset-form-group">
               <Lock size={16} className="reset-form-icon" />

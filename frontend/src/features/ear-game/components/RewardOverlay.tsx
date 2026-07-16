@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { ChevronRight, Crown, Gift, Sparkles, Trophy } from 'lucide-react';
 
-const RewardOverlay = ({ accuracy, game, rankEvent, rankMeta, onContinue }) => {
+const RewardOverlay = ({ accuracy, game, rankEvent, rankMeta, onContinue, runLabel = 'sound' }) => {
   const [skip, setSkip] = useState(false);
   const rankUp = rankEvent?.type === 'rank-up';
   const perfect = accuracy === 100;
-  const title = rankUp ? `${rankEvent.rank} unlocked` : perfect ? 'Perfect sound run' : accuracy >= 80 ? 'Gate run complete' : 'Run archived';
-  const reward = rankUp ? 'Rank crest added to your profile' : perfect ? 'Perfect-run signal captured' : `${game.correctCount} sound gates crossed`;
+  const title = rankUp ? `${rankEvent.rank} unlocked` : perfect ? `Perfect ${runLabel} run` : accuracy >= 80 ? 'Gate run complete' : 'Run archived';
+  const reward = rankUp ? 'Rank crest added to your profile' : perfect ? 'Perfect-run signal captured' : `${game.correctCount} ${runLabel} gates crossed`;
   return <section className={`reward-overlay ${skip ? 'reward-overlay--skipped' : ''}`} data-reward-type={rankUp ? 'rank-up' : perfect ? 'perfect-run' : 'run-complete'} aria-labelledby="reward-title">
     <div className="reward-overlay__rays" aria-hidden="true" />
     <div className="reward-overlay__capsule" aria-hidden="true"><Gift /><span>♪</span></div>

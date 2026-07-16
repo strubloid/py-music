@@ -72,8 +72,8 @@ export const deleteFavorite = (id) =>
 
 // ─── XP ────────────────────────────────────────────────────────────────────────
 
-export const awardXp = (amount) =>
-  api.post('/api/me/xp', { amount });
+export const awardXp = () =>
+  api.post('/api/me/xp', {});
 
 export const claimQuestReward = (questId) =>
   api.post('/api/me/quest-claim', { quest_id: questId });

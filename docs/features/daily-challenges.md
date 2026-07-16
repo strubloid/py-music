@@ -11,7 +11,8 @@
 3. The learner selects a gate by pointer, touch, A/D/arrows, direct lane key, or commit key.
 4. The learner may request a teaching hint or use separate Focus powers.
 5. Correct signed-in answers call the completion endpoint; incorrect answers show the musical proof but earn no reward.
-6. An answer result dialog presents reward/proof and moves to another unseen challenge.
+6. An answer result dialog presents reward/proof and moves to another unseen challenge until the configurable five-gate run is complete.
+7. The final result opens the shared run Reward Overlay. It summarizes the run's earned answer XP, accuracy, and peak combo; it does not grant unverified bonus XP.
 
 The card uses Nomi and physical answer gates, but the musical visual is the hero. Nomi never replaces musical evidence.
 
@@ -52,14 +53,36 @@ Every new challenge must implement the `MusicQuestion` fields in [Curriculum](..
 
 ## Persistence And Reward
 
-`DailyChallenge`, `ChallengeAttempt`, `DailyHintUsage`, and `DailyHintReveal` persist server data. Completion is unique by `(user_id, challenge_id)`; duplicate completion receives zero XP. Correct Daily reward is `100-500` XP by difficulty and contributes Rank XP.
+`DailyChallenge`, `ChallengeAttempt`, `DailyHintUsage`, and `DailyHintReveal` persist server data. Completion is unique by `(user_id, challenge_id)`; duplicate completion receives zero XP. Correct Daily reward is `100-500` XP by difficulty and contributes Rank XP. `DAILY_RUN_LENGTH` in `DailyChallenge.tsx` defines the number of gates before the shared Reward Overlay appears.
+
+## Server Authoritative Answer Validation
+
+The completion endpoint now requires the client to submit `submitted_answer: <int>` and the server re-validates the answer against the stored `correct_index` before awarding XP. The XP formula is computed server-side from the challenge difficulty; any client-supplied `xp_award` or `amount` is ignored. An incorrect submission grants no XP and is recorded in `ChallengeAttempt.is_correct` for quest progress aggregation.
+
+The GET response still includes `correct_index` for the legacy "remove one option" power flow, but the **reward** is no longer derivable from it. A future change can stop exposing `correct_index` entirely and have the server reveal the correct answer only after commitment.
+
+## Scored Bank Migration
+
+The scored Daily bank is restricted to `SCORED_CATEGORIES = ('scales', 'chords', 'intervals', 'ear_training')`. The old `theory` and `general` trivia banks (semitone counts, instrument facts, glossary, history) were retired from the scored surface. Re-seeding the bank no longer produces them. The `GET /api/daily-challenges` route filters out non-scored categories. Direct completion calls for non-scored rows return `400`.
+
+Every seeded row now carries the typed `MusicQuestion` metadata:
+
+| Column | Purpose |
+| --- | --- |
+| `skill_id` | Stable, granular skill id (e.g. `fretboard.scale.major.identify`, `ear.interval.semitone-7.identify`) |
+| `modality` | One of `listen`, `locate`, `build`, `rhythm`, `predict`, `compare`, `mixed` |
+| `rank_band_min` / `rank_band_max` | Earliest and latest rank where the task is valid |
+| `difficulty_axis` | Which single axis the difficulty scales along (root, quality, distance, family) |
+| `stimulus_version` | Bump this when the typed payload contract changes |
+
+Legacy rows are backfilled on first read so old banks still pass the curriculum contract.
 
 ## Tests
 
-- Backend: payload schemas, mode formulas, hint non-leakage, hint allowance/reset/idempotency, completion/streak/idempotency, chord inventory, migrations.
+- Backend: payload schemas, mode formulas, hint non-leakage, hint allowance/reset/idempotency, completion/streak/idempotency, server-validated correctness, scored-bank filtering, quest eligibility, chord inventory, migrations.
 - Frontend: visual renderer fixtures, keyboard/pointer state, hint visibility, power separation, answer feedback.
 - Browser: Nomi gates, authoritative reward display, answer dialog, streak, piano/guitar/off views, mobile/reduced-motion/accessibility.
 
 ## Known Boundary
 
-Current completion does not submit the selected answer to the server; the browser compares exposed `correct_index` before calling completion. Do not treat this as anti-cheat validation. A future hardening change must submit an answer ID/index and validate it server-side without exposing correctness prematurely.
+The `correct_index` field is still exposed in the GET response to support the "remove one option" power flow. The server-validated completion endpoint means the field can no longer be used to game XP, but a future change can stop exposing it entirely and switch the power flow to a server-coordinated reveal.

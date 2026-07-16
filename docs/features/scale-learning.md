@@ -45,4 +45,4 @@ Every interactive fret needs a named keyboard/touch target with string, fret, no
 
 ## Known Boundary
 
-Current Scale Path completion accepts client-reported correctness and is not persisted/idempotent account authority. Do not use it as a trustworthy rank/XP path until the server stores seeded runs and validates selected positions itself.
+`ScalePathRun` rows persist for 24 hours so the completion endpoint can validate the submitted position against the stored run. The client submits `submittedPosition: { string, fret }`; the server compares against the run's stored `correct_gap` for that fragment. Idempotency is enforced by `unique_user_run_fragment` on `(user_id, run_id, fragment_index)`. Replays return the original result without re-awarding XP.

@@ -18,12 +18,15 @@ export const getScalePathRun = (params: ScalePathRunParams = {}) => {
   return api.get(`/api/scale-path/run?${qs.toString()}`);
 };
 
-export const completeScalePathFragment = (payload: {
+export interface CompleteScalePathFragmentPayload {
   runId: string;
   fragmentIndex: number;
-  correct: boolean;
+  submittedPosition: { string: string; fret: number };
   difficulty: number;
-}) => api.post('/api/scale-path/complete', payload);
+}
+
+export const completeScalePathFragment = (payload: CompleteScalePathFragmentPayload) =>
+  api.post('/api/scale-path/complete', payload);
 
 export const verifyScaleLabBuild = (payload: {
   root: string;

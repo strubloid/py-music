@@ -13,6 +13,13 @@ const LoginModal = () => {
   const [submitting, setSubmitting] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [resetConfirm, setResetConfirm] = useState('');
+  const passwordRequirements = [
+    ['At least 8 characters', password.length >= 8],
+    ['An uppercase letter', /[A-Z]/.test(password)],
+    ['A lowercase letter', /[a-z]/.test(password)],
+    ['A number', /[0-9]/.test(password)],
+    ['A special character', /[!@#$%^&*(),.?":{}|<>_\-]/.test(password)],
+  ];
 
   // Reset form state every time the modal opens
   React.useEffect(() => {
@@ -152,6 +159,14 @@ const LoginModal = () => {
                   required
                   minLength={6}
                 />
+              </div>
+            )}
+            {mode === 'register' && password && (
+              <div className="password-strength" aria-live="polite">
+                <strong>Password requirements</strong>
+                <ul>
+                  {passwordRequirements.map(([label, met]) => <li key={label} className={met ? 'met' : ''}>{met ? 'Met: ' : ''}{label}</li>)}
+                </ul>
               </div>
             )}
 

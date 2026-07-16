@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useGameProgress } from '../../contexts/GameProgressContext';
 import StreakBadge from '../../components/game/StreakBadge';
 import NoteAvatar from '../../features/ear-game/components/NoteAvatar';
+import RewardOverlay from '../../features/ear-game/components/RewardOverlay';
 import DailyVisualStage from '../../features/daily-challenge/DailyVisualStage';
 import { actionForKeyboardEvent, shouldIgnoreGameShortcut } from '../../features/ear-game/hooks/gameInput';
 import {
@@ -11,13 +12,16 @@ import {
   completeDailyChallenge,
   seedChallenges,
   getUserStreak,
+  getMe,
   revealDailyChallengeHint,
 } from '../../services/api';
 import { calculateXpPreview, getModeBaseXp, getPowerById } from '../../game/gameSystem';
+import '../../features/ear-game/styles/overlays.scss';
 import './DailyChallenge.scss';
 
 const INITIAL_LIMIT = 1;
 const RANDOM_FETCH_LIMIT = 10;
+const DAILY_RUN_LENGTH = 5;
 const GUEST_HINT_LIMITS = { unranked: 2, bronze: 3, silver: 4, gold: 5, platinum: 6, diamond: 7, master: 8, grandmaster: 9, virtuoso: 10, maestro: 11, legendary: 12 };
 const utcDateKey = () => new Date().toISOString().slice(0, 10);
 const getDisplayQuestion = (challenge) => {
@@ -47,26 +51,24 @@ const DailyChallenge = () => {
   const [challenges, setChallenges] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
   const [seeding, setSeeding] = useState(false);
   const [streak, setStreak] = useState(0);
   const [completedToday, setCompletedToday] = useState(false);
   const [completing, setCompleting] = useState({}); // { [challengeId]: bool }
-  const [results, setResults] = useState({}); // { [challengeId]: { correct: bool, xpAwarded: int } }
-  const [totalRemaining, setTotalRemaining] = useState(0);
+  const [results, setResults] = useState({}); // { [challengeId]: { correct, correctAnswerIndex, xpAwarded } }
   const [combo, setCombo] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
   const [dailySummary, setDailySummary] = useState(null);
   const [hiddenOptionIndexes, setHiddenOptionIndexes] = useState([]);
   const [questionPowersUsed, setQuestionPowersUsed] = useState([]);
-  const [dailyBonusClaimed, setDailyBonusClaimed] = useState(false);
   const [xpBreakdown, setXpBreakdown] = useState(null);
   const [feedbackBurst, setFeedbackBurst] = useState(null);
   const [answerPopup, setAnswerPopup] = useState(null);
   const [selectedOptionIndex, setSelectedOptionIndex] = useState(0);
   const [hintAllowance, setHintAllowance] = useState(null);
   const [revealedHint, setRevealedHint] = useState('');
+  const [dailyRunComplete, setDailyRunComplete] = useState(false);
   const seenChallengeIdsRef = useRef([]);
   const questionStartedAtRef = useRef(Date.now());
   const answerCommitRef = useRef(false);
@@ -109,8 +111,7 @@ const DailyChallenge = () => {
     }
 
     if (!nextChallenge) {
-      setTotalRemaining(0);
-      if (replace) {
+        if (replace) {
         setChallenges([]);
         setActiveIndex(0);
         setResults({});
@@ -131,7 +132,6 @@ const DailyChallenge = () => {
       setActiveIndex((current) => current + 1);
     }
 
-    setTotalRemaining(res.data.remaining);
     if (res.data.hint_allowance) setHintAllowance(res.data.hint_allowance);
     return nextChallenge;
   }, [rememberSeenChallenges]);
@@ -149,7 +149,6 @@ const DailyChallenge = () => {
       ]);
       setChallenges(chalRes.data.challenges);
       setActiveIndex(0);
-      setTotalRemaining(chalRes.data.remaining);
       const initialSeenIds = chalRes.data.challenges.map((challenge) => challenge.id);
       seenChallengeIdsRef.current = initialSeenIds;
       setStreak(streakRes.data.streak);
@@ -164,6 +163,7 @@ const DailyChallenge = () => {
       setXpBreakdown(null);
       setHintAllowance(chalRes.data.hint_allowance || null);
       setRevealedHint('');
+      setDailyRunComplete(false);
       sessionStatsRef.current = { answered: 0, correct: 0, totalXp: 0, powersUsed: [] };
       window.dispatchEvent(new Event('streak:updated'));
     } catch (err) {
@@ -210,175 +210,175 @@ const DailyChallenge = () => {
     if (!answerPopup) return;
     const { challengeId } = answerPopup;
     setAnswerPopup(null);
+    if (sessionStatsRef.current.answered >= DAILY_RUN_LENGTH) {
+      setDailyRunComplete(true);
+      return;
+    }
     advanceToNextChallenge(challengeId);
   };
 
-  const handleAnswer = async (challengeId, selectedIdx, correctIdx) => {
+  const handleAnswer = async (challengeId, selectedIdx) => {
     if (completing[challengeId] || results[challengeId] || answerCommitRef.current) return;
+    if (!activeChallenge) return;
     answerCommitRef.current = true;
 
-    const isCorrect = selectedIdx === correctIdx;
     const penalties = 0;
     const bonusXp = 0;
-    const awardedXp = isCorrect ? challengeBaseXp : 0;
     setXpBreakdown({
       baseXp: challengeBaseXp,
       penalties,
       bonusXp,
-      finalXp: isCorrect ? awardedXp : 0,
+      finalXp: 0,
     });
     setCompleting((prev) => ({ ...prev, [challengeId]: true }));
 
-    const openAnswerPopup = (result) => setAnswerPopup({
-      challengeId,
-      correct: isCorrect,
-      correctAnswer: activeChallenge?.options?.[correctIdx],
-      explanation: activeChallenge?.explanation,
-      ...result,
-    });
+    let serverCorrect = false;
+    let serverCorrectAnswer = null;
+    let serverXpAwarded = 0;
+    let serverAuthenticated = isLoggedIn;
 
     try {
-      if (isCorrect) {
-        const nextCombo = combo + 1;
-        setCombo(nextCombo);
-        setMaxCombo((current) => Math.max(current, nextCombo));
-        if (isLoggedIn) {
-          const streakRes = await getUserStreak();
-          setStreak(streakRes.data.streak);
-          setCompletedToday(streakRes.data.completed_today);
-
-          const res = await completeDailyChallenge(challengeId, { mode: 'challenge' });
-          const totalAwardXp = res.data.xp_awarded || 0;
-          rememberCompletedChallengeId(challengeId);
-          const isAuthenticatedReward = res.data.authenticated !== false;
-
-          if (isAuthenticatedReward) {
-            updateUserProgress({ xp: res.data.xp, level: res.data.level, rank: res.data.rank });
-          }
-
-          setResults((prev) => ({
-            ...prev,
-            [challengeId]: {
-              correct: true,
-              xpAwarded: res.data.xp_awarded,
-            },
-          }));
-
-          if (isAuthenticatedReward && !dailyBonusClaimed) {
-            setDailyBonusClaimed(true);
-            setDailySummary({
-              score: 1,
-              accuracy: 1,
-              xpEarned: totalAwardXp,
-              combo: nextCombo,
-              powersUsed: questionPowersUsed,
-              streak: streakRes.data.streak,
-            });
-          } else if (isAuthenticatedReward) {
-            setDailySummary({
-              score: 1,
-              accuracy: 1,
-              xpEarned: totalAwardXp,
-              combo: nextCombo,
-              powersUsed: questionPowersUsed,
-              streak: streakRes.data.streak,
-            });
-          } else {
-            setDailySummary({
-              score: 1,
-              accuracy: 1,
-              xpEarned: 0,
-              combo: nextCombo,
-              powersUsed: questionPowersUsed,
-              streak: streakRes.data.streak,
-            });
-          }
-
-          sessionStatsRef.current = {
-            answered: sessionStatsRef.current.answered + 1,
-            correct: sessionStatsRef.current.correct + 1,
-            totalXp: sessionStatsRef.current.totalXp + (isAuthenticatedReward ? totalAwardXp : 0),
-            powersUsed: [...sessionStatsRef.current.powersUsed, ...questionPowersUsed],
-          };
-          recordChallengeResult({
-            challengeId: `${challengeId}`,
-            mode: 'daily',
-            score: 1,
-            accuracy: 1,
-            xpEarned: isAuthenticatedReward ? totalAwardXp : 0,
-            maxCombo: Math.max(maxCombo, nextCombo),
-            powersUsed: questionPowersUsed,
-            streakDays: streakRes.data.streak,
-            completedAt: new Date().toISOString(),
-          });
-          showFeedbackBurst(isAuthenticatedReward ? `+${totalAwardXp} XP` : 'Sign in to save XP', isAuthenticatedReward ? 'positive' : 'neutral');
-          window.dispatchEvent(new Event('streak:updated'));
-          openAnswerPopup({ xpAwarded: isAuthenticatedReward ? totalAwardXp : 0, signedInReward: isAuthenticatedReward });
-        } else {
-          setResults((prev) => ({
-            ...prev,
-            [challengeId]: {
-              correct: true,
-              xpAwarded: awardedXp,
-            },
-          }));
-          sessionStatsRef.current = {
-            answered: sessionStatsRef.current.answered + 1,
-            correct: sessionStatsRef.current.correct + 1,
-            totalXp: sessionStatsRef.current.totalXp + awardedXp,
-            powersUsed: [...sessionStatsRef.current.powersUsed, ...questionPowersUsed],
-          };
-          setDailySummary({ score: 1, accuracy: 1, xpEarned: awardedXp, combo: nextCombo, powersUsed: questionPowersUsed, streak });
-          recordChallengeResult({
-            challengeId: `${challengeId}`,
-            mode: 'daily',
-            score: 1,
-            accuracy: 1,
-            xpEarned: awardedXp,
-            maxCombo: Math.max(maxCombo, nextCombo),
-            powersUsed: questionPowersUsed,
-            streakDays: streak,
-            completedAt: new Date().toISOString(),
-          });
-          showFeedbackBurst(`+${awardedXp} XP`, 'positive');
-          openAnswerPopup({ xpAwarded: awardedXp, signedInReward: false });
-        }
-      } else {
-        const preservesCombo = questionPowersUsed.includes('second_chance') || questionPowersUsed.includes('freeze_combo');
-        if (!preservesCombo) setCombo(0);
-        setResults((prev) => ({
-          ...prev,
-          [challengeId]: {
-            correct: false,
-            xpAwarded: 0,
-          },
-        }));
-        sessionStatsRef.current = {
-          ...sessionStatsRef.current,
-          answered: sessionStatsRef.current.answered + 1,
-        };
-        setDailySummary({ score: 0, accuracy: 0, xpEarned: 0, combo, powersUsed: questionPowersUsed, streak });
-        if (penalties > 0) showFeedbackBurst(`-${penalties} XP lost`, 'negative');
-        rememberCompletedChallengeId(challengeId);
-        openAnswerPopup();
-      }
+      const res = await completeDailyChallenge(challengeId, {
+        mode: 'challenge',
+        submitted_answer: selectedIdx,
+        submitted_answer_label: activeChallenge.options[selectedIdx],
+      });
+      serverCorrect = Boolean(res.data.correct);
+      serverCorrectAnswer = res.data.correct_answer ?? null;
+      serverXpAwarded = res.data.xp_awarded || 0;
+      serverAuthenticated = res.data.authenticated !== false;
     } catch (err) {
       if (err.response?.status === 400) {
-        setResults((prev) => ({
-          ...prev,
-          [challengeId]: {
-            correct: true,
-            xpAwarded: 0,
-          },
-        }));
-        openAnswerPopup({ xpAwarded: 0, signedInReward: false });
+        setError('That challenge is not part of the scored bank anymore.');
       } else {
         setError('Failed to submit answer.');
       }
-    } finally {
       setCompleting((prev) => ({ ...prev, [challengeId]: false }));
       answerCommitRef.current = false;
+      return;
     }
+
+    setXpBreakdown({
+      baseXp: challengeBaseXp,
+      penalties,
+      bonusXp,
+      finalXp: serverXpAwarded,
+    });
+
+    const openAnswerPopup = (extra) => setAnswerPopup({
+      challengeId,
+      correct: serverCorrect,
+      correctAnswer: serverCorrectAnswer ?? activeChallenge.options[selectedIdx],
+      explanation: activeChallenge.explanation,
+      ...extra,
+    });
+
+    if (serverCorrect) {
+      const nextCombo = combo + 1;
+      setCombo(nextCombo);
+      setMaxCombo((current) => Math.max(current, nextCombo));
+      if (serverAuthenticated) {
+        let streakData = { streak: 0, completed_today: false };
+        try {
+          const streakRes = await getUserStreak();
+          streakData = streakRes.data;
+        } catch {
+          /* keep previous streak */
+        }
+        setStreak(streakData.streak);
+        setCompletedToday(streakData.completed_today);
+        rememberCompletedChallengeId(challengeId);
+
+        try {
+          const me = await getMe();
+          if (me.data?.user) {
+            updateUserProgress({
+              xp: me.data.user.xp,
+              level: me.data.user.level,
+              rank: me.data.user.rank,
+            });
+          }
+        } catch {
+          /* ignore */
+        }
+
+        setResults((prev) => ({
+          ...prev,
+          [challengeId]: { correct: true, correctAnswerIndex: activeChallenge.options.indexOf(serverCorrectAnswer), xpAwarded: serverXpAwarded },
+        }));
+        setDailySummary({
+          score: 1,
+          accuracy: 1,
+          xpEarned: serverXpAwarded,
+          combo: nextCombo,
+          powersUsed: questionPowersUsed,
+          streak: streakData.streak,
+        });
+        sessionStatsRef.current = {
+          answered: sessionStatsRef.current.answered + 1,
+          correct: sessionStatsRef.current.correct + 1,
+          totalXp: sessionStatsRef.current.totalXp + serverXpAwarded,
+          powersUsed: [...sessionStatsRef.current.powersUsed, ...questionPowersUsed],
+        };
+        recordChallengeResult({
+          challengeId: `${challengeId}`,
+          mode: 'daily',
+          score: 1,
+          accuracy: 1,
+          xpEarned: serverXpAwarded,
+          maxCombo: Math.max(maxCombo, nextCombo),
+          powersUsed: questionPowersUsed,
+          streakDays: streakData.streak,
+          completedAt: new Date().toISOString(),
+        });
+        showFeedbackBurst(`+${serverXpAwarded} XP`, 'positive');
+        window.dispatchEvent(new Event('streak:updated'));
+        openAnswerPopup({ xpAwarded: serverXpAwarded, signedInReward: true });
+      } else {
+        setResults((prev) => ({
+          ...prev,
+          [challengeId]: { correct: true, correctAnswerIndex: activeChallenge.options.indexOf(serverCorrectAnswer), xpAwarded: 0 },
+        }));
+        sessionStatsRef.current = {
+          answered: sessionStatsRef.current.answered + 1,
+          correct: sessionStatsRef.current.correct + 1,
+          totalXp: sessionStatsRef.current.totalXp,
+          powersUsed: [...sessionStatsRef.current.powersUsed, ...questionPowersUsed],
+        };
+        setDailySummary({ score: 1, accuracy: 1, xpEarned: 0, combo: nextCombo, powersUsed: questionPowersUsed, streak });
+        recordChallengeResult({
+          challengeId: `${challengeId}`,
+          mode: 'daily',
+          score: 1,
+          accuracy: 1,
+          xpEarned: 0,
+          maxCombo: Math.max(maxCombo, nextCombo),
+          powersUsed: questionPowersUsed,
+          streakDays: streak,
+          completedAt: new Date().toISOString(),
+        });
+        showFeedbackBurst('Sign in to save XP', 'neutral');
+        openAnswerPopup({ xpAwarded: 0, signedInReward: false });
+      }
+    } else {
+      const preservesCombo = questionPowersUsed.includes('second_chance') || questionPowersUsed.includes('freeze_combo');
+      if (!preservesCombo) setCombo(0);
+      setResults((prev) => ({
+        ...prev,
+        [challengeId]: { correct: false, correctAnswerIndex: activeChallenge.options.indexOf(serverCorrectAnswer), xpAwarded: 0 },
+      }));
+      sessionStatsRef.current = {
+        ...sessionStatsRef.current,
+        answered: sessionStatsRef.current.answered + 1,
+      };
+      setDailySummary({ score: 0, accuracy: 0, xpEarned: 0, combo, powersUsed: questionPowersUsed, streak });
+      if (penalties > 0) showFeedbackBurst(`-${penalties} XP lost`, 'negative');
+      rememberCompletedChallengeId(challengeId);
+      openAnswerPopup();
+    }
+
+    setCompleting((prev) => ({ ...prev, [challengeId]: false }));
+    answerCommitRef.current = false;
   };
 
   const usePower = (powerId) => {
@@ -386,9 +386,9 @@ const DailyChallenge = () => {
     if (!power || !activeChallenge || results[activeChallenge.id] || questionPowersUsed.includes(powerId)) return;
     if (power.focusCost && !consumeFocus(power.focusCost)) return;
     if (powerId === 'remove_one_option') {
-      const wrongIndexes = activeChallenge.options.map((_, index) => index).filter((index) => index !== activeChallenge.correct_index && !hiddenOptionIndexes.includes(index));
-      if (wrongIndexes.length > 0) {
-        setHiddenOptionIndexes((current) => [...current, wrongIndexes[0]]);
+      const visibleIndexes = activeChallenge.options.map((_, index) => index).filter((index) => !hiddenOptionIndexes.includes(index));
+      if (visibleIndexes.length > 1) {
+        setHiddenOptionIndexes((current) => [...current, visibleIndexes[0]]);
       }
     }
     setQuestionPowersUsed((current) => [...current, powerId]);
@@ -458,13 +458,13 @@ const DailyChallenge = () => {
         if (optionIndex !== undefined) {
           event.preventDefault();
           setSelectedOptionIndex(optionIndex);
-          handleAnswer(activeChallenge.id, optionIndex, activeChallenge.correct_index);
+          handleAnswer(activeChallenge.id, optionIndex);
         }
         return;
       }
       if (['jump', 'confirm'].includes(action)) {
         event.preventDefault();
-        handleAnswer(activeChallenge.id, selectedOptionIndex, activeChallenge.correct_index);
+        handleAnswer(activeChallenge.id, selectedOptionIndex);
       } else if (action === 'hint') {
         event.preventDefault();
         revealHint();
@@ -473,33 +473,6 @@ const DailyChallenge = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeChallenge, activeResult, answerPopup, hiddenOptionIndexes, selectedOptionIndex, revealedHint, hintAllowance]);
-
-  const handleLoadMore = async () => {
-    if (loadingMore) return;
-
-    setLoadingMore(true);
-    setError('');
-    try {
-      const excludeIds = Array.from(new Set([...seenChallengeIdsRef.current, ...challenges.map((challenge) => challenge.id)]));
-      const res = await getDailyChallenges(INITIAL_LIMIT, 0, {
-        random: true,
-        excludeIds,
-      });
-      if (res.data.challenges.length === 0) {
-        setTotalRemaining(0);
-        return;
-      }
-
-      setChallenges((prev) => [...prev, ...res.data.challenges]);
-      setActiveIndex(challenges.length);
-      rememberSeenChallenges(res.data.challenges);
-      setTotalRemaining(res.data.remaining);
-    } catch (err) {
-      setError('Failed to load more challenges.');
-    } finally {
-      setLoadingMore(false);
-    }
-  };
 
   const handleReload = async () => {
     setSeeding(true);
@@ -535,8 +508,13 @@ const DailyChallenge = () => {
     return 'Next: keep the combo moving.';
   };
 
-  const answeredCount = sessionStatsRef.current.answered + (activeResult ? 1 : 0);
-  const runProgress = Math.min(100, ((answeredCount || 0) / 5) * 100);
+  const answeredCount = sessionStatsRef.current.answered;
+  const dailyRun = {
+    challengeCount: DAILY_RUN_LENGTH,
+    correctCount: sessionStatsRef.current.correct,
+    score: sessionStatsRef.current.totalXp,
+    maxCombo,
+  };
 
   if (loading) {
     return (
@@ -547,6 +525,17 @@ const DailyChallenge = () => {
         </div>
       </div>
     );
+  }
+
+  if (dailyRunComplete) {
+    const accuracy = Math.round((dailyRun.correctCount / DAILY_RUN_LENGTH) * 100);
+    return <RewardOverlay
+      accuracy={accuracy}
+      game={dailyRun}
+      rankMeta={{ ...rankMeta, progressLabel: `Daily run complete · ${dailyRun.correctCount}/${DAILY_RUN_LENGTH} correct` }}
+      onContinue={fetchData}
+      runLabel="daily"
+    />;
   }
 
   return (
@@ -597,15 +586,10 @@ const DailyChallenge = () => {
             <div className="daily-score-track"><span style={{ width: `${Math.max(6, Math.min(100, (xpPreview.previewXp / Math.max(1, xpPreview.baseXp)) * 100))}%` }} /></div>
             <small>{xpPreview.penalties > 0 ? `${xpPreview.penalties} XP spent on powers` : 'Full reward available'}</small>
           </div>
-          <div className="daily-run-progress" aria-label="Run progress">
-            <span>Run progress</span>
-            <strong>{Math.min(5, answeredCount)}/5</strong>
-            <div className="daily-score-track"><span style={{ width: `${Math.max(8, runProgress)}%` }} /></div>
-          </div>
         </div>
-        <div className="daily-stage-map" aria-label={`Daily run progress: ${Math.min(5, answeredCount)} of 5 sectors complete`}>
-          <div><span>DAILY GATE RUN</span><strong>{Math.min(5, answeredCount) + 1 < 5 ? `Sector ${Math.min(5, answeredCount) + 1} ahead` : 'Reward vault ahead'}</strong></div>
-          <ol>{Array.from({ length: 5 }, (_, index) => <li key={index} className={index < answeredCount ? 'daily-stage-map__cleared' : index === answeredCount ? 'daily-stage-map__active' : ''}><b>{index + 1}</b><small>{index === 4 ? 'VAULT' : 'GATE'}</small></li>)}</ol>
+        <div className="daily-stage-map" aria-label={`Daily run progress: ${Math.min(DAILY_RUN_LENGTH, answeredCount)} of ${DAILY_RUN_LENGTH} gates complete`}>
+          <div><span>DAILY GATE RUN</span><strong>{answeredCount + 1 < DAILY_RUN_LENGTH ? `Gate ${answeredCount + 1} ahead` : answeredCount < DAILY_RUN_LENGTH ? 'Reward vault ahead' : 'Reward vault unlocked'}</strong></div>
+          <ol>{Array.from({ length: DAILY_RUN_LENGTH }, (_, index) => <li key={index} className={index < answeredCount ? 'daily-stage-map__cleared' : index === answeredCount ? 'daily-stage-map__active' : ''}><b>{index + 1}</b><small>{index === DAILY_RUN_LENGTH - 1 ? 'VAULT' : 'GATE'}</small></li>)}</ol>
         </div>
 
         {!activeChallenge ? (
@@ -680,7 +664,7 @@ const DailyChallenge = () => {
                   if (hiddenOptionIndexes.includes(i)) return null;
                   let optClass = 'challenge-option';
                   if (activeResult) {
-                    if (i === activeChallenge.correct_index) optClass += ' correct';
+                    if (i === activeResult.correctAnswerIndex) optClass += ' correct';
                     else optClass += ' wrong';
                   }
                   return (
@@ -693,11 +677,11 @@ const DailyChallenge = () => {
                       aria-checked={selectedOptionIndex === i}
                       onPointerEnter={() => setSelectedOptionIndex(i)}
                       onFocus={() => setSelectedOptionIndex(i)}
-                      onClick={() => handleAnswer(activeChallenge.id, i, activeChallenge.correct_index)}
+                      onClick={() => handleAnswer(activeChallenge.id, i)}
                     >
                       <span className="challenge-gate-key">{i + 1}</span>
                       <span className="challenge-gate-answer">{opt}</span>
-                      {activeResult && i === activeChallenge.correct_index && <CheckCircle size={16} className="opt-correct-icon" />}
+                      {activeResult && i === activeResult.correctAnswerIndex && <CheckCircle size={16} className="opt-correct-icon" />}
                     </button>
                   );
                 })}
@@ -712,7 +696,7 @@ const DailyChallenge = () => {
                         ? <>Clean hit. Perfect groove! <strong>+{activeResult.xpAwarded} XP</strong></>
                         : <>Clean hit. Perfect groove! <strong>Reward already claimed</strong></>)
                       : <>Clean hit. Nice hit! <strong>Sign in to save XP</strong></>
-                    : <>Off beat — the answer was <strong>{activeChallenge.options[activeChallenge.correct_index]}</strong></>
+                    : <>Off beat — the answer was <strong>{activeChallenge.options[activeResult.correctAnswerIndex]}</strong></>
                   }
                 </div>
               )}
@@ -748,12 +732,6 @@ const DailyChallenge = () => {
           </div>
 
           <div className="challenges-actions">
-            {totalRemaining > 0 && (
-              <button className="load-more-btn" onClick={handleLoadMore} disabled={loadingMore}>
-                {loadingMore ? 'Loading next challenge…' : 'Load another challenge'}
-                {!loadingMore && totalRemaining > 0 ? ` (${totalRemaining} remaining)` : ''}
-              </button>
-            )}
             <button className="reload-btn" onClick={handleReload} disabled={seeding}>
               <RefreshCw size={16} className={seeding ? 'spin' : ''} />
               {seeding ? 'Generating…' : 'Reload challenge bank'}

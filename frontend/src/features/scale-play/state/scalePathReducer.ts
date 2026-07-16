@@ -27,8 +27,7 @@ export interface ScalePathFragment {
   difficulty: number;
   anchor: ScalePathPosition;
   suffix: ScalePathPosition[];
-  gap: ScalePathPosition | null;
-  candidates: Array<ScalePathPosition & { isCorrect: boolean }>;
+  candidates: ScalePathPosition[];
   direction: 'left' | 'up';
   degreeClue: string;
   correctCandidateId?: string;

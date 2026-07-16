@@ -9,6 +9,12 @@ const INSTRUMENTS = [
   { id: 'both', label: 'Both' },
 ];
 
+const SKILL_LEVELS = [
+  { id: 'beginner', label: 'Beginner' },
+  { id: 'intermediate', label: 'Intermediate' },
+  { id: 'advanced', label: 'Advanced' },
+];
+
 const SettingsPage = () => {
   const { user, updatePreferences } = useAuth();
 
@@ -18,6 +24,14 @@ const SettingsPage = () => {
       await updatePreferences({ instrument_preference: val });
     } catch {
       // silently fail — backend will validate
+    }
+  };
+
+  const handleSkillLevelChange = async (e) => {
+    try {
+      await updatePreferences({ skill_level: e.target.value });
+    } catch {
+      // The API validates supported curriculum bands.
     }
   };
 
@@ -63,6 +77,7 @@ const SettingsPage = () => {
             Instrument
           </span>
           <select
+            aria-label="Default instrument"
             className="setting-select"
             value={user?.instrument_preference || ''}
             onChange={handleInstrumentChange}
@@ -78,6 +93,29 @@ const SettingsPage = () => {
           {user?.id
             ? 'Your default instrument is used in ear training and chord diagrams.'
             : 'Sign in to set your default instrument preference.'}
+        </p>
+        <div className="setting-row">
+          <span className="setting-label">
+            <Shield size={16} />
+            Practice level
+          </span>
+          <select
+            aria-label="Practice level"
+            className="setting-select"
+            value={user?.skill_level || ''}
+            onChange={handleSkillLevelChange}
+            disabled={!user?.id}
+          >
+            <option value="" disabled>Select practice level</option>
+            {SKILL_LEVELS.map((level) => (
+              <option key={level.id} value={level.id}>{level.label}</option>
+            ))}
+          </select>
+        </div>
+        <p className="setting-hint">
+          {user?.id
+            ? 'This sets the starting difficulty for new practice runs.'
+            : 'Sign in to tune challenge difficulty to your experience.'}
         </p>
       </div>
 

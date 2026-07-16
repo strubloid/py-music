@@ -24,7 +24,7 @@ from ..daily_challenge_explanations import build_daily_challenge_explanation
 from ..game_system import calculate_level_from_xp, get_mode_base_xp
 from backend.project.models import db
 from backend.project.models.user import (
-    DailyChallenge, ChallengeAttempt, DailyHintUsage, DailyHintReveal,
+    DailyChallenge, ChallengeAttempt, DailyHintUsage, DailyHintReveal, QuestProgress,
 )
 from backend.project.music.chord_inventory import (
     CHORD_QUALITIES,
@@ -34,6 +34,7 @@ from backend.project.music.chord_inventory import (
     build_scheduled_note_events,
     inventory_payload,
 )
+from ..gamification import quest_period_key
 
 daily_bp = Blueprint('daily', __name__, url_prefix='/api')
 
@@ -98,6 +99,22 @@ RANK_LEVELS = {
 }
 RANK_ORDER = list(RANK_LEVELS)
 RANK_XP_PER_LEVEL = 500
+
+# Scored categories are typed musical actions. History, band, instrument-fact,
+# glossary, tempo-name, and other non-musical tasks were retired from the
+# scored bank and may only appear as optional, clearly-labelled unscored
+# context cards.
+SCORED_CATEGORIES = ('scales', 'chords', 'intervals', 'ear_training')
+
+# Per-category default modality and rank band (curriculum contract).
+CATEGORY_METADATA = {
+    'scales':     {'modality': 'locate',  'rank_min': 'unranked', 'rank_max': 'legendary', 'axis': 'root'      },
+    'chords':     {'modality': 'compare', 'rank_min': 'bronze',   'rank_max': 'legendary', 'axis': 'quality'   },
+    'intervals':  {'modality': 'listen',  'rank_min': 'unranked', 'rank_max': 'legendary', 'axis': 'distance'  },
+    'ear_training': {'modality': 'listen', 'rank_min': 'unranked', 'rank_max': 'legendary', 'axis': 'family'   },
+}
+
+STIMULUS_VERSION = 2  # bump when the typed payload contract changes.
 
 CHORD_TYPES = [
     ('Major',       ['major', 'Major', 'M', '']),
@@ -363,12 +380,21 @@ def build_ear_exercise(challenge):
 
 
 def serialize_challenge(challenge):
+    """Serialize a challenge row for the public Daily API.
+
+    Correctness is intentionally omitted. The browser submits an option index
+    to the completion endpoint and learns the verdict only after the server
+    compares it with the stored answer.
+    """
     data = challenge.to_dict()
     data['xp_reward'] = get_mode_base_xp('challenge', challenge.difficulty)
-    # Pre-visual rows remain playable during the additive-column migration.
-    # Newly seeded rows always persist a specific payload below.
+    # Backfill typed metadata from the legacy row so the curriculum contract is
+    # satisfied without re-seeding. Newly seeded rows already persist this.
+    if not challenge.skill_id:
+        _backfill_challenge_metadata(challenge, data)
     if not data['visual']:
         data['visual'], data['question_type'], data['question'] = _legacy_visual(challenge)
+    data.pop('correct_index', None)
     if challenge.category != 'ear_training':
         return data
 
@@ -377,13 +403,45 @@ def serialize_challenge(challenge):
         'title': exercise['title'],
         'question': exercise['question'],
         'options': exercise['options'],
-        'correct_index': exercise['correct_index'],
         'explanation': exercise.get('explanation', data.get('explanation')),
         'exercise': exercise,
         'question_type': f'ear-{exercise["type"]}',
         'visual': _ear_visual(exercise),
     })
+    data['exercise'].pop('correct_index', None)
     return data
+
+
+def _backfill_challenge_metadata(challenge, data):
+    """Fill skill_id, modality, rank band, and difficulty axis for legacy rows
+    based on the existing category and question_type. This is a one-time
+    migration; new rows set these values during seed_challenges."""
+    category = challenge.category
+    meta = CATEGORY_METADATA.get(category)
+    if not meta:
+        return
+    challenge.skill_id = challenge.skill_id or f'{category}.{challenge.question_type or "generic"}'
+    challenge.modality = challenge.modality or meta['modality']
+    challenge.rank_band_min = challenge.rank_band_min or meta['rank_min']
+    challenge.rank_band_max = challenge.rank_band_max or meta['rank_max']
+    challenge.difficulty_axis = challenge.difficulty_axis or meta['axis']
+    challenge.stimulus_version = challenge.stimulus_version or STIMULUS_VERSION
+    db.session.add(challenge)
+    data['skill_id'] = challenge.skill_id
+    data['modality'] = challenge.modality
+    data['rank_band_min'] = challenge.rank_band_min
+    data['rank_band_max'] = challenge.rank_band_max
+    data['difficulty_axis'] = challenge.difficulty_axis
+    data['stimulus_version'] = challenge.stimulus_version
+
+
+def _eligible_for_scoring(challenge):
+    """A challenge is only eligible for reward if it belongs to a typed
+    musical-action category and has a known skill_id."""
+    return (
+        challenge.category in SCORED_CATEGORIES
+        and bool(challenge.skill_id)
+    )
 
 
 def _ear_visual(exercise):
@@ -479,6 +537,7 @@ def generate_scales_questions(count):
             'difficulty': random.choice([1, 2]),
             'question_type': 'scale-identification',
             'visual': _scale_visual(root, scale_type),
+            'skill_id': f'fretboard.scale.{scale_type}.identify',
         })
     return questions
 
@@ -501,7 +560,7 @@ def generate_chords_questions(count):
         questions.append({
             'category': 'chords',
             'title': 'Chord Stack',
-            'question': f'Chord stack check: what quality is {root}{correct_name}?',
+            'question': 'What quality is this chord?',
             'options': options,
             'correct_index': correct_idx,
             'explanation': build_daily_challenge_explanation('chords', f'Identify the {root} Chord', f'What type of chord is {root}{correct_name}? (e.g., Major, Minor, Seventh, etc.)', options, correct_idx),
@@ -509,6 +568,7 @@ def generate_chords_questions(count):
             'difficulty': random.choice([1, 2, 3]),
             'question_type': 'chord-quality',
             'visual': _chord_visual(root, chord_label),
+            'skill_id': f'chord.quality.{chord_label.lower().replace(" ", "-")}.identify',
         })
     return questions
 
@@ -542,6 +602,7 @@ def generate_intervals_questions(count):
             'difficulty': random.choice([1, 2]),
             'question_type': 'interval-identification',
             'visual': _interval_visual(n1, n2, semitones),
+            'skill_id': f'ear.interval.semitone-{semitones}.identify',
         })
     return questions
 
@@ -784,7 +845,7 @@ def generate_ear_training_questions(count):
         questions.append({
             'category': 'ear_training',
             'title': 'Ear Check',
-            'question': f'Ear check: {n1} → {n2} ({semitones} semitones). What interval do you hear?',
+            'question': 'What interval do you hear?',
             'options': options,
             'correct_index': correct_idx,
             'explanation': build_daily_challenge_explanation('ear_training', 'Interval Recognition', f'From {n1} to {n2}, what interval do you hear? (Distance: {semitones} semitones)', options, correct_idx),
@@ -792,8 +853,16 @@ def generate_ear_training_questions(count):
             'difficulty': random.choice([2, 3, 4]),
             'question_type': 'ear-training-legacy',
             'visual': _interval_visual(n1, n2, semitones),
+            'skill_id': f'ear.interval.{correct.lower().replace(" ", "-")}.identify',
         })
     return questions
+
+
+# ─── Retired banks ──────────────────────────────────────────────────────────────
+# `theory` and `general` are intentionally NOT generated. They were trivia
+# banks (semitone counts, instrument facts, glossary) that violated the
+# curriculum contract. The functions are kept as commented-out references so
+# the migration is documented, but a re-seed cannot resurrect them.
 
 
 def generate_general_questions(count):
@@ -908,39 +977,42 @@ def generate_general_questions(count):
 
 
 def seed_challenges(target=1000):
-    """Generate or regenerate challenges in the database.
+    """Generate or regenerate the scored Daily challenge bank.
 
-    Distributes 1000 questions across categories:
-      scales ~180, chords ~180, intervals ~160, theory ~120, ear_training ~120, general ~240
+    Only typed musical-action categories are seeded. The old `theory` and
+    `general` trivia banks were retired from the scored surface per the
+    curriculum contract; the optional unscored `Music context` cards
+    remain an internal future feature and are not produced here.
     """
     random.seed(42)  # deterministic seed for reproducibility
 
     DailyChallenge.query.delete()
     db.session.commit()
 
+    # Re-balance counts into the four scored categories. `theory` and
+    # `general` no longer receive any share; remaining budget flows into
+    # ear_training, which is the most musical of the four.
     counts = {
-        'scales': target * 18 // 100,
-        'chords': target * 18 // 100,
-        'intervals': target * 16 // 100,
-        'theory': target * 12 // 100,
-        'ear_training': target * 12 // 100,
+        'scales':       target * 30 // 100,
+        'chords':       target * 30 // 100,
+        'intervals':    target * 20 // 100,
+        'ear_training': target * 20 // 100,
     }
-    # Fill remainder with general
+    # Top up to the target without touching retired categories.
     used = sum(counts.values())
-    counts['general'] = target - used
+    counts['ear_training'] += target - used
 
     generators = {
-        'scales': generate_scales_questions,
-        'chords': generate_chords_questions,
-        'intervals': generate_intervals_questions,
-        'theory': generate_theory_questions,
+        'scales':       generate_scales_questions,
+        'chords':       generate_chords_questions,
+        'intervals':    generate_intervals_questions,
         'ear_training': generate_ear_training_questions,
-        'general': generate_general_questions,
     }
 
     challenges = []
     for cat, gen in generators.items():
         qs = gen(counts[cat])
+        meta = CATEGORY_METADATA[cat]
         for q in qs:
             challenges.append(DailyChallenge(
                 category=q['category'],
@@ -953,6 +1025,12 @@ def seed_challenges(target=1000):
                 visual_json=json.dumps(q['visual']),
                 xp_reward=q['xp_reward'],
                 difficulty=q['difficulty'],
+                skill_id=q.get('skill_id') or f'{cat}.{q.get("question_type") or "generic"}',
+                modality=meta['modality'],
+                rank_band_min=meta['rank_min'],
+                rank_band_max=meta['rank_max'],
+                difficulty_axis=meta['axis'],
+                stimulus_version=STIMULUS_VERSION,
             ))
 
     db.session.add_all(challenges)
@@ -1056,7 +1134,12 @@ def get_daily_challenges():
         completed_ids = {c[0] for c in completed_rows}
 
     # Fetch challenges excluding completed ones before paginating so offsets stay stable.
-    available_query = DailyChallenge.query
+    # Scored-bank filter: history, band, instrument-fact, and glossary rows are
+    # retired from the Daily reward surface. The curriculum contract requires a
+    # typed musical action.
+    available_query = DailyChallenge.query.filter(
+        DailyChallenge.category.in_(SCORED_CATEGORIES)
+    )
     if completed_ids:
         available_query = available_query.filter(~DailyChallenge.id.in_(completed_ids))
     if exclude_ids:
@@ -1153,10 +1236,47 @@ def reveal_hint(challenge_id):
 @daily_bp.route('/daily-challenge/<int:challenge_id>/complete', methods=['POST'])
 @limiter.limit('120 per hour', override_defaults=True)
 def complete_challenge(challenge_id):
-    """Mark a challenge as complete and award XP."""
+    """Mark a challenge as complete and award XP.
+
+    The client submits the selected option index and label. The server grades
+    the label against its authoritative option list and only awards XP for a
+    match. `xp_award` and any other client-supplied reward amount is ignored
+    — XP is computed from the server formula.
+    """
     challenge = DailyChallenge.query.get(challenge_id)
     if not challenge:
         return jsonify({'error': 'Challenge not found'}), 404
+
+    if challenge.category not in SCORED_CATEGORIES:
+        return jsonify({'error': 'Challenge is not part of the scored bank'}), 400
+
+    data = request.get_json(silent=True) or {}
+    submitted_answer = data.get('submitted_answer')
+    submitted_answer_label = data.get('submitted_answer_label')
+    if not isinstance(submitted_answer, int) or submitted_answer < 0:
+        return jsonify({
+            'error': 'submitted_answer is required and must be a non-negative integer',
+        }), 400
+
+    options = json.loads(challenge.options_json) if challenge.options_json else []
+    correct_index = challenge.correct_index
+    # Ear-training cards render a deterministic exercise derived from the row,
+    # rather than its legacy stored options. Grade against that same exercise.
+    if challenge.category == 'ear_training':
+        exercise = build_ear_exercise(challenge)
+        options = exercise['options']
+        correct_index = exercise['correct_index']
+    if submitted_answer >= len(options):
+        return jsonify({'error': 'submitted_answer is out of range'}), 400
+
+    # The label is the answer the player saw. Prefer it when supplied so a
+    # stale client-side option index cannot invalidate that visible choice.
+    selected_answer = (
+        submitted_answer_label
+        if isinstance(submitted_answer_label, str) and submitted_answer_label in options
+        else options[submitted_answer]
+    )
+    is_correct = selected_answer == options[correct_index]
 
     if not current_user.is_authenticated:
         return jsonify({
@@ -1164,15 +1284,17 @@ def complete_challenge(challenge_id):
             'xp': 0,
             'level': 1,
             'xp_awarded': 0,
-            'message': 'Correct! Sign in to save XP and streak progress.',
+            'correct': is_correct,
+            'correct_answer': options[correct_index] if options else None,
+            'message': 'Sign in to save XP and streak progress.' if is_correct else 'Sign in to track this attempt.',
         })
 
     today = datetime.utcnow().strftime('%Y-%m-%d')
-    data = request.get_json(silent=True) or {}
     reward_mode = data.get('mode', 'challenge')
     if reward_mode not in {'challenge', 'ear-training'}:
         return jsonify({'error': 'mode must be challenge or ear-training'}), 400
-    xp_award = get_mode_base_xp(reward_mode, challenge.difficulty)
+    base_xp = get_mode_base_xp(reward_mode, challenge.difficulty)
+    xp_award = base_xp if is_correct else 0
 
     # One reward per challenge: completed challenges are filtered out of the list,
     # so a visible challenge should pay its own reward exactly once.
@@ -1187,6 +1309,8 @@ def complete_challenge(challenge_id):
             'level': current_user.level,
             'xp_awarded': 0,
             'already_completed': True,
+            'correct': is_correct,
+            'correct_answer': options[correct_index] if options else None,
             'message': 'Challenge already completed.',
         })
 
@@ -1194,6 +1318,7 @@ def complete_challenge(challenge_id):
         existing.challenge_date = today
         existing.score = xp_award
         existing.completed = True
+        existing.is_correct = is_correct
     else:
         attempt = ChallengeAttempt(
             user_id=current_user.id,
@@ -1201,13 +1326,21 @@ def complete_challenge(challenge_id):
             challenge_date=today,
             score=xp_award,
             completed=True,
+            is_correct=is_correct,
         )
         db.session.add(attempt)
 
-    # Award XP
-    current_user.xp = (current_user.xp or 0) + xp_award
-    current_user.level = calculate_level_from_xp(current_user.xp)
-    _apply_rank_xp(current_user, xp_award)
+    if is_correct:
+        current_user.xp = (current_user.xp or 0) + xp_award
+        current_user.level = calculate_level_from_xp(current_user.xp)
+        _apply_rank_xp(current_user, xp_award)
+
+    if is_correct:
+        _record_quest_progress(current_user.id, 'play', 'daily', today)
+        _record_quest_progress(current_user.id, 'correct', 'daily', today)
+        _record_quest_progress(current_user.id, 'play', 'milestone', 'lifetime')
+        _record_quest_progress(current_user.id, 'correct', 'milestone', 'lifetime')
+
     db.session.commit()
 
     return jsonify({
@@ -1216,9 +1349,46 @@ def complete_challenge(challenge_id):
         'level': current_user.level,
         'xp_awarded': xp_award,
         'rank': current_user.to_dict()['rank'],
+        'correct': is_correct,
+        'correct_answer': options[correct_index] if options else None,
         'already_completed': False,
-        'message': f'+{xp_award} XP!',
+        'message': f'+{xp_award} XP!' if is_correct else 'Better luck next time — no XP awarded.',
     })
+
+
+def _record_quest_progress(user_id, metric, cadence, period_key):
+    """Server-side quest progress bookkeeping.
+
+    The client cannot write to `quest_progress`. These rows are only
+    updated when the server validates a real challenge attempt or scale
+    path result. Claim eligibility still depends on `QuestClaim` rows.
+    """
+    row = QuestProgress.query.filter_by(
+        user_id=user_id, metric=metric, period_key=period_key,
+    ).with_for_update().first()
+    if row is None:
+        row = QuestProgress(
+            user_id=user_id, metric=metric, period_key=period_key, count=0,
+        )
+        db.session.add(row)
+    row.count += 1
+
+
+def get_user_quest_progress(user_id, metric, cadence):
+    """Return the authoritative quest progress counter for a given metric.
+
+    Falls back to aggregating ChallengeAttempt rows for legacy users whose
+    `quest_progress` table is empty, but new progress is always written
+    through `_record_quest_progress` so this function can eventually be
+    replaced with a direct read.
+    """
+    period_key = quest_period_key(cadence)
+    row = QuestProgress.query.filter_by(
+        user_id=user_id, metric=metric, period_key=period_key,
+    ).first()
+    if row:
+        return row.count
+    return 0
 
 
 @daily_bp.route('/daily-challenge/seed', methods=['POST'])

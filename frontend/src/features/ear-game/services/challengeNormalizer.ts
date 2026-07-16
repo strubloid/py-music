@@ -37,7 +37,6 @@ export const normalizeEarChallenge = (raw, { instrumentId = 'piano' } = {}) => {
     accessibleLabel: `Lane ${lane + 1}: ${label}`,
     lane,
   }));
-  const correctIndex = exercise.correct_index ?? raw.correct_index;
   const playbackMode = exercise.chords?.length > 1
     ? 'sequence'
     : exercise.chords?.length === 1
@@ -62,11 +61,11 @@ export const normalizeEarChallenge = (raw, { instrumentId = 'piano' } = {}) => {
       chords: exercise.chords || null,
     },
     answers,
-    correctAnswerId: answers[correctIndex]?.id || null,
+    correctAnswerId: null,
     explanation: {
-      summary: exercise.explanation || raw.explanation || `The answer is ${answers[correctIndex]?.label || 'shown above'}.`,
+      summary: exercise.explanation || raw.explanation || 'Listen for the relationship between the notes.',
       formula: exercise.chordDefinitions?.[0]?.intervals || null,
-      correctLabel: answers[correctIndex]?.label || '',
+      correctLabel: '',
     },
     controls: {
       replay: true,

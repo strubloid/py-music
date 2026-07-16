@@ -5,19 +5,19 @@ import '../styles/ScaleRouteOverlay.scss';
 
 interface ScaleRouteOverlayProps {
   fragment: ScalePathFragment;
-  correctAnswerCommitted: boolean;
+  correctAnswer: ScalePathFragment['anchor'] | null;
   reducedMotion: boolean;
 }
 
 const ScaleRouteOverlay: React.FC<ScaleRouteOverlayProps> = ({
   fragment,
-  correctAnswerCommitted,
+  correctAnswer,
   reducedMotion,
 }) => {
-  const { anchor, suffix = [], gap } = fragment;
+  const { anchor, suffix = [] } = fragment;
   const nodes = [anchor, ...suffix];
-  if (correctAnswerCommitted && gap) {
-    nodes.push(gap);
+  if (correctAnswer) {
+    nodes.push(correctAnswer);
   }
 
   return (
@@ -37,7 +37,7 @@ const ScaleRouteOverlay: React.FC<ScaleRouteOverlayProps> = ({
           </div>
         ))}
 
-        {!correctAnswerCommitted && gap && (
+        {!correctAnswer && (
           <>
             <div className="route-gap" aria-label="gap portal" />
             <div className="route-node route-node--gap">

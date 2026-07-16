@@ -321,6 +321,55 @@ npm run dev
 cd frontend && npm run build
 ```
 
+### Static checks
+
+Run every backend + frontend error gate from the project root:
+
+```bash
+npm run check-all-errors
+```
+
+This runs in order:
+
+1. `python -m compileall` over `backend/project`
+2. `pyright -p pyrightconfig.json` on the backend
+3. `npm --prefix frontend run lint` (ESLint)
+4. `tsc --noEmit` on the frontend
+5. `npm --prefix frontend run build` (Vite build, catches import / type issues)
+
+Each step prints `✅` or `❌` and the script exits non-zero if any check fails. The individual targets are also available:
+
+| Script | What it does |
+| --- | --- |
+| `npm run check:backend` | pyright only |
+| `npm run check:backend:compile` | py_compile only |
+| `npm run check:frontend` | ESLint only |
+| `npm run check:frontend:types` | tsc --noEmit only |
+| `npm run check:frontend:build` | vite build only |
+| `npm run check:backend:tests` | python unit tests |
+| `npm run test:backend` | python unit tests (alias) |
+| `npm run test:frontend:unit` | node:test unit suite |
+| `npm run test:frontend:e2e` | Playwright E2E |
+
+`pyrightconfig.json` deliberately turns off `reportCallIssue` for the
+backend because pyright cannot see SQLAlchemy's declarative `__init__`
+accepting column names as kwargs. The other rules stay on so genuine
+type errors are still reported.
+
+### Production backups
+
+Run the durable-storage backup command from the deployment scheduler at least
+daily. `BACKUP_DIR` must point to encrypted persistent storage; do not back up
+to the container filesystem.
+
+```bash
+BACKUP_DIR=/secure/backups DATABASE_URL="$DATABASE_URL" ./scripts/backup-database.sh
+```
+
+The command supports SQLite and PostgreSQL, retains 30 days by default, and
+uses `BACKUP_RETENTION_DAYS` to override that retention period. Test a restore
+from a recent backup before each production release.
+
 **Note:** The app works without an OpenAI API key. LLM features initialize if `OPENAI_API_KEY` is set in `.env`; otherwise it runs in simplified mode.
 
 ---
