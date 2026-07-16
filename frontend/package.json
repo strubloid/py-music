@@ -30,6 +30,7 @@
   "dependencies": {
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-tabs": "^1.0.4",
+    "@rive-app/canvas": "^2.38.5",
     "@rive-app/react-canvas": "^4.29.5",
     "@vitejs/plugin-react": "^4.2.1",
     "@xstate/react": "^6.1.0",
