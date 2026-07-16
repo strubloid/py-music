@@ -31,15 +31,15 @@ test('all Living City routes remain inside compact mobile and reference desktop 
   }
 });
 
-test('minimal motion removes travel displacement but preserves immediate navigation controls', async ({ page }) => {
+test('minimal motion removes travel displacement and shortens district travel', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('strubloid:motion-profile', 'minimal'));
   await page.goto('/');
   await page.getByRole('button', { name: /quest vaults.*enter district/i }).click();
   const travel = page.getByRole('status').filter({ hasText: /quest vaults/i });
   await expect(travel).toBeVisible();
   await expect(travel.locator('.district-travel__pip')).toHaveCSS('animation-name', 'none');
-  await page.getByRole('button', { name: /skip travel/i }).click();
   await expect(page).toHaveURL(/\/play\/quests$/);
+  await expect(travel).toBeHidden();
 });
 
 test('core world routes emit no browser errors', async ({ page }) => {
@@ -51,4 +51,24 @@ test('core world routes emit no browser errors', async ({ page }) => {
     await page.waitForLoadState('networkidle');
   }
   expect(errors).toEqual([]);
+});
+
+test('Practice Square paints within budget without loading every district bundle', async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as typeof window & { __livingCityLcp?: number }).__livingCityLcp = 0;
+    new PerformanceObserver((list) => {
+      const latest = list.getEntries().at(-1);
+      if (latest) (window as typeof window & { __livingCityLcp?: number }).__livingCityLcp = latest.startTime;
+    }).observe({ type: 'largest-contentful-paint', buffered: true });
+  });
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: /where will the music take you/i })).toBeVisible();
+  await page.waitForTimeout(800);
+  const metrics = await page.evaluate(() => ({
+    lcp: (window as typeof window & { __livingCityLcp?: number }).__livingCityLcp || 0,
+    scripts: performance.getEntriesByType('resource').map((entry) => entry.name).filter((name) => name.endsWith('.js')),
+  }));
+  expect(metrics.lcp).toBeGreaterThan(0);
+  expect(metrics.lcp).toBeLessThan(2500);
+  expect(metrics.scripts.some((name) => /EarTraining|ScaleLab|ScalePathGame|Quests/.test(name))).toBe(false);
 });

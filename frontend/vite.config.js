@@ -6,8 +6,8 @@ export default defineConfig({
   plugins: [react({
     // Enable fast refresh
     fastRefresh: true,
-    // Include .jsx files
-    include: '**/*.{jsx,js}',
+    // Transform both legacy JavaScript and the TypeScript Living City surfaces.
+    include: '**/*.{js,jsx,ts,tsx}',
   })],
   base: '/', // Ensure correct base path for deployment
   css: {

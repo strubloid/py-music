@@ -7,6 +7,10 @@ from types import SimpleNamespace
 
 from flask import Flask
 
+# Fake password used only in tests – satisfies strength validation but is
+# obviously not a real credential (flagged by GitGuardian when hardcoded).
+TEST_PASSWORD = 'Test1234!'
+
 from backend.project.api.daily_challenges import (
     SCALE_FORMULAS, _utc_hint_state, build_ear_exercise, daily_bp, seed_challenges,
 )
@@ -78,7 +82,7 @@ class DailyChallengeFlowTest(unittest.TestCase):
         response = self.client.post('/api/auth/register', json={
             'username': 'player',
             'email': 'player@example.com',
-            'password': 'Unbroken!DailyFlow9472',
+            'password': TEST_PASSWORD,
         })
         self.assertEqual(response.status_code, 201, response.get_data(as_text=True))
 
@@ -322,7 +326,7 @@ class DailyChallengeFlowTest(unittest.TestCase):
             user = User()
             user.username = 'ranked'
             user.email = 'ranked@example.com'
-            user.set_password('secret123')
+            user.set_password(TEST_PASSWORD)
             user.rank_id = 'legendary'
             db.session.add(user)
             db.session.commit()
@@ -417,7 +421,7 @@ class DailyChallengeFlowTest(unittest.TestCase):
             user = User()
             user.username = 'migrated'
             user.email = 'migrated@example.com'
-            user.set_password('secret123')
+            user.set_password(TEST_PASSWORD)
             db.session.add(user)
             db.session.commit()
 

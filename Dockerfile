@@ -1,36 +1,34 @@
-# Build stage for frontend
-FROM node:18-alpine AS frontend-build
-
+# Build stage for the code-split Living City frontend.
+FROM node:20-alpine AS frontend-build
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm ci --no-audit --no-fund
 COPY frontend/ ./
 RUN npm run build
 
-# Production stage with Python backend
-FROM python:3.10-slim
-
+# Production stage with the Flask API and static frontend only.
+FROM python:3.12-slim
 WORKDIR /app
 
-# Install Python dependencies
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --disable-pip-version-check -r requirements.txt
 
-# Copy Python backend code
 COPY backend/ ./backend/
 COPY main.py ./
-
-# Copy built frontend
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 
-# Set environment variables
 ENV FLASK_APP=backend.project.api.app:app
 ENV PYTHONUNBUFFERED=1
 ENV PORT=5000
 
-# Expose port
-EXPOSE 5000
+RUN useradd --create-home --shell /bin/bash app && \
+    mkdir -p /app/data && \
+    chown -R app:app /app
+USER app
 
-# Run with gunicorn (production WSGI server) instead of Flask dev server
-# single-worker multi-threaded for SQLite safety
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "2", "--timeout", "30", "--forwarded-allow-ips", "*", "backend.project.api.app:app"]
+EXPOSE 5000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/api/health', timeout=3)" || exit 1
+
+# One worker preserves SQLite safety; threads provide concurrent request capacity.
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "4", "--timeout", "120", "--forwarded-allow-ips", "*", "--access-logfile", "-", "backend.project.api.app:app"]

@@ -5,6 +5,10 @@ import unittest
 
 from flask import Flask
 
+# Fake password used only in tests – satisfies strength validation but is
+# obviously not a real credential (flagged by GitGuardian when hardcoded).
+TEST_PASSWORD = 'Test1234!'
+
 from backend.project.api.daily_challenges import build_ear_exercise
 from backend.project.api.living_city import living_city_bp
 from backend.project.auth import auth_bp, login_manager
@@ -52,7 +56,7 @@ class LivingCityProgressionTest(unittest.TestCase):
         response = self.client.post('/api/auth/register', json={
             'username': username,
             'email': email,
-            'password': f'Unique!{username}9472Flow',
+            'password': TEST_PASSWORD,
         })
         self.assertEqual(response.status_code, 201, response.get_data(as_text=True))
         return response.get_json()['user']
@@ -193,7 +197,7 @@ class LivingCityProgressionTest(unittest.TestCase):
             first = User.query.filter_by(username='player').one()
             first.lifetime_points = 100
             second = User(username='ahead', email='ahead@example.com')
-            second.set_password('Unique!Ahead9472Flow')
+            second.set_password(TEST_PASSWORD)
             second.lifetime_points = 250
             second.level = 3
             second.rank_id = 'bronze'

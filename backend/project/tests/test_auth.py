@@ -4,6 +4,10 @@ import unittest
 
 from flask import Flask
 
+# Fake password used only in tests – satisfies strength validation but is
+# obviously not a real credential (flagged by GitGuardian when hardcoded).
+TEST_PASSWORD = 'Test1234!'
+
 from backend.project.auth import auth_bp, login_manager
 from backend.project.extensions import limiter
 from backend.project.models import bcrypt, db
@@ -47,7 +51,7 @@ class AuthFlowTest(unittest.TestCase):
         register = self.client.post('/api/auth/register', json={
             'username': 'player',
             'email': 'player@example.com',
-            'password': 'Unbroken!AuthFlow9472',
+            'password': TEST_PASSWORD,
         })
         self.assertEqual(register.status_code, 201, register.get_data(as_text=True))
 
