@@ -3,7 +3,7 @@ import { Compass, Footprints, Guitar, Pause, Piano, RotateCcw, ShieldCheck, Spar
 import { useAuth } from '../../../contexts/AuthContext'
 import { useGameProgress } from '../../../contexts/GameProgressContext'
 import { useMotion } from '../../../contexts/MotionContext'
-import PipCharacter from '../../../game/characters/PipCharacter'
+
 import GameGuitarFretboard from '../../../game/instruments/GameGuitarFretboard'
 import GamePianoKeyboard from '../../../game/instruments/GamePianoKeyboard'
 import { STANDARD_GUITAR_MIDI } from '../../../game/instruments/musicMath'
@@ -17,6 +17,7 @@ import '../styles/living-scale-trail.scss'
 
 type Instrument = 'guitar' | 'piano'
 type JourneyStage = 'arrival' | 'rolling' | 'playing'
+type JourneyMark = { position: ScalePathPosition; correct: boolean }
 
 const nearestPianoMidi = (pitch: number, centre = 60) => {
   const below = centre - ((centre - pitch + 120) % 12)
@@ -39,7 +40,7 @@ const ScalePathGame: React.FC = () => {
   const transportRef = useRef<ReturnType<typeof createMusicTransport> | null>(null)
 
   const [announcement, setAnnouncement] = useState('Choose Piano Garden or Guitar Bridge to begin.')
-  const [trail, setTrail] = useState<ScalePathPosition[]>([])
+  const [trail, setTrail] = useState<JourneyMark[]>([])
   const [wrongBranch, setWrongBranch] = useState<ScalePathPosition | null>(null)
   const [showLabels, setShowLabels] = useState(true)
   const [showCompass, setShowCompass] = useState(false)
@@ -118,6 +119,14 @@ const ScalePathGame: React.FC = () => {
     return undefined
   }, [game.phase, journeyStage, reducedMotion])
 
+  useEffect(() => {
+    if (journeyStage !== 'playing' || game.phase !== 'accepting-input' || !game.fragment) return undefined
+    setAnnouncement(
+      `Movement ${game.fragmentIndex + 1} of ${game.fragmentCount}. Stay in ${game.run?.root} ${game.run?.mode}. From ${game.fragment.anchor.note}, find scale degree ${game.fragment.degreeClue}.`,
+    )
+    return undefined
+  }, [game.fragment, game.fragmentCount, game.fragmentIndex, game.phase, game.run?.mode, game.run?.root, journeyStage])
+
   useEffect(
     () => () => {
       clearTimer()
@@ -156,11 +165,16 @@ const ScalePathGame: React.FC = () => {
         const correct = Boolean(response.data.correct)
         const correctPosition = response.data.correctAnswer as ScalePathPosition
         if (correct) {
-          setTrail((current) => [...current, candidate])
+          setTrail((current) => [...current, { position: candidate, correct: true }])
           setWrongBranch(null)
           setPipState('success')
         } else if (safeLanding) {
           setSafeLanding(false)
+          setTrail((current) => [
+            ...current,
+            { position: candidate, correct: false },
+            ...(correctPosition ? [{ position: correctPosition, correct: true }] : []),
+          ])
           setWrongBranch(candidate)
           setAnnouncement('Safe Landing protected this mistake. Try another glowing destination.')
           setPipState('mistake')
@@ -173,6 +187,11 @@ const ScalePathGame: React.FC = () => {
             explanation: 'Safe Landing returned Pip to the last note.',
           })
         } else {
+          setTrail((current) => [
+            ...current,
+            { position: candidate, correct: false },
+            ...(correctPosition ? [{ position: correctPosition, correct: true }] : []),
+          ])
           setWrongBranch(candidate)
           setPipState('mistake')
         }
@@ -193,7 +212,10 @@ const ScalePathGame: React.FC = () => {
           correct ? `Correct movement ${state.fragmentIndex + 1} of ${state.fragmentCount}.` : explanation,
         )
         transitionTimerRef.current = window.setTimeout(
-          () => dispatch({ type: 'NEXT_FRAGMENT' }),
+          () => {
+            setWrongBranch(null)
+            dispatch({ type: 'NEXT_FRAGMENT' })
+          },
           reducedMotion ? 350 : correct ? 1100 : 1700,
         )
       } catch {
@@ -246,8 +268,22 @@ const ScalePathGame: React.FC = () => {
     () => candidates.map((candidate) => nearestPianoMidi(candidate.pitch)),
     [candidates],
   )
-  const routeGuitarMidi = useMemo(() => trail.map(guitarMidi), [trail])
-  const routePianoMidi = useMemo(() => trail.map((position) => nearestPianoMidi(position.pitch)), [trail])
+  const correctGuitarMidi = useMemo(
+    () => trail.filter((mark) => mark.correct).map((mark) => guitarMidi(mark.position)),
+    [trail],
+  )
+  const wrongGuitarMidi = useMemo(
+    () => trail.filter((mark) => !mark.correct).map((mark) => guitarMidi(mark.position)),
+    [trail],
+  )
+  const correctPianoMidi = useMemo(
+    () => trail.filter((mark) => mark.correct).map((mark) => nearestPianoMidi(mark.position.pitch)),
+    [trail],
+  )
+  const wrongPianoMidi = useMemo(
+    () => trail.filter((mark) => !mark.correct).map((mark) => nearestPianoMidi(mark.position.pitch)),
+    [trail],
+  )
 
   if (journeyStage === 'arrival') {
     return (
@@ -264,7 +300,9 @@ const ScalePathGame: React.FC = () => {
             <strong>Piano Garden</strong>
             <span>Travel across two full octaves</span>
           </button>
-          <PipCharacter state="curious" label="Pip waits at the trail crossing" />
+          <div className="trail-guide-mark" aria-hidden="true">
+            <Compass />
+          </div>
           <button type="button" className="instrument-landmark guitar-bridge" onClick={() => beginJourney('guitar')}>
             <Guitar size={34} />
             <strong>Guitar Bridge</strong>
@@ -286,7 +324,9 @@ const ScalePathGame: React.FC = () => {
           <span>{game.run?.dieResult || '♪'}</span>
           <i>movements</i>
         </div>
-        <PipCharacter state="curious" label="Pip watches the musical die" />
+        <div className="trail-guide-mark" aria-hidden="true">
+          <Compass />
+        </div>
         <p>
           {game.run ? `The trail will have ${game.run.dieResult} movements.` : 'Tempo is preparing the musical die…'}
         </p>
@@ -336,14 +376,19 @@ const ScalePathGame: React.FC = () => {
       {game.phase !== 'run-complete' && game.phase !== 'error' && fragment && (
         <>
           <section className="trail-objective">
-            <PipCharacter state={pipState} label={`Pip is ${pipState}`} />
+            <div className="trail-guide-mark" data-state={pipState} aria-hidden="true">
+              <Compass />
+            </div>
             <div>
               <span>
                 Movement {game.fragmentIndex + 1} of {game.fragmentCount}
               </span>
-              <h2>{fragment.direction === 'left' ? 'Travel along the string' : 'Cross to the next sound'}</h2>
+              <h2>
+                Continue the {game.run?.root} {game.run?.mode} journey
+              </h2>
               <p>
-                Start from {fragment.anchor.note}. Find scale degree {fragment.degreeClue}.
+                From {fragment.anchor.note}, choose the highlighted destination for scale degree {fragment.degreeClue}.
+                Your green and red trail remains visible until all {game.fragmentCount} movements are complete.
               </p>
             </div>
             <div className="focus-backpack">
@@ -365,8 +410,12 @@ const ScalePathGame: React.FC = () => {
           >
             {instrument === 'guitar' ? (
               <GameGuitarFretboard
-                activeMidi={routeGuitarMidi}
                 legalMidi={candidateGuitarMidi}
+                correctMidi={correctGuitarMidi}
+                wrongMidi={wrongGuitarMidi}
+                legalPositions={candidates}
+                correctPositions={trail.filter((mark) => mark.correct).map((mark) => mark.position)}
+                wrongPositions={trail.filter((mark) => !mark.correct).map((mark) => mark.position)}
                 rootPitchClass={fragment.anchor.pitch}
                 fretCount={game.run?.fretCount || 12}
                 showLabels={showLabels}
@@ -380,8 +429,9 @@ const ScalePathGame: React.FC = () => {
               />
             ) : (
               <GamePianoKeyboard
-                activeMidi={routePianoMidi}
                 legalMidi={candidatePianoMidi}
+                correctMidi={correctPianoMidi}
+                wrongMidi={wrongPianoMidi}
                 rootPitchClass={fragment.anchor.pitch}
                 showLabels={showLabels}
                 disabled={game.phase !== 'accepting-input'}
@@ -391,12 +441,17 @@ const ScalePathGame: React.FC = () => {
                 }}
               />
             )}
-            {wrongBranch && (
-              <div className="dead-end-branch" role="status">
-                That path fades safely. Pip returns to the last bright note.
-              </div>
-            )}
           </section>
+          {game.result && (
+            <div className={`trail-feedback ${game.result.correct ? 'is-correct' : 'is-wrong'}`} role="status">
+              <strong>{game.result.correct ? 'Correct path' : 'Not this route'}</strong>
+              <span>
+                {game.result.correct
+                  ? `${game.result.selectedNote} is now fixed in green on your journey.`
+                  : `${game.result.selectedNote} stays red; ${game.result.correctNote} is marked green before the journey continues.`}
+              </span>
+            </div>
+          )}
           <div className="trail-powers" aria-label="Focus powers">
             <button type="button" disabled={game.phase !== 'accepting-input'} onClick={() => spendPower('trace', 1)}>
               <Footprints size={16} /> Trace One Step <b>1</b>
@@ -420,7 +475,9 @@ const ScalePathGame: React.FC = () => {
 
       {game.phase === 'run-complete' && (
         <section className="trail-landmark">
-          <PipCharacter state="success" label="Pip celebrates at the illuminated landmark" />
+          <div className="trail-guide-mark" data-state="success" aria-hidden="true">
+            <Compass />
+          </div>
           <span>Landmark awakened</span>
           <h2>{game.fragmentCount}-movement trail complete</h2>
           <p>
@@ -433,7 +490,9 @@ const ScalePathGame: React.FC = () => {
       )}
       {game.phase === 'error' && (
         <section className="sp-error" role="alert">
-          <PipCharacter state="mistake" label="Pip waits while the trail reconnects" />
+          <div className="trail-guide-mark" data-state="mistake" aria-hidden="true">
+            <Compass />
+          </div>
           <p>{game.error}</p>
           <button type="button" onClick={restart}>
             Reconnect the trail

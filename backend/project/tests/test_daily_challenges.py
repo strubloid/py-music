@@ -240,6 +240,18 @@ class DailyChallengeFlowTest(unittest.TestCase):
             )
             self.assertEqual(completion.status_code, 400)
 
+    def test_empty_bank_self_heals_on_the_first_player_request(self):
+        with self.app.app_context():
+            DailyChallenge.query.delete()
+            db.session.commit()
+
+        response = self.client.get('/api/daily-challenges?random=1&limit=1')
+
+        self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
+        payload = response.get_json()
+        self.assertEqual(len(payload['challenges']), 1)
+        self.assertGreaterEqual(payload['total'], 200)
+
     def test_generated_hints_do_not_reveal_correct_answer(self):
         with self.app.app_context():
             DailyChallenge.query.delete()

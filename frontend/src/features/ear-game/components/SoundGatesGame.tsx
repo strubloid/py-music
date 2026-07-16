@@ -16,6 +16,7 @@ const SoundGatesGame = ({
   playing,
   inputSignal,
   powers,
+  powersReady,
   focus,
   rankMeta,
   streak,
@@ -109,6 +110,7 @@ const SoundGatesGame = ({
       />
       <AbilityDock
         powers={powers}
+        powersReady={powersReady}
         game={game}
         focus={focus}
         instrument={instrument}

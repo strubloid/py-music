@@ -8,11 +8,10 @@ import RewardOverlay from '../../features/ear-game/components/RewardOverlay'
 import DailyVisualStage from '../../features/daily-challenge/DailyVisualStage'
 import { actionForKeyboardEvent, shouldIgnoreGameShortcut } from '../../features/ear-game/hooks/gameInput'
 import {
-  getDailyChallenges,
   completeDailyChallenge,
-  seedChallenges,
-  getUserStreak,
+  getDailyChallenges,
   getMe,
+  getUserStreak,
   revealDailyChallengeHint,
 } from '../../services/api'
 import { calculateXpPreview, getModeBaseXp, getPowerById } from '../../game/gameSystem'
@@ -528,10 +527,9 @@ const DailyChallenge = () => {
     setSeeding(true)
     setError('')
     try {
-      await seedChallenges()
       await fetchData()
     } catch (err) {
-      setError('Failed to reload challenges.')
+      setError('Failed to check for a challenge. Try again.')
     } finally {
       setSeeding(false)
     }
@@ -708,10 +706,10 @@ const DailyChallenge = () => {
         <div className="daily-empty">
           <CheckCircle size={48} className="empty-icon" />
           <h2>All challenges completed!</h2>
-          <p>Reload the challenge bank to get fresh questions.</p>
+          <p>No challenge is ready yet. Check again without rebuilding the shared challenge bank.</p>
           <button className="reload-btn" onClick={handleReload} disabled={seeding}>
             <RefreshCw size={16} className={seeding ? 'spin' : ''} />
-            {seeding ? 'Generating…' : 'Reload challenges'}
+            {seeding ? 'Checking…' : 'Try again'}
           </button>
         </div>
       ) : (
@@ -899,13 +897,6 @@ const DailyChallenge = () => {
                 </div>
               )}
             </div>
-          </div>
-
-          <div className="challenges-actions">
-            <button className="reload-btn" onClick={handleReload} disabled={seeding}>
-              <RefreshCw size={16} className={seeding ? 'spin' : ''} />
-              {seeding ? 'Generating…' : 'Reload challenge bank'}
-            </button>
           </div>
         </>
       )}

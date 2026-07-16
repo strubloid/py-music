@@ -19,6 +19,7 @@ const EarTraining = lazy(() => import('./pages/play/EarTraining'))
 const Quests = lazy(() => import('./pages/play/Quests'))
 const ScalePathGame = lazy(() => import('./features/scale-play/components/ScalePathGame'))
 const ScaleLab = lazy(() => import('./features/scale-play/components/ScaleLab'))
+const SIDEBAR_COLLAPSED_KEY = 'sidebarCollapsed'
 
 const DISTRICT_LOADING_COPY = {
   '/play/quests': ['Vault Keeper is searching for the right key…', 'Aligning mission seals and reward mechanisms.'],
@@ -82,17 +83,24 @@ class WorldErrorBoundary extends React.Component<React.PropsWithChildren, { erro
 const App = () => {
   const location = useLocation()
   const isWorldRoute = location.pathname === '/' || location.pathname.startsWith('/play/')
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(isWorldRoute)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const savedState = window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY)
+    return savedState === null ? isWorldRoute : savedState === 'true'
+  })
 
-  useEffect(() => {
-    setSidebarCollapsed(isWorldRoute)
-  }, [isWorldRoute, location.pathname])
+  const toggleSidebar = () => {
+    setSidebarCollapsed((collapsed) => {
+      const nextState = !collapsed
+      window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(nextState))
+      return nextState
+    })
+  }
 
   return (
     <WorldTravelProvider>
       <div className={`app-shell ${isWorldRoute ? 'world-mode' : ''}`}>
         {/* Left sidebar */}
-        <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((prev) => !prev)} />
+        <Sidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
 
         {/* Main workspace */}
         <main

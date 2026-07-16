@@ -109,6 +109,20 @@
   animation: pluck-string 320ms ease-out;
 }
 
+.game-fretboard__note.is-correct::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  background: #8ceb4a;
+  box-shadow: 0 0 22px rgba(140, 235, 74, 0.82);
+}
+
+.game-fretboard__note.is-wrong::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  background: #ff5c6c;
+  box-shadow: 0 0 22px rgba(255, 92, 108, 0.78);
+}
+
 .game-fretboard__note.is-root::after {
   outline: 3px solid #ffc21c;
   outline-offset: 3px;
@@ -251,6 +265,24 @@
 .game-piano__key.is-root::after {
   background: #ffc21c;
   box-shadow: 0 0 18px #ffc21c;
+}
+
+.game-piano__key.is-correct::after {
+  background: #8ceb4a;
+  box-shadow: 0 0 18px #8ceb4a;
+}
+
+.game-piano__key.is-wrong::after {
+  background: #ff5c6c;
+  box-shadow: 0 0 18px #ff5c6c;
+}
+
+.game-piano__key.is-correct {
+  box-shadow: inset 0 -12px 22px rgba(140, 235, 74, 0.28);
+}
+
+.game-piano__key.is-wrong {
+  box-shadow: inset 0 -12px 22px rgba(255, 92, 108, 0.3);
 }
 
 .game-piano__key span {

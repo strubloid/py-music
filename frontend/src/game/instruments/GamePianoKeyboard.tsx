@@ -8,6 +8,8 @@ type Props = {
   endMidi?: number
   activeMidi?: number[]
   legalMidi?: number[]
+  correctMidi?: number[]
+  wrongMidi?: number[]
   rootPitchClass?: number
   showLabels?: boolean
   accidental?: AccidentalPreference
@@ -36,6 +38,8 @@ const GamePianoKeyboard = ({
   endMidi = 72,
   activeMidi = [],
   legalMidi = [],
+  correctMidi = [],
+  wrongMidi = [],
   rootPitchClass,
   showLabels = false,
   accidental = 'sharp',
@@ -47,6 +51,9 @@ const GamePianoKeyboard = ({
   const whiteKeys = keys.filter((midi) => !isBlackPianoMidi(midi))
   const active = new Set(activeMidi)
   const legal = new Set(legalMidi)
+  const correct = new Set(correctMidi)
+  const wrong = new Set(wrongMidi)
+  const restricted = legalMidi.length > 0
 
   useEffect(() => {
     if (!activeMidi.length || !scrollRef.current) return
@@ -85,11 +92,11 @@ const GamePianoKeyboard = ({
                 type="button"
                 key={midi}
                 data-midi={midi}
-                className={`game-piano__key ${black ? 'is-black' : 'is-white'} ${active.has(midi) ? 'is-active' : ''} ${legal.has(midi) ? 'is-legal' : ''} ${rootPitchClass === pitchClass ? 'is-root' : ''}`}
+                className={`game-piano__key ${black ? 'is-black' : 'is-white'} ${active.has(midi) ? 'is-active' : ''} ${legal.has(midi) ? 'is-legal' : ''} ${correct.has(midi) ? 'is-correct' : ''} ${wrong.has(midi) ? 'is-wrong' : ''} ${rootPitchClass === pitchClass ? 'is-root' : ''}`}
                 style={black ? ({ '--white-before': precedingWhites } as React.CSSProperties) : undefined}
                 aria-label={`${note}${legal.has(midi) ? ', legal destination' : ''}`}
-                aria-pressed={active.has(midi)}
-                disabled={disabled}
+                aria-pressed={active.has(midi) || correct.has(midi) || wrong.has(midi)}
+                disabled={disabled || (restricted && !legal.has(midi))}
                 onClick={() => onSelect?.({ midi, pitchClass, note })}
               >
                 {showLabels && <span>{midiToNoteName(midi, accidental, false)}</span>}

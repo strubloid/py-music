@@ -1108,6 +1108,13 @@ def get_daily_challenges():
         if part.strip().isdigit()
     }
 
+    # A fresh deployment must be playable on its first request. Previously an
+    # empty production database exposed the maintenance-only bank reload flow
+    # to players. Seed a compact bank automatically only when no scored row
+    # exists; an exhausted user's filtered result must remain exhausted.
+    if DailyChallenge.query.filter(DailyChallenge.category.in_(SCORED_CATEGORIES)).count() == 0:
+        seed_challenges(target=200)
+
     # Get IDs of completed challenges
     completed_ids = set()
     if current_user.is_authenticated:

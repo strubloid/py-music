@@ -10,7 +10,17 @@ const iconFor = (id) =>
         ? Sparkles
         : HelpCircle
 
-const AbilityDock = ({ powers, game, focus, instrument, instruments, audioState, onInstrumentChange, onUsePower }) => (
+const AbilityDock = ({
+  powers,
+  powersReady,
+  game,
+  focus,
+  instrument,
+  instruments,
+  audioState,
+  onInstrumentChange,
+  onUsePower,
+}) => (
   <section className="ability-dock" aria-label="Listening abilities">
     <label className="ability-dock__instrument">
       <Headphones />
@@ -41,7 +51,7 @@ const AbilityDock = ({ powers, game, focus, instrument, instruments, audioState,
             key={power.id}
             className={used ? 'ability-tile ability-tile--used' : 'ability-tile'}
             onClick={() => onUsePower(power.id)}
-            disabled={game.phase !== 'accepting-input' || used}
+            disabled={game.phase !== 'accepting-input' || used || !powersReady}
             aria-pressed={used}
             title={power.description || power.name}
           >

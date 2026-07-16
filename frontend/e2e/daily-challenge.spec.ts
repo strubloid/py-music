@@ -5,6 +5,9 @@ test('daily challenge uses Nomi gates and awards the authoritative 10x reward', 
   await createUser(page, `reward-${Date.now()}`)
   const challenge = await captureChallengeResponse(page, '/play/daily')
 
+  await expect(page.getByRole('heading', { name: 'Challenges' })).toBeVisible()
+  await expect(page.getByRole('radiogroup', { name: 'Challenge answer gates' })).toBeVisible()
+  await expect(page.getByRole('button', { name: /reload challenge bank/i })).toHaveCount(0)
   await expect(page.getByText(`Base +${challenge.xp_reward} XP`)).toBeVisible()
   await expect(page.getByText(`Current reward ${challenge.xp_reward} XP`)).toBeVisible()
   expect(challenge.xp_reward).toBeGreaterThanOrEqual(100)

@@ -6,8 +6,6 @@ import { useGameProgress } from '../contexts/GameProgressContext'
 import { useMotionProfile } from '../contexts/MotionContext'
 import PhaserHost, { type WorldDestination } from '../game/engine/PhaserHost'
 import PixiBackground from '../game/engine/PixiBackground'
-import RiveTransit from '../game/engine/RiveTransit'
-import PipCharacter, { type PipState } from '../game/characters/PipCharacter'
 import { createMusicTransport } from '../game/audio/toneTransport'
 import { useWorldTravel } from '../contexts/WorldTravelContext'
 import './PracticeSquare.scss'
@@ -56,7 +54,7 @@ const DISTRICTS = [
 ] as const
 
 const PracticeSquare = () => {
-  const { travel, lastDistrict, visited } = useWorldTravel()
+  const { travel, lastDistrict } = useWorldTravel()
   const { user } = useAuth()
   const { progressState, rankMeta, levelMeta } = useGameProgress()
   const { motion, performance } = useMotionProfile()
@@ -83,7 +81,6 @@ const PracticeSquare = () => {
     travel(district)
   }
 
-  const pipState: PipState = nearby ? 'curious' : audioReady ? 'success' : 'idle'
   const nextRank = rankMeta.nextRank?.name || 'City Legend'
 
   return (
@@ -118,7 +115,6 @@ const PracticeSquare = () => {
           <i />
           <i />
           <i />
-          <RiveTransit className="note-train" />
         </div>
         <PhaserHost
           destinations={destinations}
@@ -139,7 +135,7 @@ const PracticeSquare = () => {
             or discover.
           </p>
           {!audioReady && (
-            <button type="button" className="listening-beacon" onClick={unlockAudio}>
+            <button type="button" className="practice-listening-beacon" onClick={unlockAudio}>
               <AudioLines size={20} />
               <span>
                 <strong>Wake the Listening Beacon</strong>
@@ -148,17 +144,6 @@ const PracticeSquare = () => {
             </button>
           )}
         </section>
-
-        <div className="pip-stage" aria-live="polite">
-          <PipCharacter state={pipState} className="pip-character" />
-          <div className="pip-speech">
-            {nearby
-              ? `${DISTRICTS.find((item) => item.id === nearby)?.name} is humming nearby.`
-              : visited.length > 1
-                ? 'Welcome back. I remembered where we parked!'
-                : 'Pick a path. I packed the good headphones!'}
-          </div>
-        </div>
 
         <nav className="district-platforms" aria-label="Music City districts">
           {DISTRICTS.map((district) => {

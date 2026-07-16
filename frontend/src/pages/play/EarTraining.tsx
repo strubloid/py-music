@@ -16,7 +16,7 @@ import {
   earGameReducer,
   isGameInputLocked,
 } from '../../features/ear-game/state/earGameReducer'
-import './EarTraining.scss'
+import './EarTrainingShell.scss'
 
 const FETCH_LIMIT = 24
 const RUN_LENGTH = 5
@@ -682,6 +682,7 @@ const EarTraining = () => {
         playing={playing}
         inputSignal={{ ...inputSignal, announcement }}
         powers={powers}
+        powersReady={!isLoggedIn || activity.status === 'active'}
         focus={progressState.focusPoints}
         rankMeta={rankMeta}
         streak={streak}

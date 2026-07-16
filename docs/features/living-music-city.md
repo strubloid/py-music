@@ -8,6 +8,20 @@ A completed activity must make the learner more able to hear, locate, continue, 
 
 The full implementation specification and phase gates are in [`../../layout-update.md`](../../layout-update.md). This contract records the repository ownership and authority boundaries used to implement it.
 
+## Implementation Status (2026-07-16)
+
+This feature is **not complete as a whole**. The route implementations exist, but the full phase contract still requires recorded human usability approval and the remaining architecture/release evidence in `layout-update.md`. Build success or the presence of a themed component is not accepted as completion.
+
+| Surface | Status | Current behavior |
+| --- | --- | --- |
+| Practice Square (`/`) | Partial | Mature spatial hub, keyboard/DOM district travel, Phaser navigation layer, Pixi atmosphere, and compact status HUD are implemented. The oversized cartoon guide and unrelated transit vignette were removed because they broke the product's visual language. Human usability approval remains pending. |
+| Daily Challenge (`/play/daily`) | Implemented for reported defect | An empty scored challenge bank self-seeds on the first request, so a cold visit presents a playable challenge. The player UI no longer exposes a destructive “Reload challenge bank” action while a challenge is active. |
+| Sound Gates (`/play/ear-training`) | Implemented for reported defects | The retired global stylesheet was removed; the Listening Beacon has one owned style contract, so transparency and geometry no longer depend on import order. Activity-backed Focus powers wait for server session creation before spending. |
+| Scale Trail (`/play/scales`) | Implemented for reported defects | One root/mode persists through six or seven connected movements. Each correct landing becomes the next anchor. Exact piano/guitar choices are actionable; wrong positions remain red and corrections green until the run ends. Feedback is rendered outside the instrument layer. |
+| Full Living Music City contract | Partial | Accessibility, browser-console, mobile, reduced-motion, backend integration, and build gates are automated. Recorded moderated beginner/child approval and any unfinished phase evidence remain release requirements. |
+
+Scale Trail's learner-facing rule is explicit: a run is one named scale/mode journey; a movement asks for a highlighted scale degree from the current anchor; the resolved landing becomes the next anchor; red/green history persists for the full six/seven-movement run and resets only when a new run starts.
+
 ## Routes And Districts
 
 | Route | District | Primary activity |

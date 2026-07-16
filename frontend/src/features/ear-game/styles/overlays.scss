@@ -43,6 +43,12 @@
   animation: sg-wave 0.8s linear infinite;
 }
 .reward-overlay {
+  --sg-void: #050817;
+  --sg-text: #f7f8ff;
+  --sg-text-muted: #9ba4c8;
+  --sg-gold: #ffbd2e;
+  --sg-gold-light: #ffd96a;
+  --sg-cyan: #49c8ef;
   position: relative;
   min-height: calc(100vh - var(--header-height, 64px));
   display: grid;

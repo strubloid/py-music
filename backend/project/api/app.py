@@ -601,8 +601,10 @@ def _build_scale_route(root_key, mode, octaves, fret_count):
     root_tone = NOTE_TONES.get(root_key.upper(), 0)
     scale_notes = [NOTE_NAMES[(root_tone + interval) % 12] for interval in MODE_INTERVALS.get(mode, MODE_INTERVALS['ionian'])]
 
-    # Guitar standard tuning: high E through low E.
-    TUNING = [('E', 4), ('B', 3), ('G', 2), ('D', 1), ('A', 0), ('E', -1)]
+    # Guitar standard tuning in the same low-E → high-E order used by the
+    # shared frontend instrument. This index contract makes server candidates
+    # light up on the string the player can actually click.
+    TUNING = [('E', -1), ('A', 0), ('D', 1), ('G', 2), ('B', 3), ('E', 4)]
 
     def note_to_semitone(note):
         return NOTE_TONES.get(note.upper(), 0)
@@ -632,14 +634,16 @@ def _build_scale_route(root_key, mode, octaves, fret_count):
     return positions
 
 
-def _select_tier1_fragment(positions, root_key, mode, fragment_index=0, seed=0, route_modifier='nearest-position'):
+def _select_tier1_fragment(
+        positions, root_key, mode, fragment_index=0, seed=0,
+        route_modifier='nearest-position', anchor=None):
     """Select one deterministic movement with several physically playable choices."""
     if len(positions) < 5:
         return None
     rng = random.Random(seed + fragment_index * 7919)
     playable = [position for position in positions if 0 <= position['fret'] <= 24]
     anchor_index = (seed + fragment_index * 5) % max(1, len(playable) - 1)
-    anchor = playable[anchor_index]
+    anchor = anchor or playable[anchor_index]
     open_midi = [40, 45, 50, 55, 59, 64]
     anchor_midi = open_midi[anchor['stringIndex']] + anchor['fret']
     eligible = [position for position in playable if position != anchor]
@@ -737,11 +741,16 @@ def get_scale_path_run():
         # Every run is a real multi-step journey. The displayed die result is
         # determined here before its animation starts.
         fragments = []
+        journey_anchor = None
         for i in range(move_count):
-            frag = _select_tier1_fragment(positions, root, mode, i, seed, route_modifier)
+            frag = _select_tier1_fragment(
+                positions, root, mode, i, seed, route_modifier,
+                anchor=journey_anchor,
+            )
             if frag:
                 frag['fragmentIndex'] = i
                 fragments.append(frag)
+                journey_anchor = frag['gap']
 
         run_id = f'scale-path-{root}-{mode}-{int(time.time())}-{os.urandom(4).hex()}'
         user_id = current_user.id if current_user.is_authenticated else None
@@ -916,4 +925,4 @@ if __name__ == '__main__':
     print("  http://localhost:5000/api/scale/G?interval=minor")
     print("  http://localhost:5000/ (frontend)")
     print("")
-    app.run(debug=False, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=int(os.getenv('PORT', '5000')))

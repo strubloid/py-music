@@ -35,34 +35,39 @@ const PhaserHost = ({ destinations, activeDestination, initialDestination, onDes
         create() {
           const width = this.scale.width
           const height = this.scale.height
-          this.add.rectangle(width / 2, height * 0.82, width, height * 0.38, 0x10163a, 0.82)
-          this.add.ellipse(width / 2, height * 0.84, width * 0.95, height * 0.22, 0x26205e, 0.6)
+          const architecture = this.add.graphics()
+          architecture.fillStyle(0x080b1a, 0.3)
+          architecture.fillRect(0, height * 0.7, width, height * 0.3)
+          architecture.lineStyle(1, 0xffc21c, 0.16)
+          architecture.lineBetween(0, height * 0.7, width, height * 0.7)
 
           destinations.forEach((destination) => {
             const x = destination.x * width
-            const tower = this.add
-              .rectangle(x, height * 0.5, 88, 170, destination.color, 0.24)
-              .setStrokeStyle(2, destination.color, 0.8)
+            architecture.lineStyle(1, destination.color, 0.22)
+            architecture.lineBetween(width / 2, height * 0.79, x, height * 0.7)
+            architecture.lineBetween(x, height * 0.7, x, height * 0.52)
             const portal = this.add
-              .ellipse(x, height * 0.67, 56, 82, destination.color, 0.22)
-              .setStrokeStyle(3, destination.color, 0.9)
+              .circle(x, height * 0.68, 24, destination.color, 0.05)
+              .setStrokeStyle(2, destination.color, 0.68)
+            const core = this.add
+              .circle(x, height * 0.68, 8, destination.color, 0.18)
+              .setStrokeStyle(1, destination.color, 0.9)
             this.tweens.add({
-              targets: [tower, portal],
-              alpha: motion === 'minimal' ? 0.85 : { from: 0.55, to: 1 },
-              duration: 1800,
+              targets: [portal, core],
+              alpha: motion === 'minimal' ? 0.8 : { from: 0.5, to: 0.95 },
+              duration: 2200,
               yoyo: true,
               repeat: motion === 'minimal' ? 0 : -1,
               ease: 'Sine.easeInOut',
             })
           })
 
-          const body = this.add.circle(0, 0, 20, 0xffc21c).setStrokeStyle(3, 0x070a18)
-          const stem = this.add.rectangle(15, -25, 7, 38, 0xffc21c).setOrigin(0.5, 1)
-          const eyeL = this.add.circle(-7, -3, 3, 0x070a18)
-          const eyeR = this.add.circle(6, -3, 3, 0x070a18)
+          const halo = this.add.circle(0, 0, 14, 0xffc21c, 0.08).setStrokeStyle(1, 0xffc21c, 0.56)
+          const body = this.add.circle(0, 0, 6, 0xffc21c)
+          const stem = this.add.rectangle(5, -12, 2, 18, 0xffc21c).setOrigin(0.5, 1)
           const rememberedDestination = destinations.find((destination) => destination.id === initialDestination)
           const initialX = rememberedDestination ? rememberedDestination.x * width : width / 2
-          this.pip = this.add.container(initialX, height * 0.76, [stem, body, eyeL, eyeR])
+          this.pip = this.add.container(initialX, height * 0.76, [halo, stem, body])
           this.targetX = this.pip.x
 
           if (this.input.keyboard) this.cursors = this.input.keyboard.createCursorKeys()

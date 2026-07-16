@@ -41,6 +41,33 @@ class ScaleTrailRouteTest(unittest.TestCase):
         self.assertEqual(same_string['anchor']['stringIndex'], same_string['gap']['stringIndex'])
         self.assertNotEqual(alternate['anchor']['stringIndex'], alternate['gap']['stringIndex'])
 
+    def test_connected_journey_uses_each_landing_as_the_next_anchor(self):
+        positions = _build_scale_route('A', 'aeolian', 2, 17)
+        fragments = []
+        anchor = None
+        for index in range(7):
+            fragment = _select_tier1_fragment(
+                positions, 'A', 'aeolian', index, 481516,
+                'nearest-position', anchor=anchor,
+            )
+            assert fragment is not None
+            fragments.append(fragment)
+            anchor = fragment['gap']
+
+        for previous, current in zip(fragments, fragments[1:]):
+            self.assertEqual(current['anchor'], previous['gap'])
+            self.assertEqual(current['root'], 'A')
+            self.assertEqual(current['mode'], 'aeolian')
+
+    def test_string_indexes_match_shared_low_e_to_high_e_instrument_order(self):
+        positions = _build_scale_route('E', 'aeolian', 1, 12)
+        open_strings = {
+            position['stringIndex']: position['note']
+            for position in positions
+            if position['fret'] == 0
+        }
+        self.assertEqual(open_strings, {0: 'E', 1: 'A', 2: 'D', 3: 'G', 4: 'B', 5: 'E'})
+
     def test_public_fragment_never_exposes_correctness_or_gap(self):
         private = _select_tier1_fragment(self.positions, 'C', 'ionian', 0, 12, 'ascending')
         assert private is not None
