@@ -46,7 +46,8 @@ frontend_dist = project_root / 'frontend' / 'dist'
 app = Flask(__name__, static_folder=None)
 PIANO_SAMPLE_REMOTE_BASE = 'https://smpldsnds.github.io/sfzinstruments-splendid-grand-piano/samples'
 SOUNDFONT_REMOTE_BASE = 'https://gleitz.github.io/midi-js-soundfonts'
-AUDIO_CACHE_DIR = project_root / 'backend' / 'project' / 'audio_assets'
+DATA_DIR = Path(os.getenv('PYMUSIC_DATA_DIR', project_root / 'data'))
+AUDIO_CACHE_DIR = DATA_DIR / 'audio_assets'
 _audio_cache_locks = {}
 _audio_cache_locks_guard = threading.Lock()
 
@@ -61,7 +62,7 @@ if not SECRET_KEY:
 app.config['SECRET_KEY'] = SECRET_KEY
 app.config['E2E_EXPOSE_ANSWERS'] = os.getenv('E2E_EXPOSE_ANSWERS') == '1'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', f'sqlite:///{project_root}/strubloid.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', f'sqlite:///{DATA_DIR / "strubloid.db"}')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['RATELIMIT_ENABLED'] = os.getenv('RATELIMIT_ENABLED', 'true').lower() != 'false'
 

@@ -6,7 +6,7 @@ Current production deployment is Fly.io. The retired Netlify documents are inten
 
 1. Install and authenticate the Fly CLI: `fly auth login`.
 2. Create the application: `fly launch --no-deploy`.
-3. Set required secrets, including `SECRET_KEY`, `FRONTEND_URL`, and `DATABASE_URL`. Set optional LLM keys only when used.
+3. Set required secrets, including `SECRET_KEY` and `FRONTEND_URL`. The attached `py_music_data` volume stores the default SQLite database at `/app/data/strubloid.db`; do not point `DATABASE_URL` at `/data` or the image filesystem. Set `DATABASE_URL` only for an external database, or set it to `sqlite:////app/data/strubloid.db` explicitly.
 4. Deploy with `fly deploy`.
 
 ## Verify Before Deploy

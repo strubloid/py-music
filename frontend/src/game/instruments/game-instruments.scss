@@ -36,14 +36,16 @@
   border-left-width: 12px;
   border-radius: 16px 8px 8px 16px;
   background:
-    linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px) 0 0 / var(--fret-width) 100%,
-    repeating-linear-gradient(4deg, rgba(255,255,255,.025) 0 2px, transparent 2px 8px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px) 0 0 / var(--fret-width) 100%,
+    repeating-linear-gradient(4deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 8px),
     linear-gradient(180deg, #55331f, #2d1814 52%, #4b2b1d);
-  box-shadow: inset 0 10px 20px rgba(255, 194, 28, 0.08), 0 18px 36px rgba(0,0,0,.34);
+  box-shadow:
+    inset 0 10px 20px rgba(255, 194, 28, 0.08),
+    0 18px 36px rgba(0, 0, 0, 0.34);
 }
 
 .game-fretboard__string {
-  --thickness: calc(1px + var(--string) * .42px);
+  --thickness: calc(1px + var(--string) * 0.42px);
   display: grid;
   grid-template-columns: repeat(var(--frets), var(--fret-width));
   min-height: 36px;
@@ -59,7 +61,7 @@
   top: 50%;
   height: var(--thickness);
   background: linear-gradient(#fff5c7, #8d704c 52%, #fff2b4);
-  box-shadow: 0 2px 2px rgba(0,0,0,.6);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
   pointer-events: none;
 }
 
@@ -69,7 +71,7 @@
   min-width: 48px;
   min-height: 36px;
   border: 0;
-  border-right: 2px solid rgba(230, 225, 211, .68);
+  border-right: 2px solid rgba(230, 225, 211, 0.68);
   background: transparent;
   color: #070a18;
   cursor: pointer;
@@ -83,18 +85,20 @@
   border-radius: 50%;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%) scale(.4);
+  transform: translate(-50%, -50%) scale(0.4);
   opacity: 0;
   background: #42d8ff;
   box-shadow: 0 0 16px #42d8ff;
-  transition: transform 140ms ease, opacity 140ms ease;
+  transition:
+    transform 140ms ease,
+    opacity 140ms ease;
 }
 
 .game-fretboard__note:hover::after,
 .game-fretboard__note:focus-visible::after,
 .game-fretboard__note.is-legal::after {
-  opacity: .78;
-  transform: translate(-50%, -50%) scale(.74);
+  opacity: 0.78;
+  transform: translate(-50%, -50%) scale(0.74);
 }
 
 .game-fretboard__note.is-active::after {
@@ -127,14 +131,14 @@
   --marker-fret: 3;
   position: absolute;
   z-index: 1;
-  left: calc((var(--marker-fret) + .5) * var(--fret-width));
+  left: calc((var(--marker-fret) + 0.5) * var(--fret-width));
   top: 50%;
   width: 11px;
   height: 11px;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: rgba(244, 228, 178, .7);
-  box-shadow: 0 0 8px rgba(255,194,28,.35);
+  background: rgba(244, 228, 178, 0.7);
+  box-shadow: 0 0 8px rgba(255, 194, 28, 0.35);
 }
 
 .game-fretboard__markers i.double::before,
@@ -147,11 +151,19 @@
   background: inherit;
 }
 
-.game-fretboard__markers i.double::before { transform: translateY(-42px); }
-.game-fretboard__markers i.double::after { transform: translateY(42px); }
+.game-fretboard__markers i.double::before {
+  transform: translateY(-42px);
+}
+.game-fretboard__markers i.double::after {
+  transform: translateY(42px);
+}
 
-.game-fretboard.is-left-handed .game-fretboard__neck { transform: scaleX(-1); }
-.game-fretboard.is-left-handed .game-fretboard__note span { transform: scaleX(-1); }
+.game-fretboard.is-left-handed .game-fretboard__neck {
+  transform: scaleX(-1);
+}
+.game-fretboard.is-left-handed .game-fretboard__note span {
+  transform: scaleX(-1);
+}
 
 .game-piano {
   width: 100%;
@@ -175,12 +187,16 @@
   padding: 10px 8px 8px;
   border-radius: 18px;
   background: linear-gradient(180deg, #8c7038, #3f2b22);
-  box-shadow: 0 22px 45px rgba(0,0,0,.4), inset 0 2px 0 rgba(255,255,255,.16);
+  box-shadow:
+    0 22px 45px rgba(0, 0, 0, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.16);
 }
 
 .game-piano__key {
   cursor: pointer;
-  transition: transform 80ms ease, filter 120ms ease;
+  transition:
+    transform 80ms ease,
+    filter 120ms ease;
 }
 
 .game-piano__key.is-white {
@@ -192,11 +208,11 @@
   border-radius: 0 0 9px 9px;
   background: linear-gradient(90deg, #d9dbe5, #fff 18%, #f3f2e9 80%, #c7c9d8);
   color: #10163a;
-  box-shadow: inset 0 -10px 14px rgba(26,30,61,.12);
+  box-shadow: inset 0 -10px 14px rgba(26, 30, 61, 0.12);
 }
 
 .game-piano__key.is-black {
-  --black-width: calc(var(--key-width) * .62);
+  --black-width: calc(var(--key-width) * 0.62);
   position: absolute;
   z-index: 3;
   top: 10px;
@@ -207,12 +223,14 @@
   border-radius: 0 0 7px 7px;
   background: linear-gradient(90deg, #05060d, #262b43 46%, #05060d);
   color: #d8dcf8;
-  box-shadow: 0 9px 8px rgba(0,0,0,.45), inset 0 -8px 5px #05060d;
+  box-shadow:
+    0 9px 8px rgba(0, 0, 0, 0.45),
+    inset 0 -8px 5px #05060d;
 }
 
 .game-piano__key:active,
 .game-piano__key.is-active {
-  transform: translateY(6px) scaleY(.98);
+  transform: translateY(6px) scaleY(0.98);
   filter: drop-shadow(0 0 10px #42d8ff);
 }
 
@@ -251,13 +269,24 @@
 }
 
 @keyframes pluck-string {
-  0% { transform: translate(-50%, -50%) scale(.4); }
-  45% { transform: translate(-50%, -50%) scale(1.35); }
-  100% { transform: translate(-50%, -50%) scale(1); }
+  0% {
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  45% {
+    transform: translate(-50%, -50%) scale(1.35);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .game-fretboard__note::after,
-  .game-piano__key { transition: none; animation: none; }
-  .game-piano__scroll [data-midi] { scroll-margin-inline: 30vw; }
+  .game-piano__key {
+    transition: none;
+    animation: none;
+  }
+  .game-piano__scroll [data-midi] {
+    scroll-margin-inline: 30vw;
+  }
 }

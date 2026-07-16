@@ -10,8 +10,11 @@ const NATURAL_INDEX = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }
 const CHROMATIC = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 // Enharmonic equivalents: for each position in the 12-tone chromatic, list aliases.
 const ENHARMONIC = {
-  1:  ['C#', 'Db'], 3:  ['D#', 'Eb'], 6:  ['F#', 'Gb'],
-  8:  ['G#', 'Ab'], 10: ['A#', 'Bb'],
+  1: ['C#', 'Db'],
+  3: ['D#', 'Eb'],
+  6: ['F#', 'Gb'],
+  8: ['G#', 'Ab'],
+  10: ['A#', 'Bb'],
 }
 
 const noteNameAt = (natural, semitoneOffset, scaleNotes = []) => {
@@ -96,11 +99,7 @@ const PianoKeyboard = ({ keyboardData }) => {
         {/* Natural (white) keys — flex row */}
         <div className="pk-natural-keys-row">
           {natural_keys?.map((note, i) => (
-            <div
-              key={i}
-              className={naturalClass(note)}
-              title={note}
-            >
+            <div key={i} className={naturalClass(note)} title={note}>
               {note}
             </div>
           ))}

@@ -1,32 +1,32 @@
 // Scale Lab page — /play/learn-scales
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { FlaskConical, Trash2, Eye, CheckCircle, ChevronDown } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
+import { FlaskConical, Trash2, Eye, CheckCircle, ChevronDown } from 'lucide-react'
 import {
   createInitialScaleLabState,
   scaleLabReducer,
   type ScaleLabState,
   type LabPosition,
-} from '../state/scaleLabReducer';
-import { analyzeCandidates } from '../services/scaleCandidateAnalysis';
-import { getScalePositions, NOTE_NAMES } from '../services/scalePathGenerator';
-import { verifyScaleLabBuild } from '../../../services/scalePlayApi';
-import ScaleBuilderFretboard from './ScaleBuilderFretboard';
-import ScaleCandidatePanel from './ScaleCandidatePanel';
-import ScaleExplanationPanel from './ScaleExplanationPanel';
-import KeySelector from '../../../components/KeySelector/KeySelector';
-import GamePianoKeyboard from '../../../game/instruments/GamePianoKeyboard';
-import GameGuitarFretboard from '../../../game/instruments/GameGuitarFretboard';
-import { STANDARD_GUITAR_MIDI } from '../../../game/instruments/musicMath';
-import { useMotionProfile } from '../../../contexts/MotionContext';
-import { useActivitySession } from '../../../game/progression/useActivitySession';
-import '../styles/scale-lab.scss';
+} from '../state/scaleLabReducer'
+import { analyzeCandidates } from '../services/scaleCandidateAnalysis'
+import { getScalePositions, NOTE_NAMES } from '../services/scalePathGenerator'
+import { verifyScaleLabBuild } from '../../../services/scalePlayApi'
+import ScaleBuilderFretboard from './ScaleBuilderFretboard'
+import ScaleCandidatePanel from './ScaleCandidatePanel'
+import ScaleExplanationPanel from './ScaleExplanationPanel'
+import KeySelector from '../../../components/KeySelector/KeySelector'
+import GamePianoKeyboard from '../../../game/instruments/GamePianoKeyboard'
+import GameGuitarFretboard from '../../../game/instruments/GameGuitarFretboard'
+import { STANDARD_GUITAR_MIDI } from '../../../game/instruments/musicMath'
+import { useMotionProfile } from '../../../contexts/MotionContext'
+import { useActivitySession } from '../../../game/progression/useActivitySession'
+import '../styles/scale-lab.scss'
 
 // RANGE_LEVELS mirrors ScalesPage
 const RANGE_LEVELS = [
   { id: 1, fretCount: 12, label: 'Single' },
   { id: 2, fretCount: 17, label: 'Double' },
   { id: 3, fretCount: 22, label: 'Triple' },
-];
+]
 
 const MODE_OPTIONS = [
   { key: 'ionian', label: 'Ionian (Major)' },
@@ -36,93 +36,89 @@ const MODE_OPTIONS = [
   { key: 'phrygian', label: 'Phrygian' },
   { key: 'lydian', label: 'Lydian' },
   { key: 'locrian', label: 'Locrian' },
-];
+]
 const ScaleLab: React.FC = () => {
-  const { reducedMotion } = useMotionProfile();
-  const [state, dispatch] = useReducer(scaleLabReducer, null, () =>
-    createInitialScaleLabState({ reducedMotion }),
-  );
-  const activity = useActivitySession('scale-lab', state.selectedPositions.length > 0 && !state.verifiedResult);
+  const { motion } = useMotionProfile()
+  const reducedMotion = motion === 'minimal'
+  const [state, dispatch] = useReducer(scaleLabReducer, null, () => createInitialScaleLabState({ reducedMotion }))
+  const activity = useActivitySession('scale-lab', state.selectedPositions.length > 0 && !state.verifiedResult)
 
-  const [activeTab, setActiveTab] = useState<'build' | 'candidates' | 'explain'>('build');
-  const [showAllMissing, setShowAllMissing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'build' | 'candidates' | 'explain'>('build')
+  const [showAllMissing, setShowAllMissing] = useState(false)
 
-  const rootPitch = NOTE_NAMES.indexOf(state.root);
-  const rangeLevel = RANGE_LEVELS.find((r) => r.id === state.rangeLevel) ?? RANGE_LEVELS[0];
+  const rootPitch = NOTE_NAMES.indexOf(state.root)
+  const rangeLevel = RANGE_LEVELS.find((r) => r.id === state.rangeLevel) ?? RANGE_LEVELS[0]
 
   // Build positions from root + mode
   const positions = useMemo(
     () => getScalePositions(rootPitch, state.mode, rangeLevel.fretCount),
     [rootPitch, state.mode, rangeLevel.fretCount],
-  );
+  )
   const referenceInstrumentData = useMemo(() => {
-    const scalePitches = new Set(positions.map((position) => position.pitch));
+    const scalePitches = new Set(positions.map((position) => position.pitch))
     return {
       pianoMidi: Array.from({ length: 13 }, (_, index) => 48 + index).filter((midi) => scalePitches.has(midi % 12)),
       guitarMidi: positions.map((position) => STANDARD_GUITAR_MIDI[position.stringIndex] + position.fret),
-    };
-  }, [positions]);
+    }
+  }, [positions])
 
   // Analyze candidates when placed notes change
   const candidates = useMemo(
     () => analyzeCandidates(state.selectedPositions, state.mode),
     [state.selectedPositions, state.mode],
-  );
+  )
 
   // Target scale missing notes for display
   const targetMissingPositions = useMemo(() => {
-    if (!state.showAllMissing || !state.mode) return [];
-    const targetPitches = getScalePositions(rootPitch, state.mode, rangeLevel.fretCount);
-    const placedKeys = new Set(state.selectedPositions.map((p) => `${p.string}-${p.fret}`));
-    return targetPitches.filter((p) => !placedKeys.has(`${p.string}-${p.fret}`));
-  }, [state.showAllMissing, state.mode, state.selectedPositions, rootPitch, rangeLevel.fretCount]);
+    if (!state.showAllMissing || !state.mode) return []
+    const targetPitches = getScalePositions(rootPitch, state.mode, rangeLevel.fretCount)
+    const placedKeys = new Set(state.selectedPositions.map((p) => `${p.string}-${p.fret}`))
+    return targetPitches.filter((p) => !placedKeys.has(`${p.string}-${p.fret}`))
+  }, [state.showAllMissing, state.mode, state.selectedPositions, rootPitch, rangeLevel.fretCount])
 
   const handleTogglePosition = useCallback((pos: LabPosition) => {
-    dispatch({ type: 'TOGGLE_POSITION', position: pos });
-  }, []);
+    dispatch({ type: 'TOGGLE_POSITION', position: pos })
+  }, [])
 
   const handleClearAll = useCallback(() => {
-    dispatch({ type: 'CLEAR_ALL' });
-  }, []);
+    dispatch({ type: 'CLEAR_ALL' })
+  }, [])
 
   const handleShowRest = useCallback(async () => {
-    setShowAllMissing(true);
-    dispatch({ type: 'SHOW_REST' });
-  }, []);
+    setShowAllMissing(true)
+    dispatch({ type: 'SHOW_REST' })
+  }, [])
 
   const handleVerify = useCallback(async () => {
-    const selectedNotes = [...new Set(state.selectedPositions.map((p) => p.pitch))];
+    const selectedNotes = [...new Set(state.selectedPositions.map((p) => p.pitch))]
     try {
       const res = await verifyScaleLabBuild({
         root: state.root,
         mode: state.mode,
         selectedNotes,
-      });
-      dispatch({ type: 'SET_VERIFIED', result: res.data });
-      setActiveTab('explain');
-      await activity.finish({ completed: Boolean(res.data.confirmed), correct: Boolean(res.data.confirmed) });
+      })
+      dispatch({ type: 'SET_VERIFIED', result: res.data })
+      setActiveTab('explain')
+      await activity.finish()
     } catch {
-      dispatch({ type: 'SET_EXPLANATION', text: 'Verification unavailable. Check your connection.' });
+      dispatch({ type: 'SET_EXPLANATION', text: 'Verification unavailable. Check your connection.' })
     }
-  }, [activity.finish, state.root, state.mode, state.selectedPositions]);
+  }, [activity.finish, state.root, state.mode, state.selectedPositions])
 
   const uniqueNotes = useMemo(() => {
-    const seen = new Set<number>();
+    const seen = new Set<number>()
     return state.selectedPositions.filter((p) => {
-      if (seen.has(p.pitch)) return false;
-      seen.add(p.pitch);
-      return true;
-    });
-  }, [state.selectedPositions]);
+      if (seen.has(p.pitch)) return false
+      seen.add(p.pitch)
+      return true
+    })
+  }, [state.selectedPositions])
 
   const nonTargetPositions = useMemo(() => {
-    if (!state.mode) return [];
-    const targetPitches = new Set(
-      getScalePositions(rootPitch, state.mode, rangeLevel.fretCount).map((p) => p.pitch),
-    );
-    return state.selectedPositions.filter((p) => !targetPitches.has(p.pitch));
-  }, [state.selectedPositions, state.mode, rootPitch, rangeLevel.fretCount]);
-
+    if (!state.mode) return []
+    const targetPitches = new Set(getScalePositions(rootPitch, state.mode, rangeLevel.fretCount).map((p) => p.pitch))
+    return state.selectedPositions.filter((p) => !targetPitches.has(p.pitch))
+  }, [state.selectedPositions, state.mode, rootPitch, rangeLevel.fretCount])
 
   return (
     <main className={`scale-lab ${state.reducedMotion ? 'reduced-motion' : ''}`}>
@@ -146,7 +142,9 @@ const ScaleLab: React.FC = () => {
           >
             <option value="">No target (explore)</option>
             {MODE_OPTIONS.map((m) => (
-              <option key={m.key} value={m.key}>{m.label}</option>
+              <option key={m.key} value={m.key}>
+                {m.label}
+              </option>
             ))}
           </select>
 
@@ -181,15 +179,36 @@ const ScaleLab: React.FC = () => {
         {/* Left: Fretboard builder */}
         <section className="sl-builder" aria-label="Fretboard builder">
           <section className="sl-reference-instruments" aria-label={`${state.root} ${state.mode} reference shape`}>
-            <header><span>Reference shape</span><strong>{state.root} {MODE_OPTIONS.find((mode) => mode.key === state.mode)?.label}</strong></header>
+            <header>
+              <span>Reference shape</span>
+              <strong>
+                {state.root} {MODE_OPTIONS.find((mode) => mode.key === state.mode)?.label}
+              </strong>
+            </header>
             <div className="sl-reference-instruments__piano">
-              <GamePianoKeyboard startMidi={48} endMidi={60} legalMidi={referenceInstrumentData.pianoMidi} rootPitchClass={rootPitch} showLabels disabled />
+              <GamePianoKeyboard
+                startMidi={48}
+                endMidi={60}
+                legalMidi={referenceInstrumentData.pianoMidi}
+                rootPitchClass={rootPitch}
+                showLabels
+                disabled
+              />
             </div>
             <div className="sl-reference-instruments__guitar">
-              <GameGuitarFretboard fretCount={rangeLevel.fretCount} legalMidi={referenceInstrumentData.guitarMidi} rootPitchClass={rootPitch} showLabels disabled />
+              <GameGuitarFretboard
+                fretCount={rangeLevel.fretCount}
+                legalMidi={referenceInstrumentData.guitarMidi}
+                rootPitchClass={rootPitch}
+                showLabels
+                disabled
+              />
             </div>
           </section>
-          <div className="sl-builder__label"><span>Build board</span><small>Tap notes to construct your own version of the shape.</small></div>
+          <div className="sl-builder__label">
+            <span>Build board</span>
+            <small>Tap notes to construct your own version of the shape.</small>
+          </div>
           <ScaleBuilderFretboard
             fretCount={rangeLevel.fretCount}
             positions={positions}
@@ -252,11 +271,7 @@ const ScaleLab: React.FC = () => {
 
           <div className="sl-analysis__panels">
             <div className={`sl-panel-wrap ${activeTab !== 'candidates' ? 'hidden-mobile' : ''}`}>
-              <ScaleCandidatePanel
-                candidates={candidates}
-                rootPitch={rootPitch}
-                targetMode={state.mode}
-              />
+              <ScaleCandidatePanel candidates={candidates} rootPitch={rootPitch} targetMode={state.mode} />
             </div>
 
             <div className={`sl-panel-wrap ${activeTab !== 'explain' ? 'hidden-mobile' : ''}`}>
@@ -276,7 +291,7 @@ const ScaleLab: React.FC = () => {
         </aside>
       </div>
     </main>
-  );
-};
+  )
+}
 
-export default ScaleLab;
+export default ScaleLab

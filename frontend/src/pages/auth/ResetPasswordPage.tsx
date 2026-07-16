@@ -90,7 +90,7 @@ const ResetPasswordPage = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="reset-form">
-              <div className="reset-form-group">
+            <div className="reset-form-group">
               <Lock size={16} className="reset-form-icon" />
               <input
                 type="password"
@@ -102,13 +102,18 @@ const ResetPasswordPage = () => {
                 minLength={6}
                 autoFocus
               />
-              </div>
-              <div className="password-strength" aria-live="polite">
-                <strong>Password requirements</strong>
-                <ul>
-                  {requirements.map(([label, met]) => <li key={label} className={met ? 'met' : ''}>{met ? 'Met: ' : ''}{label}</li>)}
-                </ul>
-              </div>
+            </div>
+            <div className="password-strength" aria-live="polite">
+              <strong>Password requirements</strong>
+              <ul>
+                {requirements.map(([label, met]) => (
+                  <li key={String(label)} className={met ? 'met' : ''}>
+                    {met ? 'Met: ' : ''}
+                    {String(label)}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
             <div className="reset-form-group">
               <Lock size={16} className="reset-form-icon" />
@@ -125,15 +130,13 @@ const ResetPasswordPage = () => {
 
             {error && <div className="reset-error">{error}</div>}
 
-            <button
-              type="submit"
-              className="reset-btn"
-              disabled={submitting}
-            >
+            <button type="submit" className="reset-btn" disabled={submitting}>
               {submitting ? (
                 'Please wait...'
               ) : (
-                <>Reset password <ArrowRight size={16} /></>
+                <>
+                  Reset password <ArrowRight size={16} />
+                </>
               )}
             </button>
           </form>

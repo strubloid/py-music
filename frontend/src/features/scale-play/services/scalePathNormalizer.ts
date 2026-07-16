@@ -1,17 +1,17 @@
 // Normalize API scale data → game data for Scale Path
 
-import type { ScalePathFragment, ScalePathPosition, ScalePathRun } from '../state/scalePathReducer';
+import type { ScalePathFragment, ScalePathPosition, ScalePathRun } from '../state/scalePathReducer'
 
 export interface NormalizedFragment {
-  id: string;
-  root: string;
-  mode: string;
-  difficulty: number;
-  anchor: ScalePathPosition;
-  suffix: ScalePathPosition[];
-  candidates: Array<ScalePathPosition & { id: string }>;
-  direction: 'left' | 'up';
-  degreeClue: string;
+  id: string
+  root: string
+  mode: string
+  difficulty: number
+  anchor: ScalePathPosition
+  suffix: ScalePathPosition[]
+  candidates: Array<ScalePathPosition & { id: string }>
+  direction: 'left' | 'up'
+  degreeClue: string
 }
 
 export function normalizeFragment(raw: ScalePathFragment, index: number): NormalizedFragment {
@@ -28,21 +28,21 @@ export function normalizeFragment(raw: ScalePathFragment, index: number): Normal
     })),
     direction: raw.direction ?? 'left',
     degreeClue: raw.degreeClue ?? '?_?',
-  };
+  }
 }
 
 export function normalizeRun(raw: ScalePathRun): {
-  runId: string;
-  root: string;
-  mode: string;
-  difficulty: number;
-  octaves: number;
-  fretCount: number;
-  positions: ScalePathPosition[];
-  fragments: NormalizedFragment[];
-  dieResult: 6 | 7;
-  routeModifier: string;
-  seed: string;
+  runId: string
+  root: string
+  mode: string
+  difficulty: number
+  octaves: number
+  fretCount: number
+  positions: ScalePathPosition[]
+  fragments: NormalizedFragment[]
+  dieResult: 6 | 7
+  routeModifier: string
+  seed: string
 } {
   return {
     runId: raw.runId,
@@ -56,5 +56,5 @@ export function normalizeRun(raw: ScalePathRun): {
     dieResult: raw.dieResult === 7 ? 7 : 6,
     routeModifier: raw.routeModifier ?? 'ascending',
     seed: raw.seed ?? '',
-  };
+  }
 }

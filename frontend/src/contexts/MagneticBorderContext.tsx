@@ -1,39 +1,39 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react'
 
-const MagneticBorderContext = createContext();
+const MagneticBorderContext = createContext<any>(null)
 
 export const useMagneticBorder = () => {
-  const context = useContext(MagneticBorderContext);
+  const context = useContext(MagneticBorderContext)
   if (!context) {
-    throw new Error('useMagneticBorder must be used within a MagneticBorderProvider');
+    throw new Error('useMagneticBorder must be used within a MagneticBorderProvider')
   }
-  return context;
-};
+  return context
+}
 
-export const MagneticBorderProvider = ({ children }) => {
+export const MagneticBorderProvider = ({ children }: { children: React.ReactNode }) => {
   const [isMagneticEnabled, setIsMagneticEnabled] = useState(() => {
     // Load from localStorage or default to true
-    const saved = localStorage.getItem('magneticBorderEnabled');
-    return saved !== null ? JSON.parse(saved) : true;
-  });
+    const saved = localStorage.getItem('magneticBorderEnabled')
+    return saved !== null ? JSON.parse(saved) : true
+  })
 
   // Save to localStorage when changed
   useEffect(() => {
-    localStorage.setItem('magneticBorderEnabled', JSON.stringify(isMagneticEnabled));
-  }, [isMagneticEnabled]);
+    localStorage.setItem('magneticBorderEnabled', JSON.stringify(isMagneticEnabled))
+  }, [isMagneticEnabled])
 
   const toggleMagnetic = () => {
-    setIsMagneticEnabled(!isMagneticEnabled);
-  };
+    setIsMagneticEnabled(!isMagneticEnabled)
+  }
 
   return (
-    <MagneticBorderContext.Provider 
-      value={{ 
-        isMagneticEnabled, 
-        toggleMagnetic 
+    <MagneticBorderContext.Provider
+      value={{
+        isMagneticEnabled,
+        toggleMagnetic,
       }}
     >
       {children}
     </MagneticBorderContext.Provider>
-  );
-};
+  )
+}

@@ -3,12 +3,14 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react({
-    // Enable fast refresh
-    fastRefresh: true,
-    // Transform both legacy JavaScript and the TypeScript Living City surfaces.
-    include: '**/*.{js,jsx,ts,tsx}',
-  })],
+  plugins: [
+    react({
+      // Enable fast refresh
+      fastRefresh: true,
+      // Transform both legacy JavaScript and the TypeScript Living City surfaces.
+      include: '**/*.{js,jsx,ts,tsx}',
+    }),
+  ],
   base: '/', // Ensure correct base path for deployment
   css: {
     preprocessorOptions: {
@@ -33,14 +35,14 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:5000',
         changeOrigin: true,
-        secure: false
+        secure: false,
       },
       '/auth': {
         target: 'http://localhost:5000',
         changeOrigin: true,
-        secure: false
-      }
-    }
+        secure: false,
+      },
+    },
   },
   // Optimize dependencies for faster rebuilds
   optimizeDeps: {

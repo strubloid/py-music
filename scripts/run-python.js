@@ -7,8 +7,8 @@ const path = require('node:path')
 const root = path.resolve(__dirname, '..')
 const candidates = [
   process.env.PYTHON,
-  path.join(root, '.venv', 'bin', 'python'),
   path.join(root, 'venv', 'bin', 'python'),
+  path.join(root, '.venv', 'bin', 'python'),
   'python3',
   'python',
 ].filter(Boolean)

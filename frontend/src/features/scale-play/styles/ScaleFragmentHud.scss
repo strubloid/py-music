@@ -41,8 +41,13 @@
     background: rgba(71, 61, 140, 0.5);
     transition: background 200ms;
 
-    &.done { background: rgba(146, 232, 76, 0.6); }
-    &.current { background: #ff9d1f; box-shadow: 0 0 4px rgba(255, 157, 31, 0.7); }
+    &.done {
+      background: rgba(146, 232, 76, 0.6);
+    }
+    &.current {
+      background: #ff9d1f;
+      box-shadow: 0 0 4px rgba(255, 157, 31, 0.7);
+    }
   }
 
   &__stats {
@@ -80,7 +85,9 @@
     color: #c3c9e5;
     margin: 0;
 
-    strong { color: #ff9d1f; }
+    strong {
+      color: #ff9d1f;
+    }
   }
 
   &__degree {
@@ -108,10 +115,30 @@
     letter-spacing: 0.08em;
     font-weight: 700;
 
-    &.tier-1 { background: rgba(146, 232, 76, 0.15); color: #92e84c; border: 1px solid rgba(146, 232, 76, 0.3); }
-    &.tier-2 { background: rgba(255, 189, 46, 0.15); color: #ff9d1f; border: 1px solid rgba(255, 189, 46, 0.3); }
-    &.tier-3 { background: rgba(73, 200, 239, 0.15); color: #49c8ef; border: 1px solid rgba(73, 200, 239, 0.3); }
-    &.tier-4 { background: rgba(200, 146, 232, 0.15); color: #c892e8; border: 1px solid rgba(200, 146, 232, 0.3); }
-    &.tier-5 { background: rgba(255, 79, 96, 0.15); color: #ff4f60; border: 1px solid rgba(255, 79, 96, 0.3); }
+    &.tier-1 {
+      background: rgba(146, 232, 76, 0.15);
+      color: #92e84c;
+      border: 1px solid rgba(146, 232, 76, 0.3);
+    }
+    &.tier-2 {
+      background: rgba(255, 189, 46, 0.15);
+      color: #ff9d1f;
+      border: 1px solid rgba(255, 189, 46, 0.3);
+    }
+    &.tier-3 {
+      background: rgba(73, 200, 239, 0.15);
+      color: #49c8ef;
+      border: 1px solid rgba(73, 200, 239, 0.3);
+    }
+    &.tier-4 {
+      background: rgba(200, 146, 232, 0.15);
+      color: #c892e8;
+      border: 1px solid rgba(200, 146, 232, 0.3);
+    }
+    &.tier-5 {
+      background: rgba(255, 79, 96, 0.15);
+      color: #ff4f60;
+      border: 1px solid rgba(255, 79, 96, 0.3);
+    }
   }
 }

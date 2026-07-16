@@ -1,16 +1,15 @@
 // Interactive guitar fretboard base — shared by Scale Path and Scale Lab
 // Distinct from the display-only GuitarFretboard component.
 
-import React, { useCallback, useEffect, useRef } from 'react';
-import '../styles/scale-fretboard.scss';
+import React, { useCallback, useEffect, useRef } from 'react'
+import '../styles/scale-fretboard.scss'
 
 export interface FretboardPosition {
-  string: string;
-  fret: number;
-  note: string;
-  stringIndex: number;
-  pitch: number;
-  [key: string]: unknown;
+  string: string
+  fret: number
+  note: string
+  stringIndex: number
+  pitch: number
 }
 
 export type FretCellState =
@@ -23,53 +22,53 @@ export type FretCellState =
   | 'incorrect'
   | 'placed'
   | 'missing'
-  | 'non-target';
+  | 'non-target'
 
 interface ScaleFretboardBaseProps {
-  fretCount: number;
-  positions: FretboardPosition[];
+  fretCount: number
+  positions: FretboardPosition[]
   // Visible note sets
-  rootNote?: string;
-  scaleNotes?: FretboardPosition[];
-  revealedNotes?: FretboardPosition[];
-  eligibleCandidates?: FretboardPosition[];
-  selectedCandidate?: FretboardPosition | null;
-  committedAnswer?: FretboardPosition | null;
-  correctAnswer?: FretboardPosition | null;
+  rootNote?: string
+  scaleNotes?: FretboardPosition[]
+  revealedNotes?: FretboardPosition[]
+  eligibleCandidates?: FretboardPosition[]
+  selectedCandidate?: FretboardPosition | null
+  committedAnswer?: FretboardPosition | null
+  correctAnswer?: FretboardPosition | null
   // Lab-specific
-  placedNotes?: FretboardPosition[];
-  missingNotes?: FretboardPosition[];
-  nonTargetNotes?: FretboardPosition[];
+  placedNotes?: FretboardPosition[]
+  missingNotes?: FretboardPosition[]
+  nonTargetNotes?: FretboardPosition[]
   // Lab target
-  targetMode?: string;
-  targetRoot?: string;
+  targetMode?: string
+  targetRoot?: string
   // Interaction
-  selectedIndex?: number | null;
-  onPositionSelect?: (pos: FretboardPosition, index: number) => void;
-  onCommit?: (pos: FretboardPosition) => void;
+  selectedIndex?: number | null
+  onPositionSelect?: (pos: FretboardPosition, index: number) => void
+  onCommit?: (pos: FretboardPosition) => void
   // Keyboard
-  onMoveLeft?: () => void;
-  onMoveRight?: () => void;
-  onCommitKey?: () => void;
-  focusIndex?: number | null;
+  onMoveLeft?: () => void
+  onMoveRight?: () => void
+  onCommitKey?: () => void
+  focusIndex?: number | null
   // Visual
-  reducedMotion?: boolean;
-  compact?: boolean;
-  children?: React.ReactNode;
+  reducedMotion?: boolean
+  compact?: boolean
+  children?: React.ReactNode
 }
 
-const STRING_ORDER = [0, 1, 2, 3, 4, 5]; // high E to low E
+const STRING_ORDER = [0, 1, 2, 3, 4, 5] // high E to low E
 
 const FretCell: React.FC<{
-  pos: FretboardPosition;
-  state: FretCellState;
-  isFocused: boolean;
-  isRoot: boolean;
-  onSelect: () => void;
-  onCommit: () => void;
-  label: string;
-  reducedMotion: boolean;
-  compact: boolean;
+  pos: FretboardPosition
+  state: FretCellState
+  isFocused: boolean
+  isRoot: boolean
+  onSelect: () => void
+  onCommit: () => void
+  label: string
+  reducedMotion: boolean
+  compact: boolean
 }> = ({ pos, state, isFocused, isRoot, onSelect, onCommit, label, reducedMotion, compact }) => {
   const classNames = [
     'sf-cell',
@@ -78,7 +77,9 @@ const FretCell: React.FC<{
     isRoot ? 'sf-cell--root' : '',
     reducedMotion ? 'sf-cell--reduced' : '',
     compact ? 'sf-cell--compact' : '',
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <button
@@ -92,13 +93,11 @@ const FretCell: React.FC<{
       data-fret={pos.fret}
       title={label}
     >
-      {pos.note && !compact && (
-        <span className="sf-cell__note">{pos.note}</span>
-      )}
+      {pos.note && !compact && <span className="sf-cell__note">{pos.note}</span>}
       {isRoot && <span className="sf-cell__root-ring" aria-hidden="true" />}
     </button>
-  );
-};
+  )
+}
 
 const ScaleFretboardBase: React.FC<ScaleFretboardBaseProps> = ({
   fretCount,
@@ -123,66 +122,63 @@ const ScaleFretboardBase: React.FC<ScaleFretboardBaseProps> = ({
   compact = false,
   children,
 }) => {
-  const boardRef = useRef<HTMLDivElement>(null);
+  const boardRef = useRef<HTMLDivElement>(null)
 
-  const positionKey = (pos: FretboardPosition) =>
-    `${pos.string}-${pos.fret}`;
+  const positionKey = (pos: FretboardPosition) => `${pos.string}-${pos.fret}`
 
-  const posMap = new Map(
-    positions.map((p) => [positionKey(p), p]),
-  );
+  const posMap = new Map(positions.map((p) => [positionKey(p), p]))
 
-  const revealedSet = new Set(revealedNotes.map(positionKey));
-  const eligibleSet = new Set(eligibleCandidates.map(positionKey));
-  const placedSet = new Set(placedNotes.map(positionKey));
-  const missingSet = new Set(missingNotes.map(positionKey));
-  const nonTargetSet = new Set(nonTargetNotes.map(positionKey));
-  const committedKey = committedAnswer ? positionKey(committedAnswer) : null;
-  const correctKey = correctAnswer ? positionKey(correctAnswer) : null;
-  const selectedKey = selectedCandidate ? positionKey(selectedCandidate) : null;
+  const revealedSet = new Set(revealedNotes.map(positionKey))
+  const eligibleSet = new Set(eligibleCandidates.map(positionKey))
+  const placedSet = new Set(placedNotes.map(positionKey))
+  const missingSet = new Set(missingNotes.map(positionKey))
+  const nonTargetSet = new Set(nonTargetNotes.map(positionKey))
+  const committedKey = committedAnswer ? positionKey(committedAnswer) : null
+  const correctKey = correctAnswer ? positionKey(correctAnswer) : null
+  const selectedKey = selectedCandidate ? positionKey(selectedCandidate) : null
 
   // Build a flat list of eligible positions for keyboard nav
-  const eligibleList = eligibleCandidates;
+  const eligibleList = eligibleCandidates
 
   const handleCellSelect = useCallback(
     (pos: FretboardPosition, idx: number) => {
-      onPositionSelect?.(pos, idx);
+      onPositionSelect?.(pos, idx)
     },
     [onPositionSelect],
-  );
+  )
 
   // Keyboard handler
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-        e.preventDefault();
-        onMoveLeft?.();
+        e.preventDefault()
+        onMoveLeft?.()
       } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-        e.preventDefault();
-        onMoveRight?.();
+        e.preventDefault()
+        onMoveRight?.()
       } else if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        onCommitKey?.();
+        e.preventDefault()
+        onCommitKey?.()
       }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onMoveLeft, onMoveRight, onCommitKey]);
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onMoveLeft, onMoveRight, onCommitKey])
 
   const getCellState = (pos: FretboardPosition): FretCellState => {
-    const key = positionKey(pos);
-    if (committedKey === key) return correctKey === key ? 'correct' : 'incorrect';
-    if (selectedKey === key) return 'candidate-selected';
-    if (eligibleSet.has(key)) return 'candidate';
-    if (placedSet.has(key)) return 'placed';
-    if (missingSet.has(key)) return 'missing';
-    if (nonTargetSet.has(key)) return 'non-target';
-    if (revealedSet.has(key)) return 'scale-note';
-    return 'default';
-  };
+    const key = positionKey(pos)
+    if (committedKey === key) return correctKey === key ? 'correct' : 'incorrect'
+    if (selectedKey === key) return 'candidate-selected'
+    if (eligibleSet.has(key)) return 'candidate'
+    if (placedSet.has(key)) return 'placed'
+    if (missingSet.has(key)) return 'missing'
+    if (nonTargetSet.has(key)) return 'non-target'
+    if (revealedSet.has(key)) return 'scale-note'
+    return 'default'
+  }
 
   const getCellLabel = (pos: FretboardPosition, idx: number): string => {
-    const state = getCellState(pos);
+    const state = getCellState(pos)
     const stateLabels: Record<FretCellState, string> = {
       default: '',
       'scale-note': 'scale note',
@@ -194,45 +190,57 @@ const ScaleFretboardBase: React.FC<ScaleFretboardBaseProps> = ({
       placed: 'placed',
       missing: 'missing',
       'non-target': 'not in target scale',
-    };
-    return `String ${pos.string}, fret ${pos.fret}, ${pos.note}. ${stateLabels[state]}.`;
-  };
+    }
+    return `String ${pos.string}, fret ${pos.fret}, ${pos.note}. ${stateLabels[state]}.`
+  }
 
   return (
-    <div className={`scale-fretboard ${reducedMotion ? 'scale-fretboard--reduced' : ''} ${compact ? 'scale-fretboard--compact' : ''}`}>
+    <div
+      className={`scale-fretboard ${reducedMotion ? 'scale-fretboard--reduced' : ''} ${compact ? 'scale-fretboard--compact' : ''}`}
+    >
       <div className="scale-fretboard__scroll" ref={boardRef}>
         <div className="sf-board" style={{ '--fret-count': fretCount + 1 } as React.CSSProperties}>
           {/* Fret number headers */}
           <div className="sf-headers" aria-hidden="true">
             <div className="sf-header sf-header--string" />
             {Array.from({ length: fretCount + 1 }, (_, i) => (
-              <div key={i} className="sf-header">{i}</div>
+              <div key={i} className="sf-header">
+                {i}
+              </div>
             ))}
           </div>
 
           {/* Strings */}
           {STRING_ORDER.map((stringIdx) => {
-            const stringPositions = positions.filter((p) => p.stringIndex === stringIdx);
+            const stringPositions = positions.filter((p) => p.stringIndex === stringIdx)
             return (
               <div key={stringIdx} className="sf-string" role="presentation">
                 <div className="sf-string__label" aria-hidden="true">
-                  {stringIdx === 0 ? 'E' : stringIdx === 1 ? 'B' : stringIdx === 2 ? 'G' : stringIdx === 3 ? 'D' : stringIdx === 4 ? 'A' : 'e'}
+                  {stringIdx === 0
+                    ? 'E'
+                    : stringIdx === 1
+                      ? 'B'
+                      : stringIdx === 2
+                        ? 'G'
+                        : stringIdx === 3
+                          ? 'D'
+                          : stringIdx === 4
+                            ? 'A'
+                            : 'e'}
                 </div>
                 <div className="sf-string__frets">
                   {Array.from({ length: fretCount + 1 }, (_, fretIdx) => {
-                    const pos = stringPositions.find((p) => p.fret === fretIdx);
+                    const pos = stringPositions.find((p) => p.fret === fretIdx)
                     if (!pos) {
                       return (
                         <div key={fretIdx} className="sf-fret-empty">
                           {fretIdx > 0 && <div className="sf-wire" />}
                         </div>
-                      );
+                      )
                     }
-                    const idx = eligibleList.findIndex(
-                      (ep) => positionKey(ep) === positionKey(pos),
-                    );
-                    const isFocused = idx === focusIndex;
-                    const isRoot = pos.note === rootNote && revealedSet.has(positionKey(pos));
+                    const idx = eligibleList.findIndex((ep) => positionKey(ep) === positionKey(pos))
+                    const isFocused = idx === focusIndex
+                    const isRoot = pos.note === rootNote && revealedSet.has(positionKey(pos))
                     return (
                       <div key={fretIdx} className="sf-fret-cell">
                         {fretIdx > 0 && <div className="sf-wire" />}
@@ -248,11 +256,11 @@ const ScaleFretboardBase: React.FC<ScaleFretboardBaseProps> = ({
                           compact={compact}
                         />
                       </div>
-                    );
+                    )
                   })}
                 </div>
               </div>
-            );
+            )
           })}
 
           {/* Fret markers */}
@@ -274,7 +282,7 @@ const ScaleFretboardBase: React.FC<ScaleFretboardBaseProps> = ({
 
       {children && <div className="scale-fretboard__extras">{children}</div>}
     </div>
-  );
-};
+  )
+}
 
-export default ScaleFretboardBase;
+export default ScaleFretboardBase

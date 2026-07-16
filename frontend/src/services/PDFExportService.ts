@@ -34,7 +34,7 @@ const PDFExportService: PDFExportServiceType = {
       lineSpacing = 25,
       pageMargin = 40,
       showChords = true,
-      showLyrics = true
+      showLyrics = true,
     } = options
 
     // Create optimized print container
@@ -78,7 +78,7 @@ const PDFExportService: PDFExportServiceType = {
           tempDiv.textContent = line.text || ''
           document.body.appendChild(tempDiv)
           const frontendTextWidth = tempDiv.offsetWidth
-          
+
           // NOW measure PDF text width with the SAME font
           tempDiv.style.cssText = `
             position: absolute;
@@ -90,48 +90,48 @@ const PDFExportService: PDFExportServiceType = {
           tempDiv.textContent = line.text || ''
           const pdfTextWidth = tempDiv.offsetWidth
           document.body.removeChild(tempDiv)
-          
+
           // Get the container width for reference
           let frontendContainerWidth = 1200
           const sampleContainer = document.querySelector('.chord-text-container')
           if (sampleContainer) {
             frontendContainerWidth = (sampleContainer as HTMLElement).offsetWidth
           }
-          
+
           console.log(`📏 Text measurement for line ${lineIndex + 1}:`, {
             text: (line.text?.substring(0, 50) || '') + '...',
             frontendTextWidth: frontendTextWidth + 'px',
             pdfTextWidth: pdfTextWidth + 'px',
             containerWidth: frontendContainerWidth + 'px',
-            ratio: (frontendTextWidth / pdfTextWidth).toFixed(2)
+            ratio: (frontendTextWidth / pdfTextWidth).toFixed(2),
           })
-          
+
           html += `<div style="position: relative; height: 10px; margin: 0;">`
-          
+
           line.chords.forEach((chord, chordIndex) => {
             // Get position from object (not array!)
             const savedPosition = line.chordPositions?.[chordIndex]
-            const position = savedPosition !== undefined ? savedPosition : (chordIndex * 80 + 10)
-            
+            const position = savedPosition !== undefined ? savedPosition : chordIndex * 80 + 10
+
             console.log(`📄 PDF Export - Chord "${chord}" at index ${chordIndex}:`, {
               savedPosition,
               finalPosition: position,
-              allPositions: line.chordPositions
+              allPositions: line.chordPositions,
             })
-            
+
             // CORRECT CALCULATION:
             // 1. Frontend lyrics have padding where text starts ≈ 13px from left
             const frontendTextStartOffset = 100
-            
+
             // 2. Adjust chord position by removing the padding offset
             const adjustedPosition = Math.max(0, position - frontendTextStartOffset)
-            
+
             // 3. Calculate ratio based on ACTUAL TEXT WIDTH, not container width!
             const textRatio = adjustedPosition / frontendTextWidth
-            
+
             // 4. Apply same ratio to PDF text width
             const printPosition = textRatio * pdfTextWidth
-            
+
             console.log(`   → PDF position calculation:`, {
               chordName: chord,
               frontendPosition: position + 'px',
@@ -140,9 +140,9 @@ const PDFExportService: PDFExportServiceType = {
               frontendTextWidth: frontendTextWidth + 'px',
               textRatio: (textRatio * 100).toFixed(1) + '%',
               pdfTextWidth: pdfTextWidth + 'px',
-              printPosition: printPosition.toFixed(1) + 'px'
+              printPosition: printPosition.toFixed(1) + 'px',
             })
-            
+
             html += `
               <div style="
                 position: absolute;
@@ -172,7 +172,7 @@ const PDFExportService: PDFExportServiceType = {
               </div>
             `
           })
-          
+
           html += `</div>`
         }
 
@@ -210,7 +210,7 @@ const PDFExportService: PDFExportServiceType = {
         width: 794,
         height: Math.max(1123, printContainer.scrollHeight + 80),
         logging: false,
-        imageTimeout: 0
+        imageTimeout: 0,
       })
 
       // Create PDF
@@ -218,7 +218,7 @@ const PDFExportService: PDFExportServiceType = {
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
-        compress: true
+        compress: true,
       })
 
       const imgData = canvas.toDataURL('image/jpeg', 0.95)
@@ -231,17 +231,8 @@ const PDFExportService: PDFExportServiceType = {
       let yOffset = 0
       while (yOffset < imgHeight) {
         const pageHeight = Math.min(pdfHeight, imgHeight - yOffset)
-        
-        pdf.addImage(
-          imgData,
-          'JPEG',
-          0,
-          -yOffset,
-          pdfWidth,
-          imgHeight,
-          undefined,
-          'FAST'
-        )
+
+        pdf.addImage(imgData, 'JPEG', 0, -yOffset, pdfWidth, imgHeight, undefined, 'FAST')
 
         yOffset += pdfHeight
         if (yOffset < imgHeight) {
@@ -251,7 +242,6 @@ const PDFExportService: PDFExportServiceType = {
 
       document.body.removeChild(printContainer)
       pdf.save(`song-${title.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.pdf`)
-
     } catch (error) {
       document.body.removeChild(printContainer)
       throw error
@@ -339,13 +329,13 @@ const PDFExportService: PDFExportServiceType = {
     `
 
     musicLines.forEach((line) => {
-      if (line.chords?.length && line.chords.length > 0 || line.text) {
+      if ((line.chords?.length && line.chords.length > 0) || line.text) {
         printHTML += `<div class="music-line">`
 
         if (line.chords?.length && line.chords.length > 0) {
           printHTML += `<div class="chords-container">`
           line.chords.forEach((chord, index) => {
-            const position = line.chordPositions?.[index] || (index * 80 + 10)
+            const position = line.chordPositions?.[index] || index * 80 + 10
             // Fine-tuned scaling for print method
             const scaledPosition = Math.max(0, position * 0.65)
             printHTML += `<span class="chord" style="left: ${scaledPosition}px;">${chord}</span>`
@@ -368,7 +358,7 @@ const PDFExportService: PDFExportServiceType = {
 
     printWindow.document.write(printHTML)
     printWindow.document.close()
-    
+
     // Wait for content to load then print
     setTimeout(() => {
       printWindow.print()
@@ -383,27 +373,27 @@ const PDFExportService: PDFExportServiceType = {
     textContent += `${'='.repeat(50)}\n\n`
 
     musicLines.forEach((line, index) => {
-      if (line.chords?.length && line.chords.length > 0 || line.text) {
+      if ((line.chords?.length && line.chords.length > 0) || line.text) {
         // Chords line
         if (line.chords?.length && line.chords.length > 0) {
           let chordLine = ''
           let maxPos = 0
-          
+
           // Build chord line with spacing - improved positioning
           line.chords.forEach((chord, chordIndex) => {
-            const rawPosition = line.chordPositions?.[chordIndex] || (chordIndex * 100 + 10)
+            const rawPosition = line.chordPositions?.[chordIndex] || chordIndex * 100 + 10
             // Apply similar correction as other methods but for character positions
             const scaleFactor = 0.12 // Characters per pixel approximation
             const offsetCorrection = -2 // Character offset correction
             const position = Math.max(0, Math.floor(rawPosition * scaleFactor + offsetCorrection))
-            
+
             while (chordLine.length < position) {
               chordLine += ' '
             }
             chordLine += chord
             maxPos = Math.max(maxPos, position + chord.length)
           })
-          
+
           textContent += chordLine + '\n'
         }
 
@@ -426,7 +416,7 @@ const PDFExportService: PDFExportServiceType = {
     a.click()
     document.body.removeChild(a)
     window.URL.revokeObjectURL(url)
-  }
+  },
 }
 
 export default PDFExportService

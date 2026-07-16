@@ -2,7 +2,7 @@
 
 ## Required local validation
 
-This repository contains a Flask/Python backend and a React/Vite/TypeScript frontend. Install Python development dependencies and frontend dependencies before validating:
+This repository contains a Flask/Python backend and a React/Vite/TypeScript frontend. The complete validation gate also builds and smoke-tests the production container, so Docker must be running. Install Python development dependencies and frontend dependencies before validating:
 
 ```bash
 python3 -m venv .venv
@@ -11,7 +11,7 @@ npm --prefix frontend ci
 npx --prefix frontend playwright install chromium
 ```
 
-Backend authentication tests require a strong test-only `TEST_PASSWORD`. Store it in your local `.env` or export it for the validation process. CI generates an ephemeral value and does not require a repository secret.
+Backend authentication tests generate a process-local strong password when `TEST_PASSWORD` is not provided. CI therefore does not require a credential secret.
 
 Run the complete fail-fast validation gate from the repository root:
 

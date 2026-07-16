@@ -75,7 +75,9 @@
   background: #dc2626;
   color: white;
   border-color: #b91c1c;
-  box-shadow: 0 0 0 1px #fca5a5, 0 2px 10px rgba(220, 38, 38, 0.5);
+  box-shadow:
+    0 0 0 1px #fca5a5,
+    0 2px 10px rgba(220, 38, 38, 0.5);
 }
 
 /* Natural (white) keys — flex row, proportional width */
@@ -107,11 +109,19 @@
   border-radius: 0;
   border-right: 1px solid #e5e7eb;
 }
-.pk-natural-key:last-child { border-right: none; }
-.pk-natural-keys-row .pk-natural-key:first-child { border-radius: 0 0 0 6px; }
-.pk-natural-keys-row .pk-natural-key:last-child  { border-radius: 0 0 6px 0; }
+.pk-natural-key:last-child {
+  border-right: none;
+}
+.pk-natural-keys-row .pk-natural-key:first-child {
+  border-radius: 0 0 0 6px;
+}
+.pk-natural-keys-row .pk-natural-key:last-child {
+  border-radius: 0 0 6px 0;
+}
 
-.pk-natural-key:hover { background: #f3f4f6; }
+.pk-natural-key:hover {
+  background: #f3f4f6;
+}
 
 .pk-natural-key.scale-note {
   background: #3b82f6;
@@ -146,27 +156,64 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.piano-legend .legend-key.white { background: white; }
-.piano-legend .legend-key.root  { background: #ef4444; }
-.piano-legend .legend-key.scale { background: #3b82f6; }
+.piano-legend .legend-key.white {
+  background: white;
+}
+.piano-legend .legend-key.root {
+  background: #ef4444;
+}
+.piano-legend .legend-key.scale {
+  background: #3b82f6;
+}
 
 /* Responsive */
 @media (max-width: 1100px) {
-  .pk-natural-key { height: 90px; font-size: 0.65rem; }
-  .pk-black-key   { font-size: 0.55rem; padding-bottom: 0.3rem; }
-  .pk-black-keys-layer { height: 55%; }
+  .pk-natural-key {
+    height: 90px;
+    font-size: 0.65rem;
+  }
+  .pk-black-key {
+    font-size: 0.55rem;
+    padding-bottom: 0.3rem;
+  }
+  .pk-black-keys-layer {
+    height: 55%;
+  }
 }
 
 @media (max-width: 768px) {
-  .pk-natural-key { height: 75px; font-size: 0.6rem; }
-  .pk-black-key   { font-size: 0.5rem; padding-bottom: 0.25rem; }
-  .pk-black-keys-layer { height: 50%; }
-  .piano-legend { gap: 0.6rem; font-size: 0.65rem; }
+  .pk-natural-key {
+    height: 75px;
+    font-size: 0.6rem;
+  }
+  .pk-black-key {
+    font-size: 0.5rem;
+    padding-bottom: 0.25rem;
+  }
+  .pk-black-keys-layer {
+    height: 50%;
+  }
+  .piano-legend {
+    gap: 0.6rem;
+    font-size: 0.65rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .pk-natural-key { height: 60px; font-size: 0.55rem; padding-bottom: 0.25rem; }
-  .pk-black-key   { font-size: 0.45rem; padding-bottom: 0.2rem; }
-  .pk-black-keys-layer { height: 45%; }
-  .piano-legend .legend-key { width: 0.75rem; height: 0.6rem; }
+  .pk-natural-key {
+    height: 60px;
+    font-size: 0.55rem;
+    padding-bottom: 0.25rem;
+  }
+  .pk-black-key {
+    font-size: 0.45rem;
+    padding-bottom: 0.2rem;
+  }
+  .pk-black-keys-layer {
+    height: 45%;
+  }
+  .piano-legend .legend-key {
+    width: 0.75rem;
+    height: 0.6rem;
+  }
 }

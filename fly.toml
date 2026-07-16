@@ -5,6 +5,9 @@ primary_region = 'lhr'
 
 [build]
 
+[env]
+  PYMUSIC_DATA_DIR = "/app/data"
+
 [deploy]
   strategy = "immediate"
 

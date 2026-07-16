@@ -6,21 +6,21 @@ import InlineChordDisplay from './InlineChordDisplay'
 import './ProgressionBuilder.scss'
 
 const ProgressionBuilder = ({ scaleData, saveName = '' }) => {
-  const { 
-    progressionLines, 
-    currentLine, 
-    addChordToProgression, 
-    removeChordFromProgression, 
-    addProgressionLine, 
-    removeProgressionLine, 
-    clearProgression, 
+  const {
+    progressionLines,
+    currentLine,
+    addChordToProgression,
+    removeChordFromProgression,
+    addProgressionLine,
+    removeProgressionLine,
+    clearProgression,
     setCurrentProgressionLine,
     showChords,
     lyrics,
     chordOverLyrics,
   } = useChordPanel()
-  
-
+  const selectedKey = scaleData?.key || scaleData?.root || ''
+  const selectedInterval = scaleData?.interval || scaleData?.scale_type || ''
 
   const addChord = (chord) => {
     addChordToProgression(chord)
@@ -56,46 +56,52 @@ const ProgressionBuilder = ({ scaleData, saveName = '' }) => {
 
   const exportToPDF = () => {
     // ─── Generate Music Sheet HTML ────────────────────────────────────────
-    const linesHTML = progressionLines.map((line, lineIndex) => {
-      const lyricText = lyrics[lineIndex] || ''
-      const words = getWords(lyricText)
-      const lineChords = chordOverLyrics[lineIndex] || []
-      
-      // Build chord map
-      const chordMap = {}
-      lineChords.forEach(({ wordIndex, chord }) => {
-        chordMap[wordIndex] = chord
-      })
-      
-      // Chord row HTML
-      const chordRow = words.map((word, wordIndex) => {
-        const chord = chordMap[wordIndex]
-        if (chord) {
-          return `<span class="chord"><span class="chord-name">${chord}</span></span>`
-        }
-        return '<span class="chord-spacer"></span>'
-      }).join('')
-      
-      // Lyric row HTML
-      const lyricRow = words.map(word => {
-        // Handle quoted phrases - show them together with chord above opening quote
-        return `<span class="lyric-word">${word}</span>`
-      }).join(' ')
-      
-      if (!lyricText.trim()) {
-        return `<div class="line line-empty">
+    const linesHTML = progressionLines
+      .map((line, lineIndex) => {
+        const lyricText = lyrics[lineIndex] || ''
+        const words = getWords(lyricText)
+        const lineChords = chordOverLyrics[lineIndex] || []
+
+        // Build chord map
+        const chordMap = {}
+        lineChords.forEach(({ wordIndex, chord }) => {
+          chordMap[wordIndex] = chord
+        })
+
+        // Chord row HTML
+        const chordRow = words
+          .map((word, wordIndex) => {
+            const chord = chordMap[wordIndex]
+            if (chord) {
+              return `<span class="chord"><span class="chord-name">${chord}</span></span>`
+            }
+            return '<span class="chord-spacer"></span>'
+          })
+          .join('')
+
+        // Lyric row HTML
+        const lyricRow = words
+          .map((word) => {
+            // Handle quoted phrases - show them together with chord above opening quote
+            return `<span class="lyric-word">${word}</span>`
+          })
+          .join(' ')
+
+        if (!lyricText.trim()) {
+          return `<div class="line line-empty">
           <div class="chord-row"><span class="line-label">Line ${lineIndex + 1}</span></div>
           <div class="lyric-row"><span class="empty-hint">No lyrics</span></div>
         </div>`
-      }
-      
-      return `<div class="line">
+        }
+
+        return `<div class="line">
         <div class="chord-row">${chordRow}</div>
         <div class="lyric-row">${lyricRow}</div>
       </div>`
-    }).join('')
+      })
+      .join('')
 
-    const hasLyrics = Object.values(lyrics).some(t => t.trim())
+    const hasLyrics = (Object.values(lyrics) as string[]).some((t) => t.trim())
     const title = saveName || 'Chord Progression'
 
     const printWindow = window.open('', '_blank')
@@ -255,7 +261,7 @@ const ProgressionBuilder = ({ scaleData, saveName = '' }) => {
 </html>
 `)
     printWindow.document.close()
-    
+
     // Give fonts time to load, then print
     setTimeout(() => {
       printWindow.focus()
@@ -298,7 +304,7 @@ const ProgressionBuilder = ({ scaleData, saveName = '' }) => {
             ))}
           </div>
         </div>
-        
+
         <div className="seventh-notes-section">
           <h4 className="section-title">Seventh Notes:</h4>
           <div className="compact-chords-grid">
@@ -320,7 +326,6 @@ const ProgressionBuilder = ({ scaleData, saveName = '' }) => {
         </div>
       </div>
 
-
       <div className="progression-section">
         <div className="progression-header">
           <h4 className="section-title">Progression:</h4>
@@ -331,10 +336,7 @@ const ProgressionBuilder = ({ scaleData, saveName = '' }) => {
 
         <div className="progression-lines">
           {progressionLines.map((line, lineIndex) => (
-            <div
-              key={lineIndex}
-              className={`progression-line ${currentLine === lineIndex ? 'active' : ''}`}
-            >
+            <div key={lineIndex} className={`progression-line ${currentLine === lineIndex ? 'active' : ''}`}>
               <div className="line-header">
                 <button
                   className="line-select-button"
@@ -344,11 +346,7 @@ const ProgressionBuilder = ({ scaleData, saveName = '' }) => {
                   {currentLine === lineIndex ? '✓' : '○'}
                 </button>
                 {progressionLines.length > 1 && (
-                  <button
-                    className="remove-line-button"
-                    onClick={() => removeLine(lineIndex)}
-                    title="Remove this line"
-                  >
+                  <button className="remove-line-button" onClick={() => removeLine(lineIndex)} title="Remove this line">
                     ×
                   </button>
                 )}
@@ -356,9 +354,7 @@ const ProgressionBuilder = ({ scaleData, saveName = '' }) => {
 
               <div className="line-chords">
                 {line.length === 0 ? (
-                  <div className="empty-line">
-                    {currentLine === lineIndex ? 'Add chords here...' : '(empty)'}
-                  </div>
+                  <div className="empty-line">{currentLine === lineIndex ? 'Add chords here...' : '(empty)'}</div>
                 ) : (
                   line.map((chord, chordIndex) => (
                     <div key={chordIndex} className="progression-chord-item">
@@ -388,8 +384,8 @@ const ProgressionBuilder = ({ scaleData, saveName = '' }) => {
       <div className="progression-info">
         <span className="progression-stats">
           {(() => {
-            const totalChords = progressionLines.reduce((total, line) => total + line.length, 0);
-            return `${progressionLines.length} line${progressionLines.length !== 1 ? 's' : ''}, ${totalChords} chord${totalChords !== 1 ? 's' : ''} total`;
+            const totalChords = progressionLines.reduce((total, line) => total + line.length, 0)
+            return `${progressionLines.length} line${progressionLines.length !== 1 ? 's' : ''}, ${totalChords} chord${totalChords !== 1 ? 's' : ''} total`
           })()}
         </span>
       </div>

@@ -1,18 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
-import {
-  ArrowLeft,
-  Download,
-  FileText,
-  FolderOpen,
-  Music,
-  Plus,
-  Save,
-  Sparkles,
-  Trash2,
-  Wand2,
-  X,
-} from 'lucide-react'
+import { ArrowLeft, Download, FileText, FolderOpen, Music, Plus, Save, Sparkles, Trash2, Wand2, X } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { createProgression, deleteProgression, getProgressions, updateProgression } from '../../services/api'
 import './MySongsPage.scss'
@@ -42,17 +30,18 @@ const splitWords = (text = '') => {
   return words
 }
 
-const escapeHtml = (text = '') => String(text)
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;')
-  .replace(/'/g, '&#039;')
+const escapeHtml = (text = '') =>
+  String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
 
 const normalizeChordLines = (rawChords) => {
   const chords = parseJson(rawChords, [])
   if (!Array.isArray(chords) || chords.length === 0) return [[]]
-  if (Array.isArray(chords[0])) return chords.map(line => line.filter(Boolean))
+  if (Array.isArray(chords[0])) return chords.map((line) => line.filter(Boolean))
   return [chords.filter(Boolean)]
 }
 
@@ -66,10 +55,16 @@ const normalizeSong = (song) => {
     id: song.id,
     name: song.name || 'Untitled Song',
     key: song.key || DEFAULT_KEY,
-    interval: song.interval === 'major' ? DEFAULT_INTERVAL : (song.interval || DEFAULT_INTERVAL),
+    interval: song.interval === 'major' ? DEFAULT_INTERVAL : song.interval || DEFAULT_INTERVAL,
     chordLines: Array.from({ length: lineCount }, (_, index) => chordLines[index] || []),
-    lyrics: Array.from({ length: lineCount }, (_, index) => lyrics[index] || '').reduce((acc, text, index) => ({ ...acc, [index]: text }), {}),
-    chordOverLyrics: Array.from({ length: lineCount }, (_, index) => chordOverLyrics[index] || []).reduce((acc, items, index) => ({ ...acc, [index]: items }), {}),
+    lyrics: Array.from({ length: lineCount }, (_, index) => lyrics[index] || '').reduce(
+      (acc, text, index) => ({ ...acc, [index]: text }),
+      {},
+    ),
+    chordOverLyrics: Array.from({ length: lineCount }, (_, index) => chordOverLyrics[index] || []).reduce(
+      (acc, items, index) => ({ ...acc, [index]: items }),
+      {},
+    ),
     created_at: song.created_at,
     updated_at: song.updated_at,
   }
@@ -89,7 +84,7 @@ const createBlankSong = () => ({
 
 const flattenChordCount = (song) => song.chordLines.reduce((sum, line) => sum + line.length, 0)
 const placedChordCount = (song) => Object.values(song.chordOverLyrics || {}).flat().length
-const lyricLineCount = (song) => Object.values(song.lyrics || {}).filter(line => line.trim()).length
+const lyricLineCount = (song) => (Object.values(song.lyrics || {}) as string[]).filter((line) => line.trim()).length
 
 const formatDate = (iso) => {
   if (!iso) return 'Draft'
@@ -143,24 +138,30 @@ const MySongsPage = () => {
     if (!draft?.key) return
 
     let cancelled = false
-    axios.get(`/api/scale/${encodeURIComponent(draft.key)}?interval=${draft.interval || DEFAULT_INTERVAL}`)
-      .then(res => {
+    axios
+      .get(`/api/scale/${encodeURIComponent(draft.key)}?interval=${draft.interval || DEFAULT_INTERVAL}`)
+      .then((res) => {
         if (cancelled) return
-        const chords = (res.data?.scale_degrees || []).map(deg => deg.chord).filter(Boolean)
-        const sevenths = (res.data?.chord_sevenths || []).map(item => item.seventh).filter(Boolean)
+        const chords = (res.data?.scale_degrees || []).map((deg) => deg.chord).filter(Boolean)
+        const sevenths = (res.data?.chord_sevenths || []).map((item) => item.seventh).filter(Boolean)
         setPalette([...new Set([...chords, ...sevenths])].slice(0, 14))
       })
       .catch(() => setPalette(FALLBACK_PALETTE))
 
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [draft?.key, draft?.interval])
 
   const sortedSongs = useMemo(() => {
-    return [...songs].sort((a, b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0))
+    return [...songs].sort(
+      (a, b) =>
+        new Date(b.updated_at || b.created_at || 0).getTime() - new Date(a.updated_at || a.created_at || 0).getTime(),
+    )
   }, [songs])
 
   const updateDraft = (updater) => {
-    setDraft(prev => {
+    setDraft((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       return { ...next, updated_at: new Date().toISOString() }
     })
@@ -172,12 +173,14 @@ const MySongsPage = () => {
   }
 
   const openSong = (song) => {
-    setDraft(normalizeSong({
-      ...song,
-      chords_json: song.chordLines,
-      lyrics_json: song.lyrics,
-      chord_over_lyrics_json: song.chordOverLyrics,
-    }))
+    setDraft(
+      normalizeSong({
+        ...song,
+        chords_json: song.chordLines,
+        lyrics_json: song.lyrics,
+        chord_over_lyrics_json: song.chordOverLyrics,
+      }),
+    )
     setPicker(null)
   }
 
@@ -196,9 +199,7 @@ const MySongsPage = () => {
       created_at: song.created_at || now,
       updated_at: now,
     }
-    const updated = Array.isArray(existing)
-      ? [record, ...existing.filter(item => item.id !== id)]
-      : [record]
+    const updated = Array.isArray(existing) ? [record, ...existing.filter((item) => item.id !== id)] : [record]
     localStorage.setItem(GUEST_SONGS_KEY, JSON.stringify(updated))
     return normalizeSong(record)
   }
@@ -215,15 +216,13 @@ const MySongsPage = () => {
       let saved
       if (isLoggedIn) {
         const payload = serializeSong(draft)
-        const res = draft.id
-          ? await updateProgression(draft.id, payload)
-          : await createProgression(payload)
+        const res = draft.id ? await updateProgression(draft.id, payload) : await createProgression(payload)
         saved = normalizeSong(res.data.progression)
       } else {
         saved = saveGuestSong(draft)
       }
 
-      setSongs(prev => [saved, ...prev.filter(song => song.id !== saved.id)])
+      setSongs((prev) => [saved, ...prev.filter((song) => song.id !== saved.id)])
       setDraft(saved)
       if (!draft.id) bumpNewSongsCount()
     } finally {
@@ -239,69 +238,75 @@ const MySongsPage = () => {
         await deleteProgression(song.id)
       } else {
         const saved = parseJson(localStorage.getItem(GUEST_SONGS_KEY), [])
-        localStorage.setItem(GUEST_SONGS_KEY, JSON.stringify(saved.filter(item => item.id !== song.id)))
+        localStorage.setItem(GUEST_SONGS_KEY, JSON.stringify(saved.filter((item) => item.id !== song.id)))
       }
-      setSongs(prev => prev.filter(item => item.id !== song.id))
+      setSongs((prev) => prev.filter((item) => item.id !== song.id))
       if (draft?.id === song.id) setDraft(null)
     } finally {
       setDeletingId(null)
     }
   }
 
-  const setLineLyrics = (lineIndex, text) => updateDraft(song => ({
-    ...song,
-    lyrics: { ...song.lyrics, [lineIndex]: text },
-    chordOverLyrics: {
-      ...song.chordOverLyrics,
-      [lineIndex]: (song.chordOverLyrics[lineIndex] || []).filter(item => item.wordIndex < splitWords(text).length),
-    },
-  }))
-
-  const addLine = () => updateDraft(song => {
-    const nextIndex = song.chordLines.length
-    return {
+  const setLineLyrics = (lineIndex, text) =>
+    updateDraft((song) => ({
       ...song,
-      chordLines: [...song.chordLines, []],
-      lyrics: { ...song.lyrics, [nextIndex]: '' },
-      chordOverLyrics: { ...song.chordOverLyrics, [nextIndex]: [] },
-    }
-  })
+      lyrics: { ...song.lyrics, [lineIndex]: text },
+      chordOverLyrics: {
+        ...song.chordOverLyrics,
+        [lineIndex]: (song.chordOverLyrics[lineIndex] || []).filter((item) => item.wordIndex < splitWords(text).length),
+      },
+    }))
 
-  const removeLine = (lineIndex) => updateDraft(song => {
-    if (song.chordLines.length <= 1) return song
-    const chordLines = song.chordLines.filter((_, index) => index !== lineIndex)
-    const lyrics = {}
-    const chordOverLyrics = {}
-    chordLines.forEach((_, newIndex) => {
-      const oldIndex = newIndex >= lineIndex ? newIndex + 1 : newIndex
-      lyrics[newIndex] = song.lyrics[oldIndex] || ''
-      chordOverLyrics[newIndex] = song.chordOverLyrics[oldIndex] || []
+  const addLine = () =>
+    updateDraft((song) => {
+      const nextIndex = song.chordLines.length
+      return {
+        ...song,
+        chordLines: [...song.chordLines, []],
+        lyrics: { ...song.lyrics, [nextIndex]: '' },
+        chordOverLyrics: { ...song.chordOverLyrics, [nextIndex]: [] },
+      }
     })
-    return { ...song, chordLines, lyrics, chordOverLyrics }
-  })
+
+  const removeLine = (lineIndex) =>
+    updateDraft((song) => {
+      if (song.chordLines.length <= 1) return song
+      const chordLines = song.chordLines.filter((_, index) => index !== lineIndex)
+      const lyrics = {}
+      const chordOverLyrics = {}
+      chordLines.forEach((_, newIndex) => {
+        const oldIndex = newIndex >= lineIndex ? newIndex + 1 : newIndex
+        lyrics[newIndex] = song.lyrics[oldIndex] || ''
+        chordOverLyrics[newIndex] = song.chordOverLyrics[oldIndex] || []
+      })
+      return { ...song, chordLines, lyrics, chordOverLyrics }
+    })
 
   const addChordToLine = (lineIndex, chord) => {
     if (!chord.trim()) return
-    updateDraft(song => {
-      const chordLines = song.chordLines.map((line, index) => index === lineIndex ? [...line, chord.trim()] : line)
+    updateDraft((song) => {
+      const chordLines = song.chordLines.map((line, index) => (index === lineIndex ? [...line, chord.trim()] : line))
       return { ...song, chordLines }
     })
     setCustomChord('')
   }
 
-  const removeChordFromLine = (lineIndex, chordIndex) => updateDraft(song => {
-    const chordToRemove = song.chordLines[lineIndex][chordIndex]
-    const chordLines = song.chordLines.map((line, index) => index === lineIndex ? line.filter((_, i) => i !== chordIndex) : line)
-    const chordOverLyrics = {
-      ...song.chordOverLyrics,
-      [lineIndex]: (song.chordOverLyrics[lineIndex] || []).filter(item => item.chord !== chordToRemove),
-    }
-    return { ...song, chordLines, chordOverLyrics }
-  })
+  const removeChordFromLine = (lineIndex, chordIndex) =>
+    updateDraft((song) => {
+      const chordToRemove = song.chordLines[lineIndex][chordIndex]
+      const chordLines = song.chordLines.map((line, index) =>
+        index === lineIndex ? line.filter((_, i) => i !== chordIndex) : line,
+      )
+      const chordOverLyrics = {
+        ...song.chordOverLyrics,
+        [lineIndex]: (song.chordOverLyrics[lineIndex] || []).filter((item) => item.chord !== chordToRemove),
+      }
+      return { ...song, chordLines, chordOverLyrics }
+    })
 
   const placeChord = (lineIndex, wordIndex, chord) => {
-    updateDraft(song => {
-      const existing = (song.chordOverLyrics[lineIndex] || []).filter(item => item.wordIndex !== wordIndex)
+    updateDraft((song) => {
+      const existing = (song.chordOverLyrics[lineIndex] || []).filter((item) => item.wordIndex !== wordIndex)
       const nextLine = chord ? [...existing, { wordIndex, chord }].sort((a, b) => a.wordIndex - b.wordIndex) : existing
       return {
         ...song,
@@ -315,23 +320,31 @@ const MySongsPage = () => {
 
   const exportSong = () => {
     if (!draft) return
-    const lines = draft.chordLines.map((_, lineIndex) => {
-      const words = splitWords(draft.lyrics[lineIndex] || '')
-      const chordMap = Object.fromEntries((draft.chordOverLyrics[lineIndex] || []).map(item => [item.wordIndex, item.chord]))
+    const lines = draft.chordLines
+      .map((_, lineIndex) => {
+        const words = splitWords(draft.lyrics[lineIndex] || '')
+        const chordMap = Object.fromEntries(
+          (draft.chordOverLyrics[lineIndex] || []).map((item) => [item.wordIndex, item.chord]),
+        )
 
-      if (words.length === 0) {
-        return `<section class="song-line empty"><div class="empty-line">Line ${lineIndex + 1}: instrumental / empty</div></section>`
-      }
+        if (words.length === 0) {
+          return `<section class="song-line empty"><div class="empty-line">Line ${lineIndex + 1}: instrumental / empty</div></section>`
+        }
 
-      const wordCells = words.map((word, wordIndex) => `
+        const wordCells = words
+          .map(
+            (word, wordIndex) => `
         <span class="word-cell">
           <span class="chord-mark">${escapeHtml(chordMap[wordIndex] || '')}</span>
           <span class="lyric-word">${escapeHtml(word)}</span>
         </span>
-      `).join('')
+      `,
+          )
+          .join('')
 
-      return `<section class="song-line"><div class="word-row">${wordCells}</div></section>`
-    }).join('')
+        return `<section class="song-line"><div class="word-row">${wordCells}</div></section>`
+      })
+      .join('')
 
     const printWindow = window.open('', '_blank')
     if (!printWindow) return
@@ -377,20 +390,31 @@ const MySongsPage = () => {
     return (
       <div className="mysongs-page song-editor-page">
         <div className="song-editor-topbar">
-          <button className="ghost-btn" onClick={() => { setDraft(null); setPicker(null) }}>
+          <button
+            className="ghost-btn"
+            onClick={() => {
+              setDraft(null)
+              setPicker(null)
+            }}
+          >
             <ArrowLeft size={16} /> Library
           </button>
           <div className="song-title-stack">
             <input
               className="song-title-input"
               value={draft.name}
-              onChange={event => updateDraft(song => ({ ...song, name: event.target.value }))}
+              onChange={(event) => updateDraft((song) => ({ ...song, name: event.target.value }))}
               aria-label="Song title"
             />
-            <span>{draft.key} · {draft.chordLines.length} line{draft.chordLines.length !== 1 ? 's' : ''} · {placedChordCount(draft)} placed chords</span>
+            <span>
+              {draft.key} · {draft.chordLines.length} line{draft.chordLines.length !== 1 ? 's' : ''} ·{' '}
+              {placedChordCount(draft)} placed chords
+            </span>
           </div>
           <div className="song-editor-actions">
-            <button className="ghost-btn" onClick={exportSong}><Download size={16} /> Export PDF</button>
+            <button className="ghost-btn" onClick={exportSong}>
+              <Download size={16} /> Export PDF
+            </button>
             <button className="save-song-btn" onClick={saveSong} disabled={saving}>
               <Save size={16} /> {saving ? 'Saving...' : 'Save Song'}
             </button>
@@ -401,11 +425,11 @@ const MySongsPage = () => {
           <div>
             <span className="panel-eyebrow">Key</span>
             <div className="root-note-grid">
-              {ROOT_NOTES.map(note => (
+              {ROOT_NOTES.map((note) => (
                 <button
                   key={note}
                   className={`root-note-chip ${draft.key === note ? 'active' : ''}`}
-                  onClick={() => updateDraft(song => ({ ...song, key: note }))}
+                  onClick={() => updateDraft((song) => ({ ...song, key: note }))}
                 >
                   {note}
                 </button>
@@ -415,28 +439,37 @@ const MySongsPage = () => {
           <div className="palette-panel">
             <span className="panel-eyebrow">Key palette</span>
             <div className="palette-chips">
-              {palette.map(chord => <span key={chord} className="palette-chip">{chord}</span>)}
+              {palette.map((chord) => (
+                <span key={chord} className="palette-chip">
+                  {chord}
+                </span>
+              ))}
             </div>
           </div>
         </section>
 
         <section className="writer-help-card">
           <Sparkles size={18} />
-          Write one lyric line, add the chords that belong to that line, then click words in the sheet row to place the harmony change exactly where you sing it.
+          Write one lyric line, add the chords that belong to that line, then click words in the sheet row to place the
+          harmony change exactly where you sing it.
         </section>
 
         <div className="song-lines-editor">
           {draft.chordLines.map((lineChords, lineIndex) => {
             const text = draft.lyrics[lineIndex] || ''
             const words = splitWords(text)
-            const chordMap = Object.fromEntries((draft.chordOverLyrics[lineIndex] || []).map(item => [item.wordIndex, item.chord]))
+            const chordMap = Object.fromEntries(
+              (draft.chordOverLyrics[lineIndex] || []).map((item) => [item.wordIndex, item.chord]),
+            )
 
             return (
               <section key={lineIndex} className="song-line-card">
                 <div className="line-card-header">
                   <div>
                     <span className="panel-eyebrow">Line {lineIndex + 1}</span>
-                    <strong>{lineChords.length} chord{lineChords.length !== 1 ? 's' : ''} available</strong>
+                    <strong>
+                      {lineChords.length} chord{lineChords.length !== 1 ? 's' : ''} available
+                    </strong>
                   </div>
                   {draft.chordLines.length > 1 && (
                     <button className="line-remove-btn" onClick={() => removeLine(lineIndex)}>
@@ -448,7 +481,7 @@ const MySongsPage = () => {
                 <textarea
                   className="line-lyrics-input"
                   value={text}
-                  onChange={event => setLineLyrics(lineIndex, event.target.value)}
+                  onChange={(event) => setLineLyrics(lineIndex, event.target.value)}
                   placeholder="Write a lyric line..."
                   rows={2}
                 />
@@ -457,7 +490,12 @@ const MySongsPage = () => {
                   <span className="bank-label">Line chords</span>
                   <div className="bank-chords">
                     {lineChords.map((chord, chordIndex) => (
-                      <button key={`${chord}-${chordIndex}`} className="bank-chord" onClick={() => removeChordFromLine(lineIndex, chordIndex)} title="Remove chord from this line">
+                      <button
+                        key={`${chord}-${chordIndex}`}
+                        className="bank-chord"
+                        onClick={() => removeChordFromLine(lineIndex, chordIndex)}
+                        title="Remove chord from this line"
+                      >
                         {chord} <X size={12} />
                       </button>
                     ))}
@@ -466,61 +504,79 @@ const MySongsPage = () => {
                 </div>
 
                 <div className="quick-add-row">
-                  {palette.slice(0, 8).map(chord => (
-                    <button key={chord} className="quick-chord-btn" onClick={() => addChordToLine(lineIndex, chord)}>{chord}</button>
+                  {palette.slice(0, 8).map((chord) => (
+                    <button key={chord} className="quick-chord-btn" onClick={() => addChordToLine(lineIndex, chord)}>
+                      {chord}
+                    </button>
                   ))}
                   <input
                     value={customChord}
-                    onChange={event => setCustomChord(event.target.value)}
-                    onKeyDown={event => {
+                    onChange={(event) => setCustomChord(event.target.value)}
+                    onKeyDown={(event) => {
                       if (event.key === 'Enter') addChordToLine(lineIndex, customChord)
                     }}
                     placeholder="Custom"
                     className="custom-chord-input"
                   />
-                  <button className="quick-chord-btn custom" onClick={() => addChordToLine(lineIndex, customChord)}>Add</button>
+                  <button className="quick-chord-btn custom" onClick={() => addChordToLine(lineIndex, customChord)}>
+                    Add
+                  </button>
                 </div>
 
                 <div className="word-sheet-row">
                   {words.length === 0 ? (
                     <span className="word-empty-hint">Type lyrics above, then click words here to place chords.</span>
-                  ) : words.map((word, wordIndex) => {
-                    const chord = chordMap[wordIndex]
-                    return (
-                      <button
-                        key={`${word}-${wordIndex}`}
-                        className={`word-cell-btn ${chord ? 'has-chord' : ''}`}
-                        onClick={() => setPicker({ lineIndex, wordIndex })}
-                      >
-                        <span className="word-chord-mark">{chord || '＋'}</span>
-                        <span className="word-text">{word}</span>
-                      </button>
-                    )
-                  })}
+                  ) : (
+                    words.map((word, wordIndex) => {
+                      const chord = chordMap[wordIndex]
+                      return (
+                        <button
+                          key={`${word}-${wordIndex}`}
+                          className={`word-cell-btn ${chord ? 'has-chord' : ''}`}
+                          onClick={() => setPicker({ lineIndex, wordIndex })}
+                        >
+                          <span className="word-chord-mark">{chord || '＋'}</span>
+                          <span className="word-text">{word}</span>
+                        </button>
+                      )
+                    })
+                  )}
                 </div>
               </section>
             )
           })}
         </div>
 
-        <button className="add-line-wide" onClick={addLine}><Plus size={16} /> Add lyric line</button>
+        <button className="add-line-wide" onClick={addLine}>
+          <Plus size={16} /> Add lyric line
+        </button>
 
         {picker && (
           <div className="chord-picker-overlay" onClick={() => setPicker(null)}>
-            <div className="word-chord-picker" onClick={event => event.stopPropagation()}>
+            <div className="word-chord-picker" onClick={(event) => event.stopPropagation()}>
               <div className="picker-header">
                 <div>
                   <span className="panel-eyebrow">Place chord</span>
                   <strong>{splitWords(draft.lyrics[picker.lineIndex] || '')[picker.wordIndex]}</strong>
                 </div>
-                <button onClick={() => setPicker(null)}><X size={18} /></button>
+                <button onClick={() => setPicker(null)}>
+                  <X size={18} />
+                </button>
               </div>
               <div className="picker-grid">
                 {(draft.chordLines[picker.lineIndex] || []).map((chord, index) => (
-                  <button key={`${chord}-${index}`} onClick={() => placeChord(picker.lineIndex, picker.wordIndex, chord)}>{chord}</button>
+                  <button
+                    key={`${chord}-${index}`}
+                    onClick={() => placeChord(picker.lineIndex, picker.wordIndex, chord)}
+                  >
+                    {chord}
+                  </button>
                 ))}
               </div>
-              <button className="remove-placement-btn" onClick={() => removePlacedChord(picker.lineIndex, picker.wordIndex)}>
+              <button
+                className="remove-placement-btn"
+                onClick={() => removePlacedChord(picker.lineIndex, picker.wordIndex)}
+              >
                 Remove chord from this word
               </button>
             </div>
@@ -534,16 +590,21 @@ const MySongsPage = () => {
     <div className="mysongs-page">
       <div className="mysongs-hero">
         <div>
-          <div className="hero-kicker"><Music size={16} /> Songwriting desk</div>
+          <div className="hero-kicker">
+            <Music size={16} /> Songwriting desk
+          </div>
           <h1>My Songs</h1>
           <p>Write lyrics, keep each line's chords close, and place changes above the exact words where they land.</p>
         </div>
-        <button className="new-song-btn" onClick={startNewSong}><Plus size={18} /> New Song</button>
+        <button className="new-song-btn" onClick={startNewSong}>
+          <Plus size={18} /> New Song
+        </button>
       </div>
 
       {!isLoggedIn && (
         <div className="guest-notice">
-          Guest mode saves in this browser. <button onClick={() => promptLogin('save')}>Sign up free</button> to sync songs across devices.
+          Guest mode saves in this browser. <button onClick={() => promptLogin('save')}>Sign up free</button> to sync
+          songs across devices.
         </div>
       )}
 
@@ -560,8 +621,8 @@ const MySongsPage = () => {
 
       {!loading && sortedSongs.length > 0 && (
         <div className="songs-library-grid">
-          {sortedSongs.map(song => {
-            const firstLine = Object.values(song.lyrics).find(line => line.trim()) || 'No lyrics yet'
+          {sortedSongs.map((song) => {
+            const firstLine = (Object.values(song.lyrics) as string[]).find((line) => line.trim()) || 'No lyrics yet'
             return (
               <article key={song.id} className="library-song-card" onClick={() => openSong(song)}>
                 <div className="song-card-topline">
@@ -579,13 +640,25 @@ const MySongsPage = () => {
                   ))}
                 </div>
                 <div className="song-stats-row">
-                  <span><FileText size={13} /> {lyricLineCount(song)} lines</span>
-                  <span><Music size={13} /> {flattenChordCount(song)} chords</span>
-                  <span><Sparkles size={13} /> {placedChordCount(song)} placed</span>
+                  <span>
+                    <FileText size={13} /> {lyricLineCount(song)} lines
+                  </span>
+                  <span>
+                    <Music size={13} /> {flattenChordCount(song)} chords
+                  </span>
+                  <span>
+                    <Sparkles size={13} /> {placedChordCount(song)} placed
+                  </span>
                 </div>
-                <div className="library-card-actions" onClick={event => event.stopPropagation()}>
-                  <button className="open-song-btn" onClick={() => openSong(song)}><FolderOpen size={15} /> Open</button>
-                  <button className="delete-song-btn" onClick={() => deleteSong(song)} disabled={deletingId === song.id}>
+                <div className="library-card-actions" onClick={(event) => event.stopPropagation()}>
+                  <button className="open-song-btn" onClick={() => openSong(song)}>
+                    <FolderOpen size={15} /> Open
+                  </button>
+                  <button
+                    className="delete-song-btn"
+                    onClick={() => deleteSong(song)}
+                    disabled={deletingId === song.id}
+                  >
                     <Trash2 size={15} /> {deletingId === song.id ? 'Deleting...' : 'Delete'}
                   </button>
                 </div>

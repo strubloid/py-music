@@ -1,16 +1,16 @@
 // Fragment HUD — shows the prompt, degree clue, and difficulty tier for Scale Path
-import React from 'react';
-import type { ScalePathFragment } from '../state/scalePathReducer';
-import '../styles/ScaleFragmentHud.scss';
+import React from 'react'
+import type { ScalePathFragment } from '../state/scalePathReducer'
+import '../styles/ScaleFragmentHud.scss'
 
 interface ScaleFragmentHudProps {
-  fragment: ScalePathFragment | null;
-  fragmentIndex: number;
-  fragmentCount: number;
-  combo: number;
-  correctCount: number;
-  score: number;
-  phase: string;
+  fragment: ScalePathFragment | null
+  fragmentIndex: number
+  fragmentCount: number
+  combo: number
+  correctCount: number
+  score: number
+  phase: string
 }
 
 const TIER_LABELS: Record<number, string> = {
@@ -19,7 +19,7 @@ const TIER_LABELS: Record<number, string> = {
   3: 'Tier 3 — Two gaps',
   4: 'Tier 4 — Position + pitch',
   5: 'Tier 5 — Sparse route',
-};
+}
 
 const ScaleFragmentHud: React.FC<ScaleFragmentHudProps> = ({
   fragment,
@@ -30,16 +30,18 @@ const ScaleFragmentHud: React.FC<ScaleFragmentHudProps> = ({
   score,
   phase,
 }) => {
-  if (!fragment) return null;
+  if (!fragment) return null
 
-  const tier = fragment.difficulty ?? 1;
-  const directionLabel = fragment.direction === 'left' ? '← higher fret on same string' : '↑ adjacent higher string';
+  const tier = fragment.difficulty ?? 1
+  const directionLabel = fragment.direction === 'left' ? '← higher fret on same string' : '↑ adjacent higher string'
 
   return (
     <div className="sf-hud">
       <div className="sf-hud__progress">
         <span className="sf-hud__fraction">
-          {fragmentIndex + 1}<span className="sf-hud__sep">/</span>{fragmentCount}
+          {fragmentIndex + 1}
+          <span className="sf-hud__sep">/</span>
+          {fragmentCount}
         </span>
         <div className="sf-hud__dots" aria-label={`Fragment ${fragmentIndex + 1} of ${fragmentCount}`}>
           {Array.from({ length: fragmentCount }, (_, i) => (
@@ -68,8 +70,11 @@ const ScaleFragmentHud: React.FC<ScaleFragmentHudProps> = ({
 
       <div className="sf-hud__prompt">
         <p className="sf-hud__prompt-text">
-          Continue the <strong>{fragment.root} {fragment.mode}</strong> scale.
-          Direction: {directionLabel}.
+          Continue the{' '}
+          <strong>
+            {fragment.root} {fragment.mode}
+          </strong>{' '}
+          scale. Direction: {directionLabel}.
         </p>
         <p className="sf-hud__degree">
           Degree clue: <span className="sf-hud__degree-val">{fragment.degreeClue}</span>
@@ -77,12 +82,10 @@ const ScaleFragmentHud: React.FC<ScaleFragmentHudProps> = ({
       </div>
 
       <div className="sf-hud__tier">
-        <span className={`sf-hud__tier-badge tier-${tier}`}>
-          {TIER_LABELS[tier] ?? `Tier ${tier}`}
-        </span>
+        <span className={`sf-hud__tier-badge tier-${tier}`}>{TIER_LABELS[tier] ?? `Tier ${tier}`}</span>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default React.memo(ScaleFragmentHud);
+export default React.memo(ScaleFragmentHud)

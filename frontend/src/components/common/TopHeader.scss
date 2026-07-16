@@ -95,7 +95,9 @@
   color: white;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
   backdrop-filter: blur(10px);
 }
 
@@ -166,7 +168,9 @@
   border-radius: 8px;
   color: var(--text-strong);
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
 }
 
 .shortcut-item:hover {
@@ -210,22 +214,22 @@
     gap: 0.5rem;
     padding: 0.75rem;
   }
-  
+
   .top-button {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
   }
-  
+
   .button-text {
     display: none;
   }
-  
+
   .shortcuts-grid,
   .favorites-grid {
     grid-template-columns: 1fr;
     gap: 0.75rem;
   }
-  
+
   .control-group {
     flex-direction: column;
     gap: 0.5rem;

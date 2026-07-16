@@ -208,6 +208,7 @@ cython_debug/
 
 # Storybook build output
 frontend/storybook-static/
+frontend/.ci/
 
 # Playwright test results & baselines
 frontend/test-results/

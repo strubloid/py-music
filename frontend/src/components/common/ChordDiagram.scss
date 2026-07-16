@@ -41,7 +41,9 @@
   padding: 0;
   line-height: 1;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .variation-nav-btn:hover {
@@ -151,17 +153,22 @@
   background: radial-gradient(circle, #667eea 0%, #4c5fd5 100%);
   border-radius: 50%;
   margin-bottom: 2px;
-  box-shadow: 0 0 8px rgba(102, 126, 234, 0.9), 0 0 12px rgba(102, 126, 234, 0.5);
+  box-shadow:
+    0 0 8px rgba(102, 126, 234, 0.9),
+    0 0 12px rgba(102, 126, 234, 0.5);
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 .piano-key-diagram.black.active .note-indicator {
   background: radial-gradient(circle, #4ecdc4 0%, #38b2ac 100%);
-  box-shadow: 0 0 8px rgba(78, 205, 196, 0.9), 0 0 12px rgba(78, 205, 196, 0.5);
+  box-shadow:
+    0 0 8px rgba(78, 205, 196, 0.9),
+    0 0 12px rgba(78, 205, 196, 0.5);
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }

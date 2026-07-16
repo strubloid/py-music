@@ -1,127 +1,127 @@
 .daily-page {
-    padding: 1.25rem 1.5rem;
-    max-width: 100%;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .daily-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .daily-icon {
-    color: #fbbf24;
-    flex-shrink: 0;
+  color: #fbbf24;
+  flex-shrink: 0;
 }
 
 .daily-header h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #fff;
-    margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
 }
 
 .daily-subtitle {
-    color: #9ca3af;
-    font-size: 0.875rem;
-    margin: 0.125rem 0 0;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  margin: 0.125rem 0 0;
 }
 
 .streak-badge-shared {
-    margin-left: auto;
+  margin-left: auto;
 }
 
 /* ─── Loading ─────────────────────────────── */
 
 .daily-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    padding: 4rem 2rem;
-    color: #9ca3af;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  color: #9ca3af;
 }
 
 .daily-loading p {
-    margin: 0;
-    font-size: 0.9375rem;
+  margin: 0;
+  font-size: 0.9375rem;
 }
 
 /* ─── Error ───────────────────────────────── */
 
 .daily-error {
-    background: rgba(239, 68, 68, 0.2);
-    border: 1px solid rgba(239, 68, 68, 0.5);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    color: #fca5a5;
-    font-size: 0.875rem;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: #fca5a5;
+  font-size: 0.875rem;
 }
 
 /* ─── Empty state ─────────────────────────── */
 
 .daily-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 4rem 2rem;
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 4rem 2rem;
+  text-align: center;
 }
 
 .empty-icon {
-    color: #fbbf24;
+  color: #fbbf24;
 }
 
 .daily-empty h2 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #fff;
-    margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
 }
 
 .daily-empty p {
-    color: #9ca3af;
-    font-size: 0.9375rem;
-    margin: 0;
+  color: #9ca3af;
+  font-size: 0.9375rem;
+  margin: 0;
 }
 
 .daily-run-header,
 .daily-game-strip {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
 }
 
 .daily-run-stat,
 .daily-strip-item,
 .daily-summary-grid div {
-    padding: 0.8rem 0.9rem;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
+  padding: 0.8rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .daily-run-stat {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    column-gap: 0.55rem;
-    align-items: center;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.55rem;
+  align-items: center;
 }
 
 .daily-run-stat svg {
-    grid-row: span 2;
-    color: #fbbf24;
+  grid-row: span 2;
+  color: #fbbf24;
 }
 
 .daily-run-stat.combo {
-    border-color: rgba(251, 191, 36, 0.24);
-    background: rgba(251, 191, 36, 0.08);
+  border-color: rgba(251, 191, 36, 0.24);
+  background: rgba(251, 191, 36, 0.08);
 }
 
 .daily-run-stat span,
@@ -129,11 +129,11 @@
 .daily-run-progress span,
 .daily-strip-item span,
 .daily-summary-grid span {
-    display: block;
-    color: #94a3b8;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+  display: block;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .daily-run-stat strong,
@@ -141,56 +141,56 @@
 .daily-run-progress strong,
 .daily-strip-item strong,
 .daily-summary-grid strong {
-    display: block;
-    margin-top: 0.25rem;
-    color: #fff;
+  display: block;
+  margin-top: 0.25rem;
+  color: #fff;
 }
 
 .daily-score-rail,
 .daily-run-progress {
-    padding: 0.8rem 0.9rem;
-    border-radius: 12px;
-    border: 1px solid rgba(251, 191, 36, 0.16);
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(124, 58, 237, 0.12));
+  padding: 0.8rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(251, 191, 36, 0.16);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(124, 58, 237, 0.12));
 }
 
 .daily-score-rail-top {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .daily-score-track {
-    height: 0.48rem;
-    margin-top: 0.6rem;
-    overflow: hidden;
-    border-radius: 999px;
-    background: rgba(15, 23, 42, 0.8);
+  height: 0.48rem;
+  margin-top: 0.6rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.8);
 }
 
 .daily-score-track span {
-    display: block;
-    height: 100%;
-    border-radius: inherit;
-    background: linear-gradient(90deg, #fbbf24, #f97316);
-    transition: width 0.18s ease-out;
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #fbbf24, #f97316);
+  transition: width 0.18s ease-out;
 }
 
 .daily-score-rail small {
-    display: block;
-    margin-top: 0.45rem;
-    color: #cbd5e1;
+  display: block;
+  margin-top: 0.45rem;
+  color: #cbd5e1;
 }
 
 .daily-xp-preview,
 .daily-xp-breakdown {
-    margin-bottom: 0.85rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.65rem;
-    align-items: center;
-    color: #cbd5e1;
-    font-size: 0.84rem;
+  margin-bottom: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  color: #cbd5e1;
+  font-size: 0.84rem;
 }
 
 .daily-xp-base,
@@ -198,906 +198,914 @@
 .daily-xp-total,
 .daily-xp-breakdown span,
 .daily-xp-breakdown strong {
-    padding: 0.45rem 0.7rem;
-    border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.45rem 0.7rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .daily-xp-penalty {
-    color: #fca5a5;
-    border-color: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.25);
 }
 
 .daily-xp-total,
 .daily-xp-breakdown strong {
-    color: #fbbf24;
+  color: #fbbf24;
 }
 
 .daily-feedback-burst {
-    margin-bottom: 0.85rem;
-    display: inline-flex;
-    align-items: center;
-    padding: 0.55rem 0.85rem;
-    border-radius: 12px;
-    font-weight: 700;
+  margin-bottom: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.85rem;
+  border-radius: 12px;
+  font-weight: 700;
 }
 
 .daily-feedback-burst.positive {
-    background: rgba(251, 191, 36, 0.12);
-    color: #fde68a;
+  background: rgba(251, 191, 36, 0.12);
+  color: #fde68a;
 }
 
 .daily-feedback-burst.negative {
-    background: rgba(239, 68, 68, 0.12);
-    color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
 }
 
 .daily-feedback-burst.neutral {
-    background: rgba(251, 191, 36, 0.12);
-    color: #fde68a;
+  background: rgba(251, 191, 36, 0.12);
+  color: #fde68a;
 }
 
 .challenge-answer-popup {
-    position: fixed;
-    z-index: 40;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    padding: 1.25rem;
-    cursor: pointer;
-    background: rgba(3, 5, 18, 0.78);
-    backdrop-filter: blur(4px);
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  cursor: pointer;
+  background: rgba(3, 5, 18, 0.78);
+  backdrop-filter: blur(4px);
 }
 
 .challenge-answer-popup__panel {
-    width: min(100%, 30rem);
-    padding: 2rem;
-    border: 1px solid rgba(251, 191, 36, 0.42);
-    border-radius: 16px;
-    color: #fff;
-    text-align: center;
-    background: #1e1b4b;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    animation: challenge-answer-popup-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  width: min(100%, 30rem);
+  padding: 2rem;
+  border: 1px solid rgba(251, 191, 36, 0.42);
+  border-radius: 16px;
+  color: #fff;
+  text-align: center;
+  background: #1e1b4b;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: challenge-answer-popup-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .challenge-answer-popup--correct .challenge-answer-popup__panel {
-    border-color: rgba(251, 191, 36, 0.58);
+  border-color: rgba(251, 191, 36, 0.58);
 }
 .challenge-answer-popup--incorrect .challenge-answer-popup__panel {
-    border-color: rgba(239, 68, 68, 0.58);
+  border-color: rgba(239, 68, 68, 0.58);
 }
 .challenge-answer-popup svg {
-    color: #fbbf24;
+  color: #fbbf24;
 }
 .challenge-answer-popup--incorrect svg {
-    color: #fca5a5;
+  color: #fca5a5;
 }
 .challenge-answer-popup__eyebrow {
-    margin: 0.85rem 0 0;
-    color: #cbd5e1;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  margin: 0.85rem 0 0;
+  color: #cbd5e1;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 .challenge-answer-popup h2 {
-    margin: 0.35rem 0 0;
-    font-size: 1.6rem;
-    text-wrap: balance;
+  margin: 0.35rem 0 0;
+  font-size: 1.6rem;
+  text-wrap: balance;
 }
 .challenge-answer-popup__reward {
-    display: inline-block;
-    margin-top: 0.85rem;
-    color: #fbbf24;
-    font-size: 1.15rem;
+  display: inline-block;
+  margin-top: 0.85rem;
+  color: #fbbf24;
+  font-size: 1.15rem;
 }
 .challenge-answer-popup__explanation {
-    margin: 1rem 0 0;
-    color: #e5e7eb;
-    line-height: 1.5;
-    text-wrap: pretty;
+  margin: 1rem 0 0;
+  color: #e5e7eb;
+  line-height: 1.5;
+  text-wrap: pretty;
 }
 .challenge-answer-popup__continue {
-    display: block;
-    margin-top: 1.5rem;
-    color: #cbd5e1;
-    font-size: 0.8125rem;
+  display: block;
+  margin-top: 1.5rem;
+  color: #cbd5e1;
+  font-size: 0.8125rem;
 }
 
 @keyframes challenge-answer-popup-in {
-    from {
-        opacity: 0;
-        transform: translateY(8px) scale(0.98);
-    }
-    to {
-        opacity: 1;
-        transform: none;
-    }
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ─── Challenges grid ─────────────────────── */
 
 .challenges-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .challenge-card {
-    position: relative;
-    overflow: hidden;
-    background: radial-gradient(circle at top right, rgba(251, 191, 36, 0.08), transparent 30%), rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    padding: 1.5rem;
-    transition: border-color 0.2s;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at top right, rgba(251, 191, 36, 0.08), transparent 30%), rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: border-color 0.2s;
 }
 
 .challenge-stage {
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 0.85fr) minmax(180px, 1.15fr);
-    gap: 1rem;
-    align-items: center;
-    margin: 0.25rem 0 1rem;
-    padding: 1rem;
-    border-radius: 16px;
-    border: 1px solid rgba(251, 191, 36, 0.18);
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.72), rgba(49, 46, 129, 0.46));
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(180px, 1.15fr);
+  gap: 1rem;
+  align-items: center;
+  margin: 0.25rem 0 1rem;
+  padding: 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(251, 191, 36, 0.18);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.72), rgba(49, 46, 129, 0.46));
 }
 
 .challenge-stage-copy span,
 .daily-next-card span {
-    display: block;
-    color: #94a3b8;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+  display: block;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .challenge-stage-copy strong {
-    display: block;
-    margin-top: 0.25rem;
-    color: #fff;
-    font-size: 1.35rem;
+  display: block;
+  margin-top: 0.25rem;
+  color: #fff;
+  font-size: 1.35rem;
 }
 
 .challenge-stage-copy small {
-    display: block;
-    margin-top: 0.2rem;
-    color: #fde68a;
+  display: block;
+  margin-top: 0.2rem;
+  color: #fde68a;
 }
 
 .challenge-stage-visual {
-    min-height: 84px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
+  min-height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .challenge-stage-visual::before {
-    content: "";
-    position: absolute;
-    right: 1.6rem;
-    left: 42%;
-    height: 2px;
-    background: linear-gradient(90deg, rgba(251, 191, 36, 0.25), rgba(251, 191, 36, 0.9));
+  content: '';
+  position: absolute;
+  right: 1.6rem;
+  left: 42%;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.25), rgba(251, 191, 36, 0.9));
 }
 
 .challenge-stage-visual i {
-    position: relative;
-    z-index: 1;
-    min-width: 3rem;
-    min-height: 3rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    border: 1px solid rgba(251, 191, 36, 0.36);
-    background: rgba(15, 23, 42, 0.92);
-    color: #fde68a;
-    font-style: normal;
-    font-weight: 800;
+  position: relative;
+  z-index: 1;
+  min-width: 3rem;
+  min-height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.36);
+  background: rgba(15, 23, 42, 0.92);
+  color: #fde68a;
+  font-style: normal;
+  font-weight: 800;
 }
 
 .stage-chord .challenge-stage-visual {
-    justify-content: center;
-    align-items: flex-end;
+  justify-content: center;
+  align-items: flex-end;
 }
 
 .stage-chord .challenge-stage-visual::before {
-    display: none;
+  display: none;
 }
 
 .stage-chord .challenge-stage-visual i {
-    border-radius: 12px;
+  border-radius: 12px;
 }
 
 .stage-chord .challenge-stage-visual i:nth-child(2) {
-    transform: translateY(-0.5rem);
+  transform: translateY(-0.5rem);
 }
 
 .stage-chord .challenge-stage-visual i:nth-child(3) {
-    transform: translateY(-1rem);
+  transform: translateY(-1rem);
 }
 
 .stage-scale .challenge-stage-visual i {
-    min-width: 2.55rem;
-    min-height: 2.55rem;
+  min-width: 2.55rem;
+  min-height: 2.55rem;
 }
 
 .challenge-card.card-correct {
-    border-color: rgba(251, 191, 36, 0.4);
+  border-color: rgba(251, 191, 36, 0.4);
 }
 
 .challenge-card.card-incorrect {
-    border-color: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .challenge-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-    flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .challenge-category {
-    color: #9ca3af;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .challenge-xp {
-    color: #fbbf24;
-    font-size: 0.75rem;
-    font-weight: 700;
-    margin-left: auto;
+  color: #fbbf24;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-left: auto;
 }
 
 .challenge-diff {
-    color: #fbbf24;
-    font-size: 0.6875rem;
-    letter-spacing: 1px;
+  color: #fbbf24;
+  font-size: 0.6875rem;
+  letter-spacing: 1px;
 }
 
 .challenge-title {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #fff;
-    margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.5rem;
 }
 
 .challenge-question {
-    color: #d1d5db;
-    font-size: 0.9375rem;
-    line-height: 1.5;
-    margin-bottom: 0.75rem;
+  color: #d1d5db;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
 }
 
 .challenge-explanation {
-    margin-bottom: 1rem;
-    padding: 0.75rem 0.9rem;
-    border-radius: 0.75rem;
-    border: 1px solid rgba(251, 191, 36, 0.18);
-    background: rgba(251, 191, 36, 0.08);
-    color: #fde68a;
-    font-size: 0.875rem;
-    line-height: 1.45;
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(251, 191, 36, 0.18);
+  background: rgba(251, 191, 36, 0.08);
+  color: #fde68a;
+  font-size: 0.875rem;
+  line-height: 1.45;
 }
 
 .challenge-explanation strong {
-    color: #fbbf24;
+  color: #fbbf24;
 }
 
 .daily-hint-row {
-    display: flex;
-    justify-content: center;
-    margin: 0.5rem 0 0.75rem;
+  display: flex;
+  justify-content: center;
+  margin: 0.5rem 0 0.75rem;
 }
 
 .daily-hint-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    min-height: 2.5rem;
-    border: 1px solid rgba(251, 191, 36, 0.36);
-    border-radius: 8px;
-    padding: 0.5rem 0.75rem;
-    color: #fde68a;
-    background: rgba(251, 191, 36, 0.08);
-    font-size: 0.78rem;
-    font-weight: 800;
-    cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  border: 1px solid rgba(251, 191, 36, 0.36);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  color: #fde68a;
+  background: rgba(251, 191, 36, 0.08);
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .daily-hint-button:hover:not(:disabled),
 .daily-hint-button:focus-visible {
-    border-color: #fbbf24;
-    background: rgba(251, 191, 36, 0.16);
+  border-color: #fbbf24;
+  background: rgba(251, 191, 36, 0.16);
 }
 
 .daily-hint-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .challenge-options {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .daily-powers {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 0.65rem;
-    margin-bottom: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1rem;
 }
 
 .daily-power {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 0.8rem 0.9rem;
-    color: #e5e7eb;
-    text-align: left;
-    cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 0.8rem 0.9rem;
+  color: #e5e7eb;
+  text-align: left;
+  cursor: pointer;
 }
 
 .daily-power span,
 .daily-power small {
-    display: block;
+  display: block;
 }
 
 .daily-power span {
-    font-weight: 700;
+  font-weight: 700;
 }
 
 .daily-power small {
-    margin-top: 0.25rem;
-    color: #94a3b8;
+  margin-top: 0.25rem;
+  color: #94a3b8;
 }
 
 .daily-power.used {
-    border-color: rgba(251, 191, 36, 0.35);
-    color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.35);
+  color: #fbbf24;
 }
 
 .challenge-option {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 14px;
-    padding: 0.75rem 1rem;
-    color: #e5e7eb;
-    font-size: 0.9375rem;
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  color: #e5e7eb;
+  font-size: 0.9375rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
 .challenge-option:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(251, 191, 36, 0.4);
-    color: #fbbf24;
-    transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: #fbbf24;
+  transform: translateY(-1px);
 }
 
 .challenge-option.correct {
-    background: rgba(251, 191, 36, 0.15);
-    border-color: #fbbf24;
-    color: #fde68a;
+  background: rgba(251, 191, 36, 0.15);
+  border-color: #fbbf24;
+  color: #fde68a;
 }
 
 .challenge-option.wrong {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.4);
-    color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
 }
 
 .opt-correct-icon {
-    color: #fbbf24;
-    flex-shrink: 0;
+  color: #fbbf24;
+  flex-shrink: 0;
 }
 
 .challenge-result {
-    margin-top: 1rem;
-    padding: 0.875rem 1rem;
-    border-radius: 12px;
-    text-align: center;
-    font-size: 0.9375rem;
+  margin-top: 1rem;
+  padding: 0.875rem 1rem;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 0.9375rem;
 }
 
 .result-correct {
-    background: rgba(251, 191, 36, 0.1);
-    color: #fde68a;
+  background: rgba(251, 191, 36, 0.1);
+  color: #fde68a;
 }
 
 .result-incorrect {
-    background: rgba(239, 68, 68, 0.1);
-    color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
 }
 
 .challenge-result strong {
-    color: #fbbf24;
+  color: #fbbf24;
 }
 
 .daily-summary-card {
-    margin-top: 1rem;
-    padding: 1rem;
-    border-radius: 12px;
-    border: 1px solid rgba(251, 191, 36, 0.2);
-    background: rgba(251, 191, 36, 0.08);
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  background: rgba(251, 191, 36, 0.08);
 }
 
 .daily-summary-card h4,
 .daily-summary-card p {
-    margin: 0;
+  margin: 0;
 }
 
 .daily-summary-card p {
-    margin-top: 0.45rem;
-    color: #fde68a;
-    line-height: 1.45;
+  margin-top: 0.45rem;
+  color: #fde68a;
+  line-height: 1.45;
 }
 
 .daily-summary-grid {
-    margin-top: 0.85rem;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.75rem;
+  margin-top: 0.85rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
 }
 
 .daily-next-card {
-    margin-top: 0.85rem;
-    padding: 0.85rem 0.9rem;
-    border-radius: 12px;
-    background: rgba(15, 23, 42, 0.58);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 0.85rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .daily-next-card strong {
-    display: block;
-    margin-top: 0.25rem;
-    color: #fff;
+  display: block;
+  margin-top: 0.25rem;
+  color: #fff;
 }
 
 /* ─── Action buttons ──────────────────────── */
 
 .challenges-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0;
 }
 
 .load-more-btn,
 .reload-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    padding: 0.75rem 1.5rem;
-    color: #d1d5db;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  color: #d1d5db;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
 }
 
 .load-more-btn:hover,
 .reload-btn:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(251, 191, 36, 0.4);
-    color: #fbbf24;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: #fbbf24;
 }
 
 .load-more-btn:disabled,
 .reload-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ─── Animation ───────────────────────────── */
 
 @keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .spin {
-    animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
 }
 
 @media (max-width: 720px) {
-    .daily-page {
-        padding: 1rem;
-    }
+  .daily-page {
+    padding: 1rem;
+  }
 
-    .daily-header {
-        align-items: flex-start;
-        flex-direction: column;
-    }
+  .daily-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 
-    .streak-badge-shared {
-        margin-left: 0;
-    }
+  .streak-badge-shared {
+    margin-left: 0;
+  }
 
-    .challenge-stage {
-        grid-template-columns: 1fr;
-    }
+  .challenge-stage {
+    grid-template-columns: 1fr;
+  }
 
-    .challenge-stage-visual::before {
-        left: 1.6rem;
-    }
+  .challenge-stage-visual::before {
+    left: 1.6rem;
+  }
 
-    .daily-summary-grid {
-        grid-template-columns: 1fr;
-    }
+  .daily-summary-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .challenge-controls-hint {
-    margin: 18px 0 8px;
-    color: #9fa99f;
-    font-size: 0.74rem;
-    font-weight: 700;
-    text-align: center;
+  margin: 18px 0 8px;
+  color: #9fa99f;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-align: center;
 }
 .challenge-controls-hint summary {
-    width: fit-content;
-    margin: 0 auto;
-    cursor: pointer;
-    color: #c3c9e5;
+  width: fit-content;
+  margin: 0 auto;
+  cursor: pointer;
+  color: #c3c9e5;
 }
 .challenge-controls-hint[open] summary {
-    margin-bottom: 0.4rem;
+  margin-bottom: 0.4rem;
 }
 .challenge-gate-world {
-    position: relative;
-    min-height: 230px;
-    padding-top: 104px;
-    overflow: hidden;
-    border: 1px solid rgba(210, 255, 67, 0.14);
-    border-radius: 20px;
-    background: repeating-linear-gradient(0deg, transparent 0 27px, rgba(210, 255, 67, 0.065) 28px 29px), linear-gradient(180deg, rgba(210, 255, 67, 0.035), rgba(5, 10, 7, 0.55));
+  position: relative;
+  min-height: 230px;
+  padding-top: 104px;
+  overflow: hidden;
+  border: 1px solid rgba(210, 255, 67, 0.14);
+  border-radius: 20px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(210, 255, 67, 0.065) 28px 29px),
+    linear-gradient(180deg, rgba(210, 255, 67, 0.035), rgba(5, 10, 7, 0.55));
 }
 .challenge-nomi-track {
-    position: absolute;
-    inset: 7px 0 auto;
-    height: 100px;
+  position: absolute;
+  inset: 7px 0 auto;
+  height: 100px;
 }
 .challenge-gate-world .nomi {
-    --runner-accent: #d2ff43;
-    position: absolute;
-    z-index: 3;
-    top: 2px;
-    left: var(--nomi-lane);
-    width: 67px;
-    height: 92px;
-    transform: translateX(-50%);
-    transition: left 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
-    filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.36));
-    pointer-events: none;
+  --runner-accent: #d2ff43;
+  position: absolute;
+  z-index: 3;
+  top: 2px;
+  left: var(--nomi-lane);
+  width: 67px;
+  height: 92px;
+  transform: translateX(-50%);
+  transition: left 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.36));
+  pointer-events: none;
 }
 .challenge-gate-world .nomi svg {
-    width: 100%;
-    height: 100%;
-    overflow: visible;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 .challenge-gate-world .nomi-body {
-    fill: #d2ff43;
-    stroke: #f3ffc8;
-    stroke-width: 1.5;
+  fill: #d2ff43;
+  stroke: #f3ffc8;
+  stroke-width: 1.5;
 }
 .challenge-gate-world .nomi-stem,
 .challenge-gate-world .nomi-flag,
 .challenge-gate-world .nomi-leg,
 .challenge-gate-world .nomi-mouth {
-    fill: none;
-    stroke: #d2ff43;
-    stroke-width: 6;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+  fill: none;
+  stroke: #d2ff43;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .challenge-gate-world .nomi-mouth {
-    stroke: #19331d;
-    stroke-width: 2.5;
+  stroke: #19331d;
+  stroke-width: 2.5;
 }
 .challenge-gate-world .nomi-eye {
-    fill: #13251a;
+  fill: #13251a;
 }
 .challenge-gate-world .nomi--celebrating {
-    animation: daily-nomi-jump 0.65s cubic-bezier(0.2, 0.7, 0.3, 1);
+  animation: daily-nomi-jump 0.65s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 .challenge-gate-world .nomi--wobble {
-    animation: daily-nomi-wobble 0.48s ease-in-out;
+  animation: daily-nomi-wobble 0.48s ease-in-out;
 }
 .challenge-gate-world .challenge-options {
-    grid-template-columns: repeat(var(--gate-count), minmax(0, 1fr));
-    margin: 0;
-    padding: 0 10px 10px;
+  grid-template-columns: repeat(var(--gate-count), minmax(0, 1fr));
+  margin: 0;
+  padding: 0 10px 10px;
 }
 .challenge-gate-world .challenge-option {
-    position: relative;
-    min-height: 100px;
-    border-top: 5px solid #465048;
-    border-radius: 10px 10px 16px 16px;
-    background: linear-gradient(180deg, #202822, #121813);
+  position: relative;
+  min-height: 100px;
+  border-top: 5px solid #465048;
+  border-radius: 10px 10px 16px 16px;
+  background: linear-gradient(180deg, #202822, #121813);
 }
-.challenge-gate-world .challenge-option[aria-checked="true"] {
-    border-color: #d2ff43;
-    color: #efffc8;
-    box-shadow:
-        0 0 0 2px rgba(210, 255, 67, 0.17),
-        0 0 30px rgba(210, 255, 67, 0.1);
-    transform: translateY(-5px);
+.challenge-gate-world .challenge-option[aria-checked='true'] {
+  border-color: #d2ff43;
+  color: #efffc8;
+  box-shadow:
+    0 0 0 2px rgba(210, 255, 67, 0.17),
+    0 0 30px rgba(210, 255, 67, 0.1);
+  transform: translateY(-5px);
 }
 .challenge-gate-key {
-    position: absolute;
-    top: 7px;
-    left: 8px;
-    display: grid;
-    place-items: center;
-    width: 22px;
-    height: 22px;
-    border: 1px solid #4a554c;
-    border-radius: 6px;
-    color: #aab4aa;
-    font-size: 0.68rem;
+  position: absolute;
+  top: 7px;
+  left: 8px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #4a554c;
+  border-radius: 6px;
+  color: #aab4aa;
+  font-size: 0.68rem;
 }
 @keyframes daily-nomi-jump {
-    50% {
-        transform: translate(-50%, -18px) rotate(-4deg);
-    }
+  50% {
+    transform: translate(-50%, -18px) rotate(-4deg);
+  }
 }
 @keyframes daily-nomi-wobble {
-    25% {
-        transform: translateX(-58%) rotate(-6deg);
-    }
-    75% {
-        transform: translateX(-42%) rotate(6deg);
-    }
+  25% {
+    transform: translateX(-58%) rotate(-6deg);
+  }
+  75% {
+    transform: translateX(-42%) rotate(6deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .daily-score-track span,
-    .challenge-option,
-    .load-more-btn,
-    .reload-btn {
-        transition: none;
-    }
+  .daily-score-track span,
+  .challenge-option,
+  .load-more-btn,
+  .reload-btn {
+    transition: none;
+  }
 
-    .challenge-answer-popup__panel {
-        animation: none;
-    }
+  .challenge-answer-popup__panel {
+    animation: none;
+  }
 
-    .challenge-option:hover:not(:disabled) {
-        transform: none;
-    }
+  .challenge-option:hover:not(:disabled) {
+    transform: none;
+  }
 }
 
 /* DESIGN.md: the challenge arena shares the app's indigo glass and gold voice. */
 .challenge-controls-hint {
-    color: #9ca3af;
+  color: #9ca3af;
 }
 .challenge-gate-world {
-    border-color: rgba(251, 191, 36, 0.2);
-    background: repeating-linear-gradient(0deg, transparent 0 27px, rgba(251, 191, 36, 0.055) 28px 29px), linear-gradient(180deg, rgba(55, 48, 163, 0.24), rgba(5, 8, 22, 0.72));
+  border-color: rgba(251, 191, 36, 0.2);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(251, 191, 36, 0.055) 28px 29px),
+    linear-gradient(180deg, rgba(55, 48, 163, 0.24), rgba(5, 8, 22, 0.72));
 }
 .challenge-gate-world .nomi {
-    --runner-accent: #fbbf24;
+  --runner-accent: #fbbf24;
 }
 .challenge-gate-world .nomi-body {
-    fill: #fbbf24;
-    stroke: #fde68a;
+  fill: #fbbf24;
+  stroke: #fde68a;
 }
 .challenge-gate-world .nomi-stem,
 .challenge-gate-world .nomi-flag,
 .challenge-gate-world .nomi-leg,
 .challenge-gate-world .nomi-mouth {
-    stroke: #fbbf24;
+  stroke: #fbbf24;
 }
 .challenge-gate-world .nomi-mouth {
-    stroke: #3b2a08;
+  stroke: #3b2a08;
 }
 .challenge-gate-world .nomi-eye {
-    fill: #1f1708;
+  fill: #1f1708;
 }
 .challenge-gate-world .challenge-option {
-    border-top-color: rgba(255, 255, 255, 0.18);
-    background: linear-gradient(180deg, rgba(49, 46, 129, 0.46), rgba(5, 8, 22, 0.9));
+  border-top-color: rgba(255, 255, 255, 0.18);
+  background: linear-gradient(180deg, rgba(49, 46, 129, 0.46), rgba(5, 8, 22, 0.9));
 }
-.challenge-gate-world .challenge-option[aria-checked="true"] {
-    border-color: #fbbf24;
-    color: #fff;
-    box-shadow:
-        0 0 0 2px rgba(251, 191, 36, 0.16),
-        0 0 26px rgba(251, 191, 36, 0.09);
+.challenge-gate-world .challenge-option[aria-checked='true'] {
+  border-color: #fbbf24;
+  color: #fff;
+  box-shadow:
+    0 0 0 2px rgba(251, 191, 36, 0.16),
+    0 0 26px rgba(251, 191, 36, 0.09);
 }
 .challenge-gate-key {
-    border-color: rgba(255, 255, 255, 0.16);
-    color: #9ca3af;
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #9ca3af;
 }
 
 /* Arcade mission surface: the daily uses the same spatial gate language as Sound Gates. */
 .daily-page--arcade {
-    max-width: 1240px;
-    gap: 0.72rem;
-    padding: 1rem 1.5rem 1.4rem;
+  max-width: 1240px;
+  gap: 0.72rem;
+  padding: 1rem 1.5rem 1.4rem;
 }
 .daily-page--arcade .daily-header {
-    min-height: 56px;
-    padding: 0 10px;
-    border-bottom: 1px solid rgba(251, 191, 36, 0.18);
-    background: linear-gradient(90deg, rgba(17, 22, 58, 0.96), rgba(9, 13, 40, 0.72));
+  min-height: 56px;
+  padding: 0 10px;
+  border-bottom: 1px solid rgba(251, 191, 36, 0.18);
+  background: linear-gradient(90deg, rgba(17, 22, 58, 0.96), rgba(9, 13, 40, 0.72));
 }
 .daily-page--arcade .daily-header h1 {
-    font-size: 1.35rem;
-    letter-spacing: -0.025em;
+  font-size: 1.35rem;
+  letter-spacing: -0.025em;
 }
 .daily-page--arcade .daily-subtitle {
-    color: #c3c9e5;
-    font-size: 0.82rem;
+  color: #c3c9e5;
+  font-size: 0.82rem;
 }
 .daily-page--arcade .daily-run-header {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 0;
-    overflow: hidden;
-    border: 1px solid rgba(251, 191, 36, 0.24);
-    border-radius: 15px;
-    background: #070a1d;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid rgba(251, 191, 36, 0.24);
+  border-radius: 15px;
+  background: #070a1d;
 }
 .daily-stage-map {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 22px;
-    min-height: 58px;
-    padding: 8px 16px;
-    border: 1px solid rgba(251, 191, 36, 0.24);
-    border-radius: 15px;
-    background: linear-gradient(90deg, rgba(25, 31, 76, 0.76), rgba(5, 8, 23, 0.82));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  min-height: 58px;
+  padding: 8px 16px;
+  border: 1px solid rgba(251, 191, 36, 0.24);
+  border-radius: 15px;
+  background: linear-gradient(90deg, rgba(25, 31, 76, 0.76), rgba(5, 8, 23, 0.82));
 }
 .daily-stage-map > div {
-    display: grid;
-    gap: 3px;
-    white-space: nowrap;
+  display: grid;
+  gap: 3px;
+  white-space: nowrap;
 }
 .daily-stage-map span {
-    color: #ffbd2e;
-    font:
-        800 0.62rem ui-monospace,
-        monospace;
-    letter-spacing: 0.13em;
+  color: #ffbd2e;
+  font:
+    800 0.62rem ui-monospace,
+    monospace;
+  letter-spacing: 0.13em;
 }
 .daily-stage-map strong {
-    color: #f7f8ff;
-    font-size: 0.82rem;
+  color: #f7f8ff;
+  font-size: 0.82rem;
 }
 .daily-stage-map ol {
-    display: flex;
-    flex: 1;
-    justify-content: flex-end;
-    gap: 5px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 .daily-stage-map li {
-    position: relative;
-    display: grid;
-    justify-items: center;
-    gap: 2px;
-    min-width: 34px;
-    color: #7f88b2;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 34px;
+  color: #7f88b2;
 }
 .daily-stage-map li::before {
-    content: "";
-    position: absolute;
-    top: 10px;
-    left: calc(50% + 11px);
-    width: calc(100% - 17px);
-    height: 1px;
-    background: rgba(255, 255, 255, 0.15);
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: calc(50% + 11px);
+  width: calc(100% - 17px);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
 }
 .daily-stage-map li:last-child::before {
-    display: none;
+  display: none;
 }
 .daily-stage-map b {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    place-items: center;
-    width: 21px;
-    height: 21px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    background: #090d28;
-    font:
-        800 0.62rem ui-monospace,
-        monospace;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  background: #090d28;
+  font:
+    800 0.62rem ui-monospace,
+    monospace;
 }
 .daily-stage-map small {
-    font:
-        700 0.52rem ui-monospace,
-        monospace;
-    letter-spacing: 0.08em;
+  font:
+    700 0.52rem ui-monospace,
+    monospace;
+  letter-spacing: 0.08em;
 }
 .daily-stage-map__cleared {
-    color: #92e84c !important;
+  color: #92e84c !important;
 }
 .daily-stage-map__cleared b {
-    border-color: #92e84c;
-    background: rgba(146, 232, 76, 0.13);
+  border-color: #92e84c;
+  background: rgba(146, 232, 76, 0.13);
 }
 .daily-stage-map__active {
-    color: #ffd96a !important;
+  color: #ffd96a !important;
 }
 .daily-stage-map__active b {
-    border-color: #ffbd2e;
-    box-shadow: 0 0 14px rgba(255, 189, 46, 0.52);
+  border-color: #ffbd2e;
+  box-shadow: 0 0 14px rgba(255, 189, 46, 0.52);
 }
 .daily-page--arcade .daily-run-stat,
 .daily-page--arcade .daily-score-rail,
 .daily-page--arcade .daily-run-progress {
-    min-height: 72px;
-    padding: 0.7rem 0.85rem;
-    border: 0;
-    border-right: 1px solid rgba(255, 255, 255, 0.11);
-    border-radius: 0;
-    background: transparent;
+  min-height: 72px;
+  padding: 0.7rem 0.85rem;
+  border: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 0;
+  background: transparent;
 }
 .daily-page--arcade .daily-run-stat span,
 .daily-page--arcade .daily-score-rail span,
 .daily-page--arcade .daily-run-progress span {
-    color: #aeb7da;
-    font-size: 0.65rem;
-    font-weight: 800;
+  color: #aeb7da;
+  font-size: 0.65rem;
+  font-weight: 800;
 }
 .daily-page--arcade .daily-run-stat strong,
 .daily-page--arcade .daily-score-rail strong,
 .daily-page--arcade .daily-run-progress strong {
-    color: #fff;
-    font-size: 0.9rem;
+  color: #fff;
+  font-size: 0.9rem;
 }
 .daily-page--arcade .daily-score-rail {
-    background: linear-gradient(110deg, rgba(251, 191, 36, 0.11), rgba(73, 200, 239, 0.08));
+  background: linear-gradient(110deg, rgba(251, 191, 36, 0.11), rgba(73, 200, 239, 0.08));
 }
 .daily-page--arcade .challenge-card {
-    padding: 0;
-    overflow: hidden;
-    border: 1px solid rgba(251, 191, 36, 0.3);
-    border-radius: 22px;
-    background: radial-gradient(circle at 50% 5%, rgba(64, 73, 170, 0.3), transparent 34%), linear-gradient(180deg, #111746, #070a1e 48%, #040611);
-    box-shadow:
-        0 22px 65px rgba(0, 0, 0, 0.3),
-        inset 0 1px rgba(255, 255, 255, 0.06);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 50% 5%, rgba(64, 73, 170, 0.3), transparent 34%),
+    linear-gradient(180deg, #111746, #070a1e 48%, #040611);
+  box-shadow:
+    0 22px 65px rgba(0, 0, 0, 0.3),
+    inset 0 1px rgba(255, 255, 255, 0.06);
 }
 .daily-page--arcade .challenge-card::before {
-    content: "";
-    position: absolute;
-    z-index: 0;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.6;
-    background: repeating-linear-gradient(90deg, transparent 0 7.8%, rgba(73, 200, 239, 0.055) 8% 8.2%, transparent 8.4% 14%), linear-gradient(135deg, transparent 48%, rgba(251, 191, 36, 0.08) 49%, transparent 50%);
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.6;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 7.8%, rgba(73, 200, 239, 0.055) 8% 8.2%, transparent 8.4% 14%),
+    linear-gradient(135deg, transparent 48%, rgba(251, 191, 36, 0.08) 49%, transparent 50%);
 }
 .daily-page--arcade .challenge-meta,
 .daily-page--arcade .challenge-stage,
@@ -1111,574 +1119,581 @@
 .daily-page--arcade .challenge-result,
 .daily-page--arcade .daily-xp-breakdown,
 .daily-page--arcade .daily-summary-card {
-    position: relative;
-    z-index: 1;
+  position: relative;
+  z-index: 1;
 }
 .daily-page--arcade .challenge-meta {
-    min-height: 41px;
-    margin: 0;
-    padding: 12px 18px 7px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  min-height: 41px;
+  margin: 0;
+  padding: 12px 18px 7px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 .daily-page--arcade .challenge-category {
-    color: #ffd96a;
-    font-weight: 800;
+  color: #ffd96a;
+  font-weight: 800;
 }
 .daily-page--arcade .challenge-xp {
-    color: #ffbd2e;
-    font-size: 0.82rem;
+  color: #ffbd2e;
+  font-size: 0.82rem;
 }
 .daily-page--arcade .challenge-diff {
-    color: #ffbd2e;
+  color: #ffbd2e;
 }
 .daily-page--arcade .challenge-stage {
-    grid-template-columns: 1fr auto;
-    min-height: 64px;
-    margin: 0;
-    padding: 11px 18px;
-    border: 0;
-    border-bottom: 1px solid rgba(251, 191, 36, 0.16);
-    border-radius: 0;
-    background: rgba(5, 8, 23, 0.38);
+  grid-template-columns: 1fr auto;
+  min-height: 64px;
+  margin: 0;
+  padding: 11px 18px;
+  border: 0;
+  border-bottom: 1px solid rgba(251, 191, 36, 0.16);
+  border-radius: 0;
+  background: rgba(5, 8, 23, 0.38);
 }
 .daily-page--arcade .challenge-stage-copy {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
 }
 .daily-page--arcade .challenge-stage-copy span {
-    color: #ffbd2e;
-    font:
-        800 0.66rem ui-monospace,
-        monospace;
+  color: #ffbd2e;
+  font:
+    800 0.66rem ui-monospace,
+    monospace;
 }
 .daily-page--arcade .challenge-stage-copy strong {
-    margin: 0;
-    font-size: 1.1rem;
+  margin: 0;
+  font-size: 1.1rem;
 }
 .daily-page--arcade .challenge-stage-copy small {
-    margin: 0;
-    color: #aeb7da;
+  margin: 0;
+  color: #aeb7da;
 }
 .daily-page--arcade .challenge-stage-visual {
-    min-height: 0;
-    gap: 6px;
+  min-height: 0;
+  gap: 6px;
 }
 .daily-page--arcade .challenge-stage-visual::before {
-    display: none;
+  display: none;
 }
 .daily-page--arcade .challenge-stage-visual i {
-    min-width: 28px;
-    min-height: 28px;
-    border-color: rgba(251, 191, 36, 0.46);
-    color: #ffd96a;
-    background: #0b1030;
-    font-size: 0.68rem;
+  min-width: 28px;
+  min-height: 28px;
+  border-color: rgba(251, 191, 36, 0.46);
+  color: #ffd96a;
+  background: #0b1030;
+  font-size: 0.68rem;
 }
 .scale-recipe-pattern {
-    position: relative;
-    z-index: 2;
-    display: grid;
-    grid-template-columns: auto minmax(180px, 1fr) minmax(160px, 0.8fr);
-    align-items: center;
-    gap: 14px;
-    max-width: 860px;
-    margin: 10px auto;
-    padding: 10px 14px;
-    border: 1px solid rgba(73, 200, 239, 0.32);
-    border-radius: 13px;
-    background: linear-gradient(100deg, rgba(73, 200, 239, 0.1), rgba(17, 22, 58, 0.7));
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: auto minmax(180px, 1fr) minmax(160px, 0.8fr);
+  align-items: center;
+  gap: 14px;
+  max-width: 860px;
+  margin: 10px auto;
+  padding: 10px 14px;
+  border: 1px solid rgba(73, 200, 239, 0.32);
+  border-radius: 13px;
+  background: linear-gradient(100deg, rgba(73, 200, 239, 0.1), rgba(17, 22, 58, 0.7));
 }
 .scale-recipe-pattern__title {
-    color: #c7cce6;
-    font:
-        800 0.62rem ui-monospace,
-        monospace;
-    letter-spacing: 0.11em;
-    text-transform: uppercase;
+  color: #c7cce6;
+  font:
+    800 0.62rem ui-monospace,
+    monospace;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
 }
 .scale-recipe-pattern__route {
-    display: flex;
-    align-items: center;
-    min-width: 0;
-    height: 28px;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 28px;
 }
 .scale-recipe-pattern__root {
-    display: grid;
-    flex: 0 0 25px;
-    place-items: center;
-    width: 25px;
-    height: 25px;
-    border: 2px solid #ffbd2e;
-    border-radius: 50%;
-    color: #1c1200;
-    background: #ffbd2e;
-    font:
-        900 0.66rem ui-monospace,
-        monospace;
-    font-style: normal;
+  display: grid;
+  flex: 0 0 25px;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border: 2px solid #ffbd2e;
+  border-radius: 50%;
+  color: #1c1200;
+  background: #ffbd2e;
+  font:
+    900 0.66rem ui-monospace,
+    monospace;
+  font-style: normal;
 }
 .scale-recipe-pattern__step {
-    position: relative;
-    display: block;
-    height: 4px;
-    margin-left: 2px;
-    background: #49c8ef;
-    box-shadow: 0 0 10px rgba(73, 200, 239, 0.6);
+  position: relative;
+  display: block;
+  height: 4px;
+  margin-left: 2px;
+  background: #49c8ef;
+  box-shadow: 0 0 10px rgba(73, 200, 239, 0.6);
 }
 .scale-recipe-pattern__step--whole {
-    flex: 2;
+  flex: 2;
 }
 .scale-recipe-pattern__step--half {
-    flex: 1;
+  flex: 1;
 }
 .scale-recipe-pattern__step::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    right: -3px;
-    width: 7px;
-    height: 7px;
-    border: 2px solid #49c8ef;
-    border-radius: 50%;
-    background: #10163d;
-    transform: translateY(-50%);
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -3px;
+  width: 7px;
+  height: 7px;
+  border: 2px solid #49c8ef;
+  border-radius: 50%;
+  background: #10163d;
+  transform: translateY(-50%);
 }
 .scale-recipe-pattern__step b {
-    position: absolute;
-    top: -15px;
-    right: -5px;
-    color: #d8f8ff;
-    font:
-        800 0.55rem ui-monospace,
-        monospace;
+  position: absolute;
+  top: -15px;
+  right: -5px;
+  color: #d8f8ff;
+  font:
+    800 0.55rem ui-monospace,
+    monospace;
 }
 .scale-recipe-pattern__keys {
-    display: flex;
-    height: 32px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 5px;
-    background: #e7ebf7;
+  display: flex;
+  height: 32px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 5px;
+  background: #e7ebf7;
 }
 .scale-recipe-pattern__keys i {
-    position: relative;
-    display: grid;
-    flex: 1;
-    place-items: end center;
-    min-width: 0;
-    padding-bottom: 3px;
-    border-right: 1px solid rgba(9, 13, 40, 0.2);
-    color: #0d1435;
-    font:
-        900 0.5rem ui-monospace,
-        monospace;
-    font-style: normal;
+  position: relative;
+  display: grid;
+  flex: 1;
+  place-items: end center;
+  min-width: 0;
+  padding-bottom: 3px;
+  border-right: 1px solid rgba(9, 13, 40, 0.2);
+  color: #0d1435;
+  font:
+    900 0.5rem ui-monospace,
+    monospace;
+  font-style: normal;
 }
 .scale-recipe-pattern__keys i.is-black {
-    z-index: 1;
-    align-self: start;
-    height: 57%;
-    margin-right: -0.55em;
-    margin-left: -0.45em;
-    padding: 0;
-    border: 0;
-    border-radius: 0 0 3px 3px;
-    color: #f7f8ff;
-    background: #111735;
+  z-index: 1;
+  align-self: start;
+  height: 57%;
+  margin-right: -0.55em;
+  margin-left: -0.45em;
+  padding: 0;
+  border: 0;
+  border-radius: 0 0 3px 3px;
+  color: #f7f8ff;
+  background: #111735;
 }
 .scale-recipe-pattern__keys i.is-scale {
-    color: #1c1200;
-    background: #ffbd2e;
+  color: #1c1200;
+  background: #ffbd2e;
 }
 .scale-recipe-pattern__keys i.is-black.is-scale {
-    color: #05101b;
-    background: #49c8ef;
+  color: #05101b;
+  background: #49c8ef;
 }
 .scale-challenge-preview {
-    position: relative;
-    z-index: 2;
-    max-width: 900px;
-    margin: 12px auto;
-    padding: 12px;
-    border: 1px solid rgba(73, 200, 239, 0.42);
-    border-radius: 15px;
-    background: linear-gradient(120deg, rgba(73, 200, 239, 0.1), rgba(17, 22, 58, 0.82));
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  margin: 12px auto;
+  padding: 12px;
+  border: 1px solid rgba(73, 200, 239, 0.42);
+  border-radius: 15px;
+  background: linear-gradient(120deg, rgba(73, 200, 239, 0.1), rgba(17, 22, 58, 0.82));
 }
 .scale-challenge-preview > header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
 }
 .scale-challenge-preview > header > div:first-child {
-    display: grid;
-    gap: 2px;
+  display: grid;
+  gap: 2px;
 }
 .scale-challenge-preview > header span {
-    color: #49c8ef;
-    font:
-        800 0.6rem ui-monospace,
-        monospace;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+  color: #49c8ef;
+  font:
+    800 0.6rem ui-monospace,
+    monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 .scale-challenge-preview > header strong {
-    color: #f7f8ff;
-    font-size: 0.78rem;
+  color: #f7f8ff;
+  font-size: 0.78rem;
 }
 .scale-challenge-preview__tabs {
-    display: flex;
-    gap: 5px;
+  display: flex;
+  gap: 5px;
 }
 .scale-challenge-preview__tabs button {
-    min-height: 30px;
-    padding: 5px 9px;
-    border: 1px solid rgba(73, 200, 239, 0.35);
-    border-radius: 7px;
-    color: #c7cce6;
-    background: rgba(5, 8, 23, 0.62);
-    font-size: 0.68rem;
-    font-weight: 800;
-    cursor: pointer;
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 1px solid rgba(73, 200, 239, 0.35);
+  border-radius: 7px;
+  color: #c7cce6;
+  background: rgba(5, 8, 23, 0.62);
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
 }
 .scale-challenge-preview__tabs button.is-active {
-    border-color: #ffbd2e;
-    color: #1c1200;
-    background: #ffbd2e;
+  border-color: #ffbd2e;
+  color: #1c1200;
+  background: #ffbd2e;
 }
 .scale-challenge-preview .piano-container {
-    margin: 0;
+  margin: 0;
 }
 .scale-challenge-preview .fretboard-container {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 .scale-challenge-preview .fretboard-legend {
-    margin-top: 7px;
+  margin-top: 7px;
 }
 .daily-page--arcade .scale-challenge-preview {
-    margin-top: 48px;
+  margin-top: 48px;
 }
 .daily-page--arcade .daily-xp-preview {
-    position: absolute;
-    z-index: 2;
-    top: 111px;
-    right: 16px;
-    margin: 0;
+  position: absolute;
+  z-index: 2;
+  top: 111px;
+  right: 16px;
+  margin: 0;
 }
 .daily-page--arcade .daily-xp-base {
-    display: inline-flex;
-    border-color: rgba(255, 255, 255, 0.12);
-    background: rgba(5, 8, 23, 0.72);
-    color: #c3c9e5;
+  display: inline-flex;
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(5, 8, 23, 0.72);
+  color: #c3c9e5;
 }
 .daily-page--arcade .daily-xp-total {
-    border-color: rgba(251, 191, 36, 0.32);
-    background: rgba(5, 8, 23, 0.72);
+  border-color: rgba(251, 191, 36, 0.32);
+  background: rgba(5, 8, 23, 0.72);
 }
 .daily-page--arcade .challenge-title {
-    margin: 21px 20px 4px;
-    text-align: center;
-    font-size: 1.15rem;
+  margin: 21px 20px 4px;
+  text-align: center;
+  font-size: 1.15rem;
 }
 .daily-page--arcade .challenge-question {
-    max-width: 780px;
-    margin: 0 auto 8px;
-    padding: 0 18px;
-    text-align: center;
-    color: #e9ecff;
-    font-size: 1.04rem;
+  max-width: 780px;
+  margin: 0 auto 8px;
+  padding: 0 18px;
+  text-align: center;
+  color: #e9ecff;
+  font-size: 1.04rem;
 }
 .daily-page--arcade .challenge-explanation {
-    max-width: 920px;
-    margin: 8px auto 12px;
-    padding: 8px 12px;
-    background: rgba(251, 191, 36, 0.08);
-    font-size: 0.82rem;
+  max-width: 920px;
+  margin: 8px auto 12px;
+  padding: 8px 12px;
+  background: rgba(251, 191, 36, 0.08);
+  font-size: 0.82rem;
 }
 .daily-page--arcade .daily-powers {
-    position: absolute;
-    z-index: 4;
-    right: 15px;
-    bottom: 13px;
-    display: flex;
-    gap: 6px;
-    margin: 0;
+  position: absolute;
+  z-index: 4;
+  right: 15px;
+  bottom: 13px;
+  display: flex;
+  gap: 6px;
+  margin: 0;
 }
 .daily-page--arcade .daily-power {
-    padding: 6px 9px;
-    border-color: rgba(251, 191, 36, 0.25);
-    border-radius: 9px;
-    background: rgba(5, 8, 23, 0.75);
-    font-size: 0.72rem;
+  padding: 6px 9px;
+  border-color: rgba(251, 191, 36, 0.25);
+  border-radius: 9px;
+  background: rgba(5, 8, 23, 0.75);
+  font-size: 0.72rem;
 }
 .daily-page--arcade .daily-power small {
-    display: none;
+  display: none;
 }
 .daily-page--arcade .challenge-controls-hint {
-    margin: 8px 0 7px;
-    color: #c3c9e5;
-    font-size: 0.75rem;
+  margin: 8px 0 7px;
+  color: #c3c9e5;
+  font-size: 0.75rem;
 }
 .daily-page--arcade .challenge-gate-world {
-    min-height: 355px;
-    margin: 0 14px 56px;
-    padding: 78px 18px 38px;
-    border-color: rgba(251, 191, 36, 0.35);
-    border-radius: 18px;
-    background:
-        radial-gradient(ellipse at 50% 32%, rgba(251, 191, 36, 0.16), transparent 24%), repeating-linear-gradient(0deg, transparent 0 26px, rgba(73, 200, 239, 0.075) 27px 28px),
-        linear-gradient(180deg, rgba(25, 31, 76, 0.84), rgba(5, 8, 23, 0.94));
+  min-height: 355px;
+  margin: 0 14px 56px;
+  padding: 78px 18px 38px;
+  border-color: rgba(251, 191, 36, 0.35);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 50% 32%, rgba(251, 191, 36, 0.16), transparent 24%),
+    repeating-linear-gradient(0deg, transparent 0 26px, rgba(73, 200, 239, 0.075) 27px 28px),
+    linear-gradient(180deg, rgba(25, 31, 76, 0.84), rgba(5, 8, 23, 0.94));
 }
 .daily-page--arcade .challenge-gate-world::before {
-    content: "";
-    position: absolute;
-    z-index: 0;
-    inset: 0 8% 18%;
-    opacity: 0.6;
-    background: linear-gradient(90deg, transparent 0 2%, rgba(73, 200, 239, 0.14) 2% 2.5%, transparent 2.5% 11%), linear-gradient(0deg, rgba(251, 191, 36, 0.13), transparent 65%);
-    clip-path: polygon(
-        0 100%,
-        0 59%,
-        9% 59%,
-        9% 35%,
-        14% 35%,
-        14% 72%,
-        22% 72%,
-        22% 42%,
-        29% 42%,
-        29% 100%,
-        39% 100%,
-        39% 26%,
-        45% 26%,
-        45% 100%,
-        57% 100%,
-        57% 45%,
-        64% 45%,
-        64% 70%,
-        72% 70%,
-        72% 20%,
-        78% 20%,
-        78% 100%,
-        88% 100%,
-        88% 51%,
-        96% 51%,
-        96% 100%
-    );
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0 8% 18%;
+  opacity: 0.6;
+  background:
+    linear-gradient(90deg, transparent 0 2%, rgba(73, 200, 239, 0.14) 2% 2.5%, transparent 2.5% 11%),
+    linear-gradient(0deg, rgba(251, 191, 36, 0.13), transparent 65%);
+  clip-path: polygon(
+    0 100%,
+    0 59%,
+    9% 59%,
+    9% 35%,
+    14% 35%,
+    14% 72%,
+    22% 72%,
+    22% 42%,
+    29% 42%,
+    29% 100%,
+    39% 100%,
+    39% 26%,
+    45% 26%,
+    45% 100%,
+    57% 100%,
+    57% 45%,
+    64% 45%,
+    64% 70%,
+    72% 70%,
+    72% 20%,
+    78% 20%,
+    78% 100%,
+    88% 100%,
+    88% 51%,
+    96% 51%,
+    96% 100%
+  );
 }
 .daily-page--arcade .challenge-nomi-track {
-    z-index: 5;
-    inset: auto 0 0;
-    height: 62px;
+  z-index: 5;
+  inset: auto 0 0;
+  height: 62px;
 }
 .daily-page--arcade .challenge-gate-world .nomi {
-    top: auto;
-    bottom: -3px;
-    width: 47px;
-    height: 59px;
+  top: auto;
+  bottom: -3px;
+  width: 47px;
+  height: 59px;
 }
 .daily-page--arcade .challenge-gate-world .challenge-options {
-    position: relative;
-    z-index: 3;
-    display: grid;
-    grid-template-columns: repeat(var(--gate-count), minmax(0, 1fr));
-    align-items: end;
-    gap: clamp(9px, 1.8vw, 20px);
-    margin: 0;
-    padding: 0;
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(var(--gate-count), minmax(0, 1fr));
+  align-items: end;
+  gap: clamp(9px, 1.8vw, 20px);
+  margin: 0;
+  padding: 0;
 }
 .daily-page--arcade .challenge-gate-world .challenge-option {
-    display: grid;
-    place-items: center;
-    min-height: 192px;
-    padding: 38px 12px 22px;
-    border: 2px solid rgba(251, 191, 36, 0.32);
-    border-top-width: 4px;
-    border-radius: 58px 58px 14px 14px;
-    color: #f7f8ff;
-    background: radial-gradient(circle at 50% 42%, rgba(251, 191, 36, 0.17), transparent 28%), linear-gradient(180deg, rgba(38, 37, 107, 0.97), rgba(5, 8, 23, 0.96));
-    box-shadow:
-        inset 0 0 0 6px rgba(251, 191, 36, 0.025),
-        0 13px 22px rgba(0, 0, 0, 0.35);
-    font-size: clamp(0.88rem, 1.45vw, 1.12rem);
-    font-weight: 800;
-    text-align: center;
-    transition:
-        transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
-        filter 0.18s ease,
-        border-color 0.18s ease;
+  display: grid;
+  place-items: center;
+  min-height: 192px;
+  padding: 38px 12px 22px;
+  border: 2px solid rgba(251, 191, 36, 0.32);
+  border-top-width: 4px;
+  border-radius: 58px 58px 14px 14px;
+  color: #f7f8ff;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(251, 191, 36, 0.17), transparent 28%),
+    linear-gradient(180deg, rgba(38, 37, 107, 0.97), rgba(5, 8, 23, 0.96));
+  box-shadow:
+    inset 0 0 0 6px rgba(251, 191, 36, 0.025),
+    0 13px 22px rgba(0, 0, 0, 0.35);
+  font-size: clamp(0.88rem, 1.45vw, 1.12rem);
+  font-weight: 800;
+  text-align: center;
+  transition:
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.18s ease,
+    border-color 0.18s ease;
 }
 .daily-page--arcade .challenge-gate-world .challenge-option::after {
-    content: "SELECT GATE";
-    position: absolute;
-    bottom: 11px;
-    color: #aeb7da;
-    font:
-        700 0.62rem ui-monospace,
-        monospace;
-    letter-spacing: 0.1em;
+  content: 'SELECT GATE';
+  position: absolute;
+  bottom: 11px;
+  color: #aeb7da;
+  font:
+    700 0.62rem ui-monospace,
+    monospace;
+  letter-spacing: 0.1em;
 }
 .daily-page--arcade .challenge-gate-world .challenge-option:hover,
-.daily-page--arcade .challenge-gate-world .challenge-option[aria-checked="true"] {
-    border-color: #ffbd2e;
-    color: #fff;
-    background: radial-gradient(circle at 50% 38%, rgba(251, 191, 36, 0.34), transparent 32%), linear-gradient(180deg, rgba(47, 45, 128, 0.98), rgba(5, 8, 23, 0.96));
-    box-shadow:
-        0 0 0 2px rgba(251, 191, 36, 0.13),
-        0 0 30px rgba(251, 191, 36, 0.25);
-    transform: translateY(-9px) scale(1.025);
+.daily-page--arcade .challenge-gate-world .challenge-option[aria-checked='true'] {
+  border-color: #ffbd2e;
+  color: #fff;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(251, 191, 36, 0.34), transparent 32%),
+    linear-gradient(180deg, rgba(47, 45, 128, 0.98), rgba(5, 8, 23, 0.96));
+  box-shadow:
+    0 0 0 2px rgba(251, 191, 36, 0.13),
+    0 0 30px rgba(251, 191, 36, 0.25);
+  transform: translateY(-9px) scale(1.025);
 }
 .daily-page--arcade .challenge-gate-key {
-    top: 15px;
-    left: 50%;
-    width: 28px;
-    height: 28px;
-    transform: translateX(-50%);
-    border-color: rgba(251, 191, 36, 0.55);
-    border-radius: 8px;
-    color: #ffd96a;
-    background: #080c28;
-    font-size: 0.75rem;
+  top: 15px;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  transform: translateX(-50%);
+  border-color: rgba(251, 191, 36, 0.55);
+  border-radius: 8px;
+  color: #ffd96a;
+  background: #080c28;
+  font-size: 0.75rem;
 }
 .daily-page--arcade .challenge-gate-answer {
-    position: absolute;
-    top: 52%;
-    left: 50%;
-    width: calc(100% - 24px);
-    padding: 0 6px;
-    transform: translate(-50%, -50%);
-    color: inherit;
-    font-size: clamp(1.05rem, 1.75vw, 1.35rem);
-    font-weight: 850;
-    line-height: 1.15;
-    text-align: center;
-    text-wrap: balance;
+  position: absolute;
+  top: 52%;
+  left: 50%;
+  width: calc(100% - 24px);
+  padding: 0 6px;
+  transform: translate(-50%, -50%);
+  color: inherit;
+  font-size: clamp(1.05rem, 1.75vw, 1.35rem);
+  font-weight: 850;
+  line-height: 1.15;
+  text-align: center;
+  text-wrap: balance;
 }
 .daily-page--arcade .challenge-result {
-    position: absolute;
-    z-index: 9;
-    right: 50%;
-    bottom: 17px;
-    width: min(560px, calc(100% - 42px));
-    margin: 0;
-    transform: translateX(50%);
-    border: 1px solid rgba(251, 191, 36, 0.58);
-    background: rgba(5, 8, 23, 0.94);
-    box-shadow: 0 0 38px rgba(251, 191, 36, 0.28);
-    font-size: 1rem;
+  position: absolute;
+  z-index: 9;
+  right: 50%;
+  bottom: 17px;
+  width: min(560px, calc(100% - 42px));
+  margin: 0;
+  transform: translateX(50%);
+  border: 1px solid rgba(251, 191, 36, 0.58);
+  background: rgba(5, 8, 23, 0.94);
+  box-shadow: 0 0 38px rgba(251, 191, 36, 0.28);
+  font-size: 1rem;
 }
 .daily-page--arcade .result-incorrect {
-    border-color: rgba(239, 68, 68, 0.6);
-    box-shadow: 0 0 38px rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.6);
+  box-shadow: 0 0 38px rgba(239, 68, 68, 0.2);
 }
 .daily-page--arcade .daily-xp-breakdown,
 .daily-page--arcade .daily-summary-card {
-    margin: 0 18px 14px;
+  margin: 0 18px 14px;
 }
 @media (max-width: 720px) {
-    .daily-page--arcade {
-        padding: 0.7rem;
-    }
-    .daily-page--arcade .daily-run-header {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .daily-stage-map {
-        gap: 10px;
-        padding: 8px 11px;
-    }
-    .daily-stage-map strong {
-        font-size: 0.72rem;
-    }
-    .daily-stage-map li {
-        min-width: 24px;
-    }
-    .daily-stage-map small {
-        display: none;
-    }
-    .daily-score-rail,
-    .daily-run-progress {
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .daily-page--arcade .challenge-stage {
-        grid-template-columns: 1fr;
-        gap: 7px;
-    }
-    .daily-page--arcade .challenge-stage-visual {
-        display: none;
-    }
-    .daily-page--arcade .daily-xp-preview {
-        top: 150px;
-    }
-    .daily-page--arcade .challenge-gate-world {
-        min-height: 500px;
-        padding: 65px 12px 50px;
-        margin: 0 8px 60px;
-    }
-    .daily-page--arcade .challenge-gate-world .challenge-options {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-    }
-    .daily-page--arcade .challenge-gate-world .challenge-option {
-        min-height: 158px;
-        padding: 34px 8px 20px;
-        font-size: 0.88rem;
-    }
-    .daily-page--arcade .daily-powers {
-        position: relative;
-        right: auto;
-        bottom: auto;
-        margin: 9px 12px;
-        flex-wrap: wrap;
-    }
-    .daily-page--arcade .challenge-result {
-        bottom: 12px;
-    }
-    .daily-page--arcade .challenge-controls-hint {
-        padding: 0 11px;
-        line-height: 1.4;
-    }
+  .daily-page--arcade {
+    padding: 0.7rem;
+  }
+  .daily-page--arcade .daily-run-header {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .daily-stage-map {
+    gap: 10px;
+    padding: 8px 11px;
+  }
+  .daily-stage-map strong {
+    font-size: 0.72rem;
+  }
+  .daily-stage-map li {
+    min-width: 24px;
+  }
+  .daily-stage-map small {
+    display: none;
+  }
+  .daily-score-rail,
+  .daily-run-progress {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .daily-page--arcade .challenge-stage {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+  .daily-page--arcade .challenge-stage-visual {
+    display: none;
+  }
+  .daily-page--arcade .daily-xp-preview {
+    top: 150px;
+  }
+  .daily-page--arcade .challenge-gate-world {
+    min-height: 500px;
+    padding: 65px 12px 50px;
+    margin: 0 8px 60px;
+  }
+  .daily-page--arcade .challenge-gate-world .challenge-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .daily-page--arcade .challenge-gate-world .challenge-option {
+    min-height: 158px;
+    padding: 34px 8px 20px;
+    font-size: 0.88rem;
+  }
+  .daily-page--arcade .daily-powers {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    margin: 9px 12px;
+    flex-wrap: wrap;
+  }
+  .daily-page--arcade .challenge-result {
+    bottom: 12px;
+  }
+  .daily-page--arcade .challenge-controls-hint {
+    padding: 0 11px;
+    line-height: 1.4;
+  }
 }
 
 /* The musical proof has its own bounded surface; reward chips must not float over it. */
 .daily-page--arcade .daily-visual-stage {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    margin: 14px 18px 10px;
-    border-color: rgba(73, 200, 239, 0.42);
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin: 14px 18px 10px;
+  border-color: rgba(73, 200, 239, 0.42);
 }
 .daily-page--arcade .daily-visual-stage .daily-instrument-frame {
-    margin: 0;
+  margin: 0;
 }
 .daily-page--arcade .daily-visual-stage .piano-container {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 .daily-page--arcade .daily-visual-stage .fretboard-container {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 .daily-page--arcade .daily-xp-preview {
-    position: relative;
-    top: auto;
-    right: auto;
-    justify-content: center;
-    margin: 0 18px 10px;
+  position: relative;
+  top: auto;
+  right: auto;
+  justify-content: center;
+  margin: 0 18px 10px;
 }
 @media (max-width: 720px) {
-    .daily-page--arcade .daily-visual-stage {
-        margin: 10px 10px 8px;
-    }
-    .daily-page--arcade .daily-xp-preview {
-        top: auto;
-        margin: 0 10px 8px;
-    }
+  .daily-page--arcade .daily-visual-stage {
+    margin: 10px 10px 8px;
+  }
+  .daily-page--arcade .daily-xp-preview {
+    top: auto;
+    margin: 0 10px 8px;
+  }
 }

@@ -2,7 +2,14 @@ import React from 'react'
 import Button from '../common/Button'
 import './KeySelector.scss'
 
-const KeySelector = ({ selectedKey, onKeyChange, loading, selectedInterval, onIntervalChange, availableIntervals }) => {
+const KeySelector = ({
+  selectedKey,
+  onKeyChange,
+  loading = false,
+  selectedInterval = undefined,
+  onIntervalChange = undefined,
+  availableIntervals = undefined,
+}) => {
   const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
   // If interval props are passed (legacy callers), render the dual-section layout
@@ -10,7 +17,7 @@ const KeySelector = ({ selectedKey, onKeyChange, loading, selectedInterval, onIn
 
   const intervals = availableIntervals || [
     { key: 'major', name: 'Major' },
-    { key: 'minor', name: 'Minor' }
+    { key: 'minor', name: 'Minor' },
   ]
 
   return (

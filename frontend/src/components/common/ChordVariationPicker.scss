@@ -135,7 +135,9 @@
 .variation-item.selected {
   background: rgba(251, 191, 36, 0.15);
   border-color: #fbbf24;
-  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1), 0 4px 18px rgba(251, 191, 36, 0.2);
+  box-shadow:
+    0 0 0 3px rgba(251, 191, 36, 0.1),
+    0 4px 18px rgba(251, 191, 36, 0.2);
   transform: scale(1.02);
 }
 

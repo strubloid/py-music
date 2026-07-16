@@ -22,7 +22,7 @@ const TopHeader = () => {
 
   const handleMouseMove = (e) => {
     if (!isDragging) return
-    
+
     const deltaY = e.clientY - dragStartY.current
     const maxHeight = window.innerHeight * 0.5 // Max 50% of viewport
     const newHeight = Math.min(Math.max(startHeight.current + deltaY, 150), maxHeight)
@@ -55,13 +55,13 @@ const TopHeader = () => {
   }, [isDragging, panelHeight])
 
   return (
-    <div 
+    <div
       ref={panelRef}
       className={`top-header${activePanel ? ' expanded' : ''}`}
       style={activePanel ? { height: panelHeight } : undefined}
     >
       {/* Top Controls */}
-      <div 
+      <div
         className={`top-controls${activePanel ? ' resizable' : ''}`}
         onMouseDown={activePanel ? handleMouseDown : undefined}
       >
@@ -73,7 +73,7 @@ const TopHeader = () => {
           <span className="button-icon">⚡</span>
           <span className="button-text">Shortcuts</span>
         </button>
-        
+
         <button
           className={`top-button ${activePanel === 'favorites' ? 'active' : ''}`}
           onClick={() => togglePanel('favorites')}
@@ -86,14 +86,11 @@ const TopHeader = () => {
 
       {/* Drag Handle */}
       {activePanel && (
-        <div 
-          className="panel-drag-handle bottom"
-          onMouseDown={handleMouseDown}
-        >
+        <div className="panel-drag-handle bottom" onMouseDown={handleMouseDown}>
           <div className={`drag-indicator ${isDragging ? 'dragging' : ''}`}></div>
         </div>
       )}
-      
+
       {/* Panel Content */}
       {activePanel && (
         <div className="top-panel-content">
@@ -108,7 +105,7 @@ const TopHeader = () => {
               </div>
             </div>
           )}
-          
+
           {activePanel === 'favorites' && (
             <div className="favorites-content">
               <h3>Your Favorites</h3>

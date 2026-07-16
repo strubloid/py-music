@@ -19,7 +19,7 @@ Security behavior is implemented primarily in `backend/project/api/app.py`, `bac
 
 ## Before Deploying
 
-1. Set `SECRET_KEY`, `FRONTEND_URL`, and `DATABASE_URL` in Fly secrets.
+1. Set `SECRET_KEY` and `FRONTEND_URL` in Fly secrets. The default SQLite database is on the Fly volume at `/app/data/strubloid.db`; only set `DATABASE_URL` when using an external database or the same explicit SQLite path.
 2. Build the frontend and run backend and frontend tests.
 3. Verify `/api/health`, login, CSRF rejection, protected seed endpoint, and production headers.
 4. Review dependency updates and run a dependency audit when the tooling is available.

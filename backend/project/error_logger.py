@@ -1,15 +1,14 @@
 """
 Error logging utility for the Strubloid Music Theory app.
-Appends errors to /data/errors.md with timestamp, type, and details.
+Appends errors to the configured writable data directory with timestamp, type, and details.
 """
+import os
 from pathlib import Path
 from datetime import datetime, timezone
 import traceback
 
-ERRORS_FILE = Path(__file__).parent.parent.parent.parent / "data" / "errors.md"
-
-# Ensure data directory exists
-ERRORS_FILE.parent.mkdir(parents=True, exist_ok=True)
+DATA_DIR = Path(os.getenv('PYMUSIC_DATA_DIR', Path(__file__).parents[2] / 'data'))
+ERRORS_FILE = DATA_DIR / 'errors.md'
 
 
 def _timestamp():
@@ -18,7 +17,7 @@ def _timestamp():
 
 def log_error(category: str, message: str, details: str | None = None, exc: BaseException | None = None):
     """
-    Append an error entry to /data/errors.md.
+    Append an error entry to the configured error log.
 
     Args:
         category: Short tag like "API", "AUTH", "FRONTEND", "DATABASE"
@@ -44,9 +43,12 @@ def log_error(category: str, message: str, details: str | None = None, exc: Base
     text = "\n".join(lines) + "\n"
 
     try:
-        ERRORS_FILE.write_text(ERRORS_FILE.read_text() + text, encoding="utf-8")
-    except FileNotFoundError:
-        ERRORS_FILE.write_text(text, encoding="utf-8")
+        ERRORS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with ERRORS_FILE.open('a', encoding='utf-8') as error_log:
+            error_log.write(text)
+    except OSError:
+        # Logging cannot prevent the application from starting or serving errors.
+        pass
 
     return text
 

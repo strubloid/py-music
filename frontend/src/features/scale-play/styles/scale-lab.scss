@@ -46,8 +46,19 @@
     color: var(--sl-amber);
     flex-shrink: 0;
 
-    p { font-size: 0.62rem; color: var(--sl-text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin: 0; }
-    h1 { font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--sl-amber-light); }
+    p {
+      font-size: 0.62rem;
+      color: var(--sl-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 0;
+    }
+    h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--sl-amber-light);
+    }
   }
 
   &__controls {
@@ -70,7 +81,9 @@
   outline: none;
   transition: border-color 120ms;
 
-  &:focus { border-color: var(--sl-amber); }
+  &:focus {
+    border-color: var(--sl-amber);
+  }
 }
 
 .sl-range-btns {
@@ -87,7 +100,9 @@
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 120ms, border-color 120ms;
+  transition:
+    background 120ms,
+    border-color 120ms;
 
   &.active {
     background: rgba(255, 157, 31, 0.15);
@@ -95,8 +110,13 @@
     color: var(--sl-amber-light);
   }
 
-  &:hover:not(.active) { background: rgba(255,255,255,0.04); }
-  &:focus-visible { outline: 2px solid var(--sl-amber); outline-offset: 2px; }
+  &:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.04);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--sl-amber);
+    outline-offset: 2px;
+  }
 }
 
 .sl-btn {
@@ -111,15 +131,25 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: background 120ms, border-color 120ms;
+  transition:
+    background 120ms,
+    border-color 120ms;
 
-  &:focus-visible { outline: 2px solid var(--sl-amber); outline-offset: 2px; }
-  &:active { transform: scale(0.97); }
+  &:focus-visible {
+    outline: 2px solid var(--sl-amber);
+    outline-offset: 2px;
+  }
+  &:active {
+    transform: scale(0.97);
+  }
 
   &--ghost {
     border-color: rgba(255, 79, 96, 0.3);
     color: #ff6678;
-    &:hover { background: rgba(255, 79, 96, 0.1); border-color: rgba(255, 79, 96, 0.6); }
+    &:hover {
+      background: rgba(255, 79, 96, 0.1);
+      border-color: rgba(255, 79, 96, 0.6);
+    }
   }
 
   &--primary {
@@ -127,8 +157,13 @@
     border-color: var(--sl-amber);
     color: var(--sl-amber-light);
 
-    &:hover:not(:disabled) { background: rgba(255, 157, 31, 0.28); }
-    &:disabled { opacity: 0.4; cursor: not-allowed; }
+    &:hover:not(:disabled) {
+      background: rgba(255, 157, 31, 0.28);
+    }
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
   }
 }
 
@@ -161,7 +196,59 @@
   }
 }
 
-.sl-reference-instruments { display:grid; gap:10px; padding:13px; border:1px solid rgba(73,200,239,.38); border-radius:14px; background:linear-gradient(120deg,rgba(73,200,239,.1),rgba(17,22,58,.78)); }.sl-reference-instruments > header { display:flex; align-items:baseline; gap:9px; }.sl-reference-instruments > header span,.sl-builder__label > span { color:var(--sl-cyan); font:800 .62rem ui-monospace,monospace; letter-spacing:.12em; text-transform:uppercase; }.sl-reference-instruments > header strong { color:var(--sl-text); font-size:.9rem; }.sl-reference-instruments__piano { max-width:640px; margin-inline:auto; width:100%; }.sl-reference-instruments__piano .piano-container { margin:0; }.sl-reference-instruments__guitar { overflow:hidden; border:1px solid rgba(255,189,46,.16); border-radius:10px; background:rgba(5,8,23,.42); }.sl-reference-instruments__guitar .fretboard-container { border:0; background:transparent; }.sl-builder__label { display:flex; align-items:baseline; gap:8px; }.sl-builder__label small { color:var(--sl-text-muted); font-size:.74rem; }
+.sl-reference-instruments {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid rgba(73, 200, 239, 0.38);
+  border-radius: 14px;
+  background: linear-gradient(120deg, rgba(73, 200, 239, 0.1), rgba(17, 22, 58, 0.78));
+}
+.sl-reference-instruments > header {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+.sl-reference-instruments > header span,
+.sl-builder__label > span {
+  color: var(--sl-cyan);
+  font:
+    800 0.62rem ui-monospace,
+    monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.sl-reference-instruments > header strong {
+  color: var(--sl-text);
+  font-size: 0.9rem;
+}
+.sl-reference-instruments__piano {
+  max-width: 640px;
+  margin-inline: auto;
+  width: 100%;
+}
+.sl-reference-instruments__piano .piano-container {
+  margin: 0;
+}
+.sl-reference-instruments__guitar {
+  overflow: hidden;
+  border: 1px solid rgba(255, 189, 46, 0.16);
+  border-radius: 10px;
+  background: rgba(5, 8, 23, 0.42);
+}
+.sl-reference-instruments__guitar .fretboard-container {
+  border: 0;
+  background: transparent;
+}
+.sl-builder__label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.sl-builder__label small {
+  color: var(--sl-text-muted);
+  font-size: 0.74rem;
+}
 
 .sl-note-strip {
   display: flex;
@@ -200,7 +287,9 @@
     display: none; // hidden on desktop
     border-bottom: 1px solid rgba(71, 61, 140, 0.4);
 
-    @media (max-width: 900px) { display: flex; }
+    @media (max-width: 900px) {
+      display: flex;
+    }
   }
 
   &__panels {
@@ -210,7 +299,9 @@
     padding: 14px;
 
     @media (max-width: 900px) {
-      .hidden-mobile { display: none; }
+      .hidden-mobile {
+        display: none;
+      }
     }
   }
 }
@@ -224,10 +315,18 @@
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
-  transition: color 120ms, border-bottom 120ms;
+  transition:
+    color 120ms,
+    border-bottom 120ms;
 
-  &.active { color: var(--sl-amber-light); border-bottom: 2px solid var(--sl-amber); }
-  &:focus-visible { outline: 2px solid var(--sl-amber); outline-offset: -2px; }
+  &.active {
+    color: var(--sl-amber-light);
+    border-bottom: 2px solid var(--sl-amber);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--sl-amber);
+    outline-offset: -2px;
+  }
 }
 
 .sl-panel-empty {
@@ -239,7 +338,9 @@
 
 // Reduced motion
 .reduced-motion {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation: none !important;
     transition-duration: 0.01ms !important;
   }

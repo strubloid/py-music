@@ -317,14 +317,14 @@
     transform: none !important;
     width: auto !important;
   }
-  
+
   .info-toggle-button {
     width: 100% !important;
     min-height: 48px !important;
     padding: 0.75rem 1rem !important;
     justify-content: space-between !important;
   }
-  
+
   .toggle-content {
     display: flex !important;
     flex-direction: row !important;
@@ -333,13 +333,13 @@
     width: 100% !important;
     justify-content: space-between !important;
   }
-  
+
   .info-title-compact {
     display: inline !important;
     color: #f3f4f6 !important;
     font-weight: 600 !important;
   }
-  
+
   .info-panel {
     position: absolute !important;
     bottom: calc(100% + 0.5rem) !important;
@@ -350,11 +350,11 @@
     min-width: auto !important;
     max-width: none !important;
   }
-  
+
   .info-container.collapsed .info-panel {
     transform: translateY(20px) !important;
   }
-  
+
   .info-container.expanded .info-panel {
     transform: translateY(0) !important;
   }
@@ -366,22 +366,22 @@
     left: 0.5rem !important;
     right: 0.5rem !important;
   }
-  
+
   .info-toggle-button {
     font-size: 0.8rem !important;
     padding: 0.625rem 0.75rem !important;
     min-height: 44px !important;
   }
-  
+
   .info-header {
     padding: 0.75rem 1rem !important;
   }
-  
+
   .info-content {
     padding: 1rem !important;
     font-size: 0.875rem !important;
   }
-  
+
   .info-panel {
     max-height: 50vh !important;
   }
@@ -475,12 +475,12 @@
 
 /* Secondary Dominants Floating Content */
 .dominants-compact-floating {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    justify-content: center;
-    align-items: center;
-    padding: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
 }
 
 .dominant-item-floating {

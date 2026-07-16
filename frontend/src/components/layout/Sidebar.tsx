@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
-  Music, BookOpen, Zap, Gamepad2, ListMusic,
-  FolderOpen, BarChart2, Settings, ChevronLeft, ChevronRight,
-  Train, LogIn, LogOut, Compass, FlaskConical
+  Music,
+  BookOpen,
+  Zap,
+  Gamepad2,
+  ListMusic,
+  FolderOpen,
+  BarChart2,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  Train,
+  LogIn,
+  LogOut,
+  Compass,
+  FlaskConical,
 } from 'lucide-react'
 import UserBadge from '../auth/UserBadge'
 import { useAuth } from '../../contexts/AuthContext'
@@ -33,21 +45,21 @@ const NavItemWithBadge = ({ collapsed, navigate }) => {
       onClick={() => navigate('/create/my-songs')}
       title={collapsed ? 'My Songs' : undefined}
     >
-      <span className="nav-icon"><FolderOpen size={18} /></span>
+      <span className="nav-icon">
+        <FolderOpen size={18} />
+      </span>
       {!collapsed && <span className="nav-label">My Songs</span>}
-      {badge > 0 && (
-        <span className="new-songs-badge">{badge > 9 ? '9+' : badge}</span>
-      )}
+      {badge > 0 && <span className="new-songs-badge">{badge > 9 ? '9+' : badge}</span>}
     </button>
   )
 }
 
 const Sidebar = ({ collapsed, onToggle }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { user, isLoggedIn, promptLogin, logout } = useAuth();
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { user, isLoggedIn, promptLogin, logout } = useAuth()
 
-  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
+  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/')
 
   const navItem = (icon, label, path) => (
     <button
@@ -58,7 +70,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
       <span className="nav-icon">{icon}</span>
       {!collapsed && <span className="nav-label">{label}</span>}
     </button>
-  );
+  )
 
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
@@ -108,7 +120,9 @@ const Sidebar = ({ collapsed, onToggle }) => {
             onClick={() => promptLogin('save')}
             title={collapsed ? 'Sign in / Register' : undefined}
           >
-            <span className="nav-icon"><LogIn size={18} /></span>
+            <span className="nav-icon">
+              <LogIn size={18} />
+            </span>
             {!collapsed && <span className="nav-label">Sign in / Register</span>}
           </button>
         )}
@@ -118,7 +132,9 @@ const Sidebar = ({ collapsed, onToggle }) => {
             onClick={logout}
             title={collapsed ? 'Sign out' : undefined}
           >
-            <span className="nav-icon"><LogOut size={18} /></span>
+            <span className="nav-icon">
+              <LogOut size={18} />
+            </span>
             {!collapsed && <span className="nav-label">Sign out</span>}
           </button>
         ) : user ? (
@@ -128,7 +144,9 @@ const Sidebar = ({ collapsed, onToggle }) => {
             onClick={() => promptLogin('save')}
             title={collapsed ? 'Sign in / Register' : undefined}
           >
-            <span className="nav-icon"><LogIn size={18} /></span>
+            <span className="nav-icon">
+              <LogIn size={18} />
+            </span>
             {!collapsed && <span className="nav-label">Sign in / Register</span>}
           </button>
         ) : null}
@@ -139,7 +157,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
         {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
       </button>
     </aside>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar

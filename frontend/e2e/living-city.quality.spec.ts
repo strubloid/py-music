@@ -1,16 +1,16 @@
-import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright'
+import { expect, test } from '@playwright/test'
 
-const WORLD_ROUTES = ['/', '/play/ear-training', '/play/scales', '/play/learn-scales', '/play/quests'];
+const WORLD_ROUTES = ['/', '/play/ear-training', '/play/scales', '/play/learn-scales', '/play/quests']
 
 for (const route of WORLD_ROUTES) {
   test(`automated accessibility has no critical or serious violations on ${route}`, async ({ page }) => {
-    await page.goto(route);
-    await page.waitForLoadState('networkidle');
-    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
-    const blocking = results.violations.filter((violation) => ['critical', 'serious'].includes(violation.impact || ''));
-    expect(blocking, blocking.map((violation) => `${violation.id}: ${violation.help}`).join('\n')).toEqual([]);
-  });
+    await page.goto(route)
+    await page.waitForLoadState('networkidle')
+    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
+    const blocking = results.violations.filter((violation) => ['critical', 'serious'].includes(violation.impact || ''))
+    expect(blocking, blocking.map((violation) => `${violation.id}: ${violation.help}`).join('\n')).toEqual([])
+  })
 }
 
 test('all Living City routes remain inside compact mobile and reference desktop widths', async ({ page }) => {
@@ -20,55 +20,65 @@ test('all Living City routes remain inside compact mobile and reference desktop 
     { width: 390, height: 844 },
     { width: 768, height: 1024 },
     { width: 1440, height: 900 },
-  ];
+  ]
   for (const viewport of viewports) {
-    await page.setViewportSize(viewport);
+    await page.setViewportSize(viewport)
     for (const route of WORLD_ROUTES) {
-      await page.goto(route);
-      const dimensions = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
-      expect(dimensions.scroll, `${route} overflowed at ${viewport.width}px`).toBeLessThanOrEqual(dimensions.viewport + 1);
+      await page.goto(route)
+      const dimensions = await page.evaluate(() => ({
+        viewport: document.documentElement.clientWidth,
+        scroll: document.documentElement.scrollWidth,
+      }))
+      expect(dimensions.scroll, `${route} overflowed at ${viewport.width}px`).toBeLessThanOrEqual(
+        dimensions.viewport + 1,
+      )
     }
   }
-});
+})
 
 test('minimal motion removes travel displacement and shortens district travel', async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem('strubloid:motion-profile', 'minimal'));
-  await page.goto('/');
-  await page.getByRole('button', { name: /quest vaults.*enter district/i }).click();
-  const travel = page.getByRole('status').filter({ hasText: /quest vaults/i });
-  await expect(travel).toBeVisible();
-  await expect(travel.locator('.district-travel__pip')).toHaveCSS('animation-name', 'none');
-  await expect(page).toHaveURL(/\/play\/quests$/);
-  await expect(travel).toBeHidden();
-});
+  await page.addInitScript(() => localStorage.setItem('strubloid:motion-profile', 'minimal'))
+  await page.goto('/')
+  await page.getByRole('button', { name: /quest vaults.*enter district/i }).click()
+  const travel = page.getByRole('status').filter({ hasText: /quest vaults/i })
+  await expect(travel).toBeVisible()
+  await expect(travel.locator('.district-travel__pip')).toHaveCSS('animation-name', 'none')
+  await expect(page).toHaveURL(/\/play\/quests$/)
+  await expect(travel).toBeHidden()
+})
 
 test('core world routes emit no browser errors', async ({ page }) => {
-  const errors: string[] = [];
-  page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
-  page.on('pageerror', (error) => errors.push(error.message));
+  const errors: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(message.text())
+  })
+  page.on('pageerror', (error) => errors.push(error.message))
   for (const route of WORLD_ROUTES) {
-    await page.goto(route);
-    await page.waitForLoadState('networkidle');
+    await page.goto(route)
+    await page.waitForLoadState('networkidle')
   }
-  expect(errors).toEqual([]);
-});
+  expect(errors).toEqual([])
+})
 
 test('Practice Square paints within budget without loading every district bundle', async ({ page }) => {
   await page.addInitScript(() => {
-    (window as typeof window & { __livingCityLcp?: number }).__livingCityLcp = 0;
+    ;(window as typeof window & { __livingCityLcp?: number }).__livingCityLcp = 0
     new PerformanceObserver((list) => {
-      const latest = list.getEntries().at(-1);
-      if (latest) (window as typeof window & { __livingCityLcp?: number }).__livingCityLcp = latest.startTime;
-    }).observe({ type: 'largest-contentful-paint', buffered: true });
-  });
-  await page.goto('/');
-  await expect(page.getByRole('heading', { name: /where will the music take you/i })).toBeVisible();
-  await page.waitForTimeout(800);
+      const latest = list.getEntries().at(-1)
+      if (latest) (window as typeof window & { __livingCityLcp?: number }).__livingCityLcp = latest.startTime
+    }).observe({ type: 'largest-contentful-paint', buffered: true })
+  })
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: /where will the music take you/i })).toBeVisible()
+  await page.waitForTimeout(800)
   const metrics = await page.evaluate(() => ({
     lcp: (window as typeof window & { __livingCityLcp?: number }).__livingCityLcp || 0,
-    scripts: performance.getEntriesByType('resource').map((entry) => entry.name).filter((name) => name.endsWith('.js')),
-  }));
-  expect(metrics.lcp).toBeGreaterThan(0);
-  expect(metrics.lcp).toBeLessThan(2500);
-  expect(metrics.scripts.some((name) => /EarTraining|ScaleLab|ScalePathGame|Quests/.test(name))).toBe(false);
-});
+    scripts: performance
+      .getEntriesByType('resource')
+      .map((entry) => entry.name)
+      .filter((name) => name.endsWith('.js')),
+  }))
+  expect(metrics.lcp).toBeGreaterThan(0)
+  expect(metrics.lcp).toBeLessThan(2500)
+  expect(metrics.scripts.some((name) => /EarTraining|ScaleLab|ScalePathGame|Quests/.test(name))).toBe(false)
+})

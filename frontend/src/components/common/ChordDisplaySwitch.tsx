@@ -1,10 +1,10 @@
-import React from 'react';
-import { Guitar, Piano } from 'lucide-react';
-import { useChordDisplay } from '../../contexts/ChordDisplayContext';
-import './ChordDisplaySwitch.scss';
+import React from 'react'
+import { Guitar, Piano } from 'lucide-react'
+import { useChordDisplay } from '../../contexts/ChordDisplayContext'
+import './ChordDisplaySwitch.scss'
 
 const ChordDisplaySwitch = ({ className = '' }) => {
-  const { displayMode, toggleDisplayMode } = useChordDisplay();
+  const { displayMode, toggleDisplayMode } = useChordDisplay()
 
   return (
     <div className={`chord-display-switch ${className}`}>
@@ -15,19 +15,13 @@ const ChordDisplaySwitch = ({ className = '' }) => {
       >
         <div className="switch-track">
           <div className={`switch-thumb ${displayMode === 'piano' ? 'piano-mode' : 'guitar-mode'}`}>
-            {displayMode === 'guitar' ? (
-              <Guitar size={14} />
-            ) : (
-              <Piano size={14} />
-            )}
+            {displayMode === 'guitar' ? <Guitar size={14} /> : <Piano size={14} />}
           </div>
         </div>
-        <span className="switch-label">
-          {displayMode === 'guitar' ? 'Guitar' : 'Piano'}
-        </span>
+        <span className="switch-label">{displayMode === 'guitar' ? 'Guitar' : 'Piano'}</span>
       </button>
     </div>
-  );
-};
+  )
+}
 
-export default ChordDisplaySwitch;
+export default ChordDisplaySwitch

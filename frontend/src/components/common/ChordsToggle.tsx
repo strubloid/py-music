@@ -4,7 +4,7 @@ import { useChordPanel } from '../../contexts/ChordPanelContext'
 import './ChordDisplaySwitch.scss'
 
 const ChordsToggle = ({ className = '' }) => {
-  const { showChords, toggleChords } = useChordPanel();
+  const { showChords, toggleChords } = useChordPanel()
 
   return (
     <div className={`chord-display-switch ${className}`}>
@@ -18,9 +18,7 @@ const ChordsToggle = ({ className = '' }) => {
             <Music size={14} />
           </div>
         </div>
-        <span className="switch-label">
-          {showChords ? 'Chords' : 'Chords'}
-        </span>
+        <span className="switch-label">{showChords ? 'Chords' : 'Chords'}</span>
       </button>
     </div>
   )

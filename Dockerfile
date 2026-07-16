@@ -23,6 +23,7 @@ COPY --chown=app:app --from=frontend-build /app/frontend/dist ./frontend/dist
 ENV FLASK_APP=backend.project.api.app:app
 ENV PYTHONUNBUFFERED=1
 ENV PORT=5000
+ENV PYMUSIC_DATA_DIR=/app/data
 
 USER app
 

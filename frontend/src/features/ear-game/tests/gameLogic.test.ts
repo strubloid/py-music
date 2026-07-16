@@ -1,8 +1,8 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
+import test from 'node:test'
+import assert from 'node:assert/strict'
 
-import { calculateRoundScore, updateMasteryWindow } from '../services/scoreMastery';
-import { normalizeEarChallenge } from '../services/challengeNormalizer';
+import { calculateRoundScore, updateMasteryWindow } from '../services/scoreMastery'
+import { normalizeEarChallenge } from '../services/challengeNormalizer'
 
 const raw = {
   id: 42,
@@ -18,27 +18,50 @@ const raw = {
     chords: [['C3', 'E3', 'G3']],
     answer_mode: 'single_chord_quality',
   },
-};
+}
 
 test('challenge normalization never retains the server-only correct answer index', () => {
-  const challenge = normalizeEarChallenge(raw, { instrumentId: 'piano' });
-  assert.equal(challenge.category, 'chord-quality');
-  assert.equal(challenge.correctAnswerId, null);
-  assert.equal(challenge.answers[0].lane, 0);
-  assert.equal(challenge.prompt.events.length, 3);
-  assert.equal(new Set(challenge.prompt.events.map((event) => event.time)).size, 1);
-});
+  const challenge = normalizeEarChallenge(raw, { instrumentId: 'piano' })
+  assert.equal(challenge.category, 'chord-quality')
+  assert.equal(challenge.correctAnswerId, null)
+  assert.equal(challenge.answers[0].lane, 0)
+  assert.equal(challenge.prompt.events.length, 3)
+  assert.equal(new Set(challenge.prompt.events.map((event) => event.time)).size, 1)
+})
 
 test('score rewards confidence and difficulty without ever becoming negative', () => {
-  assert.equal(calculateRoundScore({ base: 50, correct: true, firstAttempt: true, replays: 0, combo: 2, difficulty: 3, assists: 0 }), 105);
-  assert.equal(calculateRoundScore({ base: 25, correct: false, firstAttempt: false, replays: 8, combo: 0, difficulty: 1, assists: 4 }), 0);
-});
+  assert.equal(
+    calculateRoundScore({
+      base: 50,
+      correct: true,
+      firstAttempt: true,
+      replays: 0,
+      combo: 2,
+      difficulty: 3,
+      assists: 0,
+    }),
+    105,
+  )
+  assert.equal(
+    calculateRoundScore({
+      base: 25,
+      correct: false,
+      firstAttempt: false,
+      replays: 8,
+      combo: 0,
+      difficulty: 1,
+      assists: 4,
+    }),
+    0,
+  )
+})
 
 test('mastery adapts only after a comparable rolling window', () => {
-  let mastery = { level: 4, attempts: [] };
-  for (let index = 0; index < 7; index += 1) mastery = updateMasteryWindow(mastery, { correct: true, responseMs: 1000, replays: 0 });
-  assert.equal(mastery.level, 4);
-  mastery = updateMasteryWindow(mastery, { correct: true, responseMs: 900, replays: 0 });
-  assert.equal(mastery.level, 5);
-  assert.equal(mastery.attempts.length, 8);
-});
+  let mastery = { level: 4, attempts: [] }
+  for (let index = 0; index < 7; index += 1)
+    mastery = updateMasteryWindow(mastery, { correct: true, responseMs: 1000, replays: 0 })
+  assert.equal(mastery.level, 4)
+  mastery = updateMasteryWindow(mastery, { correct: true, responseMs: 900, replays: 0 })
+  assert.equal(mastery.level, 5)
+  assert.equal(mastery.attempts.length, 8)
+})

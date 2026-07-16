@@ -22,10 +22,20 @@
   isolation: isolate;
 }
 
-.fretboard-scroll::-webkit-scrollbar { height: 6px; }
-.fretboard-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 3px; }
-.fretboard-scroll::-webkit-scrollbar-thumb { background: rgba(251, 191, 36, 0.4); border-radius: 3px; }
-.fretboard-scroll::-webkit-scrollbar-thumb:hover { background: rgba(251, 191, 36, 0.6); }
+.fretboard-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.fretboard-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+.fretboard-scroll::-webkit-scrollbar-thumb {
+  background: rgba(251, 191, 36, 0.4);
+  border-radius: 3px;
+}
+.fretboard-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(251, 191, 36, 0.6);
+}
 
 .fretboard-content {
   /* Same min/max idea as the piano: keep a stable fret-cell unit and grow by
@@ -210,26 +220,69 @@
 }
 
 @media (max-width: 1100px) {
-  .fretboard-content { --gf-fret-width: clamp(2.15rem, 4.2vw, 3rem); }
-  .fret-cell { height: 1.7rem; }
-  .note-dot { width: 1.15rem; height: 1.15rem; font-size: 0.6rem; }
+  .fretboard-content {
+    --gf-fret-width: clamp(2.15rem, 4.2vw, 3rem);
+  }
+  .fret-cell {
+    height: 1.7rem;
+  }
+  .note-dot {
+    width: 1.15rem;
+    height: 1.15rem;
+    font-size: 0.6rem;
+  }
 }
 
 @media (max-width: 768px) {
-  .fretboard-content { --gf-fret-width: clamp(1.9rem, 5.6vw, 2.45rem); }
-  .fret-cell { height: 1.5rem; }
-  .note-dot { width: 1rem; height: 1rem; font-size: 0.55rem; }
-  .fret-number { font-size: 0.6rem; }
-  .string-name { font-size: 0.7rem; }
+  .fretboard-content {
+    --gf-fret-width: clamp(1.9rem, 5.6vw, 2.45rem);
+  }
+  .fret-cell {
+    height: 1.5rem;
+  }
+  .note-dot {
+    width: 1rem;
+    height: 1rem;
+    font-size: 0.55rem;
+  }
+  .fret-number {
+    font-size: 0.6rem;
+  }
+  .string-name {
+    font-size: 0.7rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .fretboard-content { --gf-fret-width: 1.65rem; --gf-string-label-width: 1.75rem; }
-  .fret-cell { height: 1.35rem; }
-  .note-dot { width: 0.85rem; height: 0.85rem; font-size: 0.5rem; border-width: 1px; }
-  .fret-number { font-size: 0.55rem; }
-  .string-name { font-size: 0.65rem; }
-  .fretboard-legend { gap: 0.5rem; font-size: 0.65rem; }
-  .legend-dot { width: 0.7rem; height: 0.7rem; }
-  .legend-dot.marker { width: 0.35rem; height: 0.35rem; }
+  .fretboard-content {
+    --gf-fret-width: 1.65rem;
+    --gf-string-label-width: 1.75rem;
+  }
+  .fret-cell {
+    height: 1.35rem;
+  }
+  .note-dot {
+    width: 0.85rem;
+    height: 0.85rem;
+    font-size: 0.5rem;
+    border-width: 1px;
+  }
+  .fret-number {
+    font-size: 0.55rem;
+  }
+  .string-name {
+    font-size: 0.65rem;
+  }
+  .fretboard-legend {
+    gap: 0.5rem;
+    font-size: 0.65rem;
+  }
+  .legend-dot {
+    width: 0.7rem;
+    height: 0.7rem;
+  }
+  .legend-dot.marker {
+    width: 0.35rem;
+    height: 0.35rem;
+  }
 }

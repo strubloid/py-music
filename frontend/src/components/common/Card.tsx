@@ -1,21 +1,14 @@
 import React from 'react'
 import './Card.scss'
 
-const Card = ({ 
-  children, 
-  title, 
-  size = 'default', 
-  variant = 'default',
-  className = '',
-  ...props 
-}) => {
+const Card = ({ children, title, size = 'default', variant = 'default', className = '', ...props }) => {
   const getCardClasses = () => {
     let classes = ['card']
-    
+
     if (size !== 'default') classes.push(size)
     if (variant !== 'default') classes.push(variant)
     if (className) classes.push(className)
-    
+
     return classes.join(' ')
   }
 
@@ -26,9 +19,7 @@ const Card = ({
           <h3 className={`card-title ${size}`}>{title}</h3>
         </div>
       )}
-      <div className="card-content">
-        {children}
-      </div>
+      <div className="card-content">{children}</div>
     </div>
   )
 }

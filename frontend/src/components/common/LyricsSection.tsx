@@ -5,9 +5,9 @@ import './LyricsSection.scss'
 const LYRICS_KEY = 'create-page-lyrics'
 
 const LyricsSection = () => {
-  const { 
-    progressionLines, 
-    lyrics, 
+  const {
+    progressionLines,
+    lyrics,
     setLyricLine,
     chordOverLyrics,
     placeChordAtWord,
@@ -16,9 +16,9 @@ const LyricsSection = () => {
     clearLineChords,
     showChords,
     viewMode,
-    setViewMode
+    setViewMode,
   } = useChordPanel()
-  
+
   const textareaRefs = useRef({})
 
   // Load cached lyrics on mount
@@ -30,7 +30,9 @@ const LyricsSection = () => {
         // Support both old format (string[]) and new format ({ lineIndex: text })
         if (Array.isArray(parsed)) {
           const newFormat = {}
-          parsed.forEach((text, i) => { newFormat[i] = text })
+          parsed.forEach((text, i) => {
+            newFormat[i] = text
+          })
           Object.entries(newFormat).forEach(([i, text]) => setLyricLine(parseInt(i), text))
         } else {
           Object.entries(parsed).forEach(([i, text]) => setLyricLine(parseInt(i), text))
@@ -68,7 +70,7 @@ const LyricsSection = () => {
   const handleWordClick = (lineIndex, wordIndex, event) => {
     event.stopPropagation()
     const existingChord = getChordAtWord(lineIndex, wordIndex)
-    
+
     if (existingChord) {
       // Show chord options or remove
       removeChordFromWord(lineIndex, wordIndex)
@@ -78,8 +80,8 @@ const LyricsSection = () => {
       if (lineChords.length > 0) {
         // Get the next unplaced chord in sequence
         const usedChords = chordOverLyrics[lineIndex] || []
-        const usedIndices = usedChords.map(c => c.wordIndex)
-        
+        const usedIndices = usedChords.map((c) => c.wordIndex)
+
         // Find next chord index
         let nextChordIndex = 0
         for (let i = 0; i < lineChords.length; i++) {
@@ -88,7 +90,7 @@ const LyricsSection = () => {
             break
           }
         }
-        
+
         placeChordAtWord(lineIndex, wordIndex, lineChords[nextChordIndex])
       }
     }
@@ -114,7 +116,7 @@ const LyricsSection = () => {
     const text = lyrics[lineIndex] || ''
     const words = getWords(text)
     const lineChords = chordOverLyrics[lineIndex] || []
-    
+
     // Build chord map: wordIndex -> chord
     const chordMap = {}
     lineChords.forEach(({ wordIndex, chord }) => {
@@ -122,9 +124,8 @@ const LyricsSection = () => {
     })
 
     // For words without chords, show placeholders for remaining chords
-    const placedIndices = new Set(lineChords.map(c => c.wordIndex))
-    const unplacedChords = (progressionLines[lineIndex] || [])
-      .filter((_, i) => !placedIndices.has(i))
+    const placedIndices = new Set(lineChords.map((c) => c.wordIndex))
+    const unplacedChords = (progressionLines[lineIndex] || []).filter((_, i) => !placedIndices.has(i))
 
     return (
       <div key={lineIndex} className="music-sheet-line">
@@ -133,15 +134,18 @@ const LyricsSection = () => {
           {words.map((word, wordIndex) => {
             const chord = chordMap[wordIndex]
             return (
-              <span 
-                key={wordIndex} 
+              <span
+                key={wordIndex}
                 className={`chord-slot ${chord ? 'has-chord' : 'empty'}`}
                 onClick={(e) => openChordPicker(lineIndex, wordIndex, e)}
               >
                 {chord && (
-                  <span 
-                    className="placed-chord" 
-                    onClick={(e) => { e.stopPropagation(); removeChordFromWord(lineIndex, wordIndex) }}
+                  <span
+                    className="placed-chord"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      removeChordFromWord(lineIndex, wordIndex)
+                    }}
                     title="Click to remove chord"
                   >
                     {chord}
@@ -160,11 +164,7 @@ const LyricsSection = () => {
         {/* Lyric row */}
         <div className="lyric-row">
           {words.map((word, wordIndex) => (
-            <span 
-              key={wordIndex} 
-              className="lyric-word"
-              onClick={(e) => handleWordClick(lineIndex, wordIndex, e)}
-            >
+            <span key={wordIndex} className="lyric-word" onClick={(e) => handleWordClick(lineIndex, wordIndex, e)}>
               {word}
             </span>
           ))}
@@ -178,16 +178,13 @@ const LyricsSection = () => {
       <div className="lyrics-header">
         <span className="lyrics-title">Lyrics</span>
         <div className="view-mode-toggle">
-          <button 
+          <button
             className={`mode-btn ${viewMode === 'builder' ? 'active' : ''}`}
             onClick={() => setViewMode('builder')}
           >
             Builder
           </button>
-          <button 
-            className={`mode-btn ${viewMode === 'sheet' ? 'active' : ''}`}
-            onClick={() => setViewMode('sheet')}
-          >
+          <button className={`mode-btn ${viewMode === 'sheet' ? 'active' : ''}`} onClick={() => setViewMode('sheet')}>
             Music Sheet
           </button>
         </div>
@@ -200,17 +197,20 @@ const LyricsSection = () => {
               <div key={lineIndex} className="lyrics-line-row">
                 <span className="lyrics-line-num">{lineIndex + 1}</span>
                 <textarea
-                  ref={el => textareaRefs.current[lineIndex] = el}
+                  ref={(el) => (textareaRefs.current[lineIndex] = el)}
                   className="lyrics-textarea"
                   placeholder={`Lyrics for line ${lineIndex + 1}…`}
                   value={lyrics[lineIndex] ?? ''}
-                  onChange={e => handleLyricChange(lineIndex, e.target.value)}
+                  onChange={(e) => handleLyricChange(lineIndex, e.target.value)}
                   rows={2}
                 />
                 {(lyrics[lineIndex] || '').trim() && (
-                  <button 
+                  <button
                     className="clear-lyrics-btn"
-                    onClick={() => { handleLyricChange(lineIndex, ''); clearLineChords(lineIndex) }}
+                    onClick={() => {
+                      handleLyricChange(lineIndex, '')
+                      clearLineChords(lineIndex)
+                    }}
                     title="Clear lyrics and chords for this line"
                   >
                     ×
@@ -219,7 +219,7 @@ const LyricsSection = () => {
               </div>
             ))}
           </div>
-          
+
           {/* Instructions */}
           <div className="lyrics-help">
             <p>Type lyrics, then switch to "Music Sheet" view to position chords above words.</p>
@@ -248,7 +248,7 @@ const LyricsSection = () => {
               return renderLyricLineWithChords(lineIndex)
             })}
           </div>
-          
+
           {/* Instructions for sheet view */}
           <div className="sheet-help">
             <p>Click above a word to place a chord. Click a placed chord to remove it.</p>
@@ -259,18 +259,16 @@ const LyricsSection = () => {
       {/* Chord Picker Popup */}
       {pickerOpen && (
         <div className="chord-picker-overlay" onClick={() => setPickerOpen(null)}>
-          <div className="chord-picker" onClick={e => e.stopPropagation()}>
+          <div className="chord-picker" onClick={(e) => e.stopPropagation()}>
             <div className="picker-header">
               <span>Select Chord</span>
-              <button className="picker-close" onClick={() => setPickerOpen(null)}>×</button>
+              <button className="picker-close" onClick={() => setPickerOpen(null)}>
+                ×
+              </button>
             </div>
             <div className="picker-chords">
               {(progressionLines[pickerOpen.lineIndex] || []).map((chord, i) => (
-                <button 
-                  key={i} 
-                  className="picker-chord-btn"
-                  onClick={() => selectChord(chord)}
-                >
+                <button key={i} className="picker-chord-btn" onClick={() => selectChord(chord)}>
                   {chord}
                 </button>
               ))}

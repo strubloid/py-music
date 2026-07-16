@@ -16,6 +16,7 @@
     "serve": "vite preview --host",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "build-storybook:ci": "storybook build --output-dir .ci/storybook",
     "format": "prettier --write . ../package.json ../CONTRIBUTING.md ../.github/workflows/*.yml",
     "format:check": "prettier --check . ../package.json ../CONTRIBUTING.md ../.github/workflows/*.yml",
     "test:e2e": "playwright test",
@@ -23,7 +24,8 @@
     "test:unit": "npm run test:unit:node && npm run test:unit:vitest",
     "test:unit:node": "tsx --test src/features/ear-game/tests/*.test.ts",
     "test:unit:vitest": "vitest run",
-    "test:visual": "playwright test e2e/living-city.visual.spec.ts"
+    "test:visual": "playwright test e2e/living-city.visual.spec.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.0.0",

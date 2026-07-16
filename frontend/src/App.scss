@@ -73,15 +73,54 @@
   padding: 28px;
   color: #f4f2ff;
   text-align: center;
-  background: radial-gradient(circle at 50% 38%, rgba(167, 139, 250, .18), transparent 28%), #070a18;
+  background: radial-gradient(circle at 50% 38%, rgba(167, 139, 250, 0.18), transparent 28%), #070a18;
 }
-.district-error > span { color: #ffc21c; font-size: 3rem; }
-.district-error h1 { margin: 12px 0 4px; font-size: clamp(2rem, 5vw, 4rem); }
-.district-error p { max-width: 570px; color: #aeb5d4; line-height: 1.55; }
-.district-error > div { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 12px; }
-.district-error button, .district-error a { padding: 10px 14px; border: 1px solid rgba(255, 194, 28, .5); border-radius: 10px; color: #ffe07a; background: #11152e; font-weight: 900; text-decoration: none; cursor: pointer; }
-.district-error details { max-width: 620px; margin-top: 18px; color: #8e95c8; }
-.district-error code { display: block; margin-top: 8px; padding: 9px; overflow-wrap: anywhere; border-radius: 8px; background: #030511; color: #d7daf1; text-align: left; }
+.district-error > span {
+  color: #ffc21c;
+  font-size: 3rem;
+}
+.district-error h1 {
+  margin: 12px 0 4px;
+  font-size: clamp(2rem, 5vw, 4rem);
+}
+.district-error p {
+  max-width: 570px;
+  color: #aeb5d4;
+  line-height: 1.55;
+}
+.district-error > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.district-error button,
+.district-error a {
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 194, 28, 0.5);
+  border-radius: 10px;
+  color: #ffe07a;
+  background: #11152e;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+}
+.district-error details {
+  max-width: 620px;
+  margin-top: 18px;
+  color: #8e95c8;
+}
+.district-error code {
+  display: block;
+  margin-top: 8px;
+  padding: 9px;
+  overflow-wrap: anywhere;
+  border-radius: 8px;
+  background: #030511;
+  color: #d7daf1;
+  text-align: left;
+}
 
 /* Mobile: sidebar is at bottom, full-width workspace */
 @media (max-width: 768px) {

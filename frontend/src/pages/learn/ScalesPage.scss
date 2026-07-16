@@ -152,9 +152,16 @@
   min-width: 0;
 }
 
-.modes-pill-row::-webkit-scrollbar { height: 6px; }
-.modes-pill-row::-webkit-scrollbar-track { background: transparent; }
-.modes-pill-row::-webkit-scrollbar-thumb { background: rgba(251, 191, 36, 0.3); border-radius: 3px; }
+.modes-pill-row::-webkit-scrollbar {
+  height: 6px;
+}
+.modes-pill-row::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modes-pill-row::-webkit-scrollbar-thumb {
+  background: rgba(251, 191, 36, 0.3);
+  border-radius: 3px;
+}
 
 .rail-panel {
   background: var(--surface-1);
@@ -288,7 +295,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .error-container {
@@ -336,7 +345,9 @@
   flex-shrink: 0;
 }
 
-.range-bar-label svg { color: #fbbf24; }
+.range-bar-label svg {
+  color: #fbbf24;
+}
 
 .range-bar-buttons {
   display: flex;
@@ -380,7 +391,9 @@
   line-height: 1.1;
 }
 
-.range-btn.active .range-btn-label { color: #fbbf24; }
+.range-btn.active .range-btn-label {
+  color: #fbbf24;
+}
 
 .range-btn-hint {
   font-size: 0.65rem;
@@ -390,7 +403,9 @@
   white-space: nowrap;
 }
 
-.range-btn.active .range-btn-hint { color: #cbd5e1; }
+.range-btn.active .range-btn-hint {
+  color: #cbd5e1;
+}
 
 /* ── INSTRUMENTS LAYOUT ───────────────────────────
    Single range is compact enough to compare piano + fretboard side-by-side.
@@ -436,7 +451,9 @@
   padding: 0 0.2rem;
 }
 
-.instrument-head svg { color: #fbbf24; }
+.instrument-head svg {
+  color: #fbbf24;
+}
 
 .instrument-head-meta {
   margin-left: auto;
@@ -453,9 +470,16 @@
 
 /* Hide the Card's built-in title — we control it via .instrument-head */
 .instrument-card .card-root,
-.instrument-card .card-header { display: none; }
-.instrument-card .card { padding: 0; background: transparent; }
-.instrument-card .card-content { padding: 0; }
+.instrument-card .card-header {
+  display: none;
+}
+.instrument-card .card {
+  padding: 0;
+  background: transparent;
+}
+.instrument-card .card-content {
+  padding: 0;
+}
 
 /* ── THEORY ROW (unified degrees + chords, no empty space) ── */
 .theory-row {
@@ -480,7 +504,9 @@
   letter-spacing: 0.08em;
 }
 
-.section-head svg { color: #fbbf24; }
+.section-head svg {
+  color: #fbbf24;
+}
 
 .theory-row .section-head {
   margin-bottom: 0.15rem;
@@ -503,7 +529,9 @@
   flex-direction: column;
   align-items: center;
   gap: 0.32rem;
-  transition: border-color 0.15s, transform 0.15s;
+  transition:
+    border-color 0.15s,
+    transform 0.15s;
   min-width: 0;
   width: 100%;
 }
@@ -543,7 +571,9 @@
   letter-spacing: -0.04em;
 }
 
-.degree-card.root .degree-note { color: #fbbf24; }
+.degree-card.root .degree-note {
+  color: #fbbf24;
+}
 
 .degree-chord-pill {
   margin-top: 0.1rem;
@@ -621,7 +651,9 @@
   transition: color 0.15s;
 }
 
-.tip-dismiss:hover { color: #fbbf24; }
+.tip-dismiss:hover {
+  color: #fbbf24;
+}
 
 .tip-card p {
   margin: 0;
@@ -687,12 +719,18 @@
     min-width: 80px;
     padding: 0.35rem 0.55rem;
   }
-  .range-btn-label { font-size: 0.75rem; }
-  .range-btn-hint { font-size: 0.6rem; }
+  .range-btn-label {
+    font-size: 0.75rem;
+  }
+  .range-btn-hint {
+    font-size: 0.6rem;
+  }
 }
 
 @media (max-width: 640px) {
-  .scales-page { padding: 0.85rem 0.75rem; }
+  .scales-page {
+    padding: 0.85rem 0.75rem;
+  }
   .scales-topbar {
     display: flex;
     flex-direction: column;
@@ -701,13 +739,29 @@
     padding: 0.85rem;
     width: 100%;
   }
-  .topbar-left h1 { font-size: 1.1rem; }
-  .hero-name { padding: 0.35rem 0.7rem; }
-  .hero-key { font-size: 1.05rem; }
-  .hero-mode-name { font-size: 0.8rem; }
-  .degrees-grid { grid-template-columns: 1fr; }
-  .mode-pill { padding: 0.5rem 0.85rem; font-size: 0.8rem; }
-  .tip-card { flex-direction: column; gap: 0.5rem; }
+  .topbar-left h1 {
+    font-size: 1.1rem;
+  }
+  .hero-name {
+    padding: 0.35rem 0.7rem;
+  }
+  .hero-key {
+    font-size: 1.05rem;
+  }
+  .hero-mode-name {
+    font-size: 0.8rem;
+  }
+  .degrees-grid {
+    grid-template-columns: 1fr;
+  }
+  .mode-pill {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.8rem;
+  }
+  .tip-card {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 
   .modes-pill-row {
     display: grid;

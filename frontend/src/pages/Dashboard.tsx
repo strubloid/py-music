@@ -1,21 +1,21 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Zap, ListMusic, BookOpen, ArrowRight, Sparkles, Flame, Music2 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { useGameProgress } from '../contexts/GameProgressContext';
-import './Dashboard.scss';
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Zap, ListMusic, BookOpen, ArrowRight, Sparkles, Flame, Music2 } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { useGameProgress } from '../contexts/GameProgressContext'
+import './Dashboard.scss'
 
 const Dashboard = () => {
-  const { user, isLoggedIn, promptLogin } = useAuth();
-  const { levelMeta, progressState } = useGameProgress();
-  const navigate = useNavigate();
+  const { user, isLoggedIn, promptLogin } = useAuth()
+  const { levelMeta, progressState } = useGameProgress()
+  const navigate = useNavigate()
 
   const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
-  };
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Good morning'
+    if (hour < 18) return 'Good afternoon'
+    return 'Good evening'
+  }
 
   return (
     <div className="dashboard">
@@ -26,7 +26,8 @@ const Dashboard = () => {
             <span>The practice room</span>
           </div>
           <h1 className="greeting">
-            {getGreeting()}{user ? `, ${user.username}` : ''}
+            {getGreeting()}
+            {user ? `, ${user.username}` : ''}
           </h1>
           <p className="hero-sub">
             Explore scales, build progressions, and keep the learning loop moving with immediate feedback.
@@ -110,7 +111,7 @@ const Dashboard = () => {
         </div>
       </section>
     </div>
-  );
-};
+  )
+}
 
-export default Dashboard;
+export default Dashboard

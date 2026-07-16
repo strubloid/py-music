@@ -53,8 +53,17 @@
   .key-selector-container {
     flex-direction: column;
   }
-  .key-selector-section { padding: 0.35rem 0.4rem; }
-  .interval-selector-section { min-width: unset; padding: 0.35rem 0.4rem; }
-  .keys-grid { gap: 0.2rem; }
-  .intervals-grid { gap: 0.3rem; }
+  .key-selector-section {
+    padding: 0.35rem 0.4rem;
+  }
+  .interval-selector-section {
+    min-width: unset;
+    padding: 0.35rem 0.4rem;
+  }
+  .keys-grid {
+    gap: 0.2rem;
+  }
+  .intervals-grid {
+    gap: 0.3rem;
+  }
 }

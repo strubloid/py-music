@@ -1,23 +1,19 @@
 // Route overlay for Scale Path — shows connected rails, degree markers, gap portal, Nomi token
-import React from 'react';
-import type { ScalePathFragment } from '../state/scalePathReducer';
-import '../styles/ScaleRouteOverlay.scss';
+import React from 'react'
+import type { ScalePathFragment } from '../state/scalePathReducer'
+import '../styles/ScaleRouteOverlay.scss'
 
 interface ScaleRouteOverlayProps {
-  fragment: ScalePathFragment;
-  correctAnswer: ScalePathFragment['anchor'] | null;
-  reducedMotion: boolean;
+  fragment: ScalePathFragment
+  correctAnswer: ScalePathFragment['anchor'] | null
+  reducedMotion: boolean
 }
 
-const ScaleRouteOverlay: React.FC<ScaleRouteOverlayProps> = ({
-  fragment,
-  correctAnswer,
-  reducedMotion,
-}) => {
-  const { anchor, suffix = [] } = fragment;
-  const nodes = [anchor, ...suffix];
+const ScaleRouteOverlay: React.FC<ScaleRouteOverlayProps> = ({ fragment, correctAnswer, reducedMotion }) => {
+  const { anchor, suffix = [] } = fragment
+  const nodes = [anchor, ...suffix]
   if (correctAnswer) {
-    nodes.push(correctAnswer);
+    nodes.push(correctAnswer)
   }
 
   return (
@@ -32,7 +28,9 @@ const ScaleRouteOverlay: React.FC<ScaleRouteOverlayProps> = ({
             <div className="route-node__dot" />
             <div className="route-node__info">
               <span className="route-node__note">{node.note}</span>
-              <span className="route-node__fret">{node.string}@{node.fret}</span>
+              <span className="route-node__fret">
+                {node.string}@{node.fret}
+              </span>
             </div>
           </div>
         ))}
@@ -52,7 +50,7 @@ const ScaleRouteOverlay: React.FC<ScaleRouteOverlayProps> = ({
         <span className="route-nomi">♪</span>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default React.memo(ScaleRouteOverlay);
+export default React.memo(ScaleRouteOverlay)

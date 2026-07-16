@@ -27,13 +27,13 @@ const BottomPanel = ({ scaleData }) => {
 
   const handleMouseMove = (e) => {
     if (!isDragging) return
-    
+
     const deltaY = dragStartY.current - e.clientY
     const maxHeight = window.innerHeight * 0.85
     const newHeight = Math.min(Math.max(startHeight.current + deltaY, 200), maxHeight)
-    
+
     targetHeightRef.current = newHeight
-    
+
     // Update immediately with RAF for smooth 60fps rendering
     if (!animationFrameRef.current) {
       animationFrameRef.current = requestAnimationFrame(() => {
@@ -56,13 +56,13 @@ const BottomPanel = ({ scaleData }) => {
 
   const handleTouchMove = (e) => {
     if (!isDragging) return
-    
+
     const deltaY = dragStartY.current - e.touches[0].clientY
     const maxHeight = window.innerHeight * 0.85
     const newHeight = Math.min(Math.max(startHeight.current + deltaY, 200), maxHeight)
-    
+
     targetHeightRef.current = newHeight
-    
+
     // Update immediately with RAF for smooth 60fps rendering
     if (!animationFrameRef.current) {
       animationFrameRef.current = requestAnimationFrame(() => {
@@ -104,24 +104,20 @@ const BottomPanel = ({ scaleData }) => {
   }, [isDragging, panelHeight])
 
   return (
-    <div 
+    <div
       ref={panelRef}
       className={`bottom-panel${activePanel ? ' expanded' : ''}`}
       style={activePanel ? { height: panelHeight } : undefined}
     >
       {/* Drag Handle */}
       {activePanel && (
-        <div 
-          className="panel-drag-handle"
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
-        >
+        <div className="panel-drag-handle" onMouseDown={handleMouseDown} onTouchStart={handleTouchStart}>
           <div className={`drag-indicator ${isDragging ? 'dragging' : ''}`}></div>
         </div>
       )}
-      
+
       {/* Bottom Controls */}
-      <div 
+      <div
         className={`bottom-controls${activePanel ? ' resizable' : ''}`}
         onMouseDown={activePanel ? handleMouseDown : undefined}
         onTouchStart={activePanel ? handleTouchStart : undefined}
@@ -134,7 +130,7 @@ const BottomPanel = ({ scaleData }) => {
           <span className="button-icon">🎼</span>
           <span className="button-text">Progressions</span>
         </button>
-        
+
         <button
           className={`bottom-button ${activePanel === 'production' ? 'active' : ''}`}
           onClick={() => togglePanel('production')}
