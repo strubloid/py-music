@@ -151,7 +151,18 @@ npm run test:unit
 npx playwright test
 ```
 
-Flask uses port `5000`. Vite proxies `/api` during development and emits `frontend/dist` for production. Docker builds the frontend then Flask; Fly.io deploys the single service. See [Fly Deployment](fly-deployment.md).
+Flask uses port `5000`. Vite uses port `3000` (configured in `frontend/vite.config.js`); it proxies `/api` to Flask during development and emits `frontend/dist` for production. Docker builds the frontend then Flask; Fly.io deploys the single service. See [Fly Deployment](fly-deployment.md).
+
+### Dev port alignment
+
+The Flask backend embeds the frontend origin into every password-reset email (and any other server-generated link aimed at the browser). That origin comes from the `APP_URL` env var in `.env`. For local development, `APP_URL` **must** match the port Vite is actually serving on:
+
+| If Vite is on | `APP_URL` should be |
+| --- | --- |
+| `3000` (the configured default in `frontend/vite.config.js`) | `http://localhost:3000` |
+| `3001`, `3002`, … (auto-fallback when 3000 is busy) | `http://localhost:<that-port>` |
+
+If the two drift apart, the email/link points at a port nothing is listening on and the learner sees `ERR_CONNECTION_REFUSED`. Restart Flask after changing `APP_URL` so it picks up the new value. In production, set `APP_URL` to the deployed origin (for example `https://strubloid.com`).
 
 ## Authority Boundaries To Preserve
 

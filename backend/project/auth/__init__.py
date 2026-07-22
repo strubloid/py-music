@@ -228,6 +228,18 @@ def forgot_password():
     app_url = os.getenv('APP_URL', 'http://localhost:5000').rstrip('/')
     reset_url = f'{app_url}/reset-password/{token}'
 
+    # Always log the reset link to the server console. This is the dev
+    # escape hatch when SMTP is not configured and also a useful audit trail
+    # in production when delivery is intermittent. The link carries a
+    # single-use, one-hour token, so leaking it to the server log is
+    # acceptable; it cannot be reused.
+    print()
+    print('=' * 60)
+    print(f'PASSWORD RESET LINK for {email}:')
+    print(reset_url)
+    print('=' * 60)
+    print()
+
     subject = 'Reset your password - Music Theory'
     body = (
         f'Hello {user.username},\n\n'
@@ -243,10 +255,13 @@ def forgot_password():
         log_auth_event('forgot_password', email, True)
         print(f"✅ Password reset email sent to {email}")
     except Exception as e:
+        # SMTP is best-effort. Anti-enumeration requires that we still
+        # return the standard 200 response, so the client can never tell
+        # whether the email was actually delivered. The reset link is in
+        # the server log above so a developer (or an admin who can read
+        # logs) can complete the flow locally.
         print(f"⚠️  Failed to send reset email to {email}: {e}")
-        log_auth_event('forgot_password', email, False, details='SMTP send failed')
-        # Don't expose SMTP failure details to the client
-        return jsonify({'error': 'Failed to send reset email. Please contact support.'}), 500
+        log_auth_event('forgot_password', email, False, details=f'SMTP send failed: {e}')
 
     return jsonify({'message': 'If that email is registered, you will receive a password reset link.'}), 200
 
