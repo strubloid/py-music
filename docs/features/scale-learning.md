@@ -20,9 +20,38 @@ The explorer selects key, mode, range, and a primary piano or guitar scale shape
 
 ## Scale Lab
 
-The learner selects a root, optional target family, and a guitar or piano build board, then places notes, sees selected pitch classes/degrees, evaluates candidates, exposes missing/extra notes, and verifies a complete set. The selected instrument is the single primary board; its matching target shape is available on demand through the reference toggle. With no target, candidate output must remain honest about ambiguity. With a target, it can show exact remainder as instructional guidance.
+The Lab is a free-explore surface: the learner picks a root and a guitar or
+piano build board, places notes, and watches the Compatible Scales panel
+suggest families whose intervals fit. **No target scale is shown by default.**
+The build board is in "free exploration" mode: it shows only the notes the
+learner has placed, with no pre-highlighted scale notes. Adopting a
+candidate from the Compatible Scales panel promotes that family to a
+target, after which the build board re-skins with the target scale shape
+(so the learner can see whether their notes fit) and `Show the rest` is
+unlocked. The target can be cleared at any time via the badge in the
+header, returning the build board to free exploration. The reference
+toggle is only available once a target is set.
 
-No individual note placement, clear action, or reveal can grant XP. Verification may record idempotent exploration evidence only. Root and complete-scale audio are user initiated.
+When a target is set, every placed note is classified by pitch class as
+*in target* or *off target* and rendered with a distinct visual state so
+the learner can read the fit at a glance:
+
+| State | Visual | Meaning |
+| --- | --- | --- |
+| In Target (placed) | solid green dot | placed note is a member of the target scale |
+| Off Target (placed) | red with a diagonal stripe pattern | placed note is not a member of the target scale |
+| Free explore (no target) | solid gold dot | placed note, no target set yet |
+| Show the rest (target set) | translucent gold dot | target scale note that has not been placed yet |
+| Verified correct | solid green dot with halo | server confirmed the placed note is correct |
+| Verified wrong | red dot with halo | server confirmed the placed note is off |
+
+Both the in-target and off-target states add a non-color cue (solid vs
+striped) so the meaning survives color-blind vision and any grayscale
+render. The legend at the bottom of the build board lists every state.
+
+No individual note placement, clear action, or reveal can grant XP.
+Verification may record idempotent exploration evidence only. Root and
+complete-scale audio are user initiated.
 
 ## Scale Path
 

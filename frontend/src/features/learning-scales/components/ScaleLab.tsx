@@ -6,7 +6,7 @@
 
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import axios from 'axios'
-import { CheckCircle, Eye, FlaskConical, Guitar, Piano, Trash2 } from 'lucide-react'
+import { CheckCircle, Eye, FlaskConical, Guitar, Piano, Target, Trash2, X } from 'lucide-react'
 import {
   createInitialScaleLabState,
   scaleLabReducer,
@@ -116,6 +116,14 @@ const ScaleLab: React.FC = () => {
     dispatch({ type: 'SHOW_REST' })
   }, [])
 
+  const handleSelectCandidate = useCallback((modeKey: string) => {
+    dispatch({ type: 'SET_MODE', mode: modeKey })
+  }, [])
+
+  const handleClearTarget = useCallback(() => {
+    dispatch({ type: 'CLEAR_TARGET' })
+  }, [])
+
   const handleVerify = useCallback(async () => {
     const selectedNotes = [...new Set(state.selectedPositions.map((p) => p.pitch % 12))]
     try {
@@ -131,6 +139,24 @@ const ScaleLab: React.FC = () => {
       dispatch({ type: 'SET_EXPLANATION', text: 'Verification unavailable. Check your connection.' })
     }
   }, [activity.finish, state.root, state.mode, state.selectedPositions])
+
+  // When no target is set, suppress the scale-note highlight on the build
+  // board so the surface only shows the notes the learner has placed.
+  // The API still needs a mode to compute the keyboard shape, so we send a
+  // placeholder and strip the scale_notes / is_scale_note flags client-side.
+  const hasTarget = state.mode.length > 0
+  const blankKeyboardData = useMemo(() => {
+    if (!scaleData || hasTarget) return scaleData?.keyboard_data
+    return { ...scaleData.keyboard_data, scale_notes: [] as string[] }
+  }, [scaleData, hasTarget])
+
+  const blankFretboardData = useMemo(() => {
+    if (!scaleData || hasTarget) return scaleData?.fretboard_data
+    return scaleData.fretboard_data.map((string) => ({
+      ...string,
+      frets: string.frets.map((fret) => ({ ...fret, is_scale_note: false, is_root: false })),
+    }))
+  }, [scaleData, hasTarget])
 
   // Selected pitch classes (deduped) feed the piano candidate highlight.
   const placedPitches = useMemo(() => {
@@ -160,6 +186,56 @@ const ScaleLab: React.FC = () => {
   const targetMissingNotes = useMemo(
     () => targetMissingPitchClasses.map((p) => NOTE_NAMES[p]),
     [targetMissingPitchClasses],
+  )
+
+  // When a target is set, classify each placed note as in-scale (match) or
+  // off-scale (miss) so the build board can color them differently. The
+  // classification uses pitch class so an E placed anywhere on the guitar
+  // or piano is treated as the same note. Without a target, every placed
+  // note is simply "active" (gold) — no match/miss judgment is made yet.
+  const targetPitchSet = useMemo(() => {
+    if (!hasTarget || !scaleData) return null
+    return new Set(scaleData.keyboard_data.scale_notes.map((n: string) => NOTE_NAMES.indexOf(n)))
+  }, [hasTarget, scaleData])
+
+  const matchedPositions = useMemo(
+    () => (targetPitchSet ? state.selectedPositions.filter((p) => targetPitchSet.has(p.pitch)) : []),
+    [state.selectedPositions, targetPitchSet],
+  )
+  const missedPositions = useMemo(
+    () => (targetPitchSet ? state.selectedPositions.filter((p) => !targetPitchSet.has(p.pitch)) : []),
+    [state.selectedPositions, targetPitchSet],
+  )
+
+  const matchedNoteNames = useMemo(() => {
+    const seen = new Set<string>()
+    return matchedPositions
+      .map((p) => NOTE_NAMES[p.pitch % 12])
+      .filter((note) => {
+        if (seen.has(note)) return false
+        seen.add(note)
+        return true
+      })
+  }, [matchedPositions])
+
+  const missedNoteNames = useMemo(() => {
+    const seen = new Set<string>()
+    return missedPositions
+      .map((p) => NOTE_NAMES[p.pitch % 12])
+      .filter((note) => {
+        if (seen.has(note)) return false
+        seen.add(note)
+        return true
+      })
+  }, [missedPositions])
+
+  const matchedFretKeys = useMemo(
+    () => matchedPositions.filter((p) => p.string !== 'piano').map((p) => ({ string: p.string, fret: p.fret })),
+    [matchedPositions],
+  )
+  const missedFretKeys = useMemo(
+    () => missedPositions.filter((p) => p.string !== 'piano').map((p) => ({ string: p.string, fret: p.fret })),
+    [missedPositions],
   )
 
   const handlePianoSelect = useCallback(
@@ -216,19 +292,33 @@ const ScaleLab: React.FC = () => {
             loading={loading}
           />
 
-          <select
-            className="sl-select"
-            value={state.mode}
-            onChange={(e) => dispatch({ type: 'SET_MODE', mode: e.target.value })}
-            aria-label="Target scale family"
-          >
-            <option value="">No target (explore)</option>
-            {MODE_OPTIONS.map((m) => (
-              <option key={m.key} value={m.key}>
-                {m.label}
-              </option>
-            ))}
-          </select>
+          {hasTarget ? (
+            <div
+              className="sl-target-badge"
+              role="status"
+              aria-label={`Target scale: ${state.root} ${MODE_OPTIONS.find((m) => m.key === state.mode)?.label ?? state.mode}`}
+            >
+              <Target size={14} aria-hidden="true" />
+              <span className="sl-target-badge__root">{state.root}</span>
+              <span className="sl-target-badge__mode">
+                {MODE_OPTIONS.find((m) => m.key === state.mode)?.label ?? state.mode}
+              </span>
+              <button
+                type="button"
+                className="sl-target-badge__clear"
+                onClick={handleClearTarget}
+                aria-label="Clear target scale"
+                title="Clear target scale"
+              >
+                <X size={13} aria-hidden="true" />
+              </button>
+            </div>
+          ) : (
+            <div className="sl-target-badge sl-target-badge--empty" role="status" aria-label="No target scale selected">
+              <Target size={14} aria-hidden="true" />
+              <span>No target — explore freely</span>
+            </div>
+          )}
 
           <div className="sl-range-btns" role="group" aria-label="Range">
             {RANGE_LEVELS.map((level) => (
@@ -295,13 +385,19 @@ const ScaleLab: React.FC = () => {
             <>
               {builderInstrument === 'guitar' ? (
                 <InteractiveGuitarFretboard
-                  fretboardData={scaleData.fretboard_data}
+                  fretboardData={blankFretboardData ?? []}
                   fretCount={rangeLevel.frets}
-                  selectedKeys={state.selectedPositions
-                    .filter((p) => p.string !== 'piano')
-                    .map((p) => ({ string: p.string, fret: p.fret }))}
+                  selectedKeys={
+                    hasTarget
+                      ? []
+                      : state.selectedPositions
+                          .filter((p) => p.string !== 'piano')
+                          .map((p) => ({ string: p.string, fret: p.fret }))
+                  }
+                  matchedKeys={hasTarget ? matchedFretKeys : []}
+                  missedKeys={hasTarget ? missedFretKeys : []}
                   hintKeys={
-                    state.showAllMissing && state.mode
+                    state.showAllMissing && hasTarget
                       ? targetMissingPitchClasses.flatMap((pc) => {
                           const note = NOTE_NAMES[pc]
                           return scaleData.fretboard_data.flatMap((string) =>
@@ -314,18 +410,26 @@ const ScaleLab: React.FC = () => {
                   }
                   showLabels
                   onSelect={handleFretboardSelect}
-                  ariaLabel={`${state.root} ${state.mode || 'free'} scale shape on guitar`}
+                  ariaLabel={
+                    hasTarget ? `${state.root} ${state.mode} target scale on guitar` : 'Free exploration on guitar'
+                  }
                 />
               ) : (
                 <div className="sl-piano-builder">
                   <InteractivePianoKeyboard
-                    keyboardData={scaleData.keyboard_data}
-                    selectedNotes={placedNoteNames}
+                    keyboardData={
+                      blankKeyboardData ?? { natural_keys: [], black_keys: [], scale_notes: [], root_note: state.root }
+                    }
+                    selectedNotes={hasTarget ? [] : placedNoteNames}
+                    matchedNotes={hasTarget ? matchedNoteNames : []}
+                    missedNotes={hasTarget ? missedNoteNames : []}
                     hintNotes={targetMissingNotes}
                     rootPitchClass={rootPitch}
                     showLabels
                     onSelect={handlePianoSelect}
-                    ariaLabel={`${state.root} ${state.mode || 'free'} scale shape on piano`}
+                    ariaLabel={
+                      hasTarget ? `${state.root} ${state.mode} target scale on piano` : 'Free exploration on piano'
+                    }
                   />
                 </div>
               )}
@@ -343,7 +447,17 @@ const ScaleLab: React.FC = () => {
               )}
 
               <div className="sl-builder__actions">
-                <button type="button" className="sl-btn" onClick={handleShowRest}>
+                <button
+                  type="button"
+                  className="sl-btn"
+                  onClick={handleShowRest}
+                  disabled={!hasTarget}
+                  title={
+                    hasTarget
+                      ? 'Highlight the remaining scale notes you have not yet placed'
+                      : 'Pick a target scale from the Compatible Scales panel first'
+                  }
+                >
                   <Eye size={15} /> Show the rest
                 </button>
                 <button
@@ -356,43 +470,45 @@ const ScaleLab: React.FC = () => {
                 </button>
               </div>
 
-              <section className="sl-reference" aria-label={`${state.root} ${state.mode || 'explore'} reference shape`}>
-                <button
-                  type="button"
-                  className="sl-reference__toggle"
-                  onClick={() => setShowReference((visible) => !visible)}
-                  aria-expanded={showReference}
-                >
-                  <Eye size={15} /> {showReference ? 'Hide' : 'Show'} {builderInstrument} reference
-                </button>
-                {showReference && (
-                  <div className="sl-reference__content">
-                    <div className="sl-reference__title">
-                      <span>Reference shape</span>
-                      <strong>
-                        {state.root} {MODE_OPTIONS.find((mode) => mode.key === state.mode)?.label ?? 'Free play'}
-                      </strong>
+              {hasTarget && (
+                <section className="sl-reference" aria-label={`${state.root} ${state.mode} reference shape`}>
+                  <button
+                    type="button"
+                    className="sl-reference__toggle"
+                    onClick={() => setShowReference((visible) => !visible)}
+                    aria-expanded={showReference}
+                  >
+                    <Eye size={15} /> {showReference ? 'Hide' : 'Show'} {builderInstrument} reference
+                  </button>
+                  {showReference && (
+                    <div className="sl-reference__content">
+                      <div className="sl-reference__title">
+                        <span>Reference shape</span>
+                        <strong>
+                          {state.root} {MODE_OPTIONS.find((mode) => mode.key === state.mode)?.label ?? state.mode}
+                        </strong>
+                      </div>
+                      {builderInstrument === 'piano' ? (
+                        <InteractivePianoKeyboard
+                          keyboardData={scaleData.keyboard_data}
+                          rootPitchClass={rootPitch}
+                          showLabels
+                          disabled
+                          ariaLabel={`${state.root} ${state.mode} reference piano`}
+                        />
+                      ) : (
+                        <InteractiveGuitarFretboard
+                          fretboardData={scaleData.fretboard_data}
+                          fretCount={rangeLevel.frets}
+                          showLabels
+                          disabled
+                          ariaLabel={`${state.root} ${state.mode} reference fretboard`}
+                        />
+                      )}
                     </div>
-                    {builderInstrument === 'piano' ? (
-                      <InteractivePianoKeyboard
-                        keyboardData={scaleData.keyboard_data}
-                        rootPitchClass={rootPitch}
-                        showLabels
-                        disabled
-                        ariaLabel={`${state.root} ${state.mode || 'explore'} reference piano`}
-                      />
-                    ) : (
-                      <InteractiveGuitarFretboard
-                        fretboardData={scaleData.fretboard_data}
-                        fretCount={rangeLevel.frets}
-                        showLabels
-                        disabled
-                        ariaLabel={`${state.root} ${state.mode || 'explore'} reference fretboard`}
-                      />
-                    )}
-                  </div>
-                )}
-              </section>
+                  )}
+                </section>
+              )}
             </>
           )}
         </section>
@@ -415,7 +531,12 @@ const ScaleLab: React.FC = () => {
 
           <div className="sl-analysis__panels">
             <div className={`sl-panel-wrap ${activeTab !== 'candidates' ? 'hidden-mobile' : ''}`}>
-              <ScaleCandidatePanel candidates={candidates} rootPitch={rootPitch} targetMode={state.mode} />
+              <ScaleCandidatePanel
+                candidates={candidates}
+                rootPitch={rootPitch}
+                targetMode={state.mode}
+                onSelectCandidate={handleSelectCandidate}
+              />
             </div>
 
             <div className={`sl-panel-wrap ${activeTab !== 'explain' ? 'hidden-mobile' : ''}`}>

@@ -56,7 +56,10 @@ export interface ScaleLabState {
 export const createInitialScaleLabState = (opts: { reducedMotion?: boolean } = {}): ScaleLabState => ({
   phase: 'idle',
   root: 'C',
-  mode: 'ionian',
+  // Empty mode = no target scale is selected. The build board renders no
+  // scale notes until the learner picks a candidate from the panel, so the
+  // surface stays quiet until the learner has placed notes to evaluate.
+  mode: '',
   rangeLevel: 1,
   selectedPositions: [],
   candidates: [],
@@ -75,32 +78,39 @@ export const scaleLabReducer = (
       return {
         ...state,
         root: event.root as string,
-        selectedPositions: [],
-        candidates: [],
+        // Root keeps the placed notes; candidates are recomputed for the
+        // new root on the next render. The verified result and "show the
+        // rest" hint become stale once the root changes.
         verifiedResult: null,
-        phase: 'idle',
         explanation: null,
+        showAllMissing: false,
       }
 
     case 'SET_MODE':
       return {
         ...state,
         mode: event.mode as string,
-        selectedPositions: [],
-        candidates: [],
+        // Changing the target keeps the placed notes so the learner can
+        // compare what they built against the freshly chosen scale.
         verifiedResult: null,
-        phase: 'idle',
         explanation: null,
+        showAllMissing: false,
+      }
+
+    case 'CLEAR_TARGET':
+      return {
+        ...state,
+        mode: '',
+        verifiedResult: null,
+        explanation: null,
+        showAllMissing: false,
       }
 
     case 'SET_RANGE':
       return {
         ...state,
         rangeLevel: event.level as number,
-        selectedPositions: [],
-        candidates: [],
         verifiedResult: null,
-        phase: 'idle',
         explanation: null,
       }
 

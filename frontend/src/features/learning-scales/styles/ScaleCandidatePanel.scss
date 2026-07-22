@@ -12,6 +12,13 @@
     margin: 0;
   }
 
+  &__hint {
+    font-size: 0.7rem;
+    color: #7d86b0;
+    margin: 0;
+    line-height: 1.4;
+  }
+
   &__empty {
     font-size: 0.78rem;
     color: #7d86b0;
@@ -31,6 +38,8 @@
 }
 
 .sc-candidate {
+  width: 100%;
+  text-align: left;
   padding: 10px 12px;
   background: rgba(9, 13, 40, 0.7);
   border: 1px solid rgba(71, 61, 140, 0.4);
@@ -38,10 +47,35 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  transition:
+    background 120ms,
+    border-color 120ms,
+    transform 120ms;
+
+  &:hover {
+    background: rgba(71, 61, 140, 0.18);
+    border-color: rgba(255, 189, 46, 0.45);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ff9d1f;
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
 
   &--target {
     border-color: rgba(255, 157, 31, 0.5);
     background: rgba(255, 157, 31, 0.08);
+
+    &:hover {
+      background: rgba(255, 157, 31, 0.14);
+    }
   }
 
   &__header {
@@ -69,5 +103,14 @@
   &__missing {
     font-size: 0.68rem;
     color: #49c8ef;
+  }
+
+  &__current {
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #ffbd2e;
+    margin-top: 2px;
   }
 }

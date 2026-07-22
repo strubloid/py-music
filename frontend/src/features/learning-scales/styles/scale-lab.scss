@@ -85,6 +85,63 @@
   }
 }
 
+.sl-target-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 189, 46, 0.45);
+  background: rgba(255, 157, 31, 0.12);
+  color: var(--sl-amber-light);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+
+  &--empty {
+    border-color: rgba(71, 61, 140, 0.5);
+    background: rgba(9, 13, 40, 0.7);
+    color: var(--sl-text-muted);
+    font-weight: 600;
+  }
+
+  &__root {
+    font-family: ui-monospace, monospace;
+    color: var(--sl-text);
+  }
+
+  &__mode {
+    color: var(--sl-amber-light);
+  }
+
+  &__clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-left: 4px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 79, 96, 0.18);
+    color: #ff6678;
+    cursor: pointer;
+    transition:
+      background 120ms,
+      transform 120ms;
+
+    &:hover {
+      background: rgba(255, 79, 96, 0.32);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--sl-amber);
+      outline-offset: 2px;
+    }
+  }
+}
+
 .sl-range-btns {
   display: flex;
   gap: 4px;

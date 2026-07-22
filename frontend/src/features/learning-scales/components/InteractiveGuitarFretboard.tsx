@@ -17,7 +17,7 @@ export interface InteractiveFretboardSelection {
   isRoot: boolean
 }
 
-type StateClass = 'pk-key-active' | 'pk-key-correct' | 'pk-key-wrong' | 'pk-key-hint'
+type StateClass = 'pk-key-active' | 'pk-key-match' | 'pk-key-miss' | 'pk-key-correct' | 'pk-key-wrong' | 'pk-key-hint'
 
 type Props = {
   fretboardData: Array<{
@@ -31,6 +31,8 @@ type Props = {
   }>
   fretCount?: number
   selectedKeys?: Array<{ string: string; fret: number }>
+  matchedKeys?: Array<{ string: string; fret: number }>
+  missedKeys?: Array<{ string: string; fret: number }>
   correctKeys?: Array<{ string: string; fret: number }>
   wrongKeys?: Array<{ string: string; fret: number }>
   hintKeys?: Array<{ string: string; fret: number }>
@@ -44,6 +46,8 @@ const InteractiveGuitarFretboard = ({
   fretboardData,
   fretCount: fretCountProp = 12,
   selectedKeys = [],
+  matchedKeys = [],
+  missedKeys = [],
   correctKeys = [],
   wrongKeys = [],
   hintKeys = [],
@@ -59,6 +63,8 @@ const InteractiveGuitarFretboard = ({
   // is_root; the interactive variant additionally tracks selection /
   // correctness / hint keys to extend the base CSS.
   const selectedSet = new Set(selectedKeys.map((k) => `${k.string}-${k.fret}`))
+  const matchedSet = new Set(matchedKeys.map((k) => `${k.string}-${k.fret}`))
+  const missedSet = new Set(missedKeys.map((k) => `${k.string}-${k.fret}`))
   const correctSet = new Set(correctKeys.map((k) => `${k.string}-${k.fret}`))
   const wrongSet = new Set(wrongKeys.map((k) => `${k.string}-${k.fret}`))
   const hintSet = new Set(hintKeys.map((k) => `${k.string}-${k.fret}`))
@@ -89,9 +95,11 @@ const InteractiveGuitarFretboard = ({
 
   const stateForKey = (string: string, fret: number): StateClass | null => {
     const key = `${string}-${fret}`
-    if (selectedSet.has(key)) return 'pk-key-active'
     if (correctSet.has(key)) return 'pk-key-correct'
     if (wrongSet.has(key)) return 'pk-key-wrong'
+    if (matchedSet.has(key)) return 'pk-key-match'
+    if (missedSet.has(key)) return 'pk-key-miss'
+    if (selectedSet.has(key)) return 'pk-key-active'
     if (hintSet.has(key)) return 'pk-key-hint'
     return null
   }
@@ -163,7 +171,11 @@ const InteractiveGuitarFretboard = ({
                             fret.is_root ? ', root note' : fret.is_scale_note ? ', scale note' : ''
                           }`}
                           aria-pressed={
-                            state === 'pk-key-active' || state === 'pk-key-correct' || state === 'pk-key-wrong'
+                            state === 'pk-key-active' ||
+                            state === 'pk-key-match' ||
+                            state === 'pk-key-miss' ||
+                            state === 'pk-key-correct' ||
+                            state === 'pk-key-wrong'
                           }
                           disabled={disabled}
                           onClick={() => handleSelect(stringData, stringIndex, fret.fret)}
@@ -201,6 +213,14 @@ const InteractiveGuitarFretboard = ({
         <div className="legend-item">
           <div className="legend-dot scale" />
           <span>Scale Notes</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-dot match" aria-hidden="true" />
+          <span>In Target (placed)</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-dot miss" aria-hidden="true" />
+          <span>Off Target (placed)</span>
         </div>
         <div className="legend-item">
           <div className="legend-dot marker" />

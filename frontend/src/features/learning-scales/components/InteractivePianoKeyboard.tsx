@@ -37,7 +37,7 @@ export interface InteractivePianoSelection {
   isBlack: boolean
 }
 
-type StateClass = 'pk-key-active' | 'pk-key-correct' | 'pk-key-wrong' | 'pk-key-hint'
+type StateClass = 'pk-key-active' | 'pk-key-match' | 'pk-key-miss' | 'pk-key-correct' | 'pk-key-wrong' | 'pk-key-hint'
 
 type Props = {
   keyboardData: {
@@ -47,6 +47,8 @@ type Props = {
     root_note: string
   }
   selectedNotes?: string[]
+  matchedNotes?: string[]
+  missedNotes?: string[]
   correctNotes?: string[]
   wrongNotes?: string[]
   hintNotes?: string[]
@@ -60,6 +62,8 @@ type Props = {
 const InteractivePianoKeyboard = ({
   keyboardData,
   selectedNotes = [],
+  matchedNotes = [],
+  missedNotes = [],
   correctNotes = [],
   wrongNotes = [],
   hintNotes = [],
@@ -102,9 +106,11 @@ const InteractivePianoKeyboard = ({
   }
 
   const stateClassFor = (note: string): StateClass | null => {
-    if (selectedNotes.includes(note)) return 'pk-key-active'
     if (correctNotes.includes(note)) return 'pk-key-correct'
     if (wrongNotes.includes(note)) return 'pk-key-wrong'
+    if (matchedNotes.includes(note)) return 'pk-key-match'
+    if (missedNotes.includes(note)) return 'pk-key-miss'
+    if (selectedNotes.includes(note)) return 'pk-key-active'
     if (hintNotes.includes(note)) return 'pk-key-hint'
     return null
   }
@@ -184,7 +190,13 @@ const InteractivePianoKeyboard = ({
                 className={`${naturalClass(note)} pk-key-button ${state ?? ''}`.trim()}
                 title={note}
                 aria-label={`${note}${isRootKey ? ', root note' : ''}`}
-                aria-pressed={state === 'pk-key-active' || state === 'pk-key-correct' || state === 'pk-key-wrong'}
+                aria-pressed={
+                  state === 'pk-key-active' ||
+                  state === 'pk-key-match' ||
+                  state === 'pk-key-miss' ||
+                  state === 'pk-key-correct' ||
+                  state === 'pk-key-wrong'
+                }
                 disabled={disabled}
                 onClick={() => handleNaturalClick(i, note)}
               >
@@ -192,6 +204,25 @@ const InteractivePianoKeyboard = ({
               </button>
             )
           })}
+        </div>
+      </div>
+
+      <div className="piano-legend">
+        <div className="legend-item">
+          <div className="legend-key root" />
+          <span>Root Note ({root_note})</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-key scale" />
+          <span>Scale Notes</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-key match" aria-hidden="true" />
+          <span>In Target (placed)</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-key miss" aria-hidden="true" />
+          <span>Off Target (placed)</span>
         </div>
       </div>
     </div>
