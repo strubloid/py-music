@@ -19,4 +19,8 @@ Every new feature or substantial feature change follows these steps before code 
 3. **Then implement.** Code, API, schema, tests, and UI must match both documentation layers. Update the feature contract with exact paths and verification results before declaring the work done.
 4. **Keep the index accurate.** Add the feature to `docs/features/README.md`, `docs/README.md` when it is a major surface, and this root guide when it changes the project workflow.
 
+## Pre-Finish Validation Gate
+
+Before declaring any change finished, run `npm run prepush` from the repository root and confirm every step passes. The pre-push hook is the same gate `main` uses, so a partial run (only `lint`, only `typecheck`, only `build`) is not sufficient — it also runs `check:tooling`, `check:backend` (pyright), `format:check`, and the full production build. The OpenCode skill `prepush-validation` enforces this; load it whenever you change code in this repository.
+
 A lower-level decision cannot contradict Project Rules. Do not create an unlinked document, duplicate a topic already owned by a current guide, or ship a feature without its detailed feature contract.

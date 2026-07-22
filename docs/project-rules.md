@@ -93,3 +93,4 @@ An AI working in this repository must:
 3. Reject or transform trivia into musical action before adding it to a scored bank.
 4. Add/update structured content metadata, tests, and feature documentation with any new assessed skill.
 5. Keep application changes small, testable, accessible, and consistent with the project design system.
+6. **Before declaring a job finished, run `npm run prepush` from the repository root and confirm every step passes.** A subset (only `lint`, only `typecheck`, only `build`) is not enough — the prepush gate also runs `check:tooling`, `check:backend` (pyright), `format:check`, and the full build, all of which are required by the same hook that protects `main`. The OpenCode skill `prepush-validation` exists to enforce this; load it whenever you change code in this repository.
