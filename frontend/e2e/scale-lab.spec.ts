@@ -10,13 +10,13 @@ test('Scale Lab reveals a scale only after the learner adopts it from the panel'
   // No target by default: the build board is in free-explore mode and the
   // target badge is the empty-state variant.
   await expect(page.getByRole('status', { name: /no target scale selected/i })).toBeVisible()
-  await expect(page.getByRole('group', { name: /free exploration on piano/i })).toBeVisible()
 
   // Switch to the piano build board; the guitar is the default.
   await page
     .getByRole('group', { name: /build board instrument/i })
     .getByRole('button', { name: /^piano$/i })
     .click()
+  await expect(page.getByRole('group', { name: /free exploration on piano/i })).toBeVisible()
 
   for (const note of ['C', 'D', 'E', 'F', 'G', 'A', 'B']) {
     const key = page
@@ -51,13 +51,13 @@ test('Scale Lab reveals a scale only after the learner adopts it from the panel'
   // Add an off-target note and confirm it shows up in the "miss" state.
   const missKey = page
     .getByRole('group', { name: /c ionian target scale on piano/i })
-    .locator('.pk-natural-key.pk-key-button', { hasText: 'F#' })
+    .locator('.pk-black-key.pk-key-button', { hasText: 'F#' })
     .first()
   await missKey.click()
   await expect(
     page
       .getByRole('group', { name: /c ionian target scale on piano/i })
-      .locator('.pk-natural-key.pk-key-button.pk-key-miss', { hasText: 'F#' })
+      .locator('.pk-black-key.pk-key-button.pk-key-miss', { hasText: 'F#' })
       .first(),
   ).toBeVisible()
 

@@ -126,10 +126,13 @@ const ScaleLab: React.FC = () => {
 
   const handleVerify = useCallback(async () => {
     const selectedNotes = [...new Set(state.selectedPositions.map((p) => p.pitch % 12))]
+    // Fall back to ionian when the learner has not picked a target scale so
+    // the Sound Formula analysis still runs against a meaningful baseline.
+    const analysisMode = state.mode.length > 0 ? state.mode : 'ionian'
     try {
       const res = await verifyScaleLabBuild({
         root: state.root,
-        mode: state.mode,
+        mode: analysisMode,
         selectedNotes,
       })
       dispatch({ type: 'SET_VERIFIED', result: res.data })
@@ -140,14 +143,15 @@ const ScaleLab: React.FC = () => {
     }
   }, [activity.finish, state.root, state.mode, state.selectedPositions])
 
-  // When no target is set, suppress the scale-note highlight on the build
-  // board so the surface only shows the notes the learner has placed.
-  // The API still needs a mode to compute the keyboard shape, so we send a
-  // placeholder and strip the scale_notes / is_scale_note flags client-side.
+  // When no target is set, suppress both the scale-note and root-note
+  // highlights on the build board so the surface mirrors the guitar's
+  // empty-board look. The API still needs a mode to compute the keyboard
+  // shape, so we send a placeholder and strip the scale_notes / root_note
+  // flags client-side.
   const hasTarget = state.mode.length > 0
   const blankKeyboardData = useMemo(() => {
     if (!scaleData || hasTarget) return scaleData?.keyboard_data
-    return { ...scaleData.keyboard_data, scale_notes: [] as string[] }
+    return { ...scaleData.keyboard_data, scale_notes: [] as string[], root_note: '' }
   }, [scaleData, hasTarget])
 
   const blankFretboardData = useMemo(() => {

@@ -90,8 +90,9 @@ const InteractivePianoKeyboard = ({
   const totalNaturals = natural_keys.length || 7
   const naturalWidth = keyboardWidth > 0 ? keyboardWidth / totalNaturals : 0
   const blackWidth = naturalWidth * 0.65
-  const isInScale = (note: string) => scale_notes?.includes(note)
-  const isRoot = (note: string) => note === root_note
+  const hasRoot = typeof root_note === 'string' && root_note.length > 0
+  const isInScale = (note: string) => hasRoot && scale_notes?.includes(note)
+  const isRoot = (note: string) => hasRoot && note === root_note
 
   const naturalClass = (note: string) => {
     if (isRoot(note)) return 'pk-natural-key root-note'
@@ -208,14 +209,18 @@ const InteractivePianoKeyboard = ({
       </div>
 
       <div className="piano-legend">
-        <div className="legend-item">
-          <div className="legend-key root" />
-          <span>Root Note ({root_note})</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-key scale" />
-          <span>Scale Notes</span>
-        </div>
+        {hasRoot && (
+          <div className="legend-item">
+            <div className="legend-key root" />
+            <span>Root Note ({root_note})</span>
+          </div>
+        )}
+        {hasRoot && scale_notes.length > 0 && (
+          <div className="legend-item">
+            <div className="legend-key scale" />
+            <span>Scale Notes</span>
+          </div>
+        )}
         <div className="legend-item">
           <div className="legend-key match" aria-hidden="true" />
           <span>In Target (placed)</span>

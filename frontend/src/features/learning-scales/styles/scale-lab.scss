@@ -401,6 +401,10 @@
     gap: 0;
     padding: 14px;
 
+    .sl-panel-wrap + .sl-panel-wrap {
+      margin-top: 18px;
+    }
+
     @media (max-width: 900px) {
       .hidden-mobile {
         display: none;
