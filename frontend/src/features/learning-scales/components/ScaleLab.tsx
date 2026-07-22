@@ -90,7 +90,9 @@ const ScaleLab: React.FC = () => {
         if (!cancelled) setScaleData(response.data)
       } catch (err) {
         if (!cancelled) {
-          setAnalysisError((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to load scale data')
+          setAnalysisError(
+            (err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to load scale data',
+          )
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -140,10 +142,7 @@ const ScaleLab: React.FC = () => {
     })
   }, [state.selectedPositions])
 
-  const placedNoteNames = useMemo(
-    () => placedPitches.map((p) => NOTE_NAMES[p.pitch % 12]),
-    [placedPitches],
-  )
+  const placedNoteNames = useMemo(() => placedPitches.map((p) => NOTE_NAMES[p.pitch % 12]), [placedPitches])
 
   const candidates = useMemo(
     () => analyzeCandidates(state.selectedPositions, state.mode),
@@ -178,7 +177,15 @@ const ScaleLab: React.FC = () => {
   )
 
   const handleFretboardSelect = useCallback(
-    (selection: { string: string; stringIndex: number; fret: number; note: string; pitch: number; isScaleNote: boolean; isRoot: boolean }) => {
+    (selection: {
+      string: string
+      stringIndex: number
+      fret: number
+      note: string
+      pitch: number
+      isScaleNote: boolean
+      isRoot: boolean
+    }) => {
       const pos: LabPosition = {
         string: selection.string,
         fret: selection.fret,
@@ -293,16 +300,18 @@ const ScaleLab: React.FC = () => {
                   selectedKeys={state.selectedPositions
                     .filter((p) => p.string !== 'piano')
                     .map((p) => ({ string: p.string, fret: p.fret }))}
-                  hintKeys={state.showAllMissing && state.mode
-                    ? targetMissingPitchClasses.flatMap((pc) => {
-                        const note = NOTE_NAMES[pc]
-                        return scaleData.fretboard_data.flatMap((string) =>
-                          string.frets
-                            .filter((f) => f.note === note && f.fret <= rangeLevel.frets)
-                            .map((f) => ({ string: string.string, fret: f.fret })),
-                        )
-                      })
-                    : []}
+                  hintKeys={
+                    state.showAllMissing && state.mode
+                      ? targetMissingPitchClasses.flatMap((pc) => {
+                          const note = NOTE_NAMES[pc]
+                          return scaleData.fretboard_data.flatMap((string) =>
+                            string.frets
+                              .filter((f) => f.note === note && f.fret <= rangeLevel.frets)
+                              .map((f) => ({ string: string.string, fret: f.fret })),
+                          )
+                        })
+                      : []
+                  }
                   showLabels
                   onSelect={handleFretboardSelect}
                   ariaLabel={`${state.root} ${state.mode || 'free'} scale shape on guitar`}

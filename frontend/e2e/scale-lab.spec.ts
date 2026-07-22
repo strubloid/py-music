@@ -8,7 +8,10 @@ test('Scale Lab confirms a complete Sound Formula through music21', async ({ pag
   await expect(page.getByRole('heading', { name: /build a scale/i })).toBeVisible()
 
   // Switch to the piano build board; the guitar is the default.
-  await page.getByRole('group', { name: /build board instrument/i }).getByRole('button', { name: /^piano$/i }).click()
+  await page
+    .getByRole('group', { name: /build board instrument/i })
+    .getByRole('button', { name: /^piano$/i })
+    .click()
 
   // The range-aware piano is now visible. Its accessible name describes the
   // current root and mode rather than a fixed C3-C4 span.

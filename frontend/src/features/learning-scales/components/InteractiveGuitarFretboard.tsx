@@ -72,7 +72,11 @@ const InteractiveGuitarFretboard = ({
       const scrollPos = element.scrollLeft
       const isScrolledLeft = scrollPos > 10
       const isScrolledRight = scrollPos < element.scrollWidth - element.clientWidth - 10
-      setScrollState({ left: isScrolledLeft, right: isScrolledRight, showStringNames: scrollPos < 50 || scrollPos > 150 })
+      setScrollState({
+        left: isScrolledLeft,
+        right: isScrolledRight,
+        showStringNames: scrollPos < 50 || scrollPos > 150,
+      })
     }
     const element = scrollRef.current
     if (element) {
@@ -93,7 +97,10 @@ const InteractiveGuitarFretboard = ({
   }
 
   const handleSelect = (
-    stringData: { string: string; frets: Array<{ fret: number; note: string; is_scale_note: boolean; is_root: boolean }> },
+    stringData: {
+      string: string
+      frets: Array<{ fret: number; note: string; is_scale_note: boolean; is_root: boolean }>
+    },
     stringIndex: number,
     fret: number,
   ) => {
@@ -105,7 +112,9 @@ const InteractiveGuitarFretboard = ({
       stringIndex,
       fret,
       note: fretData.note,
-      pitch: fretData.note ? ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(fretData.note) : 0,
+      pitch: fretData.note
+        ? ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(fretData.note)
+        : 0,
       isScaleNote: fretData.is_scale_note,
       isRoot: fretData.is_root,
     })
@@ -144,11 +153,7 @@ const InteractiveGuitarFretboard = ({
                     {stringData.frets.slice(0, fretCount + 1).map((fret, fretIndex) => {
                       const state = stateForKey(stringData.string, fret.fret)
                       const showDot = fret.is_scale_note || state !== null
-                      const baseDotClass = fret.is_root
-                        ? 'root-note'
-                        : fret.is_scale_note
-                          ? 'scale-note'
-                          : ''
+                      const baseDotClass = fret.is_root ? 'root-note' : fret.is_scale_note ? 'scale-note' : ''
                       return (
                         <button
                           type="button"
@@ -157,7 +162,9 @@ const InteractiveGuitarFretboard = ({
                           aria-label={`String ${stringData.string}, fret ${fret.fret}, ${fret.note}${
                             fret.is_root ? ', root note' : fret.is_scale_note ? ', scale note' : ''
                           }`}
-                          aria-pressed={state === 'pk-key-active' || state === 'pk-key-correct' || state === 'pk-key-wrong'}
+                          aria-pressed={
+                            state === 'pk-key-active' || state === 'pk-key-correct' || state === 'pk-key-wrong'
+                          }
                           disabled={disabled}
                           onClick={() => handleSelect(stringData, stringIndex, fret.fret)}
                         >
