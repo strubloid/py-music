@@ -1,4 +1,8 @@
-/* GuitarFretboard Component Styles */
+/* GuitarFretboard Component Styles
+
+   Interactive variants (see features/learning-scales) reuse these
+   classes on <button> elements so visual changes propagate automatically
+   from this base stylesheet. */
 
 .fretboard-container {
   padding: 0;
@@ -181,6 +185,90 @@
   background: #4b5563;
   border-radius: 50%;
   opacity: 0.5;
+}
+
+/* Interactive variant hooks — used by features/learning-scales so the
+   same base look extends to <button> elements without duplicating styles. */
+.note-dot.pk-key-button {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+}
+
+.note-dot.pk-key-button:focus-visible {
+  outline: 3px solid #fbbf24;
+  outline-offset: 2px;
+}
+
+.note-dot.pk-key-button.pk-key-active {
+  background: #fbbf24;
+  color: #111827;
+  border-color: rgba(251, 191, 36, 0.6);
+  box-shadow:
+    0 0 0 2px rgba(251, 191, 36, 0.55),
+    0 0 14px rgba(251, 191, 36, 0.45);
+}
+
+.note-dot.pk-key-button.pk-key-correct {
+  background: #22c55e;
+  color: white;
+  border-color: rgba(34, 197, 94, 0.7);
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.45);
+}
+
+.note-dot.pk-key-button.pk-key-wrong {
+  background: #ef4444;
+  color: white;
+  border-color: rgba(239, 68, 68, 0.7);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.45);
+}
+
+.note-dot.pk-key-button.pk-key-hint {
+  background: rgba(251, 191, 36, 0.55);
+  color: #111827;
+  border-color: rgba(251, 191, 36, 0.7);
+}
+
+.note-dot.pk-key-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Empty-fret buttons used in interactive variants to make the full grid
+   clickable even when there is no scale note to show. */
+.fret-cell.pk-fret-button {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  outline: none;
+}
+
+.fret-cell.pk-fret-button:focus-visible {
+  outline: 2px solid #fbbf24;
+  outline-offset: -2px;
+}
+
+.fret-cell.pk-fret-button.pk-key-active {
+  background: rgba(251, 191, 36, 0.25);
+  box-shadow: inset 0 0 0 2px rgba(251, 191, 36, 0.6);
+}
+
+.fret-cell.pk-fret-button.pk-key-correct {
+  background: rgba(34, 197, 94, 0.25);
+  box-shadow: inset 0 0 0 2px rgba(34, 197, 94, 0.6);
+}
+
+.fret-cell.pk-fret-button.pk-key-wrong {
+  background: rgba(239, 68, 68, 0.25);
+  box-shadow: inset 0 0 0 2px rgba(239, 68, 68, 0.6);
+}
+
+.fret-cell.pk-fret-button:disabled {
+  cursor: not-allowed;
 }
 
 .fretboard-legend {

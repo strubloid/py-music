@@ -18,7 +18,7 @@ const DailyChallenge = lazy(() => import('./pages/play/DailyChallenge'))
 const EarTraining = lazy(() => import('./pages/play/EarTraining'))
 const Quests = lazy(() => import('./pages/play/Quests'))
 const ScalePathGame = lazy(() => import('./features/scale-play/components/ScalePathGame'))
-const ScaleLab = lazy(() => import('./features/scale-play/components/ScaleLab'))
+const ScaleLab = lazy(() => import('./features/learning-scales/components/ScaleLab'))
 const SIDEBAR_COLLAPSED_KEY = 'sidebarCollapsed'
 
 const DISTRICT_LOADING_COPY = {

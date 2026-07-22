@@ -10,7 +10,7 @@ Learn and Create features turn music theory into playable, audible, and writable
 
 - Piano and fretboard display the same typed note/chord/scale data while respecting the player's instrument preference.
 - Root, scale, chord-tone, selected, invalid, and guidance states have labels/patterns in addition to color.
-- Existing `PianoKeyboard` and `GuitarFretboard` are read-only display components. Assessment modes compose dedicated interactive wrappers rather than assigning correctness to display widgets.
+- The base `PianoKeyboard` and `GuitarFretboard` are read-only display components. Assessment and lab modes compose interactive variants in the feature folder (for example `frontend/src/features/learning-scales/components/InteractivePianoKeyboard.tsx`) that re-use the base stylesheet and add `pk-key-*` state modifiers. See the [Base + Variant Component Pattern](component-pattern-base-and-variants.md) for the contract.
 - Standard guitar display is high E through low E. Fret count is centralized in `frontend/src/config/musicConfig.ts`; do not hard-code range in a feature.
 
 ### Music Data Authority

@@ -6,13 +6,20 @@ test('Scale Lab confirms a complete Sound Formula through music21', async ({ pag
   await page.goto('/play/learn-scales')
 
   await expect(page.getByRole('heading', { name: /build a scale/i })).toBeVisible()
-  await expect(page.getByRole('region', { name: /piano keyboard c3 through c4/i })).toBeVisible()
+
+  // Switch to the piano build board; the guitar is the default.
+  await page.getByRole('group', { name: /build board instrument/i }).getByRole('button', { name: /^piano$/i }).click()
+
+  // The range-aware piano is now visible. Its accessible name describes the
+  // current root and mode rather than a fixed C3-C4 span.
+  await expect(page.getByRole('group', { name: /C ionian scale shape on piano/i })).toBeVisible()
 
   for (const note of ['C', 'D', 'E', 'F', 'G', 'A', 'B']) {
-    await page
-      .getByRole('button', { name: new RegExp(`, ${note}\\.`, 'i') })
+    const key = page
+      .getByRole('group', { name: /C ionian scale shape on piano/i })
+      .locator('.pk-natural-key.pk-key-button', { hasText: new RegExp(`^${note}$`) })
       .first()
-      .click()
+    await key.click()
   }
 
   const analyzeResponse = page.waitForResponse(

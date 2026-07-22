@@ -407,25 +407,70 @@
   color: #cbd5e1;
 }
 
-/* ── INSTRUMENTS LAYOUT ───────────────────────────
-   Single range is compact enough to compare piano + fretboard side-by-side.
-   Double/Triple need one full row each. Mobile is always stacked. */
+/* ── INSTRUMENTS ────────────────────────────────── */
 .instruments-stack {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.instruments-stack.range-single {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: stretch;
+.instrument-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem;
+  padding: 0 0.2rem;
 }
 
-/* The compact single-range fretboard should fit better in its half-column
-   without changing the Double/Triple full-width proportions. */
-.instruments-stack.range-single .fretboard-content {
-  --gf-fret-width: clamp(1.85rem, 2.3vw, 2.7rem);
+.instrument-toolbar > div:first-child {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.instrument-toolbar__label {
+  color: var(--text-subtle);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.instrument-toolbar small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.instrument-switch {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid rgba(251, 191, 36, 0.24);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+.instrument-switch button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.6rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.instrument-switch button.active {
+  background: rgba(251, 191, 36, 0.18);
+  color: #fde68a;
+}
+
+.instrument-switch button:focus-visible,
+.instrument-comparison__toggle:focus-visible {
+  outline: 2px solid #fbbf24;
+  outline-offset: 2px;
 }
 
 .instrument-card {
@@ -437,6 +482,33 @@
   flex-direction: column;
   gap: 0.65rem;
   min-width: 0;
+}
+
+.instrument-card--primary {
+  border-color: rgba(251, 191, 36, 0.26);
+}
+
+.instrument-card--reference {
+  margin-top: 0.35rem;
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.instrument-comparison {
+  border-top: 1px solid var(--border-soft);
+  padding-top: 0.65rem;
+}
+
+.instrument-comparison__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0;
+  border: 0;
+  background: transparent;
+  color: #fde68a;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .instrument-head {
@@ -683,13 +755,6 @@
     grid-template-columns: 1fr;
     gap: 0.6rem;
   }
-  .instruments-stack.range-single {
-    display: flex;
-    flex-direction: column;
-  }
-  .instruments-stack.range-single .fretboard-content {
-    --gf-fret-width: clamp(1.9rem, 5.6vw, 2.45rem);
-  }
   .topbar-right {
     justify-content: flex-start;
     flex-wrap: wrap;
@@ -761,6 +826,11 @@
   .tip-card {
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .instrument-toolbar {
+    align-items: start;
+    flex-direction: column;
   }
 
   .modes-pill-row {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import axios from 'axios'
-import { Music, Piano, Guitar, Target, Zap, Maximize2 } from 'lucide-react'
+import { Music, Piano, Guitar, Target, Zap, Maximize2, Eye } from 'lucide-react'
 import KeySelector from '../../components/KeySelector/KeySelector'
 import PianoKeyboard from '../../components/PianoKeyboard/PianoKeyboard'
 import GuitarFretboard from '../../components/GuitarFretboard/GuitarFretboard'
@@ -53,6 +53,8 @@ const ScalesPage = () => {
   const [visited, setVisited] = useState(loadVisited)
   const [streak, setStreak] = useState(loadStreak)
   const [tipDismissed, setTipDismissed] = useState(() => localStorage.getItem('strubloid:scales:tip-dismissed') === '1')
+  const [activeInstrument, setActiveInstrument] = useState('piano')
+  const [showComparison, setShowComparison] = useState(false)
   const [rangeLevel, setRangeLevel] = useState(() => {
     try {
       const saved = parseInt(localStorage.getItem(RANGE_STORAGE_KEY) || '1', 10)
@@ -193,6 +195,8 @@ const ScalesPage = () => {
   }, [visited, selectedKey])
 
   const totalModes = availableModes.length
+  const range = RANGE_LEVELS.find((level) => level.id === rangeLevel) || RANGE_LEVELS[0]
+  const comparisonInstrument = activeInstrument === 'piano' ? 'guitar' : 'piano'
 
   if (error) {
     return (
@@ -330,30 +334,71 @@ const ScalesPage = () => {
                 </div>
               </section>
 
-              <section className={`instruments-stack ${rangeLevel === 1 ? 'range-single' : 'range-expanded'}`}>
-                <div className="instrument-card">
-                  <div className="instrument-head">
-                    <Piano size={14} />
-                    <span>Piano</span>
-                    <span className="instrument-head-meta">
-                      {RANGE_LEVELS.find((r) => r.id === rangeLevel)?.octaves} octave
-                      {RANGE_LEVELS.find((r) => r.id === rangeLevel)?.octaves > 1 ? 's' : ''}
-                    </span>
+              <section className="instruments-stack" aria-label="Scale shape">
+                <div className="instrument-toolbar">
+                  <div>
+                    <span className="instrument-toolbar__label">Scale shape</span>
+                    <small>Use the instrument in front of you.</small>
                   </div>
-                  <PianoKeyboard keyboardData={displayData.keyboard_data} />
+                  <div className="instrument-switch" role="group" aria-label="Scale shape instrument">
+                    <button
+                      type="button"
+                      className={activeInstrument === 'piano' ? 'active' : ''}
+                      onClick={() => setActiveInstrument('piano')}
+                      aria-pressed={activeInstrument === 'piano'}
+                    >
+                      <Piano size={15} /> Piano
+                    </button>
+                    <button
+                      type="button"
+                      className={activeInstrument === 'guitar' ? 'active' : ''}
+                      onClick={() => setActiveInstrument('guitar')}
+                      aria-pressed={activeInstrument === 'guitar'}
+                    >
+                      <Guitar size={15} /> Guitar
+                    </button>
+                  </div>
                 </div>
-                <div className="instrument-card">
+
+                <div className="instrument-card instrument-card--primary">
                   <div className="instrument-head">
-                    <Guitar size={14} />
-                    <span>Fretboard</span>
+                    {activeInstrument === 'piano' ? <Piano size={14} /> : <Guitar size={14} />}
+                    <span>{activeInstrument === 'piano' ? 'Piano' : 'Fretboard'}</span>
                     <span className="instrument-head-meta">
-                      {RANGE_LEVELS.find((r) => r.id === rangeLevel)?.frets} frets
+                      {activeInstrument === 'piano'
+                        ? `${range.octaves} octave${range.octaves > 1 ? 's' : ''}`
+                        : `${range.frets} frets`}
                     </span>
                   </div>
-                  <GuitarFretboard
-                    fretboardData={displayData.fretboard_data}
-                    fretCount={RANGE_LEVELS.find((r) => r.id === rangeLevel)?.frets || 12}
-                  />
+                  {activeInstrument === 'piano' ? (
+                    <PianoKeyboard keyboardData={displayData.keyboard_data} />
+                  ) : (
+                    <GuitarFretboard fretboardData={displayData.fretboard_data} fretCount={range.frets} />
+                  )}
+                </div>
+
+                <div className="instrument-comparison">
+                  <button
+                    type="button"
+                    className="instrument-comparison__toggle"
+                    onClick={() => setShowComparison((visible) => !visible)}
+                    aria-expanded={showComparison}
+                  >
+                    <Eye size={15} /> {showComparison ? 'Hide' : 'Show'} {comparisonInstrument} reference
+                  </button>
+                  {showComparison && (
+                    <div className="instrument-card instrument-card--reference">
+                      <div className="instrument-head">
+                        {comparisonInstrument === 'piano' ? <Piano size={14} /> : <Guitar size={14} />}
+                        <span>{comparisonInstrument === 'piano' ? 'Piano' : 'Fretboard'} reference</span>
+                      </div>
+                      {comparisonInstrument === 'piano' ? (
+                        <PianoKeyboard keyboardData={displayData.keyboard_data} />
+                      ) : (
+                        <GuitarFretboard fretboardData={displayData.fretboard_data} fretCount={range.frets} />
+                      )}
+                    </div>
+                  )}
                 </div>
               </section>
             </>
