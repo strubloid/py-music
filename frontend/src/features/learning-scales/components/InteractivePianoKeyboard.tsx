@@ -37,7 +37,8 @@ export interface InteractivePianoSelection {
   isBlack: boolean
 }
 
-type StateClass = 'pk-key-active' | 'pk-key-match' | 'pk-key-miss' | 'pk-key-correct' | 'pk-key-wrong' | 'pk-key-hint'
+type StateClass =
+  'pk-key-active' | 'pk-key-match' | 'pk-key-miss' | 'pk-key-correct' | 'pk-key-wrong' | 'pk-key-hint' | 'pk-key-legal'
 
 type Props = {
   keyboardData: {
@@ -52,6 +53,7 @@ type Props = {
   correctNotes?: string[]
   wrongNotes?: string[]
   hintNotes?: string[]
+  legalNotes?: string[]
   rootPitchClass?: number
   showLabels?: boolean
   disabled?: boolean
@@ -67,6 +69,7 @@ const InteractivePianoKeyboard = ({
   correctNotes = [],
   wrongNotes = [],
   hintNotes = [],
+  legalNotes = [],
   rootPitchClass,
   showLabels = true,
   disabled = false,
@@ -113,6 +116,7 @@ const InteractivePianoKeyboard = ({
     if (missedNotes.includes(note)) return 'pk-key-miss'
     if (selectedNotes.includes(note)) return 'pk-key-active'
     if (hintNotes.includes(note)) return 'pk-key-hint'
+    if (legalNotes.includes(note)) return 'pk-key-legal'
     return null
   }
 
@@ -168,9 +172,9 @@ const InteractivePianoKeyboard = ({
                   className={`${blackClass(chromaticName)} pk-key-button ${state ?? ''}`.trim()}
                   style={{ left: `${left}px`, width: `${blackWidth}px` }}
                   title={chromaticName}
-                  aria-label={`${chromaticName}${isRootKey ? ', root note' : ''}`}
+                  aria-label={`${chromaticName}${isRootKey ? ', root note' : ''}${state === 'pk-key-legal' ? ', legal destination' : ''}`}
                   aria-pressed={state === 'pk-key-active' || state === 'pk-key-correct' || state === 'pk-key-wrong'}
-                  disabled={disabled}
+                  disabled={disabled || (legalNotes.length > 0 && !legalNotes.includes(chromaticName))}
                   onClick={() => handleBlackClick(bk.after_natural, chromaticName)}
                 >
                   {showLabels && chromaticName}
@@ -190,7 +194,7 @@ const InteractivePianoKeyboard = ({
                 key={`nk-${i}`}
                 className={`${naturalClass(note)} pk-key-button ${state ?? ''}`.trim()}
                 title={note}
-                aria-label={`${note}${isRootKey ? ', root note' : ''}`}
+                aria-label={`${note}${isRootKey ? ', root note' : ''}${state === 'pk-key-legal' ? ', legal destination' : ''}`}
                 aria-pressed={
                   state === 'pk-key-active' ||
                   state === 'pk-key-match' ||
@@ -198,7 +202,7 @@ const InteractivePianoKeyboard = ({
                   state === 'pk-key-correct' ||
                   state === 'pk-key-wrong'
                 }
-                disabled={disabled}
+                disabled={disabled || (legalNotes.length > 0 && !legalNotes.includes(note))}
                 onClick={() => handleNaturalClick(i, note)}
               >
                 {showLabels && note}

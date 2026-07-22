@@ -4,9 +4,9 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { useGameProgress } from '../../../contexts/GameProgressContext'
 import { useMotion } from '../../../contexts/MotionContext'
 
-import GameGuitarFretboard from '../../../game/instruments/GameGuitarFretboard'
-import GamePianoKeyboard from '../../../game/instruments/GamePianoKeyboard'
-import { STANDARD_GUITAR_MIDI } from '../../../game/instruments/musicMath'
+import InteractiveGuitarFretboard from '../../learning-scales/components/InteractiveGuitarFretboard'
+import InteractivePianoKeyboard from '../../learning-scales/components/InteractivePianoKeyboard'
+import { midiToNoteName, STANDARD_GUITAR_MIDI } from '../../../game/instruments/musicMath'
 import { useActivitySession } from '../../../game/progression/useActivitySession'
 import { createMusicTransport } from '../../../game/audio/toneTransport'
 import { completeScalePathFragment, getScalePathRun } from '../../../services/scalePlayApi'
@@ -18,13 +18,6 @@ import '../styles/living-scale-trail.scss'
 type Instrument = 'guitar' | 'piano'
 type JourneyStage = 'arrival' | 'rolling' | 'playing'
 type JourneyMark = { position: ScalePathPosition; correct: boolean }
-
-const nearestPianoMidi = (pitch: number, centre = 60) => {
-  const below = centre - ((centre - pitch + 120) % 12)
-  return below < 48 ? below + 12 : below > 72 ? below - 12 : below
-}
-
-const guitarMidi = (position: ScalePathPosition) => STANDARD_GUITAR_MIDI[position.stringIndex] + position.fret
 
 const ScalePathGame: React.FC = () => {
   const { isLoggedIn, promptLogin } = useAuth()
@@ -38,6 +31,7 @@ const ScalePathGame: React.FC = () => {
   const gameRef = useRef(game)
   const transitionTimerRef = useRef<number | null>(null)
   const transportRef = useRef<ReturnType<typeof createMusicTransport> | null>(null)
+  const pendingInstrumentRef = useRef<Instrument | null>(null)
 
   const [announcement, setAnnouncement] = useState('Choose Piano Garden or Guitar Bridge to begin.')
   const [trail, setTrail] = useState<JourneyMark[]>([])
@@ -83,6 +77,7 @@ const ScalePathGame: React.FC = () => {
   const beginJourney = useCallback(
     (nextInstrument: Instrument) => {
       if (!isLoggedIn) {
+        pendingInstrumentRef.current = nextInstrument
         promptLogin('save')
         return
       }
@@ -97,6 +92,13 @@ const ScalePathGame: React.FC = () => {
     },
     [isLoggedIn, loadRun, promptLogin],
   )
+
+  useEffect(() => {
+    if (!isLoggedIn || !pendingInstrumentRef.current) return
+    const pendingInstrument = pendingInstrumentRef.current
+    pendingInstrumentRef.current = null
+    beginJourney(pendingInstrument)
+  }, [beginJourney, isLoggedIn])
 
   useEffect(() => {
     if (journeyStage !== 'rolling' || game.phase !== 'ready') return undefined
@@ -263,25 +265,42 @@ const ScalePathGame: React.FC = () => {
 
   const fragment = game.fragment
   const candidates = fragment?.candidates || []
-  const candidateGuitarMidi = useMemo(() => candidates.map(guitarMidi), [candidates])
-  const candidatePianoMidi = useMemo(
-    () => candidates.map((candidate) => nearestPianoMidi(candidate.pitch)),
-    [candidates],
+  const fretboardData = useMemo(() => {
+    const scalePositions = new Set(
+      game.run?.positions.map((position) => `${position.stringIndex}:${position.fret}`) || [],
+    )
+    return STANDARD_GUITAR_MIDI.map((openMidi, stringIndex) => ({
+      string: midiToNoteName(openMidi, 'sharp', false),
+      frets: Array.from({ length: (game.run?.fretCount || 12) + 1 }, (_, fret) => ({
+        fret,
+        note: midiToNoteName(openMidi + fret, 'sharp', false),
+        is_scale_note: scalePositions.has(`${stringIndex}:${fret}`),
+        is_root: (openMidi + fret) % 12 === fragment?.anchor.pitch,
+      })),
+    }))
+  }, [fragment?.anchor.pitch, game.run?.fretCount, game.run?.positions])
+  const keyboardData = useMemo(
+    () => ({
+      natural_keys: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+      black_keys: [
+        { note: 'C#', after_natural: 0 },
+        { note: 'D#', after_natural: 1 },
+        { note: 'F#', after_natural: 3 },
+        { note: 'G#', after_natural: 4 },
+        { note: 'A#', after_natural: 5 },
+      ],
+      scale_notes: game.run?.positions.map((position) => position.note) || [],
+      root_note: game.run?.root || '',
+    }),
+    [game.run?.positions, game.run?.root],
   )
-  const correctGuitarMidi = useMemo(
-    () => trail.filter((mark) => mark.correct).map((mark) => guitarMidi(mark.position)),
+  const legalNotes = useMemo(() => [...new Set(candidates.map((candidate) => candidate.note))], [candidates])
+  const correctNotes = useMemo(
+    () => [...new Set(trail.filter((mark) => mark.correct).map((mark) => mark.position.note))],
     [trail],
   )
-  const wrongGuitarMidi = useMemo(
-    () => trail.filter((mark) => !mark.correct).map((mark) => guitarMidi(mark.position)),
-    [trail],
-  )
-  const correctPianoMidi = useMemo(
-    () => trail.filter((mark) => mark.correct).map((mark) => nearestPianoMidi(mark.position.pitch)),
-    [trail],
-  )
-  const wrongPianoMidi = useMemo(
-    () => trail.filter((mark) => !mark.correct).map((mark) => nearestPianoMidi(mark.position.pitch)),
+  const wrongNotes = useMemo(
+    () => [...new Set(trail.filter((mark) => !mark.correct).map((mark) => mark.position.note))],
     [trail],
   )
 
@@ -409,14 +428,11 @@ const ScalePathGame: React.FC = () => {
             className={`trail-instrument ${wrongBranch ? 'has-dead-end' : ''} ${showCompass ? 'show-compass' : ''}`}
           >
             {instrument === 'guitar' ? (
-              <GameGuitarFretboard
-                legalMidi={candidateGuitarMidi}
-                correctMidi={correctGuitarMidi}
-                wrongMidi={wrongGuitarMidi}
-                legalPositions={candidates}
-                correctPositions={trail.filter((mark) => mark.correct).map((mark) => mark.position)}
-                wrongPositions={trail.filter((mark) => !mark.correct).map((mark) => mark.position)}
-                rootPitchClass={fragment.anchor.pitch}
+              <InteractiveGuitarFretboard
+                fretboardData={fretboardData}
+                legalKeys={candidates}
+                correctKeys={trail.filter((mark) => mark.correct).map((mark) => mark.position)}
+                wrongKeys={trail.filter((mark) => !mark.correct).map((mark) => mark.position)}
                 fretCount={game.run?.fretCount || 12}
                 showLabels={showLabels}
                 disabled={game.phase !== 'accepting-input'}
@@ -428,10 +444,11 @@ const ScalePathGame: React.FC = () => {
                 }}
               />
             ) : (
-              <GamePianoKeyboard
-                legalMidi={candidatePianoMidi}
-                correctMidi={correctPianoMidi}
-                wrongMidi={wrongPianoMidi}
+              <InteractivePianoKeyboard
+                keyboardData={keyboardData}
+                legalNotes={legalNotes}
+                correctNotes={correctNotes}
+                wrongNotes={wrongNotes}
                 rootPitchClass={fragment.anchor.pitch}
                 showLabels={showLabels}
                 disabled={game.phase !== 'accepting-input'}

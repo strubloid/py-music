@@ -17,7 +17,10 @@ export interface InteractiveFretboardSelection {
   isRoot: boolean
 }
 
-type StateClass = 'pk-key-active' | 'pk-key-match' | 'pk-key-miss' | 'pk-key-correct' | 'pk-key-wrong' | 'pk-key-hint'
+type StateClass =
+  'pk-key-active' | 'pk-key-match' | 'pk-key-miss' | 'pk-key-correct' | 'pk-key-wrong' | 'pk-key-hint' | 'pk-key-legal'
+
+type FretKey = { string?: string; stringIndex?: number; fret: number }
 
 type Props = {
   fretboardData: Array<{
@@ -30,12 +33,13 @@ type Props = {
     }>
   }>
   fretCount?: number
-  selectedKeys?: Array<{ string: string; fret: number }>
-  matchedKeys?: Array<{ string: string; fret: number }>
-  missedKeys?: Array<{ string: string; fret: number }>
-  correctKeys?: Array<{ string: string; fret: number }>
-  wrongKeys?: Array<{ string: string; fret: number }>
-  hintKeys?: Array<{ string: string; fret: number }>
+  selectedKeys?: FretKey[]
+  matchedKeys?: FretKey[]
+  missedKeys?: FretKey[]
+  correctKeys?: FretKey[]
+  wrongKeys?: FretKey[]
+  hintKeys?: FretKey[]
+  legalKeys?: FretKey[]
   showLabels?: boolean
   disabled?: boolean
   onSelect?: (selection: InteractiveFretboardSelection) => void
@@ -51,6 +55,7 @@ const InteractiveGuitarFretboard = ({
   correctKeys = [],
   wrongKeys = [],
   hintKeys = [],
+  legalKeys = [],
   showLabels = true,
   disabled = false,
   onSelect,
@@ -62,12 +67,14 @@ const InteractiveGuitarFretboard = ({
   // The base display component computes note states from is_scale_note /
   // is_root; the interactive variant additionally tracks selection /
   // correctness / hint keys to extend the base CSS.
-  const selectedSet = new Set(selectedKeys.map((k) => `${k.string}-${k.fret}`))
-  const matchedSet = new Set(matchedKeys.map((k) => `${k.string}-${k.fret}`))
-  const missedSet = new Set(missedKeys.map((k) => `${k.string}-${k.fret}`))
-  const correctSet = new Set(correctKeys.map((k) => `${k.string}-${k.fret}`))
-  const wrongSet = new Set(wrongKeys.map((k) => `${k.string}-${k.fret}`))
-  const hintSet = new Set(hintKeys.map((k) => `${k.string}-${k.fret}`))
+  const keyFor = (key: FretKey) => `${key.stringIndex ?? key.string}-${key.fret}`
+  const selectedSet = new Set(selectedKeys.map(keyFor))
+  const matchedSet = new Set(matchedKeys.map(keyFor))
+  const missedSet = new Set(missedKeys.map(keyFor))
+  const correctSet = new Set(correctKeys.map(keyFor))
+  const wrongSet = new Set(wrongKeys.map(keyFor))
+  const hintSet = new Set(hintKeys.map(keyFor))
+  const legalSet = new Set(legalKeys.map(keyFor))
 
   const [scrollState, setScrollState] = useState({ left: false, right: true, showStringNames: true })
 
@@ -93,16 +100,22 @@ const InteractiveGuitarFretboard = ({
     return undefined
   }, [fretCount])
 
-  const stateForKey = (string: string, fret: number): StateClass | null => {
-    const key = `${string}-${fret}`
-    if (correctSet.has(key)) return 'pk-key-correct'
-    if (wrongSet.has(key)) return 'pk-key-wrong'
-    if (matchedSet.has(key)) return 'pk-key-match'
-    if (missedSet.has(key)) return 'pk-key-miss'
-    if (selectedSet.has(key)) return 'pk-key-active'
-    if (hintSet.has(key)) return 'pk-key-hint'
+  const stateForKey = (string: string, stringIndex: number, fret: number): StateClass | null => {
+    const indexedKey = `${stringIndex}-${fret}`
+    const namedKey = `${string}-${fret}`
+    const has = (set: Set<string>) => set.has(indexedKey) || set.has(namedKey)
+    if (has(correctSet)) return 'pk-key-correct'
+    if (has(wrongSet)) return 'pk-key-wrong'
+    if (has(matchedSet)) return 'pk-key-match'
+    if (has(missedSet)) return 'pk-key-miss'
+    if (has(selectedSet)) return 'pk-key-active'
+    if (has(hintSet)) return 'pk-key-hint'
+    if (has(legalSet)) return 'pk-key-legal'
     return null
   }
+
+  const isLegalKey = (string: string, stringIndex: number, fret: number) =>
+    legalSet.has(`${stringIndex}-${fret}`) || legalSet.has(`${string}-${fret}`)
 
   const handleSelect = (
     stringData: {
@@ -159,7 +172,8 @@ const InteractiveGuitarFretboard = ({
                   </div>
                   <div className="frets-row">
                     {stringData.frets.slice(0, fretCount + 1).map((fret, fretIndex) => {
-                      const state = stateForKey(stringData.string, fret.fret)
+                      const state = stateForKey(stringData.string, stringIndex, fret.fret)
+                      const isLegal = isLegalKey(stringData.string, stringIndex, fret.fret)
                       const showDot = fret.is_scale_note || state !== null
                       const baseDotClass = fret.is_root ? 'root-note' : fret.is_scale_note ? 'scale-note' : ''
                       return (
@@ -169,7 +183,7 @@ const InteractiveGuitarFretboard = ({
                           className={`fret-cell pk-fret-button ${state ?? ''}`.trim()}
                           aria-label={`String ${stringData.string}, fret ${fret.fret}, ${fret.note}${
                             fret.is_root ? ', root note' : fret.is_scale_note ? ', scale note' : ''
-                          }`}
+                          }${isLegal ? ', legal destination' : ''}`}
                           aria-pressed={
                             state === 'pk-key-active' ||
                             state === 'pk-key-match' ||
@@ -177,7 +191,7 @@ const InteractiveGuitarFretboard = ({
                             state === 'pk-key-correct' ||
                             state === 'pk-key-wrong'
                           }
-                          disabled={disabled}
+                          disabled={disabled || (legalKeys.length > 0 && !isLegal)}
                           onClick={() => handleSelect(stringData, stringIndex, fret.fret)}
                         >
                           {fretIndex > 0 && <div className="fret-wire" aria-hidden="true" />}

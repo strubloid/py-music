@@ -246,6 +246,12 @@
   border-color: rgba(251, 191, 36, 0.7);
 }
 
+.note-dot.pk-key-button.pk-key-legal {
+  background: #fbbf24;
+  color: #111827;
+  border-color: rgba(251, 191, 36, 0.8);
+}
+
 .note-dot.pk-key-button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
@@ -281,6 +287,11 @@
 .fret-cell.pk-fret-button.pk-key-wrong {
   background: rgba(239, 68, 68, 0.25);
   box-shadow: inset 0 0 0 2px rgba(239, 68, 68, 0.6);
+}
+
+.fret-cell.pk-fret-button.pk-key-legal {
+  background: rgba(251, 191, 36, 0.18);
+  box-shadow: inset 0 0 0 2px rgba(251, 191, 36, 0.55);
 }
 
 .fret-cell.pk-fret-button:disabled {

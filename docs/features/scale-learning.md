@@ -55,7 +55,9 @@ complete-scale audio are user initiated.
 
 ## Scale Path
 
-A five-fragment run shows a root, recently traversed route notes, optional anchors, a declared gap, and eligible candidates. The learner selects a fret then commits. A valid route is musically correct and physically playable; a distractor cannot also satisfy the declared goal.
+A six- or seven-fragment run shows a root, recently traversed route notes, optional anchors, a declared gap, and eligible candidates. The learner selects a piano key or guitar fret and the server validates that movement. A valid route is musically correct and physically playable; a distractor cannot also satisfy the declared goal.
+
+Scale Path composes the same `InteractivePianoKeyboard` and `InteractiveGuitarFretboard` variants as Scale Lab. The Path supplies its authoritative run positions as legal, correct, and wrong child states; the shared components own pointer, touch, keyboard focus, and labelled destination rendering. Guitar activity keys use `stringIndex` plus fret so low E and high E remain distinct.
 
 Difficulty changes one axis at a time: candidate count, route gaps, degree labels, scale family, functional context, position, or memory. It never becomes harder through prose or unrelated theory facts.
 
@@ -65,16 +67,16 @@ Difficulty changes one axis at a time: candidate count, route gaps, degree label
 | --- | --- |
 | Explorer | `frontend/src/pages/learn/ScalesPage.tsx` |
 | Lab UI | `frontend/src/features/learning-scales/` (interactive variants in `components/`, candidate analysis in `services/`, reducer in `state/`) |
-| Path UI | `frontend/src/features/scale-play/` (Path game only; Lab has been moved out) |
+| Path UI | `frontend/src/features/scale-play/`, composed with the Lab interactive instrument variants |
 | Scale endpoints and current Path/Lab APIs | `backend/project/api/app.py` |
 | Shared instruments (base display) | `PianoKeyboard`, `GuitarFretboard`, `musicConfig.ts` |
-| Lab interactive variants | `features/learning-scales/components/InteractivePianoKeyboard.tsx`, `features/learning-scales/components/InteractiveGuitarFretboard.tsx` |
+| Shared interactive variants | `features/learning-scales/components/InteractivePianoKeyboard.tsx`, `features/learning-scales/components/InteractiveGuitarFretboard.tsx` |
 
-The Lab's piano and guitar reuse the look of the Explorer through the
+The Lab and Path piano and guitar reuse the look of the Explorer through the
 [Base + Variant Component Pattern](../component-pattern-base-and-variants.md).
 The Lab's interactive components import the base `PianoKeyboard.scss`
 and `GuitarFretboard.scss` and render `<button>` elements with the same
-class names, so any visual change to the base propagates to the Lab
+class names, so any visual change to the base propagates to both activities
 without code changes there.
 
 ## Accessibility And Tests

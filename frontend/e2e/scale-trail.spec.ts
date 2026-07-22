@@ -30,7 +30,7 @@ test('Scale Trail rolls six or seven movements and preserves progress while chan
   await expect(page.getByText(`Movement 1 of ${count}`, { exact: true })).toBeVisible()
   await expect(page.getByText(new RegExp(`Continue the ${run.root} ${run.mode} journey`, 'i'))).toBeVisible()
 
-  const legalKey = page.locator('.game-piano__key.is-legal').first()
+  const legalKey = page.locator('.piano-keyboard .pk-key-legal').first()
   await expect(legalKey).toBeEnabled()
   const completionResponse = page.waitForResponse(
     (response) => response.url().includes('/api/scale-path/complete') && response.request().method() === 'POST',
@@ -38,14 +38,14 @@ test('Scale Trail rolls six or seven movements and preserves progress while chan
   await legalKey.click()
   const completion = await (await completionResponse).json()
   await expect(page.locator('.trail-feedback')).toBeVisible()
-  await expect(page.locator('.game-piano__key.is-correct')).toHaveCount(1)
-  if (!completion.correct) await expect(page.locator('.game-piano__key.is-wrong')).toHaveCount(1)
+  await expect(page.locator('.piano-keyboard .pk-key-correct')).toHaveCount(1)
+  if (!completion.correct) await expect(page.locator('.piano-keyboard .pk-key-wrong')).toHaveCount(1)
   await expect(page.getByText(`Movement 2 of ${count}`, { exact: true })).toBeVisible({ timeout: 8_000 })
 
   await page.getByRole('button', { name: /^guitar$/i }).click()
   await expect(page.getByText(`Movement 2 of ${count}`, { exact: true })).toBeVisible()
-  await expect(page.locator('.game-fretboard')).toBeVisible()
-  const legalFrets = page.locator('.game-fretboard__note.is-legal')
+  await expect(page.locator('.fretboard-container')).toBeVisible()
+  const legalFrets = page.locator('.fretboard-container .pk-fret-button.pk-key-legal')
   await expect(legalFrets).toHaveCount(run.fragments[1].candidates.length)
   const legalFret = legalFrets.first()
   await expect(legalFret).toBeEnabled()
@@ -63,5 +63,5 @@ test('Scale Trail instrument surface does not create mobile page overflow', asyn
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   )
   expect(overflow).toBeLessThanOrEqual(1)
-  await expect(page.locator('.game-fretboard')).toBeVisible()
+  await expect(page.locator('.fretboard-container')).toBeVisible()
 })
