@@ -18,7 +18,14 @@ export interface InteractiveFretboardSelection {
 }
 
 type StateClass =
-  'pk-key-active' | 'pk-key-match' | 'pk-key-miss' | 'pk-key-correct' | 'pk-key-wrong' | 'pk-key-hint' | 'pk-key-legal'
+  | 'pk-key-active'
+  | 'pk-key-match'
+  | 'pk-key-miss'
+  | 'pk-key-correct'
+  | 'pk-key-wrong'
+  | 'pk-key-hint'
+  | 'pk-key-legal'
+  | 'pk-key-start'
 
 type FretKey = { string?: string; stringIndex?: number; fret: number }
 
@@ -40,6 +47,7 @@ type Props = {
   wrongKeys?: FretKey[]
   hintKeys?: FretKey[]
   legalKeys?: FretKey[]
+  startKeys?: FretKey[]
   showLabels?: boolean
   disabled?: boolean
   onSelect?: (selection: InteractiveFretboardSelection) => void
@@ -56,6 +64,7 @@ const InteractiveGuitarFretboard = ({
   wrongKeys = [],
   hintKeys = [],
   legalKeys = [],
+  startKeys = [],
   showLabels = true,
   disabled = false,
   onSelect,
@@ -75,6 +84,7 @@ const InteractiveGuitarFretboard = ({
   const wrongSet = new Set(wrongKeys.map(keyFor))
   const hintSet = new Set(hintKeys.map(keyFor))
   const legalSet = new Set(legalKeys.map(keyFor))
+  const startSet = new Set(startKeys.map(keyFor))
 
   const [scrollState, setScrollState] = useState({ left: false, right: true, showStringNames: true })
 
@@ -104,6 +114,7 @@ const InteractiveGuitarFretboard = ({
     const indexedKey = `${stringIndex}-${fret}`
     const namedKey = `${string}-${fret}`
     const has = (set: Set<string>) => set.has(indexedKey) || set.has(namedKey)
+    if (has(startSet)) return 'pk-key-start'
     if (has(correctSet)) return 'pk-key-correct'
     if (has(wrongSet)) return 'pk-key-wrong'
     if (has(matchedSet)) return 'pk-key-match'
@@ -201,7 +212,7 @@ const InteractiveGuitarFretboard = ({
                               className={`note-dot ${baseDotClass} pk-key-button ${state ?? ''}`.trim()}
                               title={`${fret.note} - Fret ${fret.fret}`}
                             >
-                              {showLabels ? fret.note : ''}
+                              {showLabels && (legalKeys.length === 0 || state !== null) ? fret.note : ''}
                             </div>
                           )}
                           {[3, 5, 7, 9, 12, 15, 17, 19, 21].includes(fret.fret) && !showDot && (
@@ -218,28 +229,50 @@ const InteractiveGuitarFretboard = ({
         </div>
       </div>
 
-      {/* Legend (shared with the base display) */}
       <div className="fretboard-legend">
-        <div className="legend-item">
-          <div className="legend-dot root" />
-          <span>Root Note</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-dot scale" />
-          <span>Scale Notes</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-dot match" aria-hidden="true" />
-          <span>In Target (placed)</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-dot miss" aria-hidden="true" />
-          <span>Off Target (placed)</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-dot marker" />
-          <span>Fret Markers</span>
-        </div>
+        {legalKeys.length > 0 ? (
+          <>
+            <div className="legend-item">
+              <div className="legend-dot pk-legend-start" />
+              <span>Start</span>
+            </div>
+            <div className="legend-item">
+              <div className="legend-dot pk-legend-target" />
+              <span>Choose</span>
+            </div>
+            <div className="legend-item">
+              <div className="legend-dot match" />
+              <span>Correct</span>
+            </div>
+            <div className="legend-item">
+              <div className="legend-dot miss" />
+              <span>Wrong</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="legend-item">
+              <div className="legend-dot root" />
+              <span>Root Note</span>
+            </div>
+            <div className="legend-item">
+              <div className="legend-dot scale" />
+              <span>Scale Notes</span>
+            </div>
+            <div className="legend-item">
+              <div className="legend-dot match" />
+              <span>In Target (placed)</span>
+            </div>
+            <div className="legend-item">
+              <div className="legend-dot miss" />
+              <span>Off Target (placed)</span>
+            </div>
+            <div className="legend-item">
+              <div className="legend-dot marker" />
+              <span>Fret Markers</span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

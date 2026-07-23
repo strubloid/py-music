@@ -252,6 +252,12 @@
   border-color: rgba(251, 191, 36, 0.8);
 }
 
+.note-dot.pk-key-button.pk-key-start {
+  background: #49c8ef;
+  color: #071016;
+  border-color: #bae6fd;
+}
+
 .note-dot.pk-key-button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
@@ -294,6 +300,11 @@
   box-shadow: inset 0 0 0 2px rgba(251, 191, 36, 0.55);
 }
 
+.fret-cell.pk-fret-button.pk-key-start {
+  background: rgba(73, 200, 239, 0.16);
+  box-shadow: inset 0 0 0 2px rgba(73, 200, 239, 0.55);
+}
+
 .fret-cell.pk-fret-button:disabled {
   cursor: not-allowed;
 }
@@ -311,6 +322,14 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+.pk-legend-start {
+  background: #49c8ef !important;
+}
+
+.pk-legend-target {
+  background: #fbbf24 !important;
 }
 
 .legend-dot {

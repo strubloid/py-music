@@ -31,6 +31,7 @@ class ScaleTrailRouteTest(unittest.TestCase):
                 assert fragment is not None
                 self.assertEqual(len(fragment['candidates']), 3)
                 self.assertEqual(sum(bool(candidate['isCorrect']) for candidate in fragment['candidates']), 1)
+                self.assertEqual(len({candidate['pitch'] for candidate in fragment['candidates']}), 3)
                 self.assertIn(fragment['degreeClue'], {'1', '2', '3', '4', '5', '6', '7'})
 
     def test_route_modifiers_change_the_physical_movement_when_playable(self):
@@ -45,19 +46,24 @@ class ScaleTrailRouteTest(unittest.TestCase):
         positions = _build_scale_route('A', 'aeolian', 2, 17)
         fragments = []
         anchor = None
+        visited = []
         for index in range(7):
             fragment = _select_tier1_fragment(
                 positions, 'A', 'aeolian', index, 481516,
-                'nearest-position', anchor=anchor,
+                'nearest-position', anchor=anchor, visited=visited,
             )
             assert fragment is not None
             fragments.append(fragment)
             anchor = fragment['gap']
+            visited.append(fragment['gap'])
 
         for previous, current in zip(fragments, fragments[1:]):
             self.assertEqual(current['anchor'], previous['gap'])
             self.assertEqual(current['root'], 'A')
             self.assertEqual(current['mode'], 'aeolian')
+
+        landing_keys = [(fragment['gap']['stringIndex'], fragment['gap']['fret']) for fragment in fragments]
+        self.assertEqual(len(landing_keys), len(set(landing_keys)))
 
     def test_string_indexes_match_shared_low_e_to_high_e_instrument_order(self):
         positions = _build_scale_route('E', 'aeolian', 1, 12)

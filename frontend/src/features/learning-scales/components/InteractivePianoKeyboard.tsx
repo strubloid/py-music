@@ -38,7 +38,14 @@ export interface InteractivePianoSelection {
 }
 
 type StateClass =
-  'pk-key-active' | 'pk-key-match' | 'pk-key-miss' | 'pk-key-correct' | 'pk-key-wrong' | 'pk-key-hint' | 'pk-key-legal'
+  | 'pk-key-active'
+  | 'pk-key-match'
+  | 'pk-key-miss'
+  | 'pk-key-correct'
+  | 'pk-key-wrong'
+  | 'pk-key-hint'
+  | 'pk-key-legal'
+  | 'pk-key-start'
 
 type Props = {
   keyboardData: {
@@ -54,6 +61,7 @@ type Props = {
   wrongNotes?: string[]
   hintNotes?: string[]
   legalNotes?: string[]
+  startNotes?: string[]
   rootPitchClass?: number
   showLabels?: boolean
   disabled?: boolean
@@ -70,6 +78,7 @@ const InteractivePianoKeyboard = ({
   wrongNotes = [],
   hintNotes = [],
   legalNotes = [],
+  startNotes = [],
   rootPitchClass,
   showLabels = true,
   disabled = false,
@@ -110,6 +119,7 @@ const InteractivePianoKeyboard = ({
   }
 
   const stateClassFor = (note: string): StateClass | null => {
+    if (startNotes.includes(note)) return 'pk-key-start'
     if (correctNotes.includes(note)) return 'pk-key-correct'
     if (wrongNotes.includes(note)) return 'pk-key-wrong'
     if (matchedNotes.includes(note)) return 'pk-key-match'
@@ -213,26 +223,47 @@ const InteractivePianoKeyboard = ({
       </div>
 
       <div className="piano-legend">
-        {hasRoot && (
-          <div className="legend-item">
-            <div className="legend-key root" />
-            <span>Root Note ({root_note})</span>
-          </div>
-        )}
-        {hasRoot && scale_notes.length > 0 && (
-          <div className="legend-item">
-            <div className="legend-key scale" />
-            <span>Scale Notes</span>
-          </div>
-        )}
-        <div className="legend-item">
-          <div className="legend-key match" aria-hidden="true" />
-          <span>In Target (placed)</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-key miss" aria-hidden="true" />
-          <span>Off Target (placed)</span>
-        </div>
+        {legalNotes.length > 0 ? (
+          <>
+            <div className="legend-item">
+              <div className="legend-key pk-legend-start" />
+              <span>Start</span>
+            </div>
+            <div className="legend-item">
+              <div className="legend-key pk-legend-target" />
+              <span>Choose</span>
+            </div>
+            <div className="legend-item">
+              <div className="legend-key match" />
+              <span>Correct</span>
+            </div>
+            <div className="legend-item">
+              <div className="legend-key miss" />
+              <span>Wrong</span>
+            </div>
+          </>
+        ) : hasRoot ? (
+          <>
+            <div className="legend-item">
+              <div className="legend-key root" />
+              <span>Root Note ({root_note})</span>
+            </div>
+            {scale_notes.length > 0 && (
+              <div className="legend-item">
+                <div className="legend-key scale" />
+                <span>Scale Notes</span>
+              </div>
+            )}
+            <div className="legend-item">
+              <div className="legend-key match" />
+              <span>In Target (placed)</span>
+            </div>
+            <div className="legend-item">
+              <div className="legend-key miss" />
+              <span>Off Target (placed)</span>
+            </div>
+          </>
+        ) : null}
       </div>
     </div>
   )

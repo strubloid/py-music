@@ -636,12 +636,19 @@ def _build_scale_route(root_key, mode, octaves, fret_count):
 
 def _select_tier1_fragment(
         positions, root_key, mode, fragment_index=0, seed=0,
-        route_modifier='nearest-position', anchor=None):
+        route_modifier='nearest-position', anchor=None, visited=None):
     """Select one deterministic movement with several physically playable choices."""
     if len(positions) < 5:
         return None
     rng = random.Random(seed + fragment_index * 7919)
-    playable = [position for position in positions if 0 <= position['fret'] <= 24]
+    visited_keys = {
+        (position['stringIndex'], position['fret']) for position in (visited or [])
+    }
+    playable = [
+        position for position in positions
+        if 0 <= position['fret'] <= 24
+        and ((position['stringIndex'], position['fret']) not in visited_keys or position == anchor)
+    ]
     anchor_index = (seed + fragment_index * 5) % max(1, len(playable) - 1)
     anchor = anchor or playable[anchor_index]
     open_midi = [40, 45, 50, 55, 59, 64]
@@ -673,7 +680,14 @@ def _select_tier1_fragment(
     ]
     rng.shuffle(wrong_options)
     candidates = [{**correct_gap, 'isCorrect': True}]
-    candidates.extend({**option, 'isCorrect': False} for option in wrong_options[:2])
+    used_pitches = {correct_gap['pitch']}
+    for option in wrong_options:
+        if option['pitch'] in used_pitches:
+            continue
+        candidates.append({**option, 'isCorrect': False})
+        used_pitches.add(option['pitch'])
+        if len(candidates) == 3:
+            break
     rng.shuffle(candidates)
 
     direction = 'left' if correct_gap['string'] == anchor['string'] else 'up'
@@ -732,7 +746,7 @@ def get_scale_path_run():
         move_count = 6 + (seed % 2)
         route_modifier = rng.choice([
             'ascending', 'descending', 'same-string', 'nearest-position',
-            'alternate-strings', 'octave-target', 'hidden-labels', 'listen-first',
+            'alternate-strings', 'octave-target', 'listen-first',
         ])
 
         # Build full route for this run
@@ -742,15 +756,17 @@ def get_scale_path_run():
         # determined here before its animation starts.
         fragments = []
         journey_anchor = None
+        visited_positions = []
         for i in range(move_count):
             frag = _select_tier1_fragment(
                 positions, root, mode, i, seed, route_modifier,
-                anchor=journey_anchor,
+                anchor=journey_anchor, visited=visited_positions,
             )
             if frag:
                 frag['fragmentIndex'] = i
                 fragments.append(frag)
                 journey_anchor = frag['gap']
+                visited_positions.append(frag['gap'])
 
         run_id = f'scale-path-{root}-{mode}-{int(time.time())}-{os.urandom(4).hex()}'
         user_id = current_user.id if current_user.is_authenticated else None
@@ -792,6 +808,7 @@ def get_scale_path_run():
 
 
 @app.route('/api/scale-path/complete', methods=['POST'])
+@limiter.limit('60 per minute', override_defaults=True)
 def complete_scale_path_fragment():
     """Submit a Scale Path fragment result; the server validates correctness
     against the stored run and only awards XP for genuinely correct answers.

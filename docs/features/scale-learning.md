@@ -59,6 +59,12 @@ A six- or seven-fragment run shows a root, recently traversed route notes, optio
 
 Scale Path composes the same `InteractivePianoKeyboard` and `InteractiveGuitarFretboard` variants as Scale Lab. The Path supplies its authoritative run positions as legal, correct, and wrong child states; the shared components own pointer, touch, keyboard focus, and labelled destination rendering. Guitar activity keys use `stringIndex` plus fret so low E and high E remain distinct.
 
+Each movement uses a compact mission flow rather than a prose prompt: key and mode, start note, target degree, then a prompt to choose among the highlighted candidates. The instrument mirrors that flow with cyan for the start, gold for selectable candidate positions, green/red for resolved positions, and reduced emphasis for irrelevant notes. The answer note is not revealed before the attempt. Completed physical positions are excluded from later candidate sets so the route continues forward instead of asking the learner to click an already-green landing again.
+
+The three selectable candidates always use three distinct pitch classes. A movement never presents the same answer note at multiple frets as separate choices; an octave exercise may still intentionally use the same pitch class for the cyan start and one gold destination.
+
+Scale Path always displays note names. Guitar labels are limited to the current start, selectable candidates, and resolved path so the full scale shape does not become a wall of text; piano keys remain labelled because their chromatic layout is the primary orientation cue. Scale Path does not offer a temporary label-reveal power or generate hidden-label runs.
+
 Difficulty changes one axis at a time: candidate count, route gaps, degree labels, scale family, functional context, position, or memory. It never becomes harder through prose or unrelated theory facts.
 
 ## Ownership
@@ -86,3 +92,5 @@ Every interactive fret needs a named keyboard/touch target with string, fret, no
 ## Known Boundary
 
 `ScalePathRun` rows persist for 24 hours so the completion endpoint can validate the submitted position against the stored run. The client submits `submittedPosition: { string, fret }`; the server compares against the run's stored `correct_gap` for that fragment. Idempotency is enforced by `unique_user_run_fragment` on `(user_id, run_id, fragment_index)`. Replays return the original result without re-awarding XP.
+
+The client synchronously locks each fragment while its completion request is in flight, preventing rapid pointer events from submitting the same move twice before React rerenders the instrument as disabled. `/api/scale-path/complete` uses an endpoint-specific `60 per minute` limit instead of the global `50 per hour` IP budget; server idempotency remains the reward-authority boundary.

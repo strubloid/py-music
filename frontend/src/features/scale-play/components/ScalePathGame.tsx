@@ -1,5 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { Compass, Footprints, Guitar, Pause, Piano, RotateCcw, ShieldCheck, Sparkles } from 'lucide-react'
+import {
+  ChevronRight,
+  Compass,
+  Footprints,
+  Guitar,
+  MapPin,
+  Pause,
+  Piano,
+  RotateCcw,
+  ShieldCheck,
+  Sparkles,
+  Target,
+} from 'lucide-react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useGameProgress } from '../../../contexts/GameProgressContext'
 import { useMotion } from '../../../contexts/MotionContext'
@@ -32,11 +44,11 @@ const ScalePathGame: React.FC = () => {
   const transitionTimerRef = useRef<number | null>(null)
   const transportRef = useRef<ReturnType<typeof createMusicTransport> | null>(null)
   const pendingInstrumentRef = useRef<Instrument | null>(null)
+  const submissionInFlightRef = useRef(false)
 
   const [announcement, setAnnouncement] = useState('Choose Piano Garden or Guitar Bridge to begin.')
   const [trail, setTrail] = useState<JourneyMark[]>([])
   const [wrongBranch, setWrongBranch] = useState<ScalePathPosition | null>(null)
-  const [showLabels, setShowLabels] = useState(true)
   const [showCompass, setShowCompass] = useState(false)
   const [safeLanding, setSafeLanding] = useState(false)
   const [pipState, setPipState] = useState<'curious' | 'walking' | 'thinking' | 'success' | 'mistake'>('curious')
@@ -53,6 +65,7 @@ const ScalePathGame: React.FC = () => {
   }, [])
 
   const loadRun = useCallback(async () => {
+    submissionInFlightRef.current = false
     dispatch({ type: 'RUN_LOADING' })
     setTrail([])
     setWrongBranch(null)
@@ -60,7 +73,6 @@ const ScalePathGame: React.FC = () => {
       const response = await getScalePathRun({})
       const normalized = normalizeRun(response.data)
       dispatch({ type: 'RUN_LOADED', run: normalized })
-      setShowLabels(normalized.routeModifier !== 'hidden-labels')
       setShowCompass(false)
       if (normalized.routeModifier === 'listen-first') {
         const anchorNote = normalized.fragments[0]?.anchor.note || normalized.root
@@ -152,7 +164,8 @@ const ScalePathGame: React.FC = () => {
   const submitCandidate = useCallback(
     async (candidate: ScalePathPosition, candidateIndex: number, submittedMidi?: number) => {
       const state = gameRef.current
-      if (state.phase !== 'accepting-input' || !state.fragment) return
+      if (submissionInFlightRef.current || state.phase !== 'accepting-input' || !state.fragment) return
+      submissionInFlightRef.current = true
       dispatch({ type: 'SELECT_CANDIDATE', index: candidateIndex })
       dispatch({ type: 'COMMIT_ANSWER' })
       setPipState('thinking')
@@ -215,38 +228,30 @@ const ScalePathGame: React.FC = () => {
         )
         transitionTimerRef.current = window.setTimeout(
           () => {
+            submissionInFlightRef.current = false
             setWrongBranch(null)
             dispatch({ type: 'NEXT_FRAGMENT' })
           },
           reducedMotion ? 350 : correct ? 1100 : 1700,
         )
       } catch {
+        submissionInFlightRef.current = false
         dispatch({ type: 'ERROR', error: 'Echo lost the route signal. Start a fresh trail to reconnect.' })
       }
     },
     [reducedMotion, safeLanding],
   )
 
-  const spendPower = async (power: 'trace' | 'degrees' | 'safe' | 'compass', cost: number) => {
+  const spendPower = async (power: 'trace' | 'safe' | 'compass', cost: number) => {
     if (game.phase !== 'accepting-input' || progressState.focusPoints < cost) return
     const spent = await activity.spendFocus(
       cost,
-      power === 'trace'
-        ? 'trace-path'
-        : power === 'degrees'
-          ? 'reveal-anchor'
-          : power === 'safe'
-            ? 'remove-trap'
-            : 'root-lantern',
+      power === 'trace' ? 'trace-path' : power === 'safe' ? 'remove-trap' : 'root-lantern',
     )
     if (spent) {
       if (power === 'trace') {
         setShowCompass(true)
         setAnnouncement('Trace One Step reveals the next movement without completing it.')
-      }
-      if (power === 'degrees') {
-        setShowLabels(true)
-        window.setTimeout(() => setShowLabels(false), 5000)
       }
       if (power === 'safe') setSafeLanding(true)
       if (power === 'compass') setShowCompass(true)
@@ -395,20 +400,44 @@ const ScalePathGame: React.FC = () => {
       {game.phase !== 'run-complete' && game.phase !== 'error' && fragment && (
         <>
           <section className="trail-objective">
-            <div className="trail-guide-mark" data-state={pipState} aria-hidden="true">
-              <Compass />
+            <div className="mission-heading">
+              <div className="trail-guide-mark" data-state={pipState} aria-hidden="true">
+                <Compass />
+              </div>
+              <div>
+                <span>
+                  Move {game.fragmentIndex + 1} of {game.fragmentCount}
+                </span>
+                <h2>Follow the note trail</h2>
+              </div>
             </div>
-            <div>
-              <span>
-                Movement {game.fragmentIndex + 1} of {game.fragmentCount}
-              </span>
-              <h2>
-                Continue the {game.run?.root} {game.run?.mode} journey
-              </h2>
-              <p>
-                From {fragment.anchor.note}, choose the highlighted destination for scale degree {fragment.degreeClue}.
-                Your green and red trail remains visible until all {game.fragmentCount} movements are complete.
-              </p>
+            <div
+              className="mission-flow"
+              aria-label={`In ${game.run?.root} ${game.run?.mode}, start on ${fragment.anchor.note} and find degree ${fragment.degreeClue}. Choose one of the highlighted notes.`}
+            >
+              <div className="mission-step mission-step--key">
+                <span>Key</span>
+                <strong>
+                  {game.run?.root} {game.run?.mode}
+                </strong>
+              </div>
+              <ChevronRight className="mission-arrow" aria-hidden="true" />
+              <div className="mission-step mission-step--start">
+                <MapPin aria-hidden="true" />
+                <span>Start</span>
+                <strong>{fragment.anchor.note}</strong>
+              </div>
+              <ChevronRight className="mission-arrow" aria-hidden="true" />
+              <div className="mission-step mission-step--degree">
+                <span>Find</span>
+                <strong>Degree {fragment.degreeClue}</strong>
+              </div>
+              <ChevronRight className="mission-arrow" aria-hidden="true" />
+              <div className="mission-step mission-step--answer">
+                <Target aria-hidden="true" />
+                <span>Your move</span>
+                <strong>Pick a note</strong>
+              </div>
             </div>
             <div className="focus-backpack">
               <Sparkles size={18} />
@@ -431,10 +460,11 @@ const ScalePathGame: React.FC = () => {
               <InteractiveGuitarFretboard
                 fretboardData={fretboardData}
                 legalKeys={candidates}
+                startKeys={game.phase === 'accepting-input' ? [fragment.anchor] : []}
                 correctKeys={trail.filter((mark) => mark.correct).map((mark) => mark.position)}
                 wrongKeys={trail.filter((mark) => !mark.correct).map((mark) => mark.position)}
                 fretCount={game.run?.fretCount || 12}
-                showLabels={showLabels}
+                showLabels
                 disabled={game.phase !== 'accepting-input'}
                 onSelect={(selection) => {
                   const index = candidates.findIndex(
@@ -447,10 +477,11 @@ const ScalePathGame: React.FC = () => {
               <InteractivePianoKeyboard
                 keyboardData={keyboardData}
                 legalNotes={legalNotes}
+                startNotes={game.phase === 'accepting-input' ? [fragment.anchor.note] : []}
                 correctNotes={correctNotes}
                 wrongNotes={wrongNotes}
                 rootPitchClass={fragment.anchor.pitch}
-                showLabels={showLabels}
+                showLabels
                 disabled={game.phase !== 'accepting-input'}
                 onSelect={(selection) => {
                   const index = candidates.findIndex((candidate) => candidate.pitch === selection.pitchClass)
@@ -472,9 +503,6 @@ const ScalePathGame: React.FC = () => {
           <div className="trail-powers" aria-label="Focus powers">
             <button type="button" disabled={game.phase !== 'accepting-input'} onClick={() => spendPower('trace', 1)}>
               <Footprints size={16} /> Trace One Step <b>1</b>
-            </button>
-            <button type="button" disabled={game.phase !== 'accepting-input'} onClick={() => spendPower('degrees', 2)}>
-              Ⅲ Reveal Degrees <b>2</b>
             </button>
             <button
               type="button"
